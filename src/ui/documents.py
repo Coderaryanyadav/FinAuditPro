@@ -22,19 +22,26 @@ class AIProcessWorker(QThread):
 
     def run(self):
         try:
-            from ai.rag_pipeline import RAGPipeline
-            self.rag = RAGPipeline()
+            from document_intelligence.document_pipeline import DocumentPipeline
+            pipeline = DocumentPipeline()
             total = len(self.document_ids)
             for i, doc_id in enumerate(self.document_ids):
                 doc = self.session.query(Document).filter_by(id=doc_id).first()
                 if not doc: continue
                 
-                self.progress.emit(f"Ingesting {doc.file_name}...", int((i / total) * 100))
+                def progress_cb(stage_name, pct):
+                    overall_pct = int((i / total) * 100 + (pct / total))
+                    self.progress.emit(f"Ingesting {doc.file_name} ({stage_name})...", overall_pct)
                 
-                # Perform chunking & embedding
-                success = self.rag.ingest_document(doc.file_path, doc.file_name)
+                result = pipeline.process_and_ingest(
+                    file_path=doc.file_path,
+                    engagement_id=doc.audit_id,
+                    client_id=doc.audit_id,
+                    document_id=doc.id,
+                    progress_callback=progress_cb
+                )
                 
-                if success:
+                if result and result.status == "SUCCESS":
                     doc.doc_type = "Ingested"
                     self.session.commit()
                 else:
@@ -44,7 +51,7 @@ class AIProcessWorker(QThread):
             self.progress.emit("AI Processing Complete", 100)
             self.finished.emit(True)
         except Exception as e:
-            print(f"AI Ingestion Error: {e}")
+            print(f"Document Ingestion Error: {e}")
             self.finished.emit(False)
         finally:
             self.session.close()

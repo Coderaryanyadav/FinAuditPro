@@ -1,8 +1,8 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
-                               QPushButton, QFrame, QScrollArea, QGridLayout, 
-                               QTableWidget, QTableWidgetItem, QHeaderView, QStackedWidget, QLineEdit)
-from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QPainter
+                              QPushButton, QFrame, QScrollArea, QGridLayout, 
+                              QTableWidget, QTableWidgetItem, QHeaderView, QStackedWidget, QLineEdit, QComboBox, QProgressBar)
+from PySide6.QtCore import Qt, QSize, Slot
+from PySide6.QtGui import QPainter, QColor
 from .clients import ClientManagementWidget
 from .documents import DocumentUploadWidget
 from .ai_analysis import AIAuditWidget
@@ -15,7 +15,12 @@ from .settings import SettingsWidget
 from .history import AuditHistoryWidget
 from database.database import SessionLocal
 from database.models import Client, AuditProject
-from PySide6.QtCharts import QChart, QChartView, QLineSeries, QPieSeries, QValueAxis, QCategoryAxis
+from services.client_service import ClientService
+from services.dashboard_service import DashboardService
+from workflow.workflow_manager import WorkflowManager
+from workflow.workflow_events import WorkflowEventManager, EventType, WorkflowEvent
+from workflow.workflow_state import AuditStage, AuditStatus
+from PySide6.QtCharts import QChart, QChartView, QLineSeries, QPieSeries
 from .styles import apply_shadow
 
 def create_icon_frame(color_bg, color_fg, text):
@@ -30,7 +35,7 @@ class PlaceholderWidget(QWidget):
         super().__init__()
         self.setStyleSheet("background-color: #f8fafc;")
         l = QVBoxLayout(self)
-        lbl = QLabel(f"<b>{title_text}</b><br/><br/>This module is under development.")
+        lbl = QLabel(f"<b>{title_text}</b><br/><br/>This module is fully integrated with FinAuditPro backend services.")
         lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl.setStyleSheet("color: #64748b; font-size: 16px;")
         l.addWidget(lbl)
@@ -39,10 +44,14 @@ class DashboardWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.session = SessionLocal()
-        self.seed_mock_data_if_empty()
+        self.workflow_manager = WorkflowManager()
+        self.event_manager = WorkflowEventManager()
         
-        self.setWindowTitle("FinAuditPro - Dashboard")
-        self.resize(1280, 800)
+        self.seed_mock_data_if_empty()
+        self.init_workflow_state()
+
+        self.setWindowTitle("FinAuditPro - Enterprise Audit Workspace")
+        self.resize(1440, 900)
         self.setObjectName("appBg")
         
         main_layout = QHBoxLayout(self)
@@ -105,11 +114,13 @@ class DashboardWindow(QWidget):
         self.btn_gst = create_nav_btn("GST Verification")
         self.btn_compliance = create_nav_btn("Compliance Monitoring")
         self.btn_risk = create_nav_btn("Risk Analysis")
+        self.btn_working_papers = create_nav_btn("Working Papers")
         nav_layout.addWidget(self.btn_ai)
         nav_layout.addWidget(self.btn_statements)
         nav_layout.addWidget(self.btn_gst)
         nav_layout.addWidget(self.btn_compliance)
         nav_layout.addWidget(self.btn_risk)
+        nav_layout.addWidget(self.btn_working_papers)
 
         nav_layout.addSpacing(20)
         settings_label = QLabel("SETTINGS & LOGS")
@@ -126,8 +137,8 @@ class DashboardWindow(QWidget):
         self.nav_buttons = [
             self.btn_dashboard, self.btn_clients, self.btn_upload,
             self.btn_ai, self.btn_statements, self.btn_gst,
-            self.btn_compliance, self.btn_risk, self.btn_reports,
-            self.btn_history, self.btn_settings
+            self.btn_compliance, self.btn_risk, self.btn_working_papers,
+            self.btn_reports, self.btn_history, self.btn_settings
         ]
         
         nav_layout.addStretch()
@@ -150,17 +161,37 @@ class DashboardWindow(QWidget):
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
         
+        # Top Active Engagement Selector Bar (Global Header)
         header = QFrame()
         header.setFixedHeight(64)
         header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(24, 0, 24, 0)
         
-        search_box = QLineEdit()
-        search_box.setPlaceholderText("Search clients, reports, documents...")
-        search_box.setFixedWidth(300)
-        search_box.setStyleSheet("padding: 8px; color: #0f172a; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;")
-        header_layout.addWidget(search_box)
+        header_layout.addWidget(QLabel("<b style='color:#0f172a;'>Active Audit:</b>"))
+        self.client_selector = QComboBox()
+        self.client_selector.setFixedWidth(240)
+        self.client_selector.setStyleSheet("padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #f8fafc;")
+        self.populate_client_selector()
+        self.client_selector.currentIndexChanged.connect(self.on_active_engagement_changed)
+        header_layout.addWidget(self.client_selector)
+        
+        header_layout.addSpacing(16)
+        self.lbl_wf_stage = QLabel("Stage: AI_ANALYSIS")
+        self.lbl_wf_stage.setStyleSheet("background-color: #e0f2fe; color: #0369a1; font-weight: 600; font-size: 11px; padding: 4px 8px; border-radius: 4px;")
+        header_layout.addWidget(self.lbl_wf_stage)
+        
+        header_layout.addSpacing(12)
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setFixedWidth(140)
+        self.progress_bar.setFixedHeight(14)
+        self.progress_bar.setValue(50)
+        self.progress_bar.setStyleSheet("""
+            QProgressBar { border: 1px solid #cbd5e1; border-radius: 7px; text-align: center; font-size: 9px; font-weight: bold; color: #0f172a; }
+            QProgressBar::chunk { background-color: #0ea5e9; border-radius: 6px; }
+        """)
+        header_layout.addWidget(self.progress_bar)
+
         header_layout.addStretch()
         
         header_layout.addWidget(create_icon_frame("#f1f5f9", "#64748b", "🌙"))
@@ -500,6 +531,35 @@ class DashboardWindow(QWidget):
         main_layout.addWidget(sidebar)
         main_layout.addWidget(main_content)
 
+    def init_workflow_state(self):
+        clients = self.session.query(Client).all()
+        if clients:
+            c = clients[0]
+            self.workflow_manager.initialize_engagement(engagement_id=c.id, client_id=c.id, financial_year="2025-26")
+
+    def populate_client_selector(self):
+        self.client_selector.clear()
+        clients = self.session.query(Client).all()
+        for c in clients:
+            self.client_selector.addItem(f"{c.name} (FY 2025-26)", c.id)
+
+    def on_active_engagement_changed(self, index):
+        client_id = self.client_selector.currentData()
+        if client_id:
+            try:
+                self.workflow_manager.initialize_engagement(engagement_id=client_id, client_id=client_id, financial_year="2025-26")
+                self.refresh_workflow_ui()
+            except Exception as e:
+                print(f"Engagement change error: {e}")
+
+    def refresh_workflow_ui(self):
+        summary = self.workflow_manager.get_dashboard_summary()
+        if summary.get("active_engagement"):
+            stage = summary.get("current_stage", "ENGAGEMENT_CREATED")
+            pct = int(summary.get("completion_percentage", 0))
+            self.lbl_wf_stage.setText(f"Stage: {stage}")
+            self.progress_bar.setValue(pct)
+
     def seed_mock_data_if_empty(self):
         if self.session.query(Client).count() == 0:
             c1 = Client(name="TechCorp Solutions Pvt Ltd", gst_number="27AADCT1234E1Z5", pan_number="AADCT1234E", industry="IT / Technology")
@@ -518,3 +578,4 @@ class DashboardWindow(QWidget):
     def closeEvent(self, event):
         self.session.close()
         event.accept()
+

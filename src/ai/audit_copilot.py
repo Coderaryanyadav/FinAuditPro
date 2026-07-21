@@ -43,10 +43,43 @@ class AuditCopilot:
         prompt = self.prompt_engine.build_audit_analysis_prompt(document_text, self.schema_template)
         return self._execute_analysis(prompt, engagement_id)
 
+    def compare_documents(self, doc1_text: str, doc2_text: str, engagement_id: int) -> Dict[str, Any]:
+        prompt = self.prompt_engine.build_document_comparison_prompt(doc1_text, doc2_text, self.schema_template)
+        return self._execute_analysis(prompt, engagement_id)
+
     def detect_risks(self, industry: str, background: str, engagement_id: int) -> Dict[str, Any]:
         prompt = self.prompt_engine.build_risk_assessment_prompt(industry, background, self.schema_template)
+        return self._execute_analysis(prompt, engagement_id)
+
+    def generate_findings(self, data_summary: str, engagement_id: int) -> Dict[str, Any]:
+        prompt = self.prompt_engine.build_audit_analysis_prompt(data_summary, self.schema_template)
+        return self._execute_analysis(prompt, engagement_id)
+
+    def review_working_papers(self, audit_area: str, procedure: str, observations: str, engagement_id: int) -> Dict[str, Any]:
+        prompt = self.prompt_engine.build_working_paper_prompt(audit_area, procedure, observations, self.schema_template)
+        return self._execute_analysis(prompt, engagement_id)
+
+    def generate_management_letter(self, findings_summary: str, engagement_id: int) -> Dict[str, Any]:
+        prompt = self.prompt_engine.build_management_letter_prompt(findings_summary, self.schema_template)
         return self._execute_analysis(prompt, engagement_id)
 
     def explain_gst_difference(self, invoice_text: str, engagement_id: int) -> Dict[str, Any]:
         prompt = self.prompt_engine.build_gst_review_prompt(invoice_text, self.schema_template)
         return self._execute_analysis(prompt, engagement_id)
+
+    def review_trial_balance(self, tb_data: str, engagement_id: int) -> Dict[str, Any]:
+        prompt = self.prompt_engine.build_register_review_prompt("Trial Balance", tb_data, self.schema_template)
+        return self._execute_analysis(prompt, engagement_id)
+
+    def review_bank_statement(self, bank_data: str, engagement_id: int) -> Dict[str, Any]:
+        prompt = self.prompt_engine.build_register_review_prompt("Bank Statement", bank_data, self.schema_template)
+        return self._execute_analysis(prompt, engagement_id)
+
+    def review_purchase_register(self, purchase_data: str, engagement_id: int) -> Dict[str, Any]:
+        prompt = self.prompt_engine.build_register_review_prompt("Purchase Register", purchase_data, self.schema_template)
+        return self._execute_analysis(prompt, engagement_id)
+
+    def review_sales_register(self, sales_data: str, engagement_id: int) -> Dict[str, Any]:
+        prompt = self.prompt_engine.build_register_review_prompt("Sales Register", sales_data, self.schema_template)
+        return self._execute_analysis(prompt, engagement_id)
+

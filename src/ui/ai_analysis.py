@@ -256,42 +256,46 @@ class AIAuditWidget(QWidget):
         self.add_message("CA", text, True)
         
         # Add placeholder AI message
-        self.current_ai_bubble = self.add_message("FinAudit Copilot", "...", False)
+        self.current_ai_bubble = self.add_message("FinAudit Copilot", "Analyzing financial evidence...", False)
         
-        # Fetch RAG Context
-        from ai.rag_pipeline import RAGPipeline
+        from ai.audit_copilot import AuditCopilot
+        from ai.context_retriever import ContextRetriever
+        from ai.workers import AICopilotWorker
+        from PySide6.QtCore import QThreadPool
+
         try:
-            rag = RAGPipeline()
-            results = rag.search(text, top_k=2)
-            context = ""
-            if results:
-                context = "\n".join([f"Source: {res['source']}\nContent: {res['text']}" for res in results])
+            retriever = ContextRetriever()
+            copilot = AuditCopilot(context_retriever=retriever)
             
-            if context:
-                prompt = f"Use the following document snippet context to answer the question:\n\n{context}\n\nQuestion: {text}\nAnswer:"
-            else:
-                prompt = text
+            def run_analysis():
+                return copilot.analyze_document(text, engagement_id=1)
+                
+            self.worker = AICopilotWorker(run_analysis)
+            self.worker.signals.result.connect(self.on_copilot_result)
+            self.worker.signals.error.connect(self.on_copilot_error)
+            QThreadPool.globalInstance().start(self.worker)
         except Exception as e:
-            print(f"RAG Error: {e}")
-            prompt = text
-        
-        self.worker = OllamaWorker(prompt=prompt, model="llama3.2")
-        self.worker.chunk_received.connect(self.on_chunk)
-        self.worker.finished.connect(self.on_finished)
-        self.worker.start()
+            print(f"Copilot Error: {e}")
+            if self.current_ai_bubble:
+                self.current_ai_bubble.setText(f"Analysis error: {e}")
 
-    def on_chunk(self, text):
+    def on_copilot_result(self, result):
+        if self.current_ai_bubble and isinstance(result, dict):
+            summary = result.get("summary", "Analysis completed.")
+            severity = result.get("severity", "Low")
+            std = result.get("accounting_standard", "SA 240")
+            risk = result.get("risk_score", 0)
+            
+            formatted_resp = f"<b>Summary:</b> {summary}<br/><br/>" \
+                             f"<b>Risk Score:</b> {risk}/100 ({severity} Severity)<br/>" \
+                             f"<b>Standard:</b> {std}<br/>" \
+                             f"<b>Next Step:</b> {result.get('next_audit_procedure', 'Perform verification.')}"
+            self.current_ai_bubble.setText(formatted_resp)
+        self.current_ai_bubble = None
+
+    def on_copilot_error(self, err_tuple):
         if self.current_ai_bubble:
-            current_text = self.current_ai_bubble.text()
-            if current_text == "...":
-                self.current_ai_bubble.setText(text)
-            else:
-                self.current_ai_bubble.setText(current_text + text)
-            # scroll to bottom
-            scrollbar = self.chat_area.verticalScrollBar()
-            scrollbar.setValue(scrollbar.maximum())
-
-    def on_finished(self):
+            self.current_ai_bubble.setText(f"AI Execution Error: {err_tuple[0]}")
         self.current_ai_bubble = None
         
     def add_message(self, sender, text, is_user=False):

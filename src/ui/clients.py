@@ -55,10 +55,24 @@ class AddClientDialog(QDialog):
         layout.addWidget(self.buttons)
 
     def validate_and_accept(self):
-        if not self.name_input.text().strip():
+        name = self.name_input.text().strip()
+        gst = self.gst_input.text().strip()
+        pan = self.pan_input.text().strip()
+
+        if not name:
             QMessageBox.warning(self, "Validation Error", "Client Name is required!")
-        else:
-            self.accept()
+            return
+
+        import re
+        if gst and not re.match(r"^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$", gst.upper()):
+            QMessageBox.warning(self, "Validation Error", "Invalid GSTIN format! Example: 27AADCT1234E1Z5")
+            return
+
+        if pan and not re.match(r"^[A-Z]{5}[0-9]{4}[A-Z]{1}$", pan.upper()):
+            QMessageBox.warning(self, "Validation Error", "Invalid PAN format! Example: AADCT1234E")
+            return
+
+        self.accept()
 
 class ClientManagementWidget(QWidget):
     def __init__(self):
@@ -293,10 +307,14 @@ class ClientManagementWidget(QWidget):
             else:
                 client.industry_rel = None
 
-            self.session.commit()
-            self.load_clients()
-            self.header_lbl.setText(client.name)
-            self.industry_lbl.setText(f"{client.industry or 'General'} Sector")
+            try:
+                self.session.commit()
+                self.load_clients()
+                self.header_lbl.setText(client.name)
+                self.industry_lbl.setText(f"{client.industry or 'General'} Sector")
+            except Exception as e:
+                self.session.rollback()
+                QMessageBox.critical(self, "Database Error", f"Failed to save client changes: {e}")
 
     def delete_client(self, client_id):
         client = self.session.query(Client).filter_by(id=client_id).first()

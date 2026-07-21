@@ -273,3 +273,4 @@ FROM findings) AS anon_1]
 [2026-07-21 23:29:21] [WARNING] [document_intelligence.ocr_engine:76] OCR Engine Unavailable - Digital PDF & Document Parser Active (PaddleOCR disabled: No module named 'paddleocr'; Tesseract disabled: No module named 'pytesseract'; EasyOCR disabled: No module named 'easyocr')
 [2026-07-21 23:29:24] [INFO] [workflow.workflow_manager:56] Initialized Workflow State for Engagement 3
 [2026-07-21 23:29:26] [INFO] [workflow.workflow_manager:56] Initialized Workflow State for Engagement 2
+[2026-07-21 23:33:17] [INFO] [root:52] Initialized application logging -> /Users/aryanyadav/Desktop/PROJECTS/Audit/logs/finauditpro.log

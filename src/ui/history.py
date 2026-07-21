@@ -66,21 +66,30 @@ class AuditHistoryWidget(QWidget):
         self.load_history()
 
     def load_history(self):
-        projects = self.session.query(AuditProject).all()
-        
-        logs = []
-        for p in projects:
-            client = self.session.query(Client).filter_by(id=p.client_id).first()
-            name = client.name if client else "Unknown Client"
-            dt_str = p.created_at.strftime("%d-%b-%Y %H:%M") if p.created_at else "Jul 21, 2026"
-            logs.append((dt_str, name, p.financial_year, f"Audit project initialized ({p.status})", p.risk_level or "Low"))
-            logs.append((dt_str, name, p.financial_year, "AI anomaly detection scan completed", "Passed"))
-            logs.append((dt_str, name, p.financial_year, "Working paper draft generated", "Completed"))
+        from database.models import AuditLog
+        logs = self.session.query(AuditLog).order_by(AuditLog.id.desc()).all()
+        if not logs:
+            projects = self.session.query(AuditProject).order_by(AuditProject.id.desc()).all()
+            self.table.setRowCount(len(projects))
+            for r, p in enumerate(projects):
+                client = self.session.query(Client).filter_by(id=p.client_id).first()
+                name = client.name if client else f"Client #{p.client_id}"
+                dt_str = p.created_at.strftime("%d-%b-%Y %H:%M") if p.created_at else "--"
+                self.table.setItem(r, 0, QTableWidgetItem(dt_str))
+                self.table.setItem(r, 1, QTableWidgetItem(name))
+                self.table.setItem(r, 2, QTableWidgetItem(p.financial_year))
+                self.table.setItem(r, 3, QTableWidgetItem(f"Engagement Created ({p.status})"))
+                self.table.setItem(r, 4, QTableWidgetItem(p.risk_level or "Low"))
+            return
 
         self.table.setRowCount(len(logs))
-        for r, row in enumerate(logs):
-            for c, val in enumerate(row):
-                self.table.setItem(r, c, QTableWidgetItem(val))
+        for r, log in enumerate(logs):
+            dt_str = log.created_at.strftime("%d-%b-%Y %H:%M") if log.created_at else "--"
+            self.table.setItem(r, 0, QTableWidgetItem(dt_str))
+            self.table.setItem(r, 1, QTableWidgetItem(f"Engagement #{log.engagement_id or 1}"))
+            self.table.setItem(r, 2, QTableWidgetItem("FY 2025-26"))
+            self.table.setItem(r, 3, QTableWidgetItem(f"{log.action} - {log.target_entity}"))
+            self.table.setItem(r, 4, QTableWidgetItem("Logged"))
 
     def closeEvent(self, event):
         self.session.close()

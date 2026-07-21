@@ -54,8 +54,23 @@ class SettingsWidget(QWidget):
         form_layout.addRow("Ollama Endpoint URL:", self.ollama_url)
         
         self.model_combo = QComboBox()
-        self.model_combo.addItems(["llama3.2 (Recommended)", "mistral", "phi3", "deepseek-r1:7b"])
         self.model_combo.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;")
+        
+        # Detect installed local Ollama models
+        try:
+            import requests
+            res = requests.get("http://localhost:11434/api/tags", timeout=2)
+            if res.status_code == 200:
+                models = [m.get("name", "") for m in res.json().get("models", [])]
+                if models:
+                    self.model_combo.addItems(models)
+                else:
+                    self.model_combo.addItem("No Ollama Models Found")
+            else:
+                self.model_combo.addItem("llama3.2")
+        except Exception:
+            self.model_combo.addItem("llama3.2 (Ollama Offline)")
+
         form_layout.addRow("LLM Model Target:", self.model_combo)
         
         self.chk_gpu = QCheckBox("Enable GPU Acceleration for FAISS vector search")

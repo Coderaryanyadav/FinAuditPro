@@ -5,6 +5,8 @@ Generates tailored BI data models for CEO, Audit Partner, Senior Auditor, and Ju
 
 from dataclasses import dataclass, field
 from typing import Dict, Any, List
+from database.database import SessionLocal
+from database.models import Client, AuditProject, Document, Finding, WorkingPaper
 from .kpi_engine import KPIMetrics
 from .trend_engine import TrendMetrics
 from .forecast_engine import ForecastMetrics

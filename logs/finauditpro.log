@@ -689,3 +689,65 @@ sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed
 [2026-07-22 00:36:14] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'resetCache' deprecated - use 'reset_cache'
 [2026-07-22 00:36:14] [INFO] [faiss.loader:97] Loading faiss.
 [2026-07-22 00:36:14] [INFO] [faiss.loader:99] Successfully loaded faiss.
+[2026-07-22 00:39:14] [INFO] [root:52] Initialized application logging -> /Users/aryanyadav/Desktop/PROJECTS/Audit/logs/finauditpro.log
+[2026-07-22 00:39:17] [INFO] [sentence_transformers.SentenceTransformer:196] Use pytorch device_name: mps
+[2026-07-22 00:39:17] [INFO] [sentence_transformers.SentenceTransformer:204] Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+[2026-07-22 00:39:22] [INFO] [document_intelligence.embedding_service:26] Loaded SentenceTransformer model: all-MiniLM-L6-v2
+[2026-07-22 00:39:23] [INFO] [reporting.pdf_generator:124] Generated PDF report at /var/folders/d8/s9f8fy217l3bd2hdhqr4ttx40000gn/T/Audit_Report_Clean_Co.pdf
+[2026-07-22 00:39:23] [INFO] [reporting.report_engine:118] Report Pack generated for Clean Co (ID: REP-1784660963) in 0.62s.
+[2026-07-22 00:39:23] [INFO] [reporting.pdf_generator:124] Generated PDF report at /var/folders/d8/s9f8fy217l3bd2hdhqr4ttx40000gn/T/Audit_Report_Fraud_Co.pdf
+[2026-07-22 00:39:23] [INFO] [reporting.report_engine:118] Report Pack generated for Fraud Co (ID: REP-1784660963) in 0.01s.
+[2026-07-22 00:39:23] [INFO] [sentence_transformers.SentenceTransformer:196] Use pytorch device_name: mps
+[2026-07-22 00:39:23] [INFO] [sentence_transformers.SentenceTransformer:204] Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+[2026-07-22 00:39:26] [INFO] [document_intelligence.embedding_service:26] Loaded SentenceTransformer model: all-MiniLM-L6-v2
+[2026-07-22 00:39:26] [INFO] [reporting.pdf_generator:124] Generated PDF report at /var/folders/d8/s9f8fy217l3bd2hdhqr4ttx40000gn/T/Audit_Report_TechCorp_Solutions.pdf
+[2026-07-22 00:39:26] [INFO] [reporting.report_engine:118] Report Pack generated for TechCorp Solutions (ID: REP-1784660966) in 0.01s.
+[2026-07-22 00:39:26] [INFO] [rule_engine.rule_engine:54] Rule Engine evaluated 7 rules in 0.0006s. Failed: 3
+[2026-07-22 00:39:26] [INFO] [rule_engine.rule_engine:54] Rule Engine evaluated 7 rules in 0.0004s. Failed: 3
+[2026-07-22 00:39:26] [INFO] [rule_engine.rule_engine:54] Rule Engine evaluated 7 rules in 0.0003s. Failed: 2
+[2026-07-22 00:39:26] [INFO] [rule_engine.rule_engine:54] Rule Engine evaluated 7 rules in 0.0004s. Failed: 3
+[2026-07-22 00:39:26] [INFO] [security.backup:70] Created compressed backup archive: BACKUP_20260721_190926.zip (0.00 MB)
+[2026-07-22 00:39:26] [INFO] [security.audit_trail:69] [SECURITY AUDIT LOG] CREATE_CLIENT by user1@example.com (Partner) | Hash: 7e900f503cd75944...
+[2026-07-22 00:39:26] [INFO] [security.audit_trail:69] [SECURITY AUDIT LOG] UPLOAD_DOC by user1@example.com (Partner) | Hash: 4f15c2b3680e71c2...
+[2026-07-22 00:39:27] [INFO] [workflow.workflow_manager:81] Initialized Workflow State for Engagement 1 at stage ENGAGEMENT_CREATED
+[2026-07-22 00:39:28] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'parseString' deprecated - use 'parse_string'
+[2026-07-22 00:39:28] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'resetCache' deprecated - use 'reset_cache'
+[2026-07-22 00:39:28] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'parseString' deprecated - use 'parse_string'
+[2026-07-22 00:39:28] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'resetCache' deprecated - use 'reset_cache'
+[2026-07-22 00:39:28] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'parseString' deprecated - use 'parse_string'
+[2026-07-22 00:39:28] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'resetCache' deprecated - use 'reset_cache'
+[2026-07-22 00:39:28] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'parseString' deprecated - use 'parse_string'
+[2026-07-22 00:39:28] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'resetCache' deprecated - use 'reset_cache'
+[2026-07-22 00:39:28] [INFO] [faiss.loader:97] Loading faiss.
+[2026-07-22 00:39:28] [INFO] [faiss.loader:99] Successfully loaded faiss.
+[2026-07-22 00:40:09] [INFO] [root:52] Initialized application logging -> /Users/aryanyadav/Desktop/PROJECTS/Audit/logs/finauditpro.log
+[2026-07-22 00:40:13] [INFO] [sentence_transformers.SentenceTransformer:196] Use pytorch device_name: mps
+[2026-07-22 00:40:13] [INFO] [sentence_transformers.SentenceTransformer:204] Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+[2026-07-22 00:40:16] [INFO] [document_intelligence.embedding_service:26] Loaded SentenceTransformer model: all-MiniLM-L6-v2
+[2026-07-22 00:40:17] [INFO] [reporting.pdf_generator:124] Generated PDF report at /var/folders/d8/s9f8fy217l3bd2hdhqr4ttx40000gn/T/Audit_Report_Clean_Co.pdf
+[2026-07-22 00:40:18] [INFO] [reporting.report_engine:118] Report Pack generated for Clean Co (ID: REP-1784661017) in 0.59s.
+[2026-07-22 00:40:18] [INFO] [reporting.pdf_generator:124] Generated PDF report at /var/folders/d8/s9f8fy217l3bd2hdhqr4ttx40000gn/T/Audit_Report_Fraud_Co.pdf
+[2026-07-22 00:40:18] [INFO] [reporting.report_engine:118] Report Pack generated for Fraud Co (ID: REP-1784661018) in 0.01s.
+[2026-07-22 00:40:18] [INFO] [sentence_transformers.SentenceTransformer:196] Use pytorch device_name: mps
+[2026-07-22 00:40:18] [INFO] [sentence_transformers.SentenceTransformer:204] Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+[2026-07-22 00:40:21] [INFO] [document_intelligence.embedding_service:26] Loaded SentenceTransformer model: all-MiniLM-L6-v2
+[2026-07-22 00:40:21] [INFO] [reporting.pdf_generator:124] Generated PDF report at /var/folders/d8/s9f8fy217l3bd2hdhqr4ttx40000gn/T/Audit_Report_TechCorp_Solutions.pdf
+[2026-07-22 00:40:21] [INFO] [reporting.report_engine:118] Report Pack generated for TechCorp Solutions (ID: REP-1784661021) in 0.01s.
+[2026-07-22 00:40:21] [INFO] [rule_engine.rule_engine:54] Rule Engine evaluated 7 rules in 0.0007s. Failed: 3
+[2026-07-22 00:40:21] [INFO] [rule_engine.rule_engine:54] Rule Engine evaluated 7 rules in 0.0004s. Failed: 3
+[2026-07-22 00:40:21] [INFO] [rule_engine.rule_engine:54] Rule Engine evaluated 7 rules in 0.0004s. Failed: 2
+[2026-07-22 00:40:21] [INFO] [rule_engine.rule_engine:54] Rule Engine evaluated 7 rules in 0.0004s. Failed: 3
+[2026-07-22 00:40:21] [INFO] [security.backup:70] Created compressed backup archive: BACKUP_20260721_191021.zip (0.00 MB)
+[2026-07-22 00:40:21] [INFO] [security.audit_trail:69] [SECURITY AUDIT LOG] CREATE_CLIENT by user1@example.com (Partner) | Hash: a84a9330fc4c57d1...
+[2026-07-22 00:40:21] [INFO] [security.audit_trail:69] [SECURITY AUDIT LOG] UPLOAD_DOC by user1@example.com (Partner) | Hash: 4586ea852d04cca3...
+[2026-07-22 00:40:21] [INFO] [workflow.workflow_manager:81] Initialized Workflow State for Engagement 1 at stage ENGAGEMENT_CREATED
+[2026-07-22 00:40:22] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'parseString' deprecated - use 'parse_string'
+[2026-07-22 00:40:22] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'resetCache' deprecated - use 'reset_cache'
+[2026-07-22 00:40:22] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'parseString' deprecated - use 'parse_string'
+[2026-07-22 00:40:22] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'resetCache' deprecated - use 'reset_cache'
+[2026-07-22 00:40:22] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'parseString' deprecated - use 'parse_string'
+[2026-07-22 00:40:22] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'resetCache' deprecated - use 'reset_cache'
+[2026-07-22 00:40:22] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'parseString' deprecated - use 'parse_string'
+[2026-07-22 00:40:22] [WARNING] [matplotlib.style.core:213] In /Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.12/site-packages/matplotlib/mpl-data/stylelib/classic.mplstyle: 'resetCache' deprecated - use 'reset_cache'
+[2026-07-22 00:40:22] [INFO] [faiss.loader:97] Loading faiss.
+[2026-07-22 00:40:22] [INFO] [faiss.loader:99] Successfully loaded faiss.

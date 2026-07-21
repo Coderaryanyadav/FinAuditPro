@@ -4,7 +4,7 @@ Computes executive metrics strictly from database records using SQL aggregation.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union
 from database.database import SessionLocal
 from database.models import AuditProject, Document, Finding, WorkingPaper
 
@@ -32,19 +32,27 @@ class KPIMetrics:
         }
 
 
+from typing import Optional, Union, List, Dict, Any
+
 class KPIEngine:
     """Calculates firm-wide and engagement-level KPIs strictly via SQL aggregation."""
 
     @staticmethod
-    def calculate_kpis(projects_data: Optional[List[Dict[str, Any]]] = None) -> KPIMetrics:
+    def calculate_kpis(audit_id: Optional[Union[int, List[Dict[str, Any]]]] = None) -> KPIMetrics:
         """Computes aggregated KPI metrics directly from live database tables."""
         session = SessionLocal()
         try:
-            projects = session.query(AuditProject).all()
+            if isinstance(audit_id, int):
+                projects = session.query(AuditProject).filter_by(id=audit_id).all()
+                docs = session.query(Document).filter_by(audit_id=audit_id).all()
+                findings = session.query(Finding).filter_by(audit_id=audit_id).all()
+            else:
+                projects = session.query(AuditProject).all()
+                docs = session.query(Document).all()
+                findings = session.query(Finding).all()
+
             total_projects = len(projects)
-            docs = session.query(Document).all()
             docs_count = len(docs)
-            findings = session.query(Finding).all()
             findings_count = len(findings)
 
             if total_projects == 0:

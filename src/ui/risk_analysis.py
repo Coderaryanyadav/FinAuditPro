@@ -61,9 +61,15 @@ class RiskAnalysisWidget(QWidget):
         b_layout.setSpacing(24)
         
         # Fetch counts from database
-        high_count = self.session.query(Finding).filter_by(risk_level='High').count()
-        med_count = self.session.query(Finding).filter_by(risk_level='Medium').count()
-        low_count = self.session.query(Finding).filter_by(risk_level='Low').count()
+        active_id = getattr(self, 'active_engagement_id', None)
+        if active_id:
+            high_count = self.session.query(Finding).filter_by(audit_id=active_id, risk_level='High').count()
+            med_count = self.session.query(Finding).filter_by(audit_id=active_id, risk_level='Medium').count()
+            low_count = self.session.query(Finding).filter_by(audit_id=active_id, risk_level='Low').count()
+        else:
+            high_count = self.session.query(Finding).filter_by(risk_level='High').count()
+            med_count = self.session.query(Finding).filter_by(risk_level='Medium').count()
+            low_count = self.session.query(Finding).filter_by(risk_level='Low').count()
         
         # Risk Cards
         cards_layout = QHBoxLayout()
@@ -103,7 +109,11 @@ class RiskAnalysisWidget(QWidget):
         self.load_findings()
 
     def load_findings(self):
-        findings = self.session.query(Finding).all()
+        active_id = getattr(self, 'active_engagement_id', None)
+        if active_id:
+            findings = self.session.query(Finding).filter_by(audit_id=active_id).all()
+        else:
+            findings = self.session.query(Finding).all()
         self.table.setRowCount(0)
         for r, f in enumerate(findings):
             self.table.insertRow(r)

@@ -93,7 +93,12 @@ class ReportsWidget(QWidget):
         client = self.session.query(Client).first()
         client_name = client.name if client else "Unassigned Client Account"
         
-        findings = self.session.query(Finding).all()
+        active_id = getattr(self, 'active_engagement_id', None)
+        if active_id:
+            findings = self.session.query(Finding).filter_by(audit_id=active_id).all()
+        else:
+            findings = self.session.query(Finding).all()
+
         matters_html = ""
         for f in findings:
             parts = f.description.split("|")
@@ -143,8 +148,13 @@ class ReportsWidget(QWidget):
             client = self.session.query(Client).first()
             client_name = client.name if client else "Unassigned Client Account"
 
-            db_findings = self.session.query(Finding).all()
-            db_wps = self.session.query(WorkingPaper).all()
+            active_id = getattr(self, 'active_engagement_id', None)
+            if active_id:
+                db_findings = self.session.query(Finding).filter_by(audit_id=active_id).all()
+                db_wps = self.session.query(WorkingPaper).filter_by(audit_id=active_id).all()
+            else:
+                db_findings = self.session.query(Finding).all()
+                db_wps = self.session.query(WorkingPaper).all()
 
             findings_list = [
                 {

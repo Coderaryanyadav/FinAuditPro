@@ -341,7 +341,12 @@ class DashboardWindow(QWidget):
         ai_layout.addWidget(create_progress("Portfolio Risk Score", risk_label, int(avg_risk * 2)))
         ai_layout.addWidget(create_progress("Compliance Score", comp_label, int(comp_score * 2)))
         
-        findings_query = self.session.query(Finding).order_by(Finding.id.desc()).limit(3).all()
+        active_id = getattr(self, 'active_engagement_id', None)
+        if active_id:
+            findings_query = self.session.query(Finding).filter(Finding.audit_id == active_id).order_by(Finding.id.desc()).limit(3).all()
+        else:
+            findings_query = self.session.query(Finding).order_by(Finding.id.desc()).limit(3).all()
+
         if findings_query:
             findings_text = "<b>Recent AI Findings</b><br/>" + "<br/>".join([f"• {f.description[:60]}" for f in findings_query])
         else:

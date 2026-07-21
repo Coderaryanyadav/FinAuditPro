@@ -117,6 +117,7 @@ class DocumentPipeline:
                 for failed in rule_eval.failed_rules:
                     impact = max(extracted_amounts) if extracted_amounts else 0.0
                     finding = Finding(
+                        audit_id=engagement_id,
                         description=f"[{failed.rule_id}] {failed.rule_name}: {failed.description}",
                         severity=failed.severity.value,
                         risk_level=failed.severity.value,
@@ -146,7 +147,24 @@ class DocumentPipeline:
 
         # 7. Vector Indexing
         _notify("Generating Vector Embeddings & Indexing", 95.0)
-        doc_id = document_id if document_id is not None else int(time.time())
+        if document_id is None:
+            try:
+                from database.database import SessionLocal
+                from database.models import Document
+                session = SessionLocal()
+                doc = session.query(Document).filter_by(file_path=file_path).first()
+                if not doc:
+                    doc = Document(file_name=os.path.basename(file_path), file_path=file_path, audit_id=engagement_id, engagement_id=engagement_id)
+                    session.add(doc)
+                    session.commit()
+                doc_id = doc.id
+                session.close()
+            except Exception:
+                import time
+                doc_id = int(time.time())
+        else:
+            doc_id = document_id
+
         indexed_chunks = self.indexer.index_document_chunks(
             document_id=doc_id,
             engagement_id=engagement_id,

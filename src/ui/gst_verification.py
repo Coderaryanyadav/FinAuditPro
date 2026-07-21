@@ -119,7 +119,11 @@ class GSTVerificationWidget(QWidget):
         from database.models import Finding
         session = SessionLocal()
         try:
-            gst_findings = session.query(Finding).filter(Finding.description.ilike('%GST%')).all()
+            active_id = getattr(self, 'active_engagement_id', None)
+            if active_id:
+                gst_findings = session.query(Finding).filter(Finding.audit_id == active_id, Finding.description.ilike('%GST%')).all()
+            else:
+                gst_findings = session.query(Finding).filter(Finding.description.ilike('%GST%')).all()
             if gst_findings:
                 self.table.setRowCount(len(gst_findings))
                 for r, f in enumerate(gst_findings):

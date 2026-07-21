@@ -25,13 +25,14 @@ class DashboardService:
 
     def get_engagement_dashboard_stats(self, engagement_id: int) -> Dict[str, Any]:
         """Calculate statistics for a specific engagement."""
-        pending_reviews = self.session.query(ReviewNote).filter(
-            ReviewNote.working_paper.has(index=hasattr('engagement_id', engagement_id)), 
+        from database.models import WorkingPaper
+        pending_reviews = self.session.query(ReviewNote).join(WorkingPaper).filter(
+            WorkingPaper.audit_id == engagement_id,
             ReviewNote.status == 'Open'
         ).count()
-        
+
         open_findings = self.session.query(Finding).filter(
-            Finding.working_paper.has(index=hasattr('engagement_id', engagement_id)),
+            Finding.audit_id == engagement_id,
             Finding.is_resolved == False
         ).count()
 

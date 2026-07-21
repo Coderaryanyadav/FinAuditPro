@@ -110,7 +110,11 @@ class ComplianceWidget(QWidget):
         # Query DB metrics
         projects = self.session.query(AuditProject).all()
         clients = self.session.query(Client).all()
-        findings = self.session.query(Finding).all()
+        active_id = getattr(self, 'active_engagement_id', None)
+        if active_id:
+            findings = self.session.query(Finding).filter_by(audit_id=active_id).all()
+        else:
+            findings = self.session.query(Finding).all()
 
         total_projects = len(projects)
         high_risk_findings = len([f for f in findings if f.risk_level == "High"])

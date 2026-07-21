@@ -4,7 +4,7 @@ Computes monthly time-series trends directly from database timestamp records.
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional, Union
 from database.database import SessionLocal
 from database.models import AuditProject, Document, Finding, Client
 
@@ -30,13 +30,18 @@ class TrendEngine:
     """Computes time-series trend metrics from live database records."""
 
     @staticmethod
-    def compute_trends(historical_data: Any = None) -> TrendMetrics:
+    def compute_trends(audit_id: Optional[Union[int, List[Dict[str, Any]]]] = None) -> TrendMetrics:
         """Returns monthly time-series trend metrics derived from stored DB records."""
         session = SessionLocal()
         try:
-            total_clients = session.query(Client).count()
-            total_projects = session.query(AuditProject).count()
-            total_findings = session.query(Finding).count()
+            if isinstance(audit_id, int):
+                total_clients = session.query(Client).count()
+                total_projects = session.query(AuditProject).filter_by(id=audit_id).count()
+                total_findings = session.query(Finding).filter_by(audit_id=audit_id).count()
+            else:
+                total_clients = session.query(Client).count()
+                total_projects = session.query(AuditProject).count()
+                total_findings = session.query(Finding).count()
 
             if total_projects == 0 and total_clients == 0:
                 return TrendMetrics()

@@ -254,7 +254,11 @@ class AIAuditWidget(QWidget):
             from database.database import SessionLocal
             from database.models import Finding
             session = SessionLocal()
-            findings = session.query(Finding).all()
+            active_id = getattr(self, 'active_engagement_id', None)
+            if active_id:
+                findings = session.query(Finding).filter_by(audit_id=active_id).all()
+            else:
+                findings = session.query(Finding).all()
             session.close()
 
             if not findings:

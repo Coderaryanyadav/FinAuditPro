@@ -4,7 +4,7 @@ Generates tailored BI data models for CEO, Audit Partner, Senior Auditor, and Ju
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from database.database import SessionLocal
 from database.models import Client, AuditProject, Document, Finding, WorkingPaper
 from .kpi_engine import KPIMetrics
@@ -118,13 +118,18 @@ class ExecutiveDashboardEngine:
         )
 
     @staticmethod
-    def get_senior_auditor_dashboard() -> DashboardView:
+    def get_senior_auditor_dashboard(audit_id: Optional[int] = None) -> DashboardView:
         session = SessionLocal()
         try:
-            projects = session.query(AuditProject).all()
-            findings_count = session.query(Finding).count()
-            docs_count = session.query(Document).count()
-            
+            if audit_id:
+                projects = session.query(AuditProject).filter_by(id=audit_id).all()
+                findings_count = session.query(Finding).filter_by(audit_id=audit_id).count()
+                docs_count = session.query(Document).filter_by(audit_id=audit_id).count()
+            else:
+                projects = session.query(AuditProject).all()
+                findings_count = session.query(Finding).count()
+                docs_count = session.query(Document).count()
+
             rows = []
             for p in projects:
                 client = session.query(Client).filter_by(id=p.client_id).first()

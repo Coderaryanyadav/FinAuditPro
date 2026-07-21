@@ -41,6 +41,23 @@ class DatabaseMigrator:
                 cur.execute("INSERT INTO schema_version (version) VALUES (1);")
                 logger.info("Applied Database Migration 1: WAL mode enabled.")
 
+            # Migration 2: Add audit_id column to findings table if missing
+            cur.execute("PRAGMA table_info(findings);")
+            columns = [col[1] for col in cur.fetchall()]
+            if columns and "audit_id" not in columns:
+                cur.execute("ALTER TABLE findings ADD COLUMN audit_id INTEGER REFERENCES audit_projects(id);")
+                logger.info("Applied Database Migration 2: Added audit_id column to findings table.")
+
+            # Migration 3: Add audit_id column to working_papers table if missing
+            cur.execute("PRAGMA table_info(working_papers);")
+            wp_cols = [col[1] for col in cur.fetchall()]
+            if wp_cols and "audit_id" not in wp_cols:
+                cur.execute("ALTER TABLE working_papers ADD COLUMN audit_id INTEGER REFERENCES audit_projects(id);")
+                logger.info("Applied Database Migration 3: Added audit_id column to working_papers table.")
+
+            if current_version < 3:
+                cur.execute("INSERT INTO schema_version (version) VALUES (3);")
+
             con.commit()
             con.close()
             return True

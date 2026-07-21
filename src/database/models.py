@@ -213,6 +213,7 @@ class WorkingPaperIndex(Base):
 class WorkingPaper(Base):
     __tablename__ = 'working_papers'
     id = Column(Integer, primary_key=True)
+    audit_id = Column(Integer, ForeignKey('audit_projects.id'), nullable=True)
     index_id = Column(Integer, ForeignKey('working_paper_index.id'), nullable=False)
     title = Column(String(255), nullable=False)
     objective = Column(Text, nullable=True)
@@ -223,6 +224,7 @@ class WorkingPaper(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
     
+    audit_project = relationship("AuditProject", backref="working_papers")
     index = relationship("WorkingPaperIndex", back_populates="working_papers")
     prepared_by = relationship("User", foreign_keys=[prepared_by_id], back_populates="prepared_papers")
     reviewed_by = relationship("User", foreign_keys=[reviewed_by_id], back_populates="reviewed_papers")

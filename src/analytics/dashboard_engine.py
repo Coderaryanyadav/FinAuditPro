@@ -160,8 +160,19 @@ class ExecutiveDashboardEngine:
             
             rows = []
             for d in docs:
-                client = session.query(Client).filter_by(id=d.client_id).first() if hasattr(d, 'client_id') else None
-                c_name = client.name if client else "Unassigned"
+                c_name = "Unassigned"
+                if getattr(d, 'audit_id', None):
+                    proj = session.query(AuditProject).filter_by(id=d.audit_id).first()
+                    if proj:
+                        cl = session.query(Client).filter_by(id=proj.client_id).first()
+                        if cl: c_name = cl.name
+                elif getattr(d, 'engagement_id', None):
+                    from database.models import Engagement
+                    eng = session.query(Engagement).filter_by(id=d.engagement_id).first()
+                    if eng:
+                        cl = session.query(Client).filter_by(id=eng.client_id).first()
+                        if cl: c_name = cl.name
+
                 rows.append([d.file_name, c_name, d.doc_type or "Ingested"])
 
             return DashboardView(

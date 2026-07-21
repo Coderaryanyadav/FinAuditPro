@@ -560,9 +560,16 @@ class DashboardWindow(QWidget):
         client_id = self.client_selector.currentData()
         if client_id:
             try:
-                self.workflow_manager.initialize_engagement(engagement_id=client_id, client_id=client_id, financial_year="2025-26")
+                from database.models import Engagement
+                eng = self.session.query(Engagement).filter_by(client_id=client_id, financial_year="2025-26").first()
+                if not eng:
+                    eng = Engagement(client_id=client_id, financial_year="2025-26", status="Execution")
+                    self.session.add(eng)
+                    self.session.commit()
+
+                self.workflow_manager.initialize_engagement(engagement_id=eng.id, client_id=client_id, financial_year="2025-26")
                 if hasattr(self, 'ai_page') and self.ai_page is not None:
-                    self.ai_page.active_engagement_id = client_id
+                    self.ai_page.active_engagement_id = eng.id
                 self.refresh_workflow_ui()
             except Exception as e:
                 import logging

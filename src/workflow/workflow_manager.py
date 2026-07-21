@@ -42,18 +42,43 @@ class WorkflowManager:
         return self._active_state
 
     def initialize_engagement(self, engagement_id: int, client_id: int, financial_year: str) -> WorkflowState:
-        """Create and initialize a new audit workflow state."""
+        """Create and initialize a new audit workflow state with database recovery."""
+        if engagement_id in self._state_cache:
+            self._active_state = self._state_cache[engagement_id]
+            return self._active_state
+
+        stage = AuditStage.ENGAGEMENT_CREATED
+        status = AuditStatus.IN_PROGRESS
+        completion_pct = WorkflowProgressTracker.calculate_completion(AuditStage.ENGAGEMENT_CREATED)
+
+        try:
+            from database.database import SessionLocal
+            from database.models import AuditProject
+            session = SessionLocal()
+            proj = session.query(AuditProject).filter_by(id=engagement_id).first()
+            if not proj:
+                proj = session.query(AuditProject).filter_by(client_id=client_id).first()
+            if proj and proj.status:
+                for s in AuditStage:
+                    if s.value.lower() == proj.status.lower() or s.name.lower() == proj.status.lower():
+                        stage = s
+                        completion_pct = WorkflowProgressTracker.calculate_completion(s)
+                        break
+            session.close()
+        except Exception as e:
+            logger.warning(f"Failed to query DB for workflow state recovery: {e}")
+
         state = WorkflowState(
             engagement_id=engagement_id,
             client_id=client_id,
             financial_year=financial_year,
-            current_stage=AuditStage.ENGAGEMENT_CREATED,
-            audit_status=AuditStatus.IN_PROGRESS,
-            completion_percentage=WorkflowProgressTracker.calculate_completion(AuditStage.ENGAGEMENT_CREATED)
+            current_stage=stage,
+            audit_status=status,
+            completion_percentage=completion_pct
         )
         self._state_cache[engagement_id] = state
         self._active_state = state
-        logger.info(f"Initialized Workflow State for Engagement {engagement_id}")
+        logger.info(f"Initialized Workflow State for Engagement {engagement_id} at stage {stage.value}")
         return state
 
     def load_engagement_state(self, engagement_id: int, saved_data: Optional[Dict[str, Any]] = None) -> WorkflowState:
@@ -85,13 +110,28 @@ class WorkflowManager:
         raise WorkflowStateCorruptedError(f"Engagement {engagement_id} is not loaded in memory.")
 
     def advance_current_stage(self, target_stage: AuditStage, context_data: Dict[str, Any], user_id: str = "System") -> WorkflowState:
-        """Advance the active engagement's stage."""
+        """Advance the active engagement's stage and persist to DB."""
         if not self._active_state:
             raise WorkflowStateCorruptedError("No active engagement loaded in WorkflowManager.")
 
         updated_state = self._engine.advance_stage(self._active_state, target_stage, context_data, user_id)
         self._state_cache[updated_state.engagement_id] = updated_state
         self._active_state = updated_state
+
+        try:
+            from database.database import SessionLocal
+            from database.models import AuditProject
+            session = SessionLocal()
+            proj = session.query(AuditProject).filter_by(id=updated_state.engagement_id).first()
+            if not proj:
+                proj = session.query(AuditProject).filter_by(client_id=updated_state.client_id).first()
+            if proj:
+                proj.status = updated_state.current_stage.value
+                session.commit()
+            session.close()
+        except Exception as e:
+            logger.warning(f"Failed to persist workflow stage update to DB: {e}")
+
         return updated_state
 
     def get_dashboard_summary(self) -> Dict[str, Any]:

@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QApplication
 from ui.styles import GLOBAL_QSS
 from ui.splash import SplashScreen
 from ui.login import LoginWindow
+from ui.dashboard import DashboardWindow
 from database.database import init_db
 from deployment.logger import setup_application_logging
 from deployment.crash_reporter import setup_global_crash_handler
@@ -33,12 +34,16 @@ def main():
     splash = SplashScreen()
     splash.show()
     
-    # Define transition logic
+    def show_dashboard():
+        dashboard = DashboardWindow()
+        dashboard.show()
+        app.active_window = dashboard
+
     def show_login():
         splash.close()
         login = LoginWindow()
+        login.login_successful.connect(show_dashboard)
         login.show()
-        # Keep login window reference alive
         app.active_window = login
         
     splash.finished.connect(show_login)

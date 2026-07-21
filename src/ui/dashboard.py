@@ -588,6 +588,19 @@ class DashboardWindow(QWidget):
             self.lbl_wf_stage.setText(f"Stage: {stage}")
             self.progress_bar.setValue(pct)
 
+            try:
+                from services.notification_service import NotificationService
+                ns = NotificationService(self.session)
+                eng_id = summary.get("engagement_id")
+                if eng_id:
+                    notifications = ns.get_upcoming_deadlines(engagement_id=eng_id)
+                    if notifications:
+                        import logging
+                        logging.getLogger(__name__).info(f"Loaded {len(notifications)} active deadline notifications for Engagement {eng_id}")
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"NotificationService fetch exception: {e}")
+
     def advance_audit_stage(self):
         from security.security_manager import SecurityManager
         from security.rbac import Permission

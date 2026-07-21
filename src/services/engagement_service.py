@@ -61,6 +61,16 @@ class EngagementService:
             if wm.current_state and wm.current_state.engagement_id == engagement_id:
                 return round(wm.current_state.completion_percentage, 1)
 
+            from database.database import SessionLocal
+            from database.models import WorkingPaper
+            session = SessionLocal()
+            wps = session.query(WorkingPaper).filter_by(audit_id=engagement_id).all()
+            session.close()
+
+            if wps:
+                completed = sum(1 for wp in wps if getattr(wp, 'status', None) == 'Reviewed' or getattr(wp, 'conclusion', None))
+                return round((completed / len(wps)) * 100.0, 1)
+
             engagement = self.get_engagement(engagement_id)
             if engagement.status == 'Completed':
                 return 100.0

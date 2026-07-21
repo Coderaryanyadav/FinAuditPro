@@ -264,14 +264,21 @@ class ClientManagementWidget(QWidget):
                     self.session.add(ind_obj)
                     self.session.flush()
 
-            new_client = Client(
-                name=name,
-                gst_number=dialog.gst_input.text().strip() or None,
-                pan_number=dialog.pan_input.text().strip() or None,
-                industry_rel=ind_obj
-            )
-            self.session.add(new_client)
-            self.session.commit()
+            from services.client_service import ClientService
+            client_service = ClientService(self.session)
+            try:
+                new_client = client_service.create_client(
+                    name=dialog.name_input.text().strip(),
+                    gstin=dialog.gst_input.text().strip() or None,
+                    pan=dialog.pan_input.text().strip() or None,
+                    industry_id=ind_obj.id if ind_obj else None
+                )
+            except ValueError as ve:
+                QMessageBox.warning(self, "Validation Error", str(ve))
+                return
+            except Exception as e:
+                QMessageBox.critical(self, "Creation Error", f"Failed to create client: {e}")
+                return
             
             # Auto add default audit project
             ap = AuditProject(client_id=new_client.id, financial_year="2025-26", status="Not Started", risk_level="Unknown")

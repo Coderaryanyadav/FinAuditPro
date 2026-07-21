@@ -67,8 +67,12 @@ venv.bak/
 
 # Database
 *.db
+*.db-shm
+*.db-wal
 *.sqlite3
 
 # Data/Outputs
 logs/
 temp/
+*.xlsx
+*.csv

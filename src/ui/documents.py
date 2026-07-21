@@ -94,6 +94,22 @@ class DocumentUploadWidget(QWidget):
         action_layout.addStretch()
         main_layout.addWidget(action_bar)
         
+        # OCR Graceful Feature Detection Banner
+        try:
+            from document_intelligence.ocr_engine import OCREngine
+            ocr_ok, ocr_msg = OCREngine.is_ocr_available()
+            if not ocr_ok:
+                ocr_banner = QFrame()
+                ocr_banner.setStyleSheet("background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; margin: 10px 40px 0 40px;")
+                b_layout = QHBoxLayout(ocr_banner)
+                b_layout.setContentsMargins(16, 8, 16, 8)
+                warn_lbl = QLabel(f"⚠️ {ocr_msg}")
+                warn_lbl.setStyleSheet("color: #92400e; font-size: 13px; font-weight: 500; border: none; background: transparent;")
+                b_layout.addWidget(warn_lbl)
+                main_layout.addWidget(ocr_banner)
+        except Exception:
+            pass
+        
         # Content
         content_layout = QVBoxLayout()
         content_layout.setContentsMargins(40, 40, 40, 40)

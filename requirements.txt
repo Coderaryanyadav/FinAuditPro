@@ -1,19 +1,28 @@
-PySide6>=6.5.0
-SQLAlchemy>=2.0.0
-requests>=2.31.0
-pydantic>=2.4.0
-cryptography>=41.0.0
-# OCR & Document Parsing
-pypdf>=3.17.0
-pdfplumber>=0.10.2
-paddleocr>=2.7.0.3
-paddlepaddle>=2.5.1
-# AI & Vector DB
-ollama>=0.1.6
-faiss-cpu>=1.7.4
-sentence-transformers>=2.2.2
-# Analytics & Reporting
-matplotlib>=3.8.0
-pandas>=2.1.0
-openpyxl>=3.1.2
-reportlab>=4.0.0
+# FinAuditPro Production Dependencies (Target Runtime: Python 3.12)
+# Desktop UI & Database
+PySide6==6.7.3
+SQLAlchemy==2.0.35
+
+# Network & Security
+requests==2.32.3
+pydantic==2.9.2
+cryptography==43.0.1
+
+# Document Intelligence & Parsing
+pypdf==4.3.1
+pdfplumber==0.11.4
+paddleocr>=2.7.3; python_version < "3.13"
+paddlepaddle>=2.6.2; python_version < "3.13"
+
+# Deep Learning & AI Core
+torch==2.4.1
+transformers==4.44.2
+ollama==0.3.3
+faiss-cpu==1.8.0.post1
+sentence-transformers==3.1.1
+
+# Analytics & Executive Reporting
+matplotlib==3.9.2
+pandas==2.2.3
+openpyxl==3.1.5
+reportlab==4.2.2

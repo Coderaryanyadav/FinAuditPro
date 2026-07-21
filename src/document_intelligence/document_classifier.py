@@ -5,7 +5,7 @@ Uses pattern matching and keyword heuristics to automatically categorize audit f
 
 from enum import Enum
 import re
-from typing import Dict
+from typing import Dict, List
 
 class DocumentCategory(str, Enum):
     INVOICE = "Invoice"

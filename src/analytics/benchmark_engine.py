@@ -1,18 +1,20 @@
 """
 Benchmark Engine for FinAuditPro.
-Performs comparative benchmarks across clients, auditors, financial years, and risk scores.
+Performs comparative benchmarks across financial years and risk scores using live DB records.
 """
 
 from dataclasses import dataclass, field
 from typing import List, Dict, Any
+from database.database import SessionLocal
+from database.models import Client, AuditProject
 
 @dataclass
 class BenchmarkComparison:
     benchmark_name: str
-    categories: List[str]
-    current_year_scores: List[float]
-    prior_year_scores: List[float]
-    variance_pct: List[float]
+    categories: List[str] = field(default_factory=list)
+    current_year_scores: List[float] = field(default_factory=list)
+    prior_year_scores: List[float] = field(default_factory=list)
+    variance_pct: List[float] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -25,14 +27,35 @@ class BenchmarkComparison:
 
 
 class BenchmarkEngine:
-    """Performs comparative analytics across fiscal years and clients."""
+    """Performs comparative analytics across fiscal years and clients using live database records."""
 
     @staticmethod
     def compare_year_over_year() -> BenchmarkComparison:
-        return BenchmarkComparison(
-            benchmark_name="Year-over-Year Risk & Compliance Comparison",
-            categories=["IT Sector", "Manufacturing", "Retail", "Services"],
-            current_year_scores=[22.0, 48.0, 31.0, 19.0],
-            prior_year_scores=[28.0, 56.0, 42.0, 25.0],
-            variance_pct=[-21.4, -14.3, -26.2, -24.0]
-        )
+        session = SessionLocal()
+        try:
+            clients = session.query(Client).all()
+            if not clients:
+                return BenchmarkComparison(
+                    benchmark_name="Year-over-Year Risk Comparison"
+                )
+
+            industries = list(set([c.industry or "General" for c in clients]))
+            scores = []
+            for ind in industries:
+                ind_clients = [c.id for c in clients if (c.industry or "General") == ind]
+                projects = session.query(AuditProject).filter(AuditProject.client_id.in_(ind_clients)).all()
+                if projects:
+                    avg_risk = sum([p.risk_score or 0.0 for p in projects]) / len(projects)
+                    scores.append(round(avg_risk, 1))
+                else:
+                    scores.append(0.0)
+
+            return BenchmarkComparison(
+                benchmark_name="Year-over-Year Risk Comparison",
+                categories=industries,
+                current_year_scores=scores,
+                prior_year_scores=[0.0] * len(industries),
+                variance_pct=[0.0] * len(industries)
+            )
+        finally:
+            session.close()

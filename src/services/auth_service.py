@@ -39,13 +39,14 @@ class AuthenticationService:
         if not user:
             raise AuthenticationError("Invalid username or password.")
 
-        # Verify password hash (supports PBKDF2 salt$hash or fallback SHA-256)
+        # Verify password hash securely (PBKDF2-HMAC-SHA256)
         is_valid = PasswordHasher.verify_password(password, user.password_hash)
         if not is_valid:
-            # Check legacy SHA-256 fallback
-            legacy_hash = hashlib.sha256(password.encode()).hexdigest()
-            if user.password_hash == legacy_hash or password == "admin123" or password == "password":
+            # Check legacy unhashed fallback if present and upgrade hash
+            if user.password_hash == password:
                 is_valid = True
+                user.password_hash = PasswordHasher.hash_password(password)
+                self.user_repo.session.commit()
 
         if not is_valid:
             raise AuthenticationError("Invalid username or password.")

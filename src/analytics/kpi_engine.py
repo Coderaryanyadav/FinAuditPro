@@ -1,21 +1,23 @@
 """
 KPI Calculation Engine for FinAuditPro.
-Computes executive metrics: average audit duration, risk scores, compliance %, OCR accuracy, AI confidence, and time saved.
+Computes executive metrics strictly from database records using SQL aggregation.
 """
 
 from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional
+from database.database import SessionLocal
+from database.models import AuditProject, Document, Finding, WorkingPaper
 
 @dataclass
 class KPIMetrics:
-    avg_audit_time_days: float = 14.5
-    avg_risk_score: float = 24.2
-    avg_compliance_score: float = 94.8
-    avg_ocr_accuracy_pct: float = 98.2
-    avg_ai_confidence_pct: float = 96.5
-    hours_saved_count: float = 340.0
-    documents_processed_count: int = 148
-    audit_completion_pct: float = 78.5
+    avg_audit_time_days: float = 0.0
+    avg_risk_score: float = 0.0
+    avg_compliance_score: float = 0.0
+    avg_ocr_accuracy_pct: float = 0.0
+    avg_ai_confidence_pct: float = 0.0
+    hours_saved_count: float = 0.0
+    documents_processed_count: int = 0
+    audit_completion_pct: float = 0.0
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -31,27 +33,34 @@ class KPIMetrics:
 
 
 class KPIEngine:
-    """Calculates firm-wide and engagement-level KPIs."""
+    """Calculates firm-wide and engagement-level KPIs strictly via SQL aggregation."""
 
     @staticmethod
     def calculate_kpis(projects_data: Optional[List[Dict[str, Any]]] = None) -> KPIMetrics:
-        """Computes aggregated KPI metrics from project audit data."""
-        if not projects_data:
-            return KPIMetrics()
+        """Computes aggregated KPI metrics directly from live database tables."""
+        session = SessionLocal()
+        try:
+            projects = session.query(AuditProject).all()
+            total_projects = len(projects)
+            docs_count = session.query(Document).count()
+            findings_count = session.query(Finding).count()
 
-        total = len(projects_data)
-        risk_scores = [p.get("risk_score", 20.0) for p in projects_data]
-        compliance_scores = [p.get("compliance_score", 95.0) for p in projects_data]
-        completed = sum(1 for p in projects_data if p.get("status") == "Completed")
+            if total_projects == 0:
+                return KPIMetrics(
+                    documents_processed_count=docs_count
+                )
 
-        avg_risk = sum(risk_scores) / total if total > 0 else 24.2
-        avg_comp = sum(compliance_scores) / total if total > 0 else 94.8
-        comp_pct = (completed / total) * 100.0 if total > 0 else 78.5
+            risk_scores = [p.risk_score for p in projects if p.risk_score is not None]
+            avg_risk = sum(risk_scores) / len(risk_scores) if risk_scores else 0.0
+            
+            completed = sum(1 for p in projects if p.status == "Completed")
+            comp_pct = (completed / total_projects) * 100.0
 
-        return KPIMetrics(
-            avg_risk_score=avg_risk,
-            avg_compliance_score=avg_comp,
-            hours_saved_count=total * 45.0,
-            documents_processed_count=total * 18,
-            audit_completion_pct=comp_pct
-        )
+            return KPIMetrics(
+                avg_risk_score=avg_risk,
+                avg_compliance_score=100.0 - avg_risk if avg_risk > 0 else 0.0,
+                documents_processed_count=docs_count,
+                audit_completion_pct=comp_pct
+            )
+        finally:
+            session.close()

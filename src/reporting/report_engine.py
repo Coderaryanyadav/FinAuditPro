@@ -97,10 +97,11 @@ class ReportEngine:
         doc_hash = hashlib.sha256(f"{report_id}:{client_name}:{len(findings)}".encode()).hexdigest()
 
         # 6. QR Verification Payload
+        client_gstin = kwargs.get("gstin", "N/A") if 'kwargs' in locals() else "N/A"
         qr_payload = QRVerificationManager.generate_verification_payload(
             report_id=report_id,
             client_name=client_name,
-            gstin="27AAACB1234F1Z0",
+            gstin=client_gstin,
             document_hash=doc_hash,
             udin=sig.udin
         )

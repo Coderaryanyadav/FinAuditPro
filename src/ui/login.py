@@ -116,16 +116,17 @@ class LoginWindow(QWidget):
             from database.repositories.user_repo import UserRepository
             from services.auth_service import AuthenticationService
             from database.models import User
+            from security.auth import PasswordHasher
 
             session = SessionLocal()
             user_repo = UserRepository(session)
             
-            # Seed admin user if DB is empty
+            # Seed default admin user if DB has 0 users
             if session.query(User).count() == 0:
                 admin_user = User(
                     username="admin",
                     email="admin@finauditpro.com",
-                    password_hash="admin123",
+                    password_hash=PasswordHasher.hash_password("admin123"),
                     role="Audit Partner",
                     is_active=True
                 )

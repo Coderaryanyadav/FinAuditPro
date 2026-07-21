@@ -267,3 +267,9 @@ FROM findings) AS anon_1]
 [2026-07-21 23:24:34] [INFO] [security.audit_trail:69] [SECURITY AUDIT LOG] LOGIN_SUCCESS by admin@finauditpro.com (Audit Partner) | Hash: b47e6fb7e261c4ce...
 [2026-07-21 23:24:34] [INFO] [workflow.workflow_manager:56] Initialized Workflow State for Engagement 1
 [2026-07-21 23:24:34] [WARNING] [document_intelligence.ocr_engine:76] OCR Engine Unavailable - Digital PDF & Document Parser Active (PaddleOCR disabled: No module named 'paddleocr'; Tesseract disabled: No module named 'pytesseract'; EasyOCR disabled: No module named 'easyocr')
+[2026-07-21 23:28:25] [INFO] [root:52] Initialized application logging -> /Users/aryanyadav/Desktop/PROJECTS/Audit/logs/finauditpro.log
+[2026-07-21 23:29:21] [INFO] [security.audit_trail:69] [SECURITY AUDIT LOG] LOGIN_SUCCESS by admin@finauditpro.com (Audit Partner) | Hash: bc163288ebd13f85...
+[2026-07-21 23:29:21] [INFO] [workflow.workflow_manager:56] Initialized Workflow State for Engagement 1
+[2026-07-21 23:29:21] [WARNING] [document_intelligence.ocr_engine:76] OCR Engine Unavailable - Digital PDF & Document Parser Active (PaddleOCR disabled: No module named 'paddleocr'; Tesseract disabled: No module named 'pytesseract'; EasyOCR disabled: No module named 'easyocr')
+[2026-07-21 23:29:24] [INFO] [workflow.workflow_manager:56] Initialized Workflow State for Engagement 3
+[2026-07-21 23:29:26] [INFO] [workflow.workflow_manager:56] Initialized Workflow State for Engagement 2

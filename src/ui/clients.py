@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                                QDialogButtonBox, QFormLayout, QMessageBox)
 from PySide6.QtCore import Qt
 from database.database import SessionLocal
-from database.models import Client, AuditProject
+from database.models import Client, AuditProject, ClientIndustry
 from .styles import apply_shadow
 
 class AddClientDialog(QDialog):
@@ -241,11 +241,20 @@ class ClientManagementWidget(QWidget):
             name = dialog.name_input.text().strip()
             if not name: return
             
+            ind_text = dialog.industry_input.text().strip()
+            ind_obj = None
+            if ind_text:
+                ind_obj = self.session.query(ClientIndustry).filter_by(industry_name=ind_text).first()
+                if not ind_obj:
+                    ind_obj = ClientIndustry(industry_name=ind_text)
+                    self.session.add(ind_obj)
+                    self.session.flush()
+
             new_client = Client(
                 name=name,
                 gst_number=dialog.gst_input.text().strip() or None,
                 pan_number=dialog.pan_input.text().strip() or None,
-                industry=dialog.industry_input.text().strip() or None
+                industry_rel=ind_obj
             )
             self.session.add(new_client)
             self.session.commit()
@@ -272,7 +281,18 @@ class ClientManagementWidget(QWidget):
             client.name = dialog.name_input.text().strip()
             client.gst_number = dialog.gst_input.text().strip() or None
             client.pan_number = dialog.pan_input.text().strip() or None
-            client.industry = dialog.industry_input.text().strip() or None
+            
+            ind_text = dialog.industry_input.text().strip()
+            if ind_text:
+                ind_obj = self.session.query(ClientIndustry).filter_by(industry_name=ind_text).first()
+                if not ind_obj:
+                    ind_obj = ClientIndustry(industry_name=ind_text)
+                    self.session.add(ind_obj)
+                    self.session.flush()
+                client.industry_rel = ind_obj
+            else:
+                client.industry_rel = None
+
             self.session.commit()
             self.load_clients()
             self.header_lbl.setText(client.name)

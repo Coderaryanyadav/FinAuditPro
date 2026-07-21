@@ -63,8 +63,17 @@ class Client(Base):
             self.industry_rel = value
             self._temp_industry = value.industry_name
         elif isinstance(value, str) and value.strip():
-            self._temp_industry = value.strip()
-            self.industry_rel = ClientIndustry(industry_name=value.strip())
+            val_str = value.strip()
+            self._temp_industry = val_str
+            sess = object_session(self)
+            if sess:
+                existing = sess.query(ClientIndustry).filter_by(industry_name=val_str).first()
+                if existing:
+                    self.industry_rel = existing
+                else:
+                    self.industry_rel = ClientIndustry(industry_name=val_str)
+            else:
+                self.industry_rel = ClientIndustry(industry_name=val_str)
         else:
             self.industry_rel = None
             self._temp_industry = None

@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinAuditPro - Dashboard</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        },
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.03)',
+                        'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* Slate 100 */
+            overflow: hidden; /* Prevent body scroll, handle inside layout */
+        }
+
+        /* Custom Enterprise Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Nav Item Transition */
+        .nav-item {
+            transition: all 0.2s ease;
+        }
+
+        /* Card Hover Effects */
+        .stat-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Circular Progress */
+        .circular-chart {
+            display: block;
+            margin: 0 auto;
+            max-width: 80%;
+            max-height: 250px;
+        }
+        .circle-bg {
+            fill: none;
+            stroke: #e2e8f0;
+            stroke-width: 3.8;
+        }
+        .circle {
+            fill: none;
+            stroke-width: 2.8;
+            stroke-linecap: round;
+            animation: progress 1s ease-out forwards;
+        }
+        @keyframes progress {
+            0% { stroke-dasharray: 0 100; }
+        }
+        .percentage {
+            fill: #334155;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.5em;
+            text-anchor: middle;
+        }
+        .percentage-label {
+            fill: #64748b;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.15em;
+            text-anchor: middle;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased h-screen w-screen flex">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="w-[260px] bg-white border-r border-slate-200 flex flex-col h-full z-20 flex-shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+        
+        <!-- Logo Area -->
+        <div class="h-20 flex flex-col justify-center px-6 border-b border-slate-100">
+            <div class="flex items-center space-x-2">
+                <svg width="28" height="28" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M60 5L100 20V55C100 82.5 83.5 107 60 115C36.5 107 20 82.5 20 55V20L60 5Z" fill="#0EA5E9" fill-opacity="0.1"/>
+                    <path d="M60 5L100 20V55C100 82.5 83.5 107 60 115C36.5 107 20 82.5 20 55V20L60 5Z" stroke="#0EA5E9" stroke-width="8" stroke-linejoin="round"/>
+                    <rect x="42" y="70" width="8" height="20" rx="2" fill="#0ea5e9"/>
+                    <rect x="56" y="55" width="8" height="35" rx="2" fill="#0369a1"/>
+                    <rect x="70" y="40" width="8" height="50" rx="2" fill="#0c4a6e"/>
+                </svg>
+                <span class="text-xl font-bold tracking-tight text-slate-900">FinAudit<span class="text-brand-600 font-light">Pro</span></span>
+            </div>
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-medium mt-1 ml-9">Smart Audit Assistant</span>
+        </div>
+
+        <!-- Navigation Menu -->
+        <div class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-2">Main Menu</p>
+            
+            <!-- Active Item -->
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 bg-brand-50 text-brand-700 rounded-lg border-l-4 border-brand-600 relative group">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                <span class="font-medium text-sm">Dashboard</span>
+            </a>
+
+            <!-- Other Items -->
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <span class="font-medium text-sm">Client Management</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                <span class="font-medium text-sm">Upload Documents</span>
+            </a>
+
+            <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-6">Audit Workspace</p>
+
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group">
+                <svg class="w-5 h-5 mr-3 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                <span class="font-medium text-sm">AI Audit Analysis</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span class="font-medium text-sm">Financial Statements</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span class="font-medium text-sm">GST Verification</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                <span class="font-medium text-sm">Compliance Monitoring</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <span class="font-medium text-sm">Risk Analysis</span>
+            </a>
+
+            <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-6">Settings & Logs</p>
+
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span class="font-medium text-sm">Reports</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span class="font-medium text-sm">Audit History</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span class="font-medium text-sm">Settings</span>
+            </a>
+        </div>
+
+        <!-- User Profile Card (Bottom Sidebar) -->
+        <div class="p-4 border-t border-slate-200 bg-slate-50/50">
+            <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer border border-transparent hover:border-slate-200">
+                <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-bold border border-brand-200">
+                    CA
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-slate-900 truncate">CA User</p>
+                    <p class="text-xs text-slate-500 truncate">Chartered Accountant</p>
+                </div>
+                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50">
+        
+        <!-- Header -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-8 shadow-sm z-10 flex-shrink-0">
+            <!-- Search Bar -->
+            <div class="max-w-md w-full relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-slate-400 group-focus-within:text-brand-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                <input type="text" class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 sm:text-sm transition-all" placeholder="Search clients, reports, documents...">
+            </div>
+
+            <!-- Right Header Icons -->
+            <div class="flex items-center space-x-4">
+                <!-- Theme Toggle -->
+                <button class="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+                
+                <!-- Help -->
+                <button class="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </button>
+
+                <!-- Notifications -->
+                <button class="relative text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                    <!-- Notification Dot -->
+                    <span class="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+                </button>
+
+                <!-- Divider -->
+                <div class="h-6 w-px bg-slate-200 mx-2"></div>
+
+                <!-- Small Profile Avatar -->
+                <button class="flex items-center focus:outline-none">
+                    <div class="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold ring-2 ring-white shadow-sm">
+                        CA
+                    </div>
+                </button>
+            </div>
+        </header>
+
+        <!-- SCROLLABLE DASHBOARD CONTENT -->
+        <div class="flex-1 overflow-y-auto p-6 lg:p-8">
+            
+            <!-- Welcome Header -->
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Good Morning, Auditor</h1>
+                <p class="text-slate-500 mt-1">Here is your audit overview for today.</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                
+                <!-- Stat 1: Total Clients -->
+                <div class="bg-white rounded-xl border border-slate-200 p-5 stat-card shadow-soft relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-16 h-16 bg-blue-50 rounded-bl-full flex items-center justify-center -mr-2 -mt-2">
+                        <svg class="w-6 h-6 text-blue-500 mr-2 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                    <p class="text-sm font-medium text-slate-500">Total Clients</p>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <p class="text-3xl font-bold text-slate-900">150</p>
+                        <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">+12%</span>
+                    </div>
+                </div>
+
+                <!-- Stat 2: Completed Audits -->
+                <div class="bg-white rounded-xl border border-slate-200 p-5 stat-card shadow-soft relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-16 h-16 bg-emerald-50 rounded-bl-full flex items-center justify-center -mr-2 -mt-2">
+                        <svg class="w-6 h-6 text-emerald-500 mr-2 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                    </div>
+                    <p class="text-sm font-medium text-slate-500">Completed Audits</p>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <p class="text-3xl font-bold text-slate-900">98</p>
+                        <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">This Year</span>
+                    </div>
+                </div>
+
+                <!-- Stat 3: Pending Reviews -->
+                <div class="bg-white rounded-xl border border-slate-200 p-5 stat-card shadow-soft relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-16 h-16 bg-amber-50 rounded-bl-full flex items-center justify-center -mr-2 -mt-2">
+                        <svg class="w-6 h-6 text-amber-500 mr-2 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <p class="text-sm font-medium text-slate-500">Pending Reviews</p>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <p class="text-3xl font-bold text-slate-900">12</p>
+                        <span class="text-xs font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">Action Req.</span>
+                    </div>
+                </div>
+
+                <!-- Stat 4: High Risk Cases -->
+                <div class="bg-white rounded-xl border border-slate-200 p-5 stat-card shadow-soft relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-16 h-16 bg-red-50 rounded-bl-full flex items-center justify-center -mr-2 -mt-2">
+                        <svg class="w-6 h-6 text-red-500 mr-2 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <p class="text-sm font-medium text-slate-500">High Risk Cases</p>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <p class="text-3xl font-bold text-red-600">5</p>
+                        <span class="text-xs font-medium text-slate-500">Flagged by AI</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Section Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+                
+                <!-- Left: AI Audit Summary (Scores) -->
+                <div class="col-span-1 lg:col-span-4 bg-white border border-slate-200 rounded-xl shadow-soft flex flex-col">
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                        <h2 class="text-base font-semibold text-slate-800 flex items-center">
+                            <svg class="w-5 h-5 text-brand-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            AI Audit Summary
+                        </h2>
+                    </div>
+                    
+                    <div class="p-5 flex-1 flex flex-col justify-center space-y-6">
+                        
+                        <!-- Overall Portfolio Risk Score -->
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-slate-500">Portfolio Risk Score</p>
+                                <p class="text-xs text-slate-400 mt-1">Lower is better</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-2xl font-bold text-emerald-600">24/100</span>
+                                <p class="text-xs font-medium text-emerald-600 mt-1">Low Risk</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Bar for Risk -->
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div class="bg-emerald-500 h-2 rounded-full" style="width: 24%"></div>
+                        </div>
+
+                        <hr class="border-slate-100">
+
+                        <!-- Overall Compliance Score -->
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-slate-500">Compliance Score</p>
+                                <p class="text-xs text-slate-400 mt-1">Higher is better</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-2xl font-bold text-brand-600">92%</span>
+                                <p class="text-xs font-medium text-brand-600 mt-1">Excellent</p>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar for Compliance -->
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div class="bg-brand-500 h-2 rounded-full" style="width: 92%"></div>
+                        </div>
+
+                    </div>
+
+                    <!-- Recent AI Findings Teaser -->
+                    <div class="p-4 bg-slate-50 rounded-b-xl border-t border-slate-100">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Recent AI Findings</p>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 flex items-center justify-center mt-0.5">
+                                    <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                </div>
+                                <p class="ml-3 text-sm text-slate-600"><span class="font-medium text-slate-800">TechCorp Ltd.</span> - GST Mismatch detected in Q3 filings.</p>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center mt-0.5">
+                                    <svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                </div>
+                                <p class="ml-3 text-sm text-slate-600"><span class="font-medium text-slate-800">Global Impex</span> - Unusual expense spike in marketing.</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Center: Audit Progress Graph -->
+                <div class="col-span-1 lg:col-span-5 bg-white border border-slate-200 rounded-xl shadow-soft">
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                        <h2 class="text-base font-semibold text-slate-800">Audit Progress</h2>
+                        <select class="text-sm border-none bg-transparent text-slate-500 focus:ring-0 cursor-pointer outline-none">
+                            <option>Last 6 Months</option>
+                            <option>This Year</option>
+                        </select>
+                    </div>
+                    <div class="p-5 h-[300px] w-full relative">
+                        <!-- Chart Canvas -->
+                        <canvas id="auditProgressChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Right: Risk Distribution Chart -->
+                <div class="col-span-1 lg:col-span-3 bg-white border border-slate-200 rounded-xl shadow-soft">
+                    <div class="p-5 border-b border-slate-100">
+                        <h2 class="text-base font-semibold text-slate-800">Risk Distribution</h2>
+                    </div>
+                    <div class="p-5 h-[300px] flex flex-col items-center justify-center relative">
+                        <!-- Doughnut Chart Canvas -->
+                        <div class="w-full h-full relative">
+                            <canvas id="riskDistributionChart"></canvas>
+                            <!-- Inner Text for Doughnut -->
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <span class="text-3xl font-bold text-slate-800">150</span>
+                                <span class="text-xs text-slate-500">Total Audits</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Section: Data Table -->
+            <div class="bg-white border border-slate-200 rounded-xl shadow-soft mb-8">
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                    <h2 class="text-base font-semibold text-slate-800">Recent Audit Projects</h2>
+                    <button class="text-sm font-medium text-brand-600 hover:text-brand-700">View All</button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Client Name</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Audit Type</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Risk Level</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Last Updated</th>
+                                <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200">
+                            
+                            <!-- Row 1 -->
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-8 w-8 rounded bg-brand-100 flex items-center justify-center text-brand-700 font-bold text-xs">
+                                            TC
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-slate-900">TechCorp Solutions</div>
+                                            <div class="text-xs text-slate-500">ID: AUD-2026-089</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-slate-900">Statutory Audit</div>
+                                    <div class="text-xs text-slate-500">FY 2025-26</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        In Progress
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center text-sm text-slate-900">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></div>
+                                        Low
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                    Today, 10:24 AM
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="#" class="text-brand-600 hover:text-brand-900">Review</a>
+                                </td>
+                            </tr>
+
+                            <!-- Row 2 -->
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-8 w-8 rounded bg-purple-100 flex items-center justify-center text-purple-700 font-bold text-xs">
+                                            GI
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-slate-900">Global Impex Ltd.</div>
+                                            <div class="text-xs text-slate-500">ID: AUD-2026-090</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-slate-900">Tax Audit</div>
+                                    <div class="text-xs text-slate-500">FY 2025-26</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">
+                                        Pending Review
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center text-sm text-slate-900">
+                                        <div class="w-2 h-2 rounded-full bg-amber-500 mr-2"></div>
+                                        Medium
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                    Yesterday, 04:15 PM
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="#" class="text-brand-600 hover:text-brand-900">Review</a>
+                                </td>
+                            </tr>
+
+                            <!-- Row 3 -->
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-8 w-8 rounded bg-rose-100 flex items-center justify-center text-rose-700 font-bold text-xs">
+                                            MM
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-slate-900">Mega Mart Retail</div>
+                                            <div class="text-xs text-slate-500">ID: AUD-2026-085</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-slate-900">Internal Audit</div>
+                                    <div class="text-xs text-slate-500">Q2 2026</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800">
+                                        Completed
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center text-sm text-slate-900">
+                                        <div class="w-2 h-2 rounded-full bg-red-500 mr-2 animate-pulse"></div>
+                                        High
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                    Jul 12, 2026
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="#" class="text-slate-400 hover:text-slate-600">Report</a>
+                                </td>
+                            </tr>
+                            
+                            <!-- Row 4 -->
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-8 w-8 rounded bg-slate-200 flex items-center justify-center text-slate-700 font-bold text-xs">
+                                            SN
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-slate-900">Sunrise Networks</div>
+                                            <div class="text-xs text-slate-500">ID: AUD-2026-092</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-slate-900">GST Compliance</div>
+                                    <div class="text-xs text-slate-500">Annual</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800">
+                                        Not Started
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center text-sm text-slate-900">
+                                        <div class="w-2 h-2 rounded-full bg-slate-300 mr-2"></div>
+                                        Unknown
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                    --
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="#" class="text-brand-600 hover:text-brand-900">Start AI Scan</a>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Footer minimal -->
+            <div class="text-center pb-6">
+                <p class="text-xs text-slate-400">FinAuditPro Desktop Client v1.0.42 • Secure Connection Established</p>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Common Chart.js Settings for Enterprise look
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.color = '#64748b'; // slate-500
+            
+            // 1. Audit Progress Line Chart
+            const progressCtx = document.getElementById('auditProgressChart').getContext('2d');
+            
+            // Create gradient for line chart
+            let gradient = progressCtx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(14, 165, 233, 0.2)'); // brand-500
+            gradient.addColorStop(1, 'rgba(14, 165, 233, 0)');
+
+            new Chart(progressCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Completed Audits',
+                        data: [12, 19, 15, 25, 22, 30],
+                        borderColor: '#0ea5e9', // brand-500
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#0ea5e9',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.4 // smooth curves
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false // Hide legend for cleaner look
+                        },
+                        tooltip: {
+                            backgroundColor: '#1e293b', // slate-800
+                            padding: 10,
+                            cornerRadius: 4,
+                            displayColors: false,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#f1f5f9', // slate-100
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                padding: 10
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                padding: 10
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    },
+                }
+            });
+
+            // 2. Risk Distribution Doughnut Chart
+            const riskCtx = document.getElementById('riskDistributionChart').getContext('2d');
+            new Chart(riskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Low Risk', 'Medium Risk', 'High Risk'],
+                    datasets: [{
+                        data: [95, 45, 10], // Example distribution out of 150
+                        backgroundColor: [
+                            '#10b981', // emerald-500 (Low)
+                            '#f59e0b', // amber-500 (Medium)
+                            '#ef4444'  // red-500 (High)
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%', // Make it thin and elegant
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            padding: 10,
+                            cornerRadius: 4,
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

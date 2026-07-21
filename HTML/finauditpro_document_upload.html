@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinAuditPro - Upload Documents</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        },
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.03)',
+                        'card-hover': '0 10px 25px -5px rgba(0, 0, 0, 0.08)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            overflow: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Drag and Drop Active State */
+        .drag-active {
+            border-color: #0ea5e9 !important;
+            background-color: #f0f9ff !important;
+        }
+        
+        /* Pulse animation for active processing steps */
+        @keyframes subtle-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(14, 165, 233, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+        }
+        .processing-pulse {
+            animation: subtle-pulse 2s infinite;
+        }
+
+        /* File Card Hover Transition */
+        .file-card {
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        .file-card:hover {
+            border-color: #e2e8f0;
+            background-color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased h-screen w-screen flex">
+
+    <!-- LEFT SIDEBAR (Reused Structure) -->
+    <aside class="w-[260px] bg-white border-r border-slate-200 flex flex-col h-full z-20 flex-shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+        <div class="h-16 flex flex-col justify-center px-6 border-b border-slate-100">
+            <div class="flex items-center space-x-2">
+                <svg width="24" height="24" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M60 5L100 20V55C100 82.5 83.5 107 60 115C36.5 107 20 82.5 20 55V20L60 5Z" fill="#0EA5E9" fill-opacity="0.1"/>
+                    <path d="M60 5L100 20V55C100 82.5 83.5 107 60 115C36.5 107 20 82.5 20 55V20L60 5Z" stroke="#0EA5E9" stroke-width="8" stroke-linejoin="round"/>
+                    <rect x="42" y="70" width="8" height="20" rx="2" fill="#0ea5e9"/>
+                    <rect x="56" y="55" width="8" height="35" rx="2" fill="#0369a1"/>
+                    <rect x="70" y="40" width="8" height="50" rx="2" fill="#0c4a6e"/>
+                </svg>
+                <span class="text-lg font-bold tracking-tight text-slate-900">FinAudit<span class="text-brand-600 font-light">Pro</span></span>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Main Menu</p>
+            
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group transition-colors">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                <span class="font-medium text-sm">Dashboard</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group transition-colors">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <span class="font-medium text-sm">Client Management</span>
+            </a>
+
+            <!-- Active Item: Upload Documents -->
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 bg-brand-50 text-brand-700 rounded-lg border-l-4 border-brand-600 relative group transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                <span class="font-medium text-sm">Upload Documents</span>
+            </a>
+
+            <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-6">Audit Workspace</p>
+
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group transition-colors">
+                <svg class="w-5 h-5 mr-3 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                <span class="font-medium text-sm">AI Audit Analysis</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group transition-colors">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span class="font-medium text-sm">Reports</span>
+            </a>
+        </div>
+
+        <div class="p-4 border-t border-slate-200 bg-slate-50/50">
+            <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-slate-100 cursor-pointer">
+                <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-bold border border-brand-200">CA</div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-slate-900 truncate">CA User</p>
+                    <p class="text-xs text-slate-500 truncate">Chartered Accountant</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50">
+        
+        <!-- TOP HEADER -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shadow-sm z-10 flex-shrink-0">
+            <div class="flex items-center text-sm text-slate-500">
+                <span class="font-medium text-slate-900">Workspace</span>
+                <span class="mx-2">/</span>
+                <span class="font-medium text-brand-600">Upload Documents</span>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <button class="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                </button>
+                <div class="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">CA</div>
+            </div>
+        </header>
+
+        <!-- CONTENT AREA (Split into Main Upload and Right AI Panel) -->
+        <main class="flex-1 flex overflow-hidden">
+            
+            <!-- LEFT AREA: Upload Controls & Recent Files -->
+            <div class="flex-1 flex flex-col overflow-y-auto p-6 lg:p-8">
+                
+                <!-- Page Title & Actions -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-900">Upload Financial Documents</h1>
+                        <p class="text-sm text-slate-500 mt-1">Upload client records for secure AI-driven audit analysis.</p>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3">
+                        <button class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 shadow-sm flex items-center transition-colors">
+                            <svg class="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                            Scan Folder
+                        </button>
+                        <button class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 shadow-sm flex items-center transition-colors">
+                            <svg class="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                            Import Data
+                        </button>
+                        <button class="px-4 py-2 bg-brand-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-brand-700 shadow-sm flex items-center transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            Upload Files
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Drag & Drop Zone -->
+                <div id="dropzone" class="w-full bg-white border-2 border-dashed border-slate-300 rounded-2xl p-12 flex flex-col items-center justify-center transition-all duration-200 hover:bg-brand-50/50 hover:border-brand-400 cursor-pointer shadow-sm mb-8 relative overflow-hidden group">
+                    
+                    <!-- Decorative background elements -->
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50/50 pointer-events-none"></div>
+                    
+                    <!-- Icon -->
+                    <div class="w-20 h-20 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-inner">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Drag and Drop Files Here</h3>
+                    <p class="text-slate-500 text-sm mb-6 text-center max-w-md">Drag your client financial documents directly into this area, or click the button below to browse your computer.</p>
+                    
+                    <div class="flex items-center space-x-2 text-xs font-medium text-slate-400 mb-6 bg-slate-100 px-4 py-2 rounded-full">
+                        <span>Supported formats:</span>
+                        <span class="px-1.5 py-0.5 rounded text-red-600 bg-red-100/50">PDF</span>
+                        <span class="px-1.5 py-0.5 rounded text-green-600 bg-green-100/50">Excel</span>
+                        <span class="px-1.5 py-0.5 rounded text-purple-600 bg-purple-100/50">CSV</span>
+                        <span class="px-1.5 py-0.5 rounded text-blue-600 bg-blue-100/50">Images</span>
+                    </div>
+
+                    <button class="px-6 py-2.5 bg-white border-2 border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:border-brand-300 hover:text-brand-600 shadow-sm transition-all z-10">
+                        Browse Files
+                    </button>
+                    
+                    <!-- Hidden file input for actual functionality -->
+                    <input type="file" multiple class="hidden" id="fileInput">
+                </div>
+
+                <!-- Recent Uploads Section -->
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-bold text-slate-800">Recent Uploads</h2>
+                        <button class="text-sm text-brand-600 hover:text-brand-700 font-medium">View All History</button>
+                    </div>
+
+                    <!-- File List -->
+                    <div class="space-y-3">
+                        
+                        <!-- File Card 1: Completed -->
+                        <div class="file-card bg-slate-50/50 rounded-xl p-4 flex items-center justify-between group">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-10 h-10 rounded-lg bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0 border border-green-200">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-slate-900 group-hover:text-brand-600 transition-colors cursor-pointer">FY25_Trial_Balance.xlsx</h4>
+                                    <div class="flex items-center text-xs text-slate-500 mt-1 space-x-3">
+                                        <span>Excel Spreadsheet</span>
+                                        <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                        <span>2.4 MB</span>
+                                        <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                        <span>Today, 09:41 AM</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-md bg-green-50 text-green-700 border border-green-200 flex items-center">
+                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    Completed
+                                </span>
+                                <button class="text-slate-400 hover:text-slate-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg></button>
+                            </div>
+                        </div>
+
+                        <!-- File Card 2: Processing (Active linking to right panel) -->
+                        <div class="file-card bg-white border-brand-200 rounded-xl p-4 flex items-center justify-between group shadow-sm ring-1 ring-brand-100 relative overflow-hidden">
+                            <!-- Subtle progress background -->
+                            <div class="absolute left-0 bottom-0 h-1 bg-amber-400 w-[45%]"></div>
+                            
+                            <div class="flex items-center space-x-4 relative z-10">
+                                <div class="w-10 h-10 rounded-lg bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0 border border-red-200">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-slate-900 group-hover:text-brand-600 transition-colors cursor-pointer">Q2_Bank_Statements_Merged.pdf</h4>
+                                    <div class="flex items-center text-xs text-slate-500 mt-1 space-x-3">
+                                        <span>PDF Document</span>
+                                        <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                        <span>14.8 MB</span>
+                                        <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                        <span>Just now</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4 relative z-10">
+                                <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-md bg-amber-50 text-amber-700 border border-amber-200 flex items-center">
+                                    <svg class="w-3.5 h-3.5 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                    Processing (45%)
+                                </span>
+                                <button class="text-slate-400 hover:text-slate-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg></button>
+                            </div>
+                        </div>
+
+                        <!-- File Card 3: Uploaded (Queued) -->
+                        <div class="file-card bg-slate-50/50 rounded-xl p-4 flex items-center justify-between group">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 border border-blue-200">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-slate-900 group-hover:text-brand-600 transition-colors cursor-pointer">Invoices_Scan_Batch1.jpeg</h4>
+                                    <div class="flex items-center text-xs text-slate-500 mt-1 space-x-3">
+                                        <span>Image File</span>
+                                        <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                        <span>3.1 MB</span>
+                                        <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                        <span>2 mins ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-md bg-blue-50 text-blue-700 border border-blue-200 flex items-center">
+                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                    Uploaded
+                                </span>
+                                <button class="text-slate-400 hover:text-slate-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg></button>
+                            </div>
+                        </div>
+
+                        <!-- File Card 4: Failed -->
+                        <div class="file-card bg-slate-50/50 rounded-xl p-4 flex items-center justify-between group">
+                            <div class="flex items-center space-x-4 opacity-70">
+                                <div class="w-10 h-10 rounded-lg bg-slate-200 text-slate-500 flex items-center justify-center flex-shrink-0 border border-slate-300">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-slate-900 line-through">Corrupt_Data_Export.csv</h4>
+                                    <div class="flex items-center text-xs text-slate-500 mt-1 space-x-3">
+                                        <span>CSV File</span>
+                                        <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                        <span>0.8 MB</span>
+                                        <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                        <span>Yesterday</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-md bg-red-50 text-red-700 border border-red-200 flex items-center">
+                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    Failed
+                                </span>
+                                <button class="text-slate-400 hover:text-slate-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT AREA: AI Processing Information Panel -->
+            <aside class="w-[340px] bg-white border-l border-slate-200 flex-shrink-0 flex flex-col h-full shadow-[-4px_0_24px_rgba(0,0,0,0.02)] z-10 hidden xl:flex">
+                
+                <!-- Panel Header -->
+                <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+                    <h2 class="text-sm font-bold text-slate-900 flex items-center tracking-wide uppercase">
+                        <svg class="w-4 h-4 mr-2 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        AI Processing Pipeline
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-2">Currently tracking processing status for <span class="font-semibold text-slate-700">Q2_Bank_Statements_Merged.pdf</span></p>
+                </div>
+
+                <!-- Scrollable Pipeline Details -->
+                <div class="flex-1 overflow-y-auto p-6">
+                    
+                    <!-- Vertical Stepper -->
+                    <div class="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+                        
+                        <!-- Step 1: Upload & Ingestion (Completed) -->
+                        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 border-2 border-white shadow shrink-0 text-green-600 relative z-10">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-slate-100 bg-white shadow-sm ml-4 md:ml-0 md:mr-4 text-right">
+                                <h3 class="font-bold text-slate-900 text-sm">File Ingestion</h3>
+                                <p class="text-xs text-slate-500 mt-1">Virus scan passed, format validated, and securely encrypted.</p>
+                                <span class="text-[10px] font-semibold text-green-600 mt-2 block">09:42 AM</span>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: OCR Detection (Active/Processing) -->
+                        <div class="relative flex items-center justify-between md:justify-normal group is-active">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-brand-50 border-2 border-brand-500 shadow shrink-0 text-brand-600 relative z-10 processing-pulse">
+                                <svg class="w-5 h-5 animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            </div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-brand-200 bg-brand-50/30 shadow-sm ml-4">
+                                <h3 class="font-bold text-brand-700 text-sm">OCR Detection</h3>
+                                <p class="text-xs text-brand-600 mt-1">Scanning 42 pages for text, tables, and financial signatures.</p>
+                                <div class="w-full bg-slate-200 rounded-full h-1 mt-3">
+                                    <div class="bg-brand-500 h-1 rounded-full w-[45%]"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Data Extraction (Pending) -->
+                        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 border-2 border-white shadow shrink-0 text-slate-400 relative z-10">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                            </div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-slate-100 bg-slate-50 shadow-sm ml-4 md:ml-0 md:mr-4 text-right opacity-60">
+                                <h3 class="font-bold text-slate-700 text-sm">Data Extraction</h3>
+                                <p class="text-xs text-slate-500 mt-1">Parsing line items, dates, and amounts into structured formats.</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Validation (Pending) -->
+                        <div class="relative flex items-center justify-between md:justify-normal group">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 border-2 border-white shadow shrink-0 text-slate-400 relative z-10">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            </div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-slate-100 bg-slate-50 shadow-sm ml-4 opacity-60">
+                                <h3 class="font-bold text-slate-700 text-sm">Validation</h3>
+                                <p class="text-xs text-slate-500 mt-1">Cross-referencing totals against historical ledgers.</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 5: Analysis (Pending) -->
+                        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 border-2 border-white shadow shrink-0 text-slate-400 relative z-10">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            </div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-slate-100 bg-slate-50 shadow-sm ml-4 md:ml-0 md:mr-4 text-right opacity-60">
+                                <h3 class="font-bold text-slate-700 text-sm">Audit Analysis</h3>
+                                <p class="text-xs text-slate-500 mt-1">Generating anomaly reports and compliance scoring.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Panel Footer Action -->
+                <div class="p-4 border-t border-slate-100 bg-white">
+                    <button class="w-full flex items-center justify-center py-2 px-4 border border-slate-300 rounded-lg shadow-sm text-xs font-medium text-slate-600 bg-white hover:bg-slate-50 transition-colors">
+                        View Detailed Log
+                    </button>
+                </div>
+
+            </aside>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropzone = document.getElementById('dropzone');
+            const fileInput = document.getElementById('fileInput');
+
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            // Highlight dropzone when item is dragged over it
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                dropzone.classList.add('drag-active');
+            }
+
+            function unhighlight(e) {
+                dropzone.classList.remove('drag-active');
+            }
+
+            // Handle dropped files
+            dropzone.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                let dt = e.dataTransfer;
+                let files = dt.files;
+                handleFiles(files);
+            }
+            
+            // Allow clicking the dropzone to open file dialog
+            dropzone.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', function() {
+                handleFiles(this.files);
+            });
+
+            function handleFiles(files) {
+                if(files.length > 0) {
+                    // In a real application, this would trigger an upload progress UI update
+                    // and send the files to the server.
+                    console.log(`Detected ${files.length} files to upload.`);
+                    
+                    // Simple visual feedback for the demo
+                    const btn = dropzone.querySelector('button');
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Preparing Upload...';
+                    btn.classList.add('bg-brand-50', 'text-brand-600', 'border-brand-300');
+                    
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.classList.remove('bg-brand-50', 'text-brand-600', 'border-brand-300');
+                        // Ideally, add new file cards to the "Recent Uploads" list here.
+                    }, 1500);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

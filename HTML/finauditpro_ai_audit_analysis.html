@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinAuditPro - AI Audit Analysis</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        },
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.03)',
+                        'glow': '0 0 15px rgba(14, 165, 233, 0.3)',
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'typing': 'typing 1.5s infinite ease-in-out',
+                    },
+                    keyframes: {
+                        typing: {
+                            '0%, 100%': { transform: 'translateY(0)', opacity: '0.5' },
+                            '50%': { transform: 'translateY(-3px)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            overflow: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Mock Document Overlay Boxes */
+        .highlight-box {
+            position: absolute;
+            border: 2px solid rgba(239, 68, 68, 0.5); /* Red for anomaly */
+            background-color: rgba(239, 68, 68, 0.1);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .highlight-box:hover, .highlight-box.active {
+            border-color: rgba(239, 68, 68, 1);
+            background-color: rgba(239, 68, 68, 0.2);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+        }
+        
+        .highlight-box.warning {
+            border-color: rgba(245, 158, 11, 0.5); /* Amber */
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+        .highlight-box.warning:hover, .highlight-box.warning.active {
+            border-color: rgba(245, 158, 11, 1);
+            background-color: rgba(245, 158, 11, 0.2);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Finding Card Hover */
+        .finding-card {
+            transition: all 0.2s ease;
+            transform: translateY(0);
+        }
+        .finding-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .typing-dot {
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased h-screen w-screen flex">
+
+    <aside class="w-[260px] bg-white border-r border-slate-200 flex flex-col h-full z-20 flex-shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+        <div class="h-16 flex flex-col justify-center px-6 border-b border-slate-100">
+            <div class="flex items-center space-x-2">
+                <svg width="24" height="24" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M60 5L100 20V55C100 82.5 83.5 107 60 115C36.5 107 20 82.5 20 55V20L60 5Z" fill="#0EA5E9" fill-opacity="0.1"/>
+                    <path d="M60 5L100 20V55C100 82.5 83.5 107 60 115C36.5 107 20 82.5 20 55V20L60 5Z" stroke="#0EA5E9" stroke-width="8" stroke-linejoin="round"/>
+                    <rect x="42" y="70" width="8" height="20" rx="2" fill="#0ea5e9"/>
+                    <rect x="56" y="55" width="8" height="35" rx="2" fill="#0369a1"/>
+                    <rect x="70" y="40" width="8" height="50" rx="2" fill="#0c4a6e"/>
+                </svg>
+                <span class="text-lg font-bold tracking-tight text-slate-900">FinAudit<span class="text-brand-600 font-light">Pro</span></span>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Main Menu</p>
+            
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group transition-colors">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                <span class="font-medium text-sm">Dashboard</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group transition-colors">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <span class="font-medium text-sm">Client Management</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group transition-colors">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                <span class="font-medium text-sm">Upload Documents</span>
+            </a>
+
+            <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-6">Audit Workspace</p>
+
+            <!-- Active Item: AI Audit Analysis -->
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 bg-brand-50 text-brand-700 rounded-lg border-l-4 border-brand-600 relative group transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                <span class="font-medium text-sm">AI Audit Analysis</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group transition-colors">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span class="font-medium text-sm">Reports</span>
+            </a>
+        </div>
+
+        <div class="p-4 border-t border-slate-200 bg-slate-50/50">
+            <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-slate-100 cursor-pointer">
+                <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-bold border border-brand-200">CA</div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-slate-900 truncate">CA User</p>
+                    <p class="text-xs text-slate-500 truncate">Chartered Accountant</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50">
+        
+        <!-- TOP HEADER -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shadow-sm z-10 flex-shrink-0">
+            <div class="flex items-center text-sm text-slate-500">
+                <span class="font-medium text-slate-900">Workspace</span>
+                <span class="mx-2">/</span>
+                <span class="font-medium text-brand-600 flex items-center">
+                    AI Audit Analysis
+                </span>
+                <span class="mx-2">/</span>
+                <span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs font-mono border border-slate-200">TechCorp_Q3_Financials</span>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center px-3 py-1.5 bg-brand-50 text-brand-700 border border-brand-200 rounded-md text-xs font-semibold shadow-glow">
+                    <div class="w-2 h-2 rounded-full bg-brand-500 mr-2 animate-pulse-fast"></div>
+                    AI Engine Active
+                </div>
+                <button class="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- 3-COLUMN LAYOUT -->
+        <main class="flex-1 flex overflow-hidden">
+            
+            <div class="w-[28%] min-w-[320px] bg-slate-100 border-r border-slate-200 flex flex-col shadow-[inset_-4px_0_12px_rgba(0,0,0,0.02)]">
+                <div class="p-3 border-b border-slate-200 bg-white flex justify-between items-center shadow-sm z-10">
+                    <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Source Document
+                    </h2>
+                    <div class="flex space-x-1">
+                        <button class="p-1 text-slate-400 hover:text-slate-700 bg-slate-50 rounded border border-slate-200"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg></button>
+                        <button class="p-1 text-slate-400 hover:text-slate-700 bg-slate-50 rounded border border-slate-200"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path></svg></button>
+                    </div>
+                </div>
+                
+                <div class="flex-1 overflow-auto p-6 flex justify-center relative">
+                    <!-- Simulated Multi-Page Document Container -->
+                    <div class="space-y-6">
+                        
+                        <!-- Page 1 (Simulated Tax Invoice) -->
+                        <div class="w-[280px] h-[380px] bg-white shadow-md rounded-sm border border-slate-200 relative overflow-hidden text-[6px] text-slate-300 font-mono p-4">
+                            <!-- Doc Content Mock -->
+                            <div class="flex justify-between border-b border-slate-200 pb-2 mb-2">
+                                <div class="w-12 h-4 bg-slate-200"></div>
+                                <div class="text-right">INVOICE #INV-402<br>Date: 12-Oct-2025</div>
+                            </div>
+                            <div class="space-y-1 mb-4">
+                                <div class="h-1.5 w-full bg-slate-100"></div>
+                                <div class="h-1.5 w-[90%] bg-slate-100"></div>
+                                <div class="h-1.5 w-[80%] bg-slate-100"></div>
+                            </div>
+                            <table class="w-full text-left border-collapse mb-4">
+                                <tr class="border-b border-slate-200"><th class="pb-1">Item</th><th class="pb-1 text-right">Amt</th></tr>
+                                <tr><td class="py-1">Software License</td><td class="py-1 text-right">$3,000.00</td></tr>
+                                <tr><td class="py-1">Consulting</td><td class="py-1 text-right">$1,500.00</td></tr>
+                                <tr class="border-t border-slate-200"><td class="py-1 font-bold">Subtotal</td><td class="py-1 text-right">$4,500.00</td></tr>
+                                <tr><td class="py-1 text-red-500">Tax (12%)</td><td class="py-1 text-right text-red-500">$540.00</td></tr>
+                                <tr class="border-t border-slate-200 font-bold text-[7px] text-slate-800"><td class="py-1">Total</td><td class="py-1 text-right">$5,040.00</td></tr>
+                            </table>
+
+                            <!-- AI Anomaly Highlight Box 1 (Incorrect Tax) -->
+                            <div class="highlight-box" style="top: 245px; left: 10px; width: 260px; height: 25px;" title="Tax Calculation Anomaly"></div>
+                        </div>
+
+                        <!-- Page 2 (Simulated General Ledger) -->
+                        <div class="w-[280px] h-[380px] bg-white shadow-md rounded-sm border border-slate-200 relative overflow-hidden text-[6px] text-slate-300 font-mono p-4">
+                            <div class="text-center font-bold text-slate-500 mb-2 border-b border-slate-200 pb-1">GENERAL LEDGER EXTRACT</div>
+                            <table class="w-full text-left border-collapse">
+                                <tr class="border-b border-slate-200"><th class="pb-1">Date</th><th class="pb-1">Ref</th><th class="pb-1 text-right">Debit</th></tr>
+                                <tr><td class="py-1">11-Oct</td><td class="py-1">JE-40920</td><td class="py-1 text-right">$1,200.00</td></tr>
+                                <tr><td class="py-1 text-amber-500">12-Oct</td><td class="py-1 text-amber-500">JE-40921</td><td class="py-1 text-right text-amber-500">$4,500.00</td></tr>
+                                <tr><td class="py-1 text-amber-500">12-Oct</td><td class="py-1 text-amber-500">JE-40921</td><td class="py-1 text-right text-amber-500">$4,500.00</td></tr>
+                                <tr><td class="py-1 text-purple-500">14-Oct</td><td class="py-1 text-purple-500">JE-40988</td><td class="py-1 text-right text-purple-500">$12,000.00</td></tr>
+                            </table>
+
+                            <!-- AI Anomaly Highlight Box 2 (Duplicate) -->
+                            <div class="highlight-box warning" style="top: 60px; left: 10px; width: 260px; height: 35px;" title="Duplicate Transaction"></div>
+                            
+                            <!-- AI Anomaly Highlight Box 3 (Suspicious Entry) -->
+                            <div class="highlight-box border-purple-500 bg-purple-500/10" style="top: 105px; left: 10px; width: 260px; height: 20px;" title="Suspicious Entry"></div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-[37%] min-w-[380px] bg-white border-r border-slate-200 flex flex-col relative">
+                
+                <!-- Chat Header -->
+                <div class="p-4 border-b border-slate-100 flex items-center justify-between shadow-sm z-10 bg-white/95 backdrop-blur">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center mr-3 shadow-inner border border-brand-200">
+                            <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-800">FinAudit Copilot</h2>
+                            <p class="text-[10px] text-slate-500 uppercase tracking-wider">Enterprise Audit Model v4.2</p>
+                        </div>
+                    </div>
+                    <button class="text-xs text-brand-600 hover:text-brand-800 font-medium flex items-center">
+                        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        Restart
+                    </button>
+                </div>
+
+                <!-- Chat Messages Area -->
+                <div class="flex-1 overflow-y-auto p-5 space-y-6 bg-slate-50/50" id="chat-container">
+                    
+                    <!-- Timestamp -->
+                    <div class="text-center">
+                        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider bg-slate-100 px-2 py-1 rounded-full">Analysis Started • 10:42 AM</span>
+                    </div>
+
+                    <!-- AI System Message 1 -->
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 rounded-full bg-brand-100 flex-shrink-0 flex items-center justify-center mr-3 border border-brand-200 mt-1">
+                            <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none p-4 shadow-sm text-sm text-slate-700 max-w-[85%]">
+                            <p class="mb-2 font-medium">I've ingested the <b>TechCorp Q3 Financials</b> dataset. Beginning comprehensive audit scan across 42 documents and ledgers.</p>
+                            <ul class="space-y-1.5 text-xs text-slate-500">
+                                <li class="flex items-center"><svg class="w-3.5 h-3.5 mr-1.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Structural integrity verified.</li>
+                                <li class="flex items-center"><svg class="w-3.5 h-3.5 mr-1.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> OCR extraction complete.</li>
+                                <li class="flex items-center"><svg class="w-3.5 h-3.5 mr-1.5 text-blue-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Analyzing Financial Data...</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- User Message -->
+                    <div class="flex items-start justify-end">
+                        <div class="bg-brand-600 text-white rounded-2xl rounded-tr-none p-4 shadow-sm text-sm max-w-[85%]">
+                            <p>Focus specifically on cross-referencing GST inputs against the general ledger for the month of October.</p>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center ml-3 border border-slate-300 mt-1 font-bold text-xs text-slate-600">
+                            CA
+                        </div>
+                    </div>
+
+                    <!-- AI System Message 2 -->
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 rounded-full bg-brand-100 flex-shrink-0 flex items-center justify-center mr-3 border border-brand-200 mt-1">
+                            <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none p-4 shadow-sm text-sm text-slate-700 max-w-[85%] border-l-4 border-l-brand-500">
+                            <p class="mb-2">Understood. Prioritizing October GST reconciliations.</p>
+                            <div class="bg-slate-50 rounded border border-slate-100 p-2 text-xs font-mono text-slate-600 mb-2 space-y-1">
+                                <div>> Checking compliance ruleset IND-GST-2025...</div>
+                                <div>> Cross-referencing 342 ledger entries...</div>
+                                <div class="text-amber-600">> Detecting anomalies...</div>
+                                <div class="text-red-600">> Finding risks...</div>
+                            </div>
+                            <p>I have identified <b>5 critical/medium anomalies</b> requiring your attention. I have populated the findings panel on the right with the details.</p>
+                        </div>
+                    </div>
+
+                    <!-- AI Typing Indicator (Active State) -->
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 rounded-full bg-brand-50 flex-shrink-0 flex items-center justify-center mr-3 border border-brand-200 mt-1 shadow-glow">
+                            <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path></svg>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center space-x-1">
+                            <div class="w-1.5 h-1.5 bg-brand-500 rounded-full typing-dot"></div>
+                            <div class="w-1.5 h-1.5 bg-brand-500 rounded-full typing-dot"></div>
+                            <div class="w-1.5 h-1.5 bg-brand-500 rounded-full typing-dot"></div>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <!-- Chat Input Area -->
+                <div class="p-4 bg-white border-t border-slate-200 z-10">
+                    <div class="relative flex items-center">
+                        <input type="text" class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder-slate-400 transition-shadow shadow-inner" placeholder="Ask AI about this document or findings...">
+                        <button class="absolute right-2 w-8 h-8 bg-brand-600 hover:bg-brand-700 text-white rounded-lg flex items-center justify-center transition-colors shadow-sm">
+                            <svg class="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V6m0 0l-4 4m4-4l4 4"></path></svg>
+                        </button>
+                    </div>
+                    <div class="flex space-x-2 mt-2 px-1">
+                        <button class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-1 rounded border border-slate-200 transition-colors">Summarize anomalies</button>
+                        <button class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-1 rounded border border-slate-200 transition-colors">Verify tax calculations</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-slate-50 flex flex-col shadow-[inset_4px_0_12px_rgba(0,0,0,0.02)] relative z-10">
+                
+                <!-- Findings Header & Actions -->
+                <div class="p-5 border-b border-slate-200 bg-white flex justify-between items-center shadow-sm z-10">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900 flex items-center">
+                            AI Findings Panel
+                            <span class="ml-2 bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full">5 Issues</span>
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Auto-detected anomalies requiring review.</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center transition-colors">
+                            <svg class="w-3.5 h-3.5 mr-1.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Export
+                        </button>
+                        <button class="px-3 py-1.5 bg-brand-600 border border-transparent rounded-lg text-xs font-semibold text-white hover:bg-brand-700 shadow-sm flex items-center transition-colors">
+                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            Generate Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scrollable Findings List -->
+                <div class="flex-1 overflow-y-auto p-5 space-y-4">
+                    
+                    <!-- Finding 1: Suspicious Entry (Critical) -->
+                    <div class="finding-card bg-white rounded-xl border border-purple-200 shadow-sm overflow-hidden relative">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-purple-600"></div>
+                        <div class="p-4 pl-5">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-sm font-bold text-slate-900">Suspicious Entry</h3>
+                                <span class="bg-purple-100 text-purple-700 text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded">Critical Severity</span>
+                            </div>
+                            <p class="text-xs text-slate-600 mb-3 leading-relaxed">A manual journal entry for a significant amount ($12,000) was recorded on a weekend by an unverified user ID.</p>
+                            
+                            <div class="bg-slate-50 border border-slate-100 rounded-lg p-2.5 mb-3">
+                                <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Evidence / Reference</p>
+                                <p class="text-xs font-mono text-slate-800">Ledger: JE-40988 | Date: 14-Oct (Sunday) | User: TEMP_ADM_02</p>
+                            </div>
+                            
+                            <div class="flex justify-end space-x-2">
+                                <button class="text-xs font-medium text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded hover:bg-slate-100 transition-colors">Dismiss</button>
+                                <button class="text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 px-3 py-1.5 rounded transition-colors">Flag for Review</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Finding 2: Incorrect Tax Calculation (High) -->
+                    <div class="finding-card bg-white rounded-xl border border-red-200 shadow-sm overflow-hidden relative">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
+                        <div class="p-4 pl-5">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-sm font-bold text-slate-900">Incorrect Tax Calculation</h3>
+                                <span class="bg-red-50 text-red-700 border border-red-100 text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded">High Severity</span>
+                            </div>
+                            <p class="text-xs text-slate-600 mb-3 leading-relaxed">Tax amount on invoice does not match the expected statutory rate for the declared HSN/SAC code.</p>
+                            
+                            <div class="bg-red-50/50 border border-red-100 rounded-lg p-2.5 mb-3 flex items-start">
+                                <svg class="w-4 h-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                <div>
+                                    <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Evidence: Invoice #INV-402</p>
+                                    <p class="text-xs font-mono text-slate-800">Expected 18% ($810.00), Found 12% ($540.00)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-end space-x-2">
+                                <button class="text-xs font-medium text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded hover:bg-slate-100 transition-colors">Dismiss</button>
+                                <button class="text-xs font-semibold bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 px-3 py-1.5 rounded transition-colors">Raise Query</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Finding 3: GST Mismatch (High) -->
+                    <div class="finding-card bg-white rounded-xl border border-red-200 shadow-sm overflow-hidden relative">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
+                        <div class="p-4 pl-5">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-sm font-bold text-slate-900">GST Mismatch Detected</h3>
+                                <span class="bg-red-50 text-red-700 border border-red-100 text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded">High Severity</span>
+                            </div>
+                            <p class="text-xs text-slate-600 mb-3 leading-relaxed">Input Tax Credit (ITC) claimed in books does not reconcile with auto-populated GSTR-2B data from the portal.</p>
+                            
+                            <div class="bg-slate-50 border border-slate-100 rounded-lg p-2.5 mb-3">
+                                <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Evidence / Reference</p>
+                                <p class="text-xs font-mono text-slate-800">Vendor: TechCorp Solutions | Inv #INV-402 missing in GSTR-2B</p>
+                            </div>
+                            
+                            <div class="flex justify-end space-x-2">
+                                <button class="text-xs font-medium text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded hover:bg-slate-100 transition-colors">Dismiss</button>
+                                <button class="text-xs font-semibold bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 px-3 py-1.5 rounded transition-colors">Reconcile Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Finding 4: Duplicate Transaction (Medium) -->
+                    <div class="finding-card bg-white rounded-xl border border-amber-200 shadow-sm overflow-hidden relative">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
+                        <div class="p-4 pl-5">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-sm font-bold text-slate-900">Duplicate Transaction</h3>
+                                <span class="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded">Medium Severity</span>
+                            </div>
+                            <p class="text-xs text-slate-600 mb-3 leading-relaxed">Identical journal entries found on the same date with the same reference number and amount.</p>
+                            
+                            <div class="bg-slate-50 border border-slate-100 rounded-lg p-2.5 mb-3">
+                                <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Evidence / Reference</p>
+                                <p class="text-xs font-mono text-slate-800">Ledger: JE-40921 repeated on 12-Oct for $4,500.00</p>
+                            </div>
+                            
+                            <div class="flex justify-end space-x-2">
+                                <button class="text-xs font-medium text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded hover:bg-slate-100 transition-colors">Dismiss</button>
+                                <button class="text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 px-3 py-1.5 rounded transition-colors">Resolve</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Finding 5: Missing Invoice (Medium) -->
+                    <div class="finding-card bg-white rounded-xl border border-amber-200 shadow-sm overflow-hidden relative mb-4">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
+                        <div class="p-4 pl-5">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-sm font-bold text-slate-900">Missing Source Document</h3>
+                                <span class="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded">Medium Severity</span>
+                            </div>
+                            <p class="text-xs text-slate-600 mb-3 leading-relaxed">Ledger entry exists for a significant expense, but the corresponding source document (invoice/receipt) is missing from the uploaded batch.</p>
+                            
+                            <div class="bg-slate-50 border border-slate-100 rounded-lg p-2.5 mb-3">
+                                <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Evidence / Reference</p>
+                                <p class="text-xs font-mono text-slate-800">Ledger: JE-40920 | Date: 11-Oct | Amount: $1,200.00</p>
+                            </div>
+                            
+                            <div class="flex justify-end space-x-2">
+                                <button class="text-xs font-medium text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded hover:bg-slate-100 transition-colors">Dismiss</button>
+                                <button class="text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 px-3 py-1.5 rounded transition-colors">Request Doc</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Scroll chat to bottom initially
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Simple interactivity for highlight boxes to link with cards
+            // In a real app, clicking a card would scroll to/highlight the document snippet
+            const highlightBoxes = document.querySelectorAll('.highlight-box');
+            const findingCards = document.querySelectorAll('.finding-card');
+
+            findingCards.forEach((card, index) => {
+                card.addEventListener('mouseenter', () => {
+                    // Just a visual mock of linking right panel to left panel
+                    if(highlightBoxes[index]) {
+                        highlightBoxes[index].classList.add('active');
+                    }
+                });
+                card.addEventListener('mouseleave', () => {
+                    if(highlightBoxes[index]) {
+                        highlightBoxes[index].classList.remove('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinAuditPro - OCR Processing</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        },
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.03)',
+                        'glow': '0 0 15px rgba(14, 165, 233, 0.5)',
+                    },
+                    animation: {
+                        'scan': 'scan 3s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+                        'pulse-ring': 'pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite',
+                        'blink': 'blink 1s step-end infinite',
+                    },
+                    keyframes: {
+                        scan: {
+                            '0%, 100%': { transform: 'translateY(0)', opacity: '0' },
+                            '10%': { opacity: '1' },
+                            '90%': { opacity: '1' },
+                            '50%': { transform: 'translateY(380px)' },
+                        },
+                        'pulse-ring': {
+                            '0%': { transform: 'scale(0.8)', boxShadow: '0 0 0 0 rgba(14, 165, 233, 0.7)' },
+                            '70%': { transform: 'scale(1)', boxShadow: '0 0 0 10px rgba(14, 165, 233, 0)' },
+                            '100%': { transform: 'scale(0.8)', boxShadow: '0 0 0 0 rgba(14, 165, 233, 0)' },
+                        },
+                        blink: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            overflow: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Dark Scrollbar for Terminal */
+        .term-scroll::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        .term-scroll::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* Mock Document Overlay Boxes */
+        .bounding-box {
+            position: absolute;
+            border: 2px solid rgba(14, 165, 233, 0.6);
+            background-color: rgba(14, 165, 233, 0.1);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .bounding-box.active {
+            border-color: #10b981;
+            background-color: rgba(16, 185, 129, 0.15);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased h-screen w-screen flex">
+
+    <aside class="w-[260px] bg-white border-r border-slate-200 flex flex-col h-full z-20 flex-shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+        <div class="h-16 flex flex-col justify-center px-6 border-b border-slate-100">
+            <div class="flex items-center space-x-2">
+                <svg width="24" height="24" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M60 5L100 20V55C100 82.5 83.5 107 60 115C36.5 107 20 82.5 20 55V20L60 5Z" fill="#0EA5E9" fill-opacity="0.1"/>
+                    <path d="M60 5L100 20V55C100 82.5 83.5 107 60 115C36.5 107 20 82.5 20 55V20L60 5Z" stroke="#0EA5E9" stroke-width="8" stroke-linejoin="round"/>
+                    <rect x="42" y="70" width="8" height="20" rx="2" fill="#0ea5e9"/>
+                    <rect x="56" y="55" width="8" height="35" rx="2" fill="#0369a1"/>
+                    <rect x="70" y="40" width="8" height="50" rx="2" fill="#0c4a6e"/>
+                </svg>
+                <span class="text-lg font-bold tracking-tight text-slate-900">FinAudit<span class="text-brand-600 font-light">Pro</span></span>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Main Menu</p>
+            
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group transition-colors">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                <span class="font-medium text-sm">Dashboard</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group transition-colors">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <span class="font-medium text-sm">Client Management</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group transition-colors">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                <span class="font-medium text-sm">Upload Documents</span>
+            </a>
+
+            <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-6">Audit Workspace</p>
+
+            <!-- Active Item: AI Audit Analysis -->
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 bg-brand-50 text-brand-700 rounded-lg border-l-4 border-brand-600 relative group transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                <span class="font-medium text-sm">AI Audit Analysis</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group transition-colors ml-4 pl-6 border-l border-slate-200">
+                <div class="w-1.5 h-1.5 rounded-full bg-brand-500 mr-2 absolute left-[1.1rem]"></div>
+                <span class="font-medium text-sm">OCR Processing</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg group transition-colors">
+                <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span class="font-medium text-sm">Reports</span>
+            </a>
+        </div>
+
+        <div class="p-4 border-t border-slate-200 bg-slate-50/50">
+            <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-slate-100 cursor-pointer">
+                <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-bold border border-brand-200">CA</div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-slate-900 truncate">CA User</p>
+                    <p class="text-xs text-slate-500 truncate">Chartered Accountant</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50">
+        
+        <!-- TOP HEADER -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shadow-sm z-10 flex-shrink-0">
+            <div class="flex items-center text-sm text-slate-500">
+                <span class="font-medium text-slate-900">Workspace</span>
+                <span class="mx-2">/</span>
+                <span class="font-medium text-slate-900">AI Audit Analysis</span>
+                <span class="mx-2">/</span>
+                <span class="font-medium text-brand-600 flex items-center">
+                    <span class="w-2 h-2 rounded-full bg-brand-500 mr-2 animate-pulse"></span>
+                    OCR Processing Pipeline
+                </span>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <div class="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-md text-xs font-semibold flex items-center">
+                    <svg class="w-3.5 h-3.5 mr-1.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Processing Batch #4092
+                </div>
+                <button class="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                </button>
+                <div class="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">CA</div>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT: Top 3 Columns & Bottom Logs -->
+        <main class="flex-1 flex flex-col min-h-0">
+            
+            <!-- Top Section (3 Columns) -->
+            <div class="flex-1 flex overflow-hidden">
+                
+                <!-- COLUMN 1: LEFT - Document Preview -->
+                <div class="w-[30%] min-w-[320px] bg-slate-50 border-r border-slate-200 flex flex-col shadow-[inset_-4px_0_12px_rgba(0,0,0,0.01)]">
+                    <div class="p-4 border-b border-slate-200 bg-white flex justify-between items-center">
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                            Document Preview
+                        </h2>
+                        <span class="text-xs font-medium text-slate-500">Page 1 of 42</span>
+                    </div>
+                    
+                    <div class="flex-1 overflow-auto p-6 flex justify-center bg-slate-100 relative">
+                        <!-- Simulated PDF Document -->
+                        <div class="w-[280px] h-[400px] bg-white shadow-md rounded border border-slate-200 relative overflow-hidden">
+                            
+                            <!-- Document Header Mock -->
+                            <div class="absolute top-4 left-4 right-4 h-12 border-b border-slate-200 flex justify-between">
+                                <div class="w-16 h-8 bg-slate-200 rounded"></div>
+                                <div class="w-24 h-4 bg-slate-200 rounded mt-2"></div>
+                            </div>
+
+                            <!-- Document Table Mock -->
+                            <div class="absolute top-20 left-4 right-4 space-y-2">
+                                <div class="h-3 w-full bg-slate-100 rounded"></div>
+                                <div class="h-3 w-[90%] bg-slate-100 rounded"></div>
+                                <div class="h-3 w-full bg-slate-100 rounded"></div>
+                                <div class="h-3 w-[85%] bg-slate-100 rounded"></div>
+                                <div class="h-3 w-full bg-slate-100 rounded"></div>
+                            </div>
+                            
+                            <!-- Document Total Mock -->
+                            <div class="absolute bottom-8 right-4 w-32 space-y-2 border-t border-slate-200 pt-2">
+                                <div class="h-3 w-full bg-slate-200 rounded"></div>
+                                <div class="h-4 w-full bg-slate-300 rounded"></div>
+                            </div>
+
+                            <!-- AI Overlay Boxes (Simulating Detection) -->
+                            <div class="bounding-box active" style="top: 15px; left: 10px; width: 80px; height: 40px;"></div>
+                            <div class="bounding-box" style="top: 18px; left: 160px; width: 110px; height: 20px;"></div>
+                            <div class="bounding-box" style="top: 75px; left: 10px; width: 260px; height: 100px;"></div>
+                            
+                            <!-- Active Scanning Element -->
+                            <div class="absolute bottom-6 right-2 w-[140px] h-[50px] border-2 border-amber-400 bg-amber-400/10 rounded animate-pulse shadow-[0_0_10px_rgba(251,191,36,0.5)] z-10">
+                                <div class="absolute -top-6 left-1 text-[8px] font-bold text-amber-600 bg-amber-100 px-1 rounded uppercase tracking-wider">Extracting Values</div>
+                            </div>
+
+                            <!-- Laser Scan Line -->
+                            <div class="absolute top-0 left-0 w-full h-[2px] bg-brand-500 shadow-glow animate-scan z-20"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Document Controls -->
+                    <div class="p-3 border-t border-slate-200 bg-white flex justify-center space-x-2">
+                        <button class="p-1.5 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                        <span class="text-xs font-medium text-slate-600 py-1.5 px-2">Page 1</span>
+                        <button class="p-1.5 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
+                        <div class="w-px h-6 bg-slate-200 mx-2 mt-0.5"></div>
+                        <button class="p-1.5 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg></button>
+                    </div>
+                </div>
+
+                <!-- COLUMN 2: CENTER - AI Processing Timeline -->
+                <div class="flex-1 bg-white border-r border-slate-200 flex flex-col">
+                    <div class="p-4 border-b border-slate-200 flex justify-between items-center">
+                        <h2 class="text-sm font-bold text-slate-800">AI Processing Timeline</h2>
+                        <span class="text-xs font-semibold text-brand-600 bg-brand-50 px-2 py-1 rounded">Active</span>
+                    </div>
+                    
+                    <div class="flex-1 overflow-y-auto p-8 lg:p-12">
+                        <div class="relative max-w-md mx-auto">
+                            <!-- Vertical Connecting Line -->
+                            <div class="absolute left-6 top-6 bottom-6 w-0.5 bg-slate-200"></div>
+
+                            <!-- Step 1: Document Detection (Checked) -->
+                            <div class="relative flex items-start mb-10 group">
+                                <div class="w-12 h-12 rounded-full bg-emerald-100 border-2 border-emerald-500 flex items-center justify-center z-10 shrink-0">
+                                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                                <div class="ml-6 pt-2">
+                                    <h3 class="text-sm font-bold text-slate-900">Step 1: Document Detection</h3>
+                                    <p class="text-xs text-slate-500 mt-1">Identified format as structured invoice. Layout analyzed.</p>
+                                    <span class="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider block mt-2">✓ Completed</span>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: OCR Text Extraction (Checked) -->
+                            <div class="relative flex items-start mb-10 group">
+                                <div class="w-12 h-12 rounded-full bg-emerald-100 border-2 border-emerald-500 flex items-center justify-center z-10 shrink-0">
+                                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                                <div class="ml-6 pt-2">
+                                    <h3 class="text-sm font-bold text-slate-900">Step 2: OCR Text Extraction</h3>
+                                    <p class="text-xs text-slate-500 mt-1">Converted pixels to raw string characters using Vision API.</p>
+                                    <span class="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider block mt-2">✓ Completed</span>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Table Recognition (Checked) -->
+                            <div class="relative flex items-start mb-10 group">
+                                <div class="w-12 h-12 rounded-full bg-emerald-100 border-2 border-emerald-500 flex items-center justify-center z-10 shrink-0">
+                                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                                <div class="ml-6 pt-2">
+                                    <h3 class="text-sm font-bold text-slate-900">Step 3: Table Recognition</h3>
+                                    <p class="text-xs text-slate-500 mt-1">Detected line items, columns, and matrix structures.</p>
+                                    <span class="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider block mt-2">✓ Completed</span>
+                                </div>
+                            </div>
+
+                            <!-- Step 4: Invoice Understanding (Active) -->
+                            <div class="relative flex items-start mb-10 group">
+                                <!-- Animated Active Line Segment overlaying the background line -->
+                                <div class="absolute left-6 top-12 h-full w-0.5 bg-gradient-to-b from-brand-500 to-transparent"></div>
+                                
+                                <div class="w-12 h-12 rounded-full bg-brand-50 border-2 border-brand-500 flex items-center justify-center z-10 shrink-0 shadow-glow relative">
+                                    <div class="absolute inset-0 rounded-full border-2 border-brand-400 animate-pulse-ring"></div>
+                                    <svg class="w-5 h-5 text-brand-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                </div>
+                                <div class="ml-6 pt-2">
+                                    <h3 class="text-sm font-bold text-brand-700">Step 4: Invoice Understanding</h3>
+                                    <p class="text-xs text-brand-600/80 mt-1">Mapping spatial data to financial context (Dates, Entities, Tax amounts).</p>
+                                    <div class="w-full bg-slate-100 rounded-full h-1.5 mt-3">
+                                        <div class="bg-brand-500 h-1.5 rounded-full w-[65%]"></div>
+                                    </div>
+                                    <span class="text-[10px] font-semibold text-brand-600 uppercase tracking-wider block mt-2 animate-blink">Processing 65%</span>
+                                </div>
+                            </div>
+
+                            <!-- Step 5: Financial Data Extraction (Pending) -->
+                            <div class="relative flex items-start group opacity-50">
+                                <div class="w-12 h-12 rounded-full bg-slate-100 border-2 border-slate-300 flex items-center justify-center z-10 shrink-0">
+                                    <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                                </div>
+                                <div class="ml-6 pt-2">
+                                    <h3 class="text-sm font-bold text-slate-700">Step 5: Financial Data Extraction</h3>
+                                    <p class="text-xs text-slate-500 mt-1">Finalizing structured JSON output and ledger cross-reference.</p>
+                                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mt-2">Pending</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLUMN 3: RIGHT - Extraction Results -->
+                <div class="w-[30%] min-w-[320px] bg-slate-50 flex flex-col shadow-[inset_4px_0_12px_rgba(0,0,0,0.01)]">
+                    <div class="p-4 border-b border-slate-200 bg-white flex justify-between items-center">
+                        <h2 class="text-sm font-bold text-slate-800">Extraction Results</h2>
+                        <button class="text-xs text-brand-600 hover:text-brand-700 font-medium">Export JSON</button>
+                    </div>
+                    
+                    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                        
+                        <!-- Quick Stats Grid -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                                <p class="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mb-1">Pages Processed</p>
+                                <p class="text-xl font-bold text-slate-900">4<span class="text-sm text-slate-400 font-normal">/42</span></p>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                                <p class="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mb-1">Text Accuracy</p>
+                                <p class="text-xl font-bold text-emerald-600">98.5%</p>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                                <p class="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mb-1">Detected Tables</p>
+                                <p class="text-xl font-bold text-slate-900">12</p>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                                <p class="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mb-1">Anomalies</p>
+                                <p class="text-xl font-bold text-amber-500">1</p>
+                            </div>
+                        </div>
+
+                        <!-- Extracted Data Feed -->
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2 mt-2">Live Extracted Data</h3>
+                            
+                            <div class="space-y-2">
+                                <!-- Data Card 1 -->
+                                <div class="bg-white p-3 rounded-lg border border-emerald-200 shadow-sm border-l-4 border-l-emerald-500 relative overflow-hidden group">
+                                    <div class="flex justify-between items-start mb-1">
+                                        <span class="text-[11px] font-semibold text-slate-500">Invoice Number</span>
+                                        <span class="text-[10px] bg-emerald-50 text-emerald-600 px-1.5 rounded">High Confidence</span>
+                                    </div>
+                                    <p class="font-mono text-sm font-bold text-slate-900">INV-2025-08992</p>
+                                </div>
+
+                                <!-- Data Card 2 -->
+                                <div class="bg-white p-3 rounded-lg border border-emerald-200 shadow-sm border-l-4 border-l-emerald-500 relative overflow-hidden group">
+                                    <div class="flex justify-between items-start mb-1">
+                                        <span class="text-[11px] font-semibold text-slate-500">Vendor Entity</span>
+                                        <span class="text-[10px] bg-emerald-50 text-emerald-600 px-1.5 rounded">High Confidence</span>
+                                    </div>
+                                    <p class="font-mono text-sm font-bold text-slate-900">TechCorp Solutions Inc.</p>
+                                </div>
+
+                                <!-- Data Card 3 (Active Processing) -->
+                                <div class="bg-white p-3 rounded-lg border border-amber-200 shadow-sm border-l-4 border-l-amber-500 relative overflow-hidden">
+                                    <div class="absolute inset-0 bg-amber-50/30 animate-pulse"></div>
+                                    <div class="relative z-10 flex justify-between items-start mb-1">
+                                        <span class="text-[11px] font-semibold text-slate-500">Extracted Amounts</span>
+                                        <span class="text-[10px] text-amber-600 flex items-center"><svg class="w-3 h-3 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Analyzing</span>
+                                    </div>
+                                    <div class="relative z-10 space-y-1 mt-2">
+                                        <div class="flex justify-between text-xs">
+                                            <span class="text-slate-500">Subtotal:</span>
+                                            <span class="font-mono font-medium">$4,500.00</span>
+                                        </div>
+                                        <div class="flex justify-between text-xs">
+                                            <span class="text-slate-500">Tax (10%):</span>
+                                            <span class="font-mono font-medium">$450.00</span>
+                                        </div>
+                                        <div class="flex justify-between text-xs pt-1 border-t border-slate-100">
+                                            <span class="font-bold text-slate-700">Total:</span>
+                                            <span class="font-mono font-bold text-brand-600">$4,950.00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTTOM SECTION: Processing Logs -->
+            <div class="h-48 bg-slate-900 border-t border-slate-800 flex flex-col flex-shrink-0 z-20 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+                <div class="px-4 py-2 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+                    <h2 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center font-mono">
+                        <svg class="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        System Execution Logs
+                    </h2>
+                    <div class="flex space-x-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-red-500 hover:bg-red-400 cursor-pointer"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500 hover:bg-amber-400 cursor-pointer"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-green-500 hover:bg-green-400 cursor-pointer"></span>
+                    </div>
+                </div>
+                
+                <!-- Terminal Output Area -->
+                <div id="log-container" class="flex-1 overflow-y-auto p-4 font-mono text-xs term-scroll space-y-1.5">
+                    <div class="text-slate-500">[05:14:23.010] [INFO] Initiating AI Audit Pipeline for Job #4092...</div>
+                    <div class="text-slate-500">[05:14:23.145] [INFO] Loading Vision Model: fin-ocr-v4.2.onnx</div>
+                    <div class="text-slate-500">[05:14:23.890] [INFO] Page 1 layout analysis complete. Detected 1 table, 14 text blocks.</div>
+                    <div class="text-emerald-400">[05:14:24.210] [SUCCESS] OCR Extraction Engine finished on Page 1. Confidence: 0.985</div>
+                    <div class="text-slate-500">[05:14:24.550] [INFO] Passing extracted vectors to NLP Semantic Mapper...</div>
+                    <div class="text-blue-400">[05:14:25.002] [PROCESS] Identifying key-value pairs (Invoice, Dates, Totals) using spatial heuristics...</div>
+                    <div class="text-slate-500">[05:14:25.330] [INFO] Vendor matched against verified database: UUID-8F92A.</div>
+                    <!-- The blinking cursor -->
+                    <div class="text-emerald-400 flex items-center">
+                        <span class="mr-2">></span>
+                        <span class="w-2 h-3 bg-emerald-400 animate-blink inline-block"></span>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const logContainer = document.getElementById('log-container');
+            const cursorDiv = logContainer.lastElementChild;
+            
+            // Mock log messages to simulate ongoing processing
+            const mockLogs = [
+                { type: 'process', msg: '[05:14:26.110] [PROCESS] Extracting table row coordinates...' },
+                { type: 'info', msg: '[05:14:26.450] [INFO] Found 3 line items in main table block.' },
+                { type: 'warn', msg: '[05:14:27.020] [WARN] Ambiguous tax field detected. Applying secondary cross-validation check.' },
+                { type: 'success', msg: '[05:14:27.880] [SUCCESS] Cross-validation passed. Tax calculated at 10%.' },
+                { type: 'info', msg: '[05:14:28.100] [INFO] Committing parsed values to memory store for Page 1...' },
+                { type: 'process', msg: '[05:14:28.500] [PROCESS] Fetching Page 2 into memory buffer...' }
+            ];
+
+            let logIndex = 0;
+
+            function addLog() {
+                if (logIndex < mockLogs.length) {
+                    const log = mockLogs[logIndex];
+                    const div = document.createElement('div');
+                    
+                    // Assign colors based on log type
+                    if (log.type === 'success') div.className = 'text-emerald-400';
+                    else if (log.type === 'warn') div.className = 'text-amber-400';
+                    else if (log.type === 'process') div.className = 'text-blue-400';
+                    else div.className = 'text-slate-500';
+                    
+                    div.textContent = log.msg;
+                    
+                    // Insert before the cursor
+                    logContainer.insertBefore(div, cursorDiv);
+                    
+                    // Auto-scroll to bottom
+                    logContainer.scrollTop = logContainer.scrollHeight;
+                    
+                    logIndex++;
+                    
+                    // Randomize next log timing to feel natural
+                    setTimeout(addLog, Math.random() * 1500 + 500);
+                }
+            }
+
+            // Start the log simulation after a short delay
+            setTimeout(addLog, 1500);
+        });
+    </script>
+</body>
+</html>

@@ -24,16 +24,31 @@ FinAuditPro is an enterprise-grade, offline-first desktop application designed f
 
 ---
 
+## 📚 Documentation Index (`docs/` Folder)
+
+Detailed documentation is organized in the [`docs/`](docs/) directory:
+
+- 🏛️ [**docs/ARCHITECTURE.md**](docs/ARCHITECTURE.md): Database-Outward Pipeline & Engineering Design.
+- 🛡️ [**docs/SECURITY.md**](docs/SECURITY.md): PBKDF2 Hashing, AES-256 Encryption, Audit Trail, and RBAC.
+- 🤝 [**docs/CONTRIBUTING.md**](docs/CONTRIBUTING.md): Developer Setup, Code Standards, and Testing.
+- 📝 [**docs/CHANGELOG.md**](docs/CHANGELOG.md): Version History and Architectural Refactoring Log.
+- 🔌 [**docs/API.md**](docs/API.md): Service APIs, Database Repositories, and LLM Client Reference.
+
+---
+
 ## 🏗️ Project Structure
 
 ```text
 FinAuditPro/
+├── docs/                       # Project documentation directory
+│   ├── ARCHITECTURE.md         # Pure Database-Outward Architecture guide
+│   ├── SECURITY.md             # Security policy & cryptography spec
+│   ├── CONTRIBUTING.md         # Contribution standards & pytest workflow
+│   ├── CHANGELOG.md            # Release history
+│   └── API.md                  # Service & repository API reference
 ├── src/
 │   ├── main.py                 # App entry point & initialization
 │   ├── database/               # SQLAlchemy ORM models & database repositories
-│   │   ├── models.py           # Core schema (Clients, Projects, Documents, Findings)
-│   │   ├── database.py         # SQLite connection & PRAGMA configuration
-│   │   └── repositories/       # Client, Document, AuditLog, Risk repositories
 │   ├── services/               # Core business services & authentication
 │   ├── workflow/               # Engagement workflow state engine
 │   ├── rule_engine/            # Deterministic financial rule executor
@@ -45,7 +60,6 @@ FinAuditPro/
 │   ├── deployment/             # DDL Migrations, Diagnostics, Logger
 │   └── ui/                     # PySide6 desktop interface screens
 ├── tests/                      # Pytest integration test suite
-├── installer/                  # Packaging configuration
 ├── pyproject.toml              # Build & dependency metadata
 └── requirements.txt            # Python dependencies
 ```
@@ -54,11 +68,6 @@ FinAuditPro/
 
 ## 🚀 Quickstart & Installation
 
-### Prerequisites
-- **Python 3.12+**
-- **Ollama** (Running locally on `http://localhost:11434` with model `llama3.2:latest`)
-
-### Setup Commands
 ```bash
 # Clone the repository
 git clone https://github.com/Coderaryanyadav/FinAuditPro.git
@@ -77,22 +86,6 @@ pip install -r requirements.txt
 # Launch application
 .venv/bin/python src/main.py
 ```
-
-### Running Tests
-```bash
-.venv/bin/pytest tests/test_fatal_fixes.py
-```
-
----
-
-## 🛡️ Security, Governance & Contributing
-
-### Security Policy
-We take security and financial data privacy seriously. All processing occurs locally on the client system. No unencrypted financial telemetry or document text is ever transmitted over network connections.
-
-### Code of Conduct & Contributing
-- Maintain high code quality with zero hardcoded metrics, zero synthetic fallbacks, and clean 100% database-driven control flows.
-- Ensure all pull requests pass `pytest tests/test_fatal_fixes.py` before submitting.
 
 ---
 

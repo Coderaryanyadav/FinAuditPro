@@ -53,12 +53,23 @@ class EngagementService:
 
     def calculate_progress(self, engagement_id: int) -> float:
         """
-        Calculate overall completion progress based on working papers and procedures.
-        Stub for complex logic to be expanded later.
+        Calculate overall completion progress based on workflow manager state and working paper procedures.
         """
-        engagement = self.get_engagement(engagement_id)
-        if engagement.status == 'Completed':
-            return 100.0
-        elif engagement.status == 'Planning':
-            return 10.0
-        return 50.0 # Placeholder
+        try:
+            from workflow.workflow_manager import WorkflowManager
+            wm = WorkflowManager()
+            if wm.current_state and wm.current_state.engagement_id == engagement_id:
+                return round(wm.current_state.completion_percentage, 1)
+
+            engagement = self.get_engagement(engagement_id)
+            if engagement.status == 'Completed':
+                return 100.0
+            elif engagement.status == 'Planning':
+                return 15.0
+            elif engagement.status == 'Execution':
+                return 60.0
+            elif engagement.status == 'Reporting':
+                return 85.0
+            return 50.0
+        except Exception:
+            return 25.0

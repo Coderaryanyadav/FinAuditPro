@@ -54,7 +54,7 @@ class ImmutableAuditLogger:
         self._last_hash = "0000000000000000000000000000000000000000000000000000000000000000"
 
     def log_action(self, user_email: str, role: str, action: str, details: str = "") -> SecurityAuditEntry:
-        """Log an immutable security audit entry into the ledger."""
+        """Log an immutable security audit entry into memory and persistent SQLite database."""
         entry_id = f"LOG-{len(self.ledger) + 1:06d}"
         entry = SecurityAuditEntry(
             entry_id=entry_id,
@@ -67,6 +67,26 @@ class ImmutableAuditLogger:
         self._last_hash = entry.entry_hash
         self.ledger.append(entry)
         logger.info(f"[SECURITY AUDIT LOG] {action} by {user_email} ({role}) | Hash: {entry.entry_hash[:16]}...")
+
+        # Persist to SQLite Database
+        try:
+            from database.database import SessionLocal
+            from database.models import AuditLog, User
+            session = SessionLocal()
+            user = session.query(User).filter_by(email=user_email).first()
+            user_id = user.id if user else 1
+            log_record = AuditLog(
+                user_id=user_id,
+                action=action,
+                target_entity=details or "SecurityAudit",
+                ip_address=entry.ip_address
+            )
+            session.add(log_record)
+            session.commit()
+            session.close()
+        except Exception as e:
+            logger.warning(f"Failed to persist audit log to DB: {e}")
+
         return entry
 
     def verify_ledger_integrity(self) -> bool:

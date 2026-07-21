@@ -78,12 +78,25 @@ class OCREngine:
         except Exception:
             pass
 
-        # Default robust text extraction fallback
+        # Read file text directly if plain text/csv/tsv or readable file
+        try:
+            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                content = f.read()
+                if content.strip():
+                    return OCRResult(
+                        raw_text=content,
+                        pages=[OCRPageResult(page_number=1, text=content, confidence=0.90)],
+                        provider_used="Direct File Parser",
+                        overall_confidence=0.90
+                    )
+        except Exception:
+            pass
+
         return OCRResult(
-            raw_text="Extracted Document Text Placeholder for Scanned Image",
-            pages=[OCRPageResult(page_number=1, text="Extracted Document Text Placeholder", confidence=0.85)],
-            provider_used="Standard Fallback Engine",
-            overall_confidence=0.85
+            raw_text=f"[OCR Processing Failed for {os.path.basename(file_path)}: Tesseract OCR Engine Not Installed]",
+            pages=[OCRPageResult(page_number=1, text="", confidence=0.0)],
+            provider_used="None (Missing Tesseract)",
+            overall_confidence=0.0
         )
 
     @classmethod

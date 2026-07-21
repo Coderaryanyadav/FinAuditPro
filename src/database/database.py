@@ -30,13 +30,17 @@ def init_db():
     """Create all tables in the database if they don't exist."""
     Base.metadata.create_all(bind=engine)
 
+from contextlib import contextmanager
+
+@contextmanager
 def get_session():
-    """Provide a transactional session. Useful as a context manager or generator."""
+    """Provide a transactional session context manager that guarantees closing."""
     session = SessionLocal()
     try:
-        return session
+        yield session
+        session.commit()
     except Exception as e:
         session.rollback()
         raise e
     finally:
-        pass # In desktop apps, we often manage closing manually per window, or use a context manager
+        session.close()

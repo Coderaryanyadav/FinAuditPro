@@ -129,10 +129,14 @@ class AIAuditWidget(QWidget):
         doc_scroll = QScrollArea()
         doc_scroll.setWidgetResizable(True)
         doc_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        doc_content = QLabel("<b>[Simulated Document View]</b><br/><br/>INVOICE #INV-402<br/>Date: 12-Oct-2025<br/><br/>Item: Software License ($3,000.00)<br/>Item: Consulting ($1,500.00)<br/>Subtotal: $4,500.00<br/>Tax (12%): <span style='color:red;'>$540.00</span><br/><br/>TOTAL: $5,040.00")
-        doc_content.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        doc_content.setStyleSheet("background-color: #ffffff; margin: 20px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 4px; font-family: monospace; font-size: 12px; color: #64748b;")
-        doc_scroll.setWidget(doc_content)
+        
+        # Load real document content from DB or filesystem
+        self.doc_content = QLabel()
+        self.doc_content.setWordWrap(True)
+        self.doc_content.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.doc_content.setStyleSheet("background-color: #ffffff; margin: 10px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 4px; font-family: monospace; font-size: 11px; color: #334155;")
+        self.load_active_document_view()
+        doc_scroll.setWidget(self.doc_content)
         c1_layout.addWidget(doc_scroll)
         
         # COL 2: AI Chat
@@ -197,7 +201,7 @@ class AIAuditWidget(QWidget):
         c3_header.setFixedHeight(60)
         c3_header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
         c3_h_layout = QHBoxLayout(c3_header)
-        f_title = QLabel("<b>AI Findings Panel</b> <span style='background-color:#fee2e2; color:#b91c1c; font-size:10px; padding:2px 6px; border-radius:8px;'>5 Issues</span><br/><span style='color:#64748b; font-size:11px; font-weight:normal;'>Auto-detected anomalies</span>")
+        f_title = QLabel("<b>AI Findings Panel</b><br/><span style='color:#64748b; font-size:11px; font-weight:normal;'>Auto-detected anomalies</span>")
         f_title.setStyleSheet("border: none; font-size: 14px; color: #0f172a;")
         c3_h_layout.addWidget(f_title)
         c3_h_layout.addStretch()
@@ -207,30 +211,11 @@ class AIAuditWidget(QWidget):
         findings_scroll.setWidgetResizable(True)
         findings_scroll.setFrameShape(QFrame.Shape.NoFrame)
         findings_widget = QWidget()
-        f_layout = QVBoxLayout(findings_widget)
-        f_layout.setContentsMargins(20, 20, 20, 20)
-        f_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.f_layout = QVBoxLayout(findings_widget)
+        self.f_layout.setContentsMargins(20, 20, 20, 20)
+        self.f_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         
-        f_layout.addWidget(create_finding_card(
-            "Suspicious Entry", "CRITICAL",
-            "A manual journal entry for a significant amount ($12,000) was recorded on a weekend.",
-            "Ledger: JE-40988 | Date: 14-Oct | User: TEMP",
-            "#e9d5ff", "#9333ea", "#f3e8ff", "#7e22ce"
-        ))
-        
-        f_layout.addWidget(create_finding_card(
-            "Incorrect Tax Calculation", "HIGH",
-            "Tax amount on invoice does not match the expected statutory rate.",
-            "Expected 18% ($810), Found 12% ($540)",
-            "#fecaca", "#ef4444", "#fef2f2", "#b91c1c"
-        ))
-        
-        f_layout.addWidget(create_finding_card(
-            "Duplicate Transaction", "MEDIUM",
-            "Identical journal entries found on the same date.",
-            "Ledger: JE-40921 repeated on 12-Oct",
-            "#fde68a", "#f59e0b", "#fffbeb", "#b45309"
-        ))
+        self.load_database_findings()
         
         findings_scroll.setWidget(findings_widget)
         c3_layout.addWidget(findings_scroll)
@@ -241,11 +226,58 @@ class AIAuditWidget(QWidget):
         
         main_layout.addWidget(body)
         
-        self.add_message("FinAudit Copilot", "I've ingested the <b>TechCorp Q3 Financials</b> dataset. I have identified <b>5 critical anomalies</b>. How can I help you?", False)
+        self.add_message("FinAudit Copilot", "I've loaded active engagement data. How can I assist with your audit verification?", False)
         
         self.chat_input.returnPressed.connect(self.handle_input)
         self.current_ai_bubble = None
         self.worker = None
+
+    def load_active_document_view(self):
+        try:
+            from database.database import SessionLocal
+            from database.models import Document
+            session = SessionLocal()
+            doc = session.query(Document).order_by(Document.id.desc()).first()
+            if doc and os.path.exists(doc.file_path):
+                with open(doc.file_path, "r", errors="ignore") as f:
+                    content = f.read(2000)
+                self.doc_content.setText(f"<b>DOCUMENT: {doc.file_name}</b><br/><br/>" + content.replace("\n", "<br/>"))
+            else:
+                self.doc_content.setText("<b>NO ACTIVE DOCUMENT</b><br/><br/>Upload financial documents to inspect OCR text and line items.")
+            session.close()
+        except Exception as e:
+            self.doc_content.setText(f"Document load error: {e}")
+
+    def load_database_findings(self):
+        try:
+            from database.database import SessionLocal
+            from database.models import Finding
+            session = SessionLocal()
+            findings = session.query(Finding).all()
+            session.close()
+
+            if not findings:
+                lbl = QLabel("No anomalies detected in current active engagement.")
+                lbl.setStyleSheet("color: #64748b; font-size: 12px;")
+                self.f_layout.addWidget(lbl)
+                return
+
+            for f in findings:
+                sev = getattr(f, 'severity', 'LOW') or getattr(f, 'risk_level', 'LOW')
+                card = create_finding_card(
+                    "Audit Finding", sev.upper(),
+                    f.description,
+                    f"Impact: ₹ {getattr(f, 'financial_impact', 0) or 0:,.2f}",
+                    "#fecaca" if sev.upper() in ["HIGH", "CRITICAL"] else "#fde68a",
+                    "#ef4444" if sev.upper() in ["HIGH", "CRITICAL"] else "#f59e0b",
+                    "#fef2f2" if sev.upper() in ["HIGH", "CRITICAL"] else "#fffbeb",
+                    "#b91c1c" if sev.upper() in ["HIGH", "CRITICAL"] else "#b45309"
+                )
+                self.f_layout.addWidget(card)
+        except Exception as e:
+            lbl = QLabel(f"Findings load status: {e}")
+            lbl.setStyleSheet("color: #64748b; font-size: 11px;")
+            self.f_layout.addWidget(lbl)
 
     def handle_input(self):
         text = self.chat_input.text().strip()

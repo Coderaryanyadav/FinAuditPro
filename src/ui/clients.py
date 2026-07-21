@@ -156,24 +156,8 @@ class ClientManagementWidget(QWidget):
         
         main_layout.addWidget(splitter)
         
-        # Initial database seed (if empty) & load
-        self.seed_mock_data_if_empty()
+        # Load clients from database
         self.load_clients()
-        
-    def seed_mock_data_if_empty(self):
-        if self.session.query(Client).count() == 0:
-            c1 = Client(name="TechCorp Solutions Pvt Ltd", gst_number="27AADCT1234E1Z5", pan_number="AADCT1234E", industry="IT / Technology")
-            c2 = Client(name="Global Impex Ltd.", gst_number="07BXYZI9876Q1Z9", pan_number="BXYZI9876Q", industry="Import/Export")
-            c3 = Client(name="Mega Mart Retail", gst_number="29ABCDE1234F2Z5", pan_number="ABCDE1234F", industry="Retail")
-            self.session.add_all([c1, c2, c3])
-            self.session.commit()
-            
-            # Seed matching audit projects
-            ap1 = AuditProject(client_id=c1.id, financial_year="2025-26", status="In Progress", risk_score=24.0, risk_level="Low")
-            ap2 = AuditProject(client_id=c2.id, financial_year="2025-26", status="Pending Review", risk_score=56.0, risk_level="Medium")
-            ap3 = AuditProject(client_id=c3.id, financial_year="2025-26", status="Completed", risk_score=82.0, risk_level="High")
-            self.session.add_all([ap1, ap2, ap3])
-            self.session.commit()
 
     def load_clients(self):
         search_text = self.search_box.text().strip()

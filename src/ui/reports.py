@@ -90,7 +90,7 @@ class ReportsWidget(QWidget):
         
     def load_report_draft(self):
         client = self.session.query(Client).first()
-        client_name = client.name if client else "TechCorp Solutions Pvt Ltd"
+        client_name = client.name if client else "Unassigned Client Account"
         
         findings = self.session.query(Finding).all()
         matters_html = ""
@@ -140,7 +140,7 @@ class ReportsWidget(QWidget):
             report_engine = ReportEngine()
             
             client = self.session.query(Client).first()
-            client_name = client.name if client else "TechCorp Solutions Pvt Ltd"
+            client_name = client.name if client else "Unassigned Client Account"
 
             result = report_engine.generate_full_audit_pack(
                 client_name=client_name,

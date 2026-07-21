@@ -115,19 +115,24 @@ class GSTVerificationWidget(QWidget):
         self.table.setShowGrid(False)
         self.table.verticalHeader().setVisible(False)
         
-        sample_data = [
-            ("INV-2025-0891", "TechCorp Solutions (27AADCT1234E1Z5)", "₹ 45,000", "₹ 45,000", "₹ 0", "Exact Match"),
-            ("INV-2025-0892", "Global Impex Ltd. (07BXYZI9876Q1Z9)", "₹ 18,500", "₹ 12,000", "₹ 6,500", "Mismatch"),
-            ("INV-2025-0893", "Mega Mart Retail (29ABCDE1234F2Z5)", "₹ 82,400", "₹ 82,400", "₹ 0", "Exact Match"),
-            ("INV-2025-0894", "Sunrise Networks (19XYZAB4321C1Z2)", "₹ 23,250", "₹ 0", "₹ 23,250", "Missing in 2B"),
-            ("INV-2025-0895", "Apex Logistics (27AAACA5678B1Z0)", "₹ 12,400", "₹ 12,400", "₹ 0", "Blocked Sec 17(5)")
-        ]
-        
-        self.table.setRowCount(len(sample_data))
-        for r, row in enumerate(sample_data):
-            for c, val in enumerate(row):
-                item = QTableWidgetItem(val)
-                self.table.setItem(r, c, item)
+        from database.database import SessionLocal
+        from database.models import Finding
+        session = SessionLocal()
+        try:
+            gst_findings = session.query(Finding).filter(Finding.description.ilike('%GST%')).all()
+            if gst_findings:
+                self.table.setRowCount(len(gst_findings))
+                for r, f in enumerate(gst_findings):
+                    self.table.setItem(r, 0, QTableWidgetItem(f"FINDING-{f.id}"))
+                    self.table.setItem(r, 1, QTableWidgetItem("Audit Record"))
+                    self.table.setItem(r, 2, QTableWidgetItem(f"₹ {f.financial_impact or 0:.2f}"))
+                    self.table.setItem(r, 3, QTableWidgetItem("₹ 0.00"))
+                    self.table.setItem(r, 4, QTableWidgetItem(f"₹ {f.financial_impact or 0:.2f}"))
+                    self.table.setItem(r, 5, QTableWidgetItem(f.severity))
+            else:
+                self.table.setRowCount(0)
+        finally:
+            session.close()
                 
         table_v.addWidget(self.table)
         content_layout.addWidget(table_card)

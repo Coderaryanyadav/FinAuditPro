@@ -115,41 +115,67 @@ class ExecutiveDashboardEngine:
 
     @staticmethod
     def get_senior_auditor_dashboard() -> DashboardView:
-        return DashboardView(
-            role_name="Senior Auditor Dashboard",
-            metrics={
-                "assigned_audits": 6,
-                "pending_ocr": 2,
-                "pending_ai": 3,
-                "pending_reviews": 4,
-                "risk_findings_count": 14,
-            },
-            cards=[
-                {"title": "Assigned Audits", "value": "6 Projects", "status": "Active"},
-                {"title": "Pending AI Runs", "value": "3 Queued", "status": "Processing"},
-                {"title": "Risk Findings", "value": "14 Items", "status": "Reviewing"},
-            ],
-            tables=[
-                {"name": "My Assigned Engagements", "headers": ["Client", "Current Stage", "Completion %"], "rows": [["TechCorp", "AI_ANALYSIS", "50%"], ["Mega Mart", "DOCUMENT_COLLECTION", "25%"]]}
-            ]
-        )
+        session = SessionLocal()
+        try:
+            projects = session.query(AuditProject).all()
+            findings_count = session.query(Finding).count()
+            docs_count = session.query(Document).count()
+            
+            rows = []
+            for p in projects:
+                client = session.query(Client).filter_by(id=p.client_id).first()
+                c_name = client.name if client else f"Client #{p.client_id}"
+                rows.append([c_name, p.status, f"{int(p.risk_score or 0)}%"])
+
+            return DashboardView(
+                role_name="Senior Auditor Dashboard",
+                metrics={
+                    "assigned_audits": len(projects),
+                    "documents_count": docs_count,
+                    "risk_findings_count": findings_count,
+                },
+                cards=[
+                    {"title": "Assigned Audits", "value": f"{len(projects)} Projects", "status": "Active"},
+                    {"title": "Documents Ingested", "value": f"{docs_count} Files", "status": "Processed"},
+                    {"title": "Risk Findings", "value": f"{findings_count} Items", "status": "Reviewing"},
+                ],
+                tables=[
+                    {"name": "My Assigned Engagements", "headers": ["Client", "Current Stage", "Completion %"], "rows": rows or [["No Active Engagements", "--", "--"]]}
+                ]
+            )
+        finally:
+            session.close()
 
     @staticmethod
     def get_junior_auditor_dashboard() -> DashboardView:
-        return DashboardView(
-            role_name="Junior Auditor Dashboard",
-            metrics={
-                "todays_tasks": 8,
-                "recent_uploads": 14,
-                "assigned_clients": 4,
-                "pending_working_papers": 5,
-            },
-            cards=[
-                {"title": "Today's Tasks", "value": "8 Pending", "status": "In Progress"},
-                {"title": "Recent Uploads", "value": "14 Files", "status": "Completed"},
-                {"title": "Pending Working Papers", "value": "5 Papers", "status": "Drafting"},
-            ],
-            tables=[
-                {"name": "Assigned Document Queue", "headers": ["Document Name", "Client", "OCR Status"], "rows": [["Invoice_402.pdf", "TechCorp", "Ingested"], ["Bank_Feb.xlsx", "Global Impex", "Ingested"]]}
-            ]
-        )
+        session = SessionLocal()
+        try:
+            docs = session.query(Document).all()
+            clients_count = session.query(Client).count()
+            wp_count = session.query(WorkingPaper).count()
+            
+            rows = []
+            for d in docs:
+                client = session.query(Client).filter_by(id=d.client_id).first() if hasattr(d, 'client_id') else None
+                c_name = client.name if client else "Unassigned"
+                rows.append([d.file_name, c_name, d.doc_type or "Ingested"])
+
+            return DashboardView(
+                role_name="Junior Auditor Dashboard",
+                metrics={
+                    "todays_tasks": len(docs),
+                    "recent_uploads": len(docs),
+                    "assigned_clients": clients_count,
+                    "pending_working_papers": wp_count,
+                },
+                cards=[
+                    {"title": "Recent Uploads", "value": f"{len(docs)} Files", "status": "Completed"},
+                    {"title": "Assigned Clients", "value": f"{clients_count} Clients", "status": "Active"},
+                    {"title": "Pending Working Papers", "value": f"{wp_count} Papers", "status": "Drafting"},
+                ],
+                tables=[
+                    {"name": "Assigned Document Queue", "headers": ["Document Name", "Client", "OCR Status"], "rows": rows or [["No Documents In Queue", "--", "--"]]}
+                ]
+            )
+        finally:
+            session.close()

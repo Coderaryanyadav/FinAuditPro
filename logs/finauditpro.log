@@ -60,3 +60,210 @@
 [2026-07-21 23:01:39] [WARNING] [security.audit_trail:88] Failed to persist audit log to DB: No module named 'sqlalchemy'
 [2026-07-21 23:18:01] [INFO] [root:52] Initialized application logging -> /Users/aryanyadav/Desktop/PROJECTS/Audit/logs/finauditpro.log
 [2026-07-21 23:18:01] [INFO] [deployment.migration:42] Applied Database Migration 1: WAL mode enabled.
+[2026-07-21 23:18:48] [INFO] [security.audit_trail:69] [SECURITY AUDIT LOG] LOGIN_SUCCESS by admin@finauditpro.com (Audit Partner) | Hash: 8a22008fa0723b5e...
+[2026-07-21 23:19:17] [INFO] [root:52] Initialized application logging -> /Users/aryanyadav/Desktop/PROJECTS/Audit/logs/finauditpro.log
+[2026-07-21 23:19:29] [INFO] [security.audit_trail:69] [SECURITY AUDIT LOG] LOGIN_SUCCESS by admin@finauditpro.com (Audit Partner) | Hash: 74dfacb4cc94fa1c...
+[2026-07-21 23:19:29] [CRITICAL] [deployment.crash_reporter:38] Uncaught Exception Intercepted! Crash log saved to logs/crashes/crash_20260721_174929.log
+Traceback (most recent call last):
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/src/main.py", line 38, in show_dashboard
+    dashboard = DashboardWindow()
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/src/ui/dashboard.py", line 50, in __init__
+    self.seed_mock_data_if_empty()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/src/ui/dashboard.py", line 567, in seed_mock_data_if_empty
+    c1 = Client(name="TechCorp Solutions Pvt Ltd", gst_number="27AADCT1234E1Z5", pan_number="AADCT1234E", industry="IT / Technology")
+  File "<string>", line 4, in __init__
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/state.py", line 596, in _initialize_instance
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py", line 122, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/state.py", line 594, in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/decl_base.py", line 2182, in _declarative_constructor
+    setattr(self, k, kwargs[k])
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/attributes.py", line 540, in __set__
+    self.impl.set(
+    ~~~~~~~~~~~~~^
+        instance_state(instance), instance_dict(instance), value, None
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/attributes.py", line 1477, in set
+    value = self.fire_replace_event(state, dict_, value, old, initiator)
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/attributes.py", line 1516, in fire_replace_event
+    value = fn(
+        state, value, previous, initiator or self._replace_token
+    )
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/attributes.py", line 2171, in emit_backref_from_scalar_set_event
+    instance_state(child),
+    ~~~~~~~~~~~~~~^^^^^^^
+AttributeError: 'str' object has no attribute '_sa_instance_state'
+
+[2026-07-21 23:20:30] [INFO] [root:52] Initialized application logging -> /Users/aryanyadav/Desktop/PROJECTS/Audit/logs/finauditpro.log
+[2026-07-21 23:20:46] [INFO] [security.audit_trail:69] [SECURITY AUDIT LOG] LOGIN_SUCCESS by admin@finauditpro.com (Audit Partner) | Hash: e859d53bccac6294...
+[2026-07-21 23:20:46] [INFO] [workflow.workflow_manager:56] Initialized Workflow State for Engagement 1
+[2026-07-21 23:20:46] [WARNING] [document_intelligence.ocr_engine:76] OCR Engine Unavailable - Digital PDF & Document Parser Active (PaddleOCR disabled: No module named 'paddleocr'; Tesseract disabled: No module named 'pytesseract'; EasyOCR disabled: No module named 'easyocr')
+[2026-07-21 23:20:46] [CRITICAL] [deployment.crash_reporter:38] Uncaught Exception Intercepted! Crash log saved to logs/crashes/crash_20260721_175046.log
+Traceback (most recent call last):
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/src/main.py", line 38, in show_dashboard
+    dashboard = DashboardWindow()
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/src/ui/dashboard.py", line 488, in __init__
+    self.risk_page = RiskAnalysisWidget()
+                     ~~~~~~~~~~~~~~~~~~^^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/src/ui/risk_analysis.py", line 64, in __init__
+    self.seed_mock_findings_if_empty()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/src/ui/risk_analysis.py", line 113, in seed_mock_findings_if_empty
+    f1 = Finding(audit_id=proj_id, description="Suspicious Entry | $12,000 | JE-40988 | Review approval logs immediately.", risk_level="High")
+  File "<string>", line 4, in __init__
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/state.py", line 596, in _initialize_instance
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py", line 122, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/state.py", line 594, in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/decl_base.py", line 2179, in _declarative_constructor
+    raise TypeError(
+        "%r is an invalid keyword argument for %s" % (k, cls_.__name__)
+    )
+TypeError: 'audit_id' is an invalid keyword argument for Finding
+
+[2026-07-21 23:21:21] [INFO] [root:52] Initialized application logging -> /Users/aryanyadav/Desktop/PROJECTS/Audit/logs/finauditpro.log
+[2026-07-21 23:21:58] [INFO] [security.audit_trail:69] [SECURITY AUDIT LOG] LOGIN_SUCCESS by admin@finauditpro.com (Audit Partner) | Hash: 2f71c6a0a4e9825f...
+[2026-07-21 23:21:58] [INFO] [workflow.workflow_manager:56] Initialized Workflow State for Engagement 1
+[2026-07-21 23:21:58] [WARNING] [document_intelligence.ocr_engine:76] OCR Engine Unavailable - Digital PDF & Document Parser Active (PaddleOCR disabled: No module named 'paddleocr'; Tesseract disabled: No module named 'pytesseract'; EasyOCR disabled: No module named 'easyocr')
+[2026-07-21 23:21:58] [CRITICAL] [deployment.crash_reporter:38] Uncaught Exception Intercepted! Crash log saved to logs/crashes/crash_20260721_175158.log
+Traceback (most recent call last):
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: findings.audit_id
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/src/main.py", line 38, in show_dashboard
+    dashboard = DashboardWindow()
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/src/ui/dashboard.py", line 488, in __init__
+    self.risk_page = RiskAnalysisWidget()
+                     ~~~~~~~~~~~~~~~~~~^^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/src/ui/risk_analysis.py", line 64, in __init__
+    self.seed_mock_findings_if_empty()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/src/ui/risk_analysis.py", line 108, in seed_mock_findings_if_empty
+    if self.session.query(Finding).count() == 0:
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/query.py", line 3153, in count
+    self._legacy_from_self(col).enable_eagerloads(False).scalar()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/query.py", line 2842, in scalar
+    ret = self.one()
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/query.py", line 2815, in one
+    return self._iter().one()  # type: ignore
+           ~~~~~~~~~~^^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/query.py", line 2864, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+        params,
+        ^^^^^^^
+        execution_options={"_sa_orm_load_options": self.load_options},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 2373, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 2271, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/aryanyadav/Desktop/PROJECTS/Audit/.venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: findings.audit_id
+[SQL: SELECT count(*) AS count_1 
+FROM (SELECT findings.id AS findings_id, findings.audit_id AS findings_audit_id, findings.working_paper_id AS findings_working_paper_id, findings.description AS findings_description, findings.financial_impact AS findings_financial_impact, findings.severity AS findings_severity, findings.risk_level AS findings_risk_level, findings.ai_confidence_score AS findings_ai_confidence_score, findings.is_resolved AS findings_is_resolved, findings.created_at AS findings_created_at, findings.updated_at AS findings_updated_at 
+FROM findings) AS anon_1]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+[2026-07-21 23:22:42] [INFO] [root:52] Initialized application logging -> /Users/aryanyadav/Desktop/PROJECTS/Audit/logs/finauditpro.log
+[2026-07-21 23:22:53] [INFO] [security.audit_trail:69] [SECURITY AUDIT LOG] LOGIN_SUCCESS by admin@finauditpro.com (Audit Partner) | Hash: 5000e6ba089e0e3a...
+[2026-07-21 23:22:53] [INFO] [workflow.workflow_manager:56] Initialized Workflow State for Engagement 1
+[2026-07-21 23:22:53] [WARNING] [document_intelligence.ocr_engine:76] OCR Engine Unavailable - Digital PDF & Document Parser Active (PaddleOCR disabled: No module named 'paddleocr'; Tesseract disabled: No module named 'pytesseract'; EasyOCR disabled: No module named 'easyocr')
+[2026-07-21 23:24:16] [INFO] [root:52] Initialized application logging -> /Users/aryanyadav/Desktop/PROJECTS/Audit/logs/finauditpro.log
+[2026-07-21 23:24:34] [INFO] [security.audit_trail:69] [SECURITY AUDIT LOG] LOGIN_SUCCESS by admin@finauditpro.com (Audit Partner) | Hash: b47e6fb7e261c4ce...
+[2026-07-21 23:24:34] [INFO] [workflow.workflow_manager:56] Initialized Workflow State for Engagement 1
+[2026-07-21 23:24:34] [WARNING] [document_intelligence.ocr_engine:76] OCR Engine Unavailable - Digital PDF & Document Parser Active (PaddleOCR disabled: No module named 'paddleocr'; Tesseract disabled: No module named 'pytesseract'; EasyOCR disabled: No module named 'easyocr')

@@ -14,7 +14,7 @@ from .compliance import ComplianceWidget
 from .settings import SettingsWidget
 from .history import AuditHistoryWidget
 from database.database import SessionLocal
-from database.models import Client, AuditProject
+from database.models import Client, AuditProject, Finding
 from services.client_service import ClientService
 from services.dashboard_service import DashboardService
 from workflow.workflow_manager import WorkflowManager
@@ -47,7 +47,6 @@ class DashboardWindow(QWidget):
         self.workflow_manager = WorkflowManager()
         self.event_manager = WorkflowEventManager()
         
-        self.seed_mock_data_if_empty()
         self.init_workflow_state()
 
         self.setWindowTitle("FinAuditPro - Enterprise Audit Workspace")
@@ -330,7 +329,13 @@ class DashboardWindow(QWidget):
         ai_layout.addWidget(create_progress("Portfolio Risk Score", "24/100 (Low Risk)", 50))
         ai_layout.addWidget(create_progress("Compliance Score", "92% (Excellent)", 200))
         
-        ai_findings = QLabel("<b>Recent AI Findings</b><br/>• TechCorp Ltd - GST Mismatch<br/>• Global Impex - Unusual expense spike")
+        findings_query = self.session.query(Finding).order_by(Finding.id.desc()).limit(3).all()
+        if findings_query:
+            findings_text = "<b>Recent AI Findings</b><br/>" + "<br/>".join([f"• {f.description[:60]}" for f in findings_query])
+        else:
+            findings_text = "<b>Recent AI Findings</b><br/><span style='color: #64748b;'>No AI findings recorded. Ingest documents to run AI analysis.</span>"
+        
+        ai_findings = QLabel(findings_text)
         ai_findings.setStyleSheet("background-color: #f8fafc; padding: 12px; border-radius: 8px; margin-top: 12px; border: 1px solid #e2e8f0;")
         ai_layout.addWidget(ai_findings)
         ai_layout.addStretch()
@@ -431,29 +436,17 @@ class DashboardWindow(QWidget):
         
         # Load from DB
         projects = self.session.query(AuditProject).order_by(AuditProject.id.desc()).limit(5).all()
-        if not projects:
-            data = [
-                ("TechCorp Solutions", "Statutory Audit", "In Progress", "Low", "Today"),
-                ("Global Impex Ltd.", "Tax Audit", "Pending Review", "Medium", "Yesterday"),
-                ("Mega Mart Retail", "Internal Audit", "Completed", "High", "Jul 12"),
-                ("Sunrise Networks", "GST Compliance", "Not Started", "Unknown", "--")
-            ]
-            self.table.setRowCount(len(data))
-            for r, row in enumerate(data):
-                for c, val in enumerate(row):
-                    self.table.setItem(r, c, QTableWidgetItem(val))
-        else:
-            self.table.setRowCount(0)
-            for r, proj in enumerate(projects):
-                self.table.insertRow(r)
-                client = self.session.query(Client).filter_by(id=proj.client_id).first()
-                client_name = client.name if client else "Unknown Client"
-                
-                self.table.setItem(r, 0, QTableWidgetItem(client_name))
-                self.table.setItem(r, 1, QTableWidgetItem(f"Audit {proj.financial_year}"))
-                self.table.setItem(r, 2, QTableWidgetItem(proj.status))
-                self.table.setItem(r, 3, QTableWidgetItem(proj.risk_level))
-                self.table.setItem(r, 4, QTableWidgetItem(proj.created_at.strftime("%d-%b-%Y") if proj.created_at else "--"))
+        self.table.setRowCount(0)
+        for r, proj in enumerate(projects):
+            self.table.insertRow(r)
+            client = self.session.query(Client).filter_by(id=proj.client_id).first()
+            client_name = client.name if client else "Unknown Client"
+            
+            self.table.setItem(r, 0, QTableWidgetItem(client_name))
+            self.table.setItem(r, 1, QTableWidgetItem(f"Audit {proj.financial_year}"))
+            self.table.setItem(r, 2, QTableWidgetItem(proj.status))
+            self.table.setItem(r, 3, QTableWidgetItem(proj.risk_level))
+            self.table.setItem(r, 4, QTableWidgetItem(proj.created_at.strftime("%d-%b-%Y") if proj.created_at else "--"))
                 
         table_layout.addWidget(self.table)
         body_layout.addWidget(table_container)
@@ -561,21 +554,6 @@ class DashboardWindow(QWidget):
             pct = int(summary.get("completion_percentage", 0))
             self.lbl_wf_stage.setText(f"Stage: {stage}")
             self.progress_bar.setValue(pct)
-
-    def seed_mock_data_if_empty(self):
-        if self.session.query(Client).count() == 0:
-            c1 = Client(name="TechCorp Solutions Pvt Ltd", gst_number="27AADCT1234E1Z5", pan_number="AADCT1234E", industry="IT / Technology")
-            c2 = Client(name="Global Impex Ltd.", gst_number="07BXYZI9876Q1Z9", pan_number="BXYZI9876Q", industry="Import/Export")
-            c3 = Client(name="Mega Mart Retail", gst_number="29ABCDE1234F2Z5", pan_number="ABCDE1234F", industry="Retail")
-            self.session.add_all([c1, c2, c3])
-            self.session.commit()
-            
-            # Seed matching audit projects
-            ap1 = AuditProject(client_id=c1.id, financial_year="2025-26", status="In Progress", risk_score=24.0, risk_level="Low")
-            ap2 = AuditProject(client_id=c2.id, financial_year="2025-26", status="Pending Review", risk_score=56.0, risk_level="Medium")
-            ap3 = AuditProject(client_id=c3.id, financial_year="2025-26", status="Completed", risk_score=82.0, risk_level="High")
-            self.session.add_all([ap1, ap2, ap3])
-            self.session.commit()
 
     def closeEvent(self, event):
         self.session.close()

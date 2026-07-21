@@ -61,8 +61,6 @@ class RiskAnalysisWidget(QWidget):
         b_layout.setSpacing(24)
         
         # Fetch counts from database
-        self.seed_mock_findings_if_empty()
-        
         high_count = self.session.query(Finding).filter_by(risk_level='High').count()
         med_count = self.session.query(Finding).filter_by(risk_level='Medium').count()
         low_count = self.session.query(Finding).filter_by(risk_level='Low').count()
@@ -103,18 +101,6 @@ class RiskAnalysisWidget(QWidget):
         main_layout.addWidget(scroll)
         
         self.load_findings()
-        
-    def seed_mock_findings_if_empty(self):
-        if self.session.query(Finding).count() == 0:
-            # Query an existing project to link
-            proj = self.session.query(AuditProject).first()
-            proj_id = proj.id if proj else 1
-            
-            f1 = Finding(audit_id=proj_id, description="Suspicious Entry | $12,000 | JE-40988 | Review approval logs immediately.", risk_level="High")
-            f2 = Finding(audit_id=proj_id, description="GST Mismatch | $540 | INV-402 | Reconcile with GSTR-2B.", risk_level="High")
-            f3 = Finding(audit_id=proj_id, description="Duplicate Transaction | $4,500 | JE-40921 | Verify and reverse duplicate entry.", risk_level="Medium")
-            self.session.add_all([f1, f2, f3])
-            self.session.commit()
 
     def load_findings(self):
         findings = self.session.query(Finding).all()

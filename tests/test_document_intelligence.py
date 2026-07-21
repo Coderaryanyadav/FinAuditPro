@@ -78,8 +78,12 @@ class TestDocumentIntelligence(unittest.TestCase):
 
     def test_embedding_service(self):
         service = EmbeddingService()
-        vec = service.generate_embedding("Test audit sentence")
-        self.assertEqual(len(vec), 384)
+        if service._model is None:
+            with self.assertRaises(RuntimeError):
+                service.generate_embedding("Test audit sentence")
+        else:
+            vec = service.generate_embedding("Test audit sentence")
+            self.assertEqual(len(vec), 384)
 
 
 if __name__ == "__main__":

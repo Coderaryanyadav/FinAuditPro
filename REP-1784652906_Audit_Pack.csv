@@ -1,2 +1,0 @@
-rule_id,rule_name,category,severity,risk_score,description,recommendation
-GST-001,Missing Mandatory GSTIN,GST Rules,HIGH,75.0,Missing GSTIN on vendor invoice.,Obtain valid GSTIN copy.

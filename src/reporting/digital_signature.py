@@ -23,7 +23,7 @@ class SignatureBlock:
             payload = f"{self.ca_name}:{self.membership_number}:{self.firm_registration_number}:{self.signature_date.isoformat()}"
             self.digital_signature_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
         if not self.udin:
-            self.udin = f"26{self.membership_number}AAAA{hashlib.md5(self.digital_signature_hash.encode()).hexdigest()[:6].upper()}"
+            self.udin = "UDIN PENDING (Requires ICAI Portal Verification)"
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -33,7 +33,7 @@ class SignatureBlock:
             "firm_registration_number": self.firm_registration_number,
             "signature_date": self.signature_date.isoformat(),
             "digital_signature_hash": self.digital_signature_hash,
-            "udin": self.udin or f"26{self.membership_number}AAAA{hashlib.md5(self.digital_signature_hash.encode()).hexdigest()[:6].upper()}",
+            "udin": self.udin or "UDIN PENDING (Requires ICAI Portal Verification)",
         }
 
 

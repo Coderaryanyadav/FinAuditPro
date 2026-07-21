@@ -251,6 +251,7 @@ class DocumentUploadWidget(QWidget):
         self.worker = AIProcessWorker(doc_ids)
         self.worker.progress.connect(self.on_process_progress)
         self.worker.finished.connect(self.on_process_finished)
+        self.worker.finished.connect(self.worker.deleteLater)
         self.worker.start()
 
     def on_process_progress(self, msg, pct):

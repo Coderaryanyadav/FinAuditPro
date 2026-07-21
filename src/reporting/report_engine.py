@@ -67,8 +67,13 @@ class ReportEngine:
             firm_registration_number=firm_reg_no
         )
 
-        # 2. Executive Summary Template
-        summary_text = ReportTemplateFactory.get_unmodified_opinion_template(client_name, financial_year)
+        # 2. Dynamic Audit Opinion Selection
+        has_critical_or_high = any(f.get("severity") in ["High", "Critical"] or f.get("risk_level") in ["High", "Critical"] for f in findings)
+        if has_critical_or_high:
+            qual_reasons = "\n".join([f"- [{f.get('severity', 'High')}] {f.get('description', 'Material misstatement detected')}" for f in findings if f.get("severity") in ["High", "Critical"]])
+            summary_text = ReportTemplateFactory.get_qualified_opinion_template(client_name, financial_year, qual_reasons)
+        else:
+            summary_text = ReportTemplateFactory.get_unmodified_opinion_template(client_name, financial_year)
 
         # 3. PDF Generation
         pdf_path = PDFReportGenerator.generate_pdf_report(

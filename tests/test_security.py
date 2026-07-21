@@ -41,11 +41,14 @@ class TestSecurityArchitecture(unittest.TestCase):
     def test_aes_crypto_engine(self):
         engine = AESCryptoEngine(master_password="TestMasterKey")
         original_data = b"Sensitive Audit Data Records"
-        encrypted = engine.encrypt_bytes(original_data)
-        self.assertNotEqual(encrypted, original_data)
-        
-        decrypted = engine.decrypt_bytes(encrypted)
-        self.assertEqual(decrypted, original_data)
+        if engine._fernet is None:
+            with self.assertRaises(RuntimeError):
+                engine.encrypt_bytes(original_data)
+        else:
+            encrypted = engine.encrypt_bytes(original_data)
+            self.assertNotEqual(encrypted, original_data)
+            decrypted = engine.decrypt_bytes(encrypted)
+            self.assertEqual(decrypted, original_data)
 
     def test_immutable_audit_logger(self):
         logger = ImmutableAuditLogger()

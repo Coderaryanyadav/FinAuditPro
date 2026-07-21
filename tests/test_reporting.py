@@ -47,7 +47,7 @@ class TestReportingEngine(unittest.TestCase):
         )
         self.assertEqual(sig.ca_name, "CA Test User")
         self.assertTrue(len(sig.digital_signature_hash) == 64)
-        self.assertIn("54321", sig.udin)
+        self.assertIn("UDIN PENDING", sig.udin)
 
     def test_qr_verification(self):
         payload = QRVerificationManager.generate_verification_payload(

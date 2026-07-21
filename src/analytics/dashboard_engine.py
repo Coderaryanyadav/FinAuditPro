@@ -30,7 +30,8 @@ class ExecutiveDashboardEngine:
 
     @staticmethod
     def get_ceo_dashboard() -> DashboardView:
-        total_clients, total_audits, hours_saved = 0, 0, 0.0
+        total_clients, total_audits, hours_saved, doc_count = 0, 0, 0.0, 0
+        top_risks = []
         try:
             from database.database import SessionLocal
             from database.models import Client, AuditProject, Document
@@ -38,7 +39,16 @@ class ExecutiveDashboardEngine:
             total_clients = session.query(Client).count()
             total_audits = session.query(AuditProject).count()
             doc_count = session.query(Document).count()
-            hours_saved = doc_count * 2.5
+            # Real metrics based strictly on database values
+            hours_saved = doc_count * 0.5  # Estimated 30 mins saved per document processed
+            
+            recent_projects = session.query(AuditProject).order_by(AuditProject.id.desc()).limit(5).all()
+            for p in recent_projects:
+                client = session.query(Client).filter_by(id=p.client_id).first()
+                c_name = client.name if client else f"Client #{p.client_id}"
+                c_ind = client.industry if client and hasattr(client, "industry") else "N/A"
+                top_risks.append([c_name, c_ind, p.risk_level or "Low"])
+                
             session.close()
         except Exception:
             pass
@@ -46,41 +56,60 @@ class ExecutiveDashboardEngine:
         return DashboardView(
             role_name="CEO Dashboard",
             metrics={
-                "revenue_ytd": f"₹ {max(total_clients, 1) * 8.0:.1f} Lakhs",
                 "total_clients": total_clients,
                 "total_audits": total_audits,
-                "growth_rate_pct": 24.5,
+                "total_documents": doc_count,
                 "hours_saved": round(hours_saved, 1),
-                "compliance_score_pct": 94.8,
             },
             cards=[
                 {"title": "Firm Total Clients", "value": str(total_clients), "status": "Active"},
-                {"title": "Time Saved via AI", "value": f"{hours_saved:.0f} Hours", "status": "Efficiency Boost"},
-                {"title": "Firm Compliance", "value": "94.8%", "status": "Excellent"},
+                {"title": "Total Engagements", "value": str(total_audits), "status": "Active"},
+                {"title": "Documents Processed", "value": str(doc_count), "status": "Ingested"},
             ],
             tables=[
-                {"name": "Top Client Risks", "headers": ["Client Name", "Industry", "Risk Level"], "rows": [["TechCorp", "IT", "Low"], ["Global Impex", "Import/Export", "Medium"]]}
+                {"name": "Top Client Risks", "headers": ["Client Name", "Industry", "Risk Level"], "rows": top_risks if top_risks else [["N/A", "N/A", "N/A"]]}
             ]
         )
 
     @staticmethod
     def get_partner_dashboard() -> DashboardView:
+        active_engagements, critical_findings, high_risk_clients = 0, 0, 0
+        review_queue = []
+        try:
+            from database.database import SessionLocal
+            from database.models import Client, AuditProject, Finding
+            session = SessionLocal()
+            active_engagements = session.query(AuditProject).filter(AuditProject.status != 'Completed').count()
+            critical_findings = session.query(Finding).filter(Finding.severity == 'High').count()
+            high_risk_clients = session.query(AuditProject).filter(AuditProject.risk_level == 'High').count()
+            
+            # Fetch pending reviews (e.g. In Progress engagements for demo purposes)
+            pending_projects = session.query(AuditProject).filter(AuditProject.status.in_(['In Progress', 'Execution'])).limit(5).all()
+            for proj in pending_projects:
+                client = session.query(Client).filter_by(id=proj.client_id).first()
+                client_name = client.name if client else "Unknown"
+                review_queue.append([client_name, proj.status, "CA Partner"])
+            
+            session.close()
+        except Exception:
+            pass
+
         return DashboardView(
             role_name="Audit Partner Dashboard",
             metrics={
-                "active_engagements": 12,
-                "critical_findings": 3,
-                "high_risk_clients": 2,
-                "review_queue_count": 5,
-                "pending_partner_approvals": 4,
+                "active_engagements": active_engagements,
+                "critical_findings": critical_findings,
+                "high_risk_clients": high_risk_clients,
+                "review_queue_count": len(review_queue),
+                "pending_partner_approvals": len(review_queue),
             },
             cards=[
-                {"title": "Active Engagements", "value": "12", "status": "In Progress"},
-                {"title": "Critical Findings", "value": "3 Flagged", "status": "Requires Review"},
-                {"title": "Pending Approvals", "value": "4 Reports", "status": "Action Req."},
+                {"title": "Active Engagements", "value": str(active_engagements), "status": "In Progress"},
+                {"title": "Critical Findings", "value": f"{critical_findings} Flagged", "status": "Requires Review"},
+                {"title": "Pending Approvals", "value": f"{len(review_queue)} Reports", "status": "Action Req."},
             ],
             tables=[
-                {"name": "Partner Review Queue", "headers": ["Client", "Audit Stage", "Reviewer"], "rows": [["TechCorp", "FINAL_REPORT", "CA Partner"], ["Global Impex", "PARTNER_REVIEW", "CA Partner"]]}
+                {"name": "Partner Review Queue", "headers": ["Client", "Audit Stage", "Reviewer"], "rows": review_queue or [["None", "N/A", "N/A"]]}
             ]
         )
 

@@ -87,23 +87,40 @@ class DocumentPipeline:
         try:
             from rule_engine.rule_engine import AuditRuleEngine
             rule_engine = AuditRuleEngine()
+            
+            # Extract real transaction amounts from parsed document tables
+            extracted_amounts = []
+            if parsed_doc.tables:
+                import re
+                for tbl in parsed_doc.tables:
+                    for cell in tbl.get("cells", []):
+                        matches = re.findall(r"\b\d{1,3}(?:,\d{3})*(?:\.\d{2})?\b", str(cell))
+                        for m in matches:
+                            try:
+                                val = float(m.replace(",", ""))
+                                if val > 0:
+                                    extracted_amounts.append(val)
+                            except ValueError:
+                                pass
+
             rule_eval = rule_engine.evaluate_document({
                 "text": parsed_doc.cleaned_text,
                 "gstin": meta.gstin,
                 "pan": meta.pan,
                 "file_name": parsed_doc.file_name,
-                "transaction_amounts": [12000.0, 4500.0, 99000.0]
+                "transaction_amounts": extracted_amounts
             })
             if rule_eval.failed_rules:
                 from database.database import SessionLocal
                 from database.models import Finding
                 session = SessionLocal()
                 for failed in rule_eval.failed_rules:
+                    impact = max(extracted_amounts) if extracted_amounts else 0.0
                     finding = Finding(
                         description=f"[{failed.rule_id}] {failed.rule_name}: {failed.description}",
                         severity=failed.severity.value,
                         risk_level=failed.severity.value,
-                        financial_impact=1000.0
+                        financial_impact=impact
                     )
                     session.add(finding)
                 session.commit()
@@ -129,7 +146,7 @@ class DocumentPipeline:
 
         # 7. Vector Indexing
         _notify("Generating Vector Embeddings & Indexing", 95.0)
-        doc_id = document_id or 1
+        doc_id = document_id if document_id is not None else int(time.time())
         indexed_chunks = self.indexer.index_document_chunks(
             document_id=doc_id,
             engagement_id=engagement_id,

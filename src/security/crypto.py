@@ -15,12 +15,11 @@ logger = logging.getLogger(__name__)
 class AESCryptoEngine:
     """Provides AES-256 file encryption and decryption for sensitive audit records."""
 
-    def __init__(self, master_password: Optional[str] = None):
+    def __init__(self, master_password: Optional[str] = None, salt: Optional[bytes] = None):
         import platform
-        # Derive key dynamically using hardware machine node + PBKDF2 salt
-        secret = master_password or f"FinAuditPro_{platform.node()}_{os.getlogin() if hasattr(os, 'getlogin') else 'user'}"
-        salt = b"FinAuditPro_Salt_2026"
-        self.key = hashlib.pbkdf2_hmac("sha256", secret.encode("utf-8"), salt, 100000)
+        secret = master_password or f"FinAuditPro_Secret_{platform.node()}"
+        self.salt = salt or os.urandom(16)
+        self.key = hashlib.pbkdf2_hmac("sha256", secret.encode("utf-8"), self.salt, 100000)
         self._fernet = None
         self._init_fernet()
 
@@ -30,20 +29,20 @@ class AESCryptoEngine:
             url_safe_key = base64.urlsafe_b64encode(self.key)
             self._fernet = Fernet(url_safe_key)
         except ImportError:
-            logger.info("cryptography package not installed. Operating in transparent local storage mode.")
+            logger.error("cryptography package not installed. Cryptographic operations halted for security compliance.")
+            self._fernet = None
 
     def encrypt_bytes(self, data: bytes) -> bytes:
-        """Encrypt byte array using AES-256 (Fernet) or hashlib block cipher."""
+        """Encrypt byte array using AES-256 (Fernet)."""
         if self._fernet:
             return self._fernet.encrypt(data)
-        # Keystream substitution fallback
-        return bytes([((b + self.key[i % len(self.key)]) % 256) for i, b in enumerate(data)])
+        raise RuntimeError("Fernet AES-256 encryption unavailable. 'cryptography' library is required.")
 
     def decrypt_bytes(self, encrypted_data: bytes) -> bytes:
-        """Decrypt byte array."""
+        """Decrypt byte array using AES-256 (Fernet)."""
         if self._fernet:
             return self._fernet.decrypt(encrypted_data)
-        return bytes([((b - self.key[i % len(self.key)]) % 256) for i, b in enumerate(encrypted_data)])
+        raise RuntimeError("Fernet AES-256 decryption unavailable. 'cryptography' library is required.")
 
     def encrypt_file(self, source_path: str, dest_path: str) -> str:
         """Encrypt source file and write to dest_path."""

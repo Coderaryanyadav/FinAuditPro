@@ -25,7 +25,7 @@ class EmbeddingService:
             self._model = SentenceTransformer(self.model_name)
             logger.info(f"Loaded SentenceTransformer model: {self.model_name}")
         except Exception as e:
-            logger.warning(f"SentenceTransformer not available ({e}). Using deterministic fallback embeddings.")
+            logger.error(f"SentenceTransformer not available ({e}). Vector embedding capabilities disabled.")
 
     def generate_embedding(self, text: str) -> List[float]:
         """Generate embedding vector for a single string."""
@@ -35,9 +35,9 @@ class EmbeddingService:
                 return embedding
             except Exception as e:
                 logger.error(f"Embedding encoding failed: {e}")
+                raise RuntimeError(f"Embedding encoding failed: {e}")
 
-        # Deterministic feature hashing fallback vector
-        return self._fallback_hash_embedding(text)
+        raise RuntimeError("Vector embedding model is unavailable. Ingestion halted to prevent corrupt index state.")
 
     def generate_embeddings_batch(self, texts: List[str]) -> List[List[float]]:
         """Batch embedding generation for efficiency."""
@@ -47,15 +47,6 @@ class EmbeddingService:
                 return embeddings
             except Exception as e:
                 logger.error(f"Batch embedding failed: {e}")
+                raise RuntimeError(f"Batch embedding failed: {e}")
 
-        return [self._fallback_hash_embedding(t) for t in texts]
-
-    def _fallback_hash_embedding(self, text: str) -> List[float]:
-        """Generates a deterministic normalized 384-dimensional vector from SHA-256 hash."""
-        vec = []
-        seed_bytes = text.encode("utf-8")
-        for i in range(self.EMBEDDING_DIM):
-            chunk_hash = hashlib.sha256(seed_bytes + str(i).encode("utf-8")).digest()
-            val = (int.from_bytes(chunk_hash[:4], "big") / (2**32 - 1)) * 2.0 - 1.0
-            vec.append(round(val, 6))
-        return vec
+        raise RuntimeError("Vector embedding model is unavailable. Ingestion halted to prevent corrupt index state.")

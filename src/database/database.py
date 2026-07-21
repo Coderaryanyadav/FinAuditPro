@@ -14,13 +14,17 @@ DB_PATH = os.path.join(DATA_DIR, 'finauditpro.db')
 DATABASE_URL = f"sqlite:///{DB_PATH}"
 
 # Setup SQLAlchemy Engine and Session
-engine = create_engine(DATABASE_URL, echo=False)
+engine = create_engine(DATABASE_URL, echo=False, connect_args={'timeout': 30.0})
 
 from sqlalchemy import event
 @event.listens_for(engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.execute("PRAGMA synchronous=NORMAL")
+    cursor.execute("PRAGMA cache_size=-64000") # 64MB cache for M4 Pro high memory bandwidth
+    cursor.execute("PRAGMA mmap_size=30000000000") # Memory mapped I/O
+    cursor.execute("PRAGMA temp_store=MEMORY") # Keep temp tables in RAM
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
 

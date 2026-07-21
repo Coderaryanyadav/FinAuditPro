@@ -37,6 +37,12 @@ a = Analysis(
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
+import platform
+import os
+
+os_name = platform.system()
+icon_path = 'assets/icon.ico' if os_name == 'Windows' else 'assets/icon.icns' if os_name == 'Darwin' else 'assets/icon.png'
+
 exe = EXE(
     pyz,
     a.scripts,
@@ -47,13 +53,13 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=False,
+    console=False, # Disable console for production desktop app
     disable_windowed_traceback=False,
-    argv_emulation=False,
+    argv_emulation=True if os_name == 'Darwin' else False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='HTML/assets/icon.ico' if os.path.exists('HTML/assets/icon.ico') else None,
+    icon=icon_path if os.path.exists(icon_path) else None,
 )
 
 coll = COLLECT(

@@ -285,7 +285,7 @@ class DashboardWindow(QWidget):
         pending_reviews = self.session.query(AuditProject).filter_by(status='Pending Review').count()
         high_risk_cases = self.session.query(AuditProject).filter_by(risk_level='High').count()
 
-        stats_layout.addWidget(create_stat_card("Total Clients", str(total_clients), "+12%", "#e0f2fe", "#0ea5e9", "👥", "#f0f9ff", "#0ea5e9"))
+        stats_layout.addWidget(create_stat_card("Total Clients", str(total_clients), "Live Count", "#e0f2fe", "#0ea5e9", "👥", "#f0f9ff", "#0ea5e9"))
         stats_layout.addWidget(create_stat_card("Completed Audits", str(completed_audits), "This Year", "#ecfdf5", "#10b981", "✅", "#f0fdf4", "#10b981"))
         stats_layout.addWidget(create_stat_card("Pending Reviews", str(pending_reviews), "Action Req.", "#fffbeb", "#f59e0b", "🕒", "#fff9db", "#f59e0b"))
         stats_layout.addWidget(create_stat_card("High Risk Cases", str(high_risk_cases), "Flagged by AI", "#fef2f2", "#ef4444", "⚠️", "#fff5f5", "#ef4444"))

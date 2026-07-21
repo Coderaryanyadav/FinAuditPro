@@ -257,9 +257,18 @@ class AIAuditWidget(QWidget):
             session.close()
 
             if not findings:
-                lbl = QLabel("No anomalies detected in current active engagement.")
-                lbl.setStyleSheet("color: #64748b; font-size: 12px;")
-                self.f_layout.addWidget(lbl)
+                empty_card = QFrame()
+                empty_card.setStyleSheet("background-color: #ffffff; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 20px;")
+                e_layout = QVBoxLayout(empty_card)
+                e_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                lbl1 = QLabel("🔍")
+                lbl1.setStyleSheet("font-size: 28px; border: none;")
+                lbl2 = QLabel("<b>No Anomaly Findings Detected</b><br/><span style='color: #64748b; font-size: 11px;'>Upload financial ledger or invoice PDFs to run AI audit scans.</span>")
+                lbl2.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                lbl2.setStyleSheet("color: #0f172a; font-size: 12px; border: none; margin-top: 6px;")
+                e_layout.addWidget(lbl1, alignment=Qt.AlignmentFlag.AlignCenter)
+                e_layout.addWidget(lbl2, alignment=Qt.AlignmentFlag.AlignCenter)
+                self.f_layout.addWidget(empty_card)
                 return
 
             for f in findings:

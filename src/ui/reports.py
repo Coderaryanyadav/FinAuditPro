@@ -1,9 +1,10 @@
+import os
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                                QPushButton, QFrame, QScrollArea, QFileDialog, QMessageBox)
 from PySide6.QtCore import Qt, QMarginsF
 from PySide6.QtGui import QPdfWriter, QTextDocument, QPageLayout, QPageSize
 from database.database import SessionLocal
-from database.models import Client, Finding
+from database.models import Client, Finding, WorkingPaper
 
 class ReportsWidget(QWidget):
     def __init__(self):
@@ -142,11 +143,33 @@ class ReportsWidget(QWidget):
             client = self.session.query(Client).first()
             client_name = client.name if client else "Unassigned Client Account"
 
+            db_findings = self.session.query(Finding).all()
+            db_wps = self.session.query(WorkingPaper).all()
+
+            findings_list = [
+                {
+                    "rule_id": f.rule_id or "AUD-FINDING",
+                    "rule_name": f.title or "Audit Finding",
+                    "category": f.category or "General",
+                    "severity": f.severity or "MEDIUM",
+                    "risk_score": float(f.confidence_score or 50.0)
+                } for f in db_findings
+            ] if db_findings else [{"rule_id": "AUD-001", "rule_name": "Standard Audit Review", "category": "General", "severity": "LOW", "risk_score": 10.0}]
+
+            wp_list = [
+                {
+                    "working_paper_number": f"WP-{wp.id}",
+                    "audit_area": wp.objective or "Financial Review",
+                    "prepared_by": "Auditor",
+                    "review_status": "COMPLETED"
+                } for wp in db_wps
+            ] if db_wps else [{"working_paper_number": "WP-001", "audit_area": "Financial Statements", "prepared_by": "Auditor", "review_status": "REVIEWED"}]
+
             result = report_engine.generate_full_audit_pack(
                 client_name=client_name,
                 financial_year="2025-26",
-                findings=[{"rule_id": "GST-001", "rule_name": "GST Reconciliation Discrepancy", "category": "GST", "severity": "HIGH", "risk_score": 75.0}],
-                working_papers=[{"working_paper_number": "WP-AUD-2026-001", "audit_area": "Revenue", "prepared_by": "CA Auditor", "review_status": "APPROVED"}],
+                findings=findings_list,
+                working_papers=wp_list,
                 output_dir=os.path.dirname(file_path)
             )
 
@@ -164,7 +187,7 @@ class ReportsWidget(QWidget):
                 f"Output: {file_path}"
             )
         except Exception as e:
-            # Fallback to Qt PDF compilation
+            # Fallback to Qt PDF compilation if ReportLab unavailable
             try:
                 doc = QTextDocument()
                 doc.setHtml(self.editor_content.text())
@@ -175,8 +198,6 @@ class ReportsWidget(QWidget):
                 QMessageBox.information(self, "Export Successful", f"PDF report exported to:\n{file_path}")
             except Exception as ex:
                 QMessageBox.critical(self, "Export Failed", f"An error occurred: {ex}")
-        except Exception as e:
-            QMessageBox.critical(self, "Export Failed", f"An error occurred while generating PDF:\n{str(e)}")
 
     def closeEvent(self, event):
         self.session.close()

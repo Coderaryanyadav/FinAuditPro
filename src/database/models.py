@@ -3,7 +3,7 @@ from sqlalchemy import (
     Column, Integer, String, DateTime, ForeignKey, 
     Text, Float, Boolean, Index
 )
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import declarative_base, relationship, object_session
 
 Base = declarative_base()
 

@@ -18,15 +18,15 @@ class AIProcessWorker(QThread):
     def __init__(self, document_ids):
         super().__init__()
         self.document_ids = document_ids
-        self.session = SessionLocal()
 
     def run(self):
+        session = SessionLocal()
         try:
             from document_intelligence.document_pipeline import DocumentPipeline
             pipeline = DocumentPipeline()
             total = len(self.document_ids)
             for i, doc_id in enumerate(self.document_ids):
-                doc = self.session.query(Document).filter_by(id=doc_id).first()
+                doc = session.query(Document).filter_by(id=doc_id).first()
                 if not doc: continue
                 
                 def progress_cb(stage_name, pct):
@@ -43,10 +43,10 @@ class AIProcessWorker(QThread):
                 
                 if result and result.status == "SUCCESS":
                     doc.doc_type = "Ingested"
-                    self.session.commit()
+                    session.commit()
                 else:
                     doc.doc_type = "Failed"
-                    self.session.commit()
+                    session.commit()
             
             self.progress.emit("AI Processing Complete", 100)
             self.finished.emit(True)
@@ -54,7 +54,7 @@ class AIProcessWorker(QThread):
             print(f"Document Ingestion Error: {e}")
             self.finished.emit(False)
         finally:
-            self.session.close()
+            session.close()
 
 class DocumentUploadWidget(QWidget):
     def __init__(self):

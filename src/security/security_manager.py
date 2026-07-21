@@ -15,21 +15,26 @@ from .crash_recovery import CrashRecoveryManager, SessionState
 
 logger = logging.getLogger(__name__)
 
+import threading
+
 class SecurityManager:
     """Master Facade for Enterprise Security & Governance."""
 
     _instance = None
+    _lock = threading.Lock()
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(SecurityManager, cls).__new__(cls)
-            cls._instance.auth_manager = AuthManager()
-            cls._instance.crypto_engine = AESCryptoEngine()
-            cls._instance.secure_storage = SecureStorage()
-            cls._instance.audit_logger = ImmutableAuditLogger()
-            cls._instance.backup_engine = BackupEngine()
-            cls._instance.recovery_manager = CrashRecoveryManager()
-            cls._instance.current_session: Optional[SessionToken] = None
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super(SecurityManager, cls).__new__(cls)
+                    cls._instance.auth_manager = AuthManager()
+                    cls._instance.crypto_engine = AESCryptoEngine()
+                    cls._instance.secure_storage = SecureStorage()
+                    cls._instance.audit_logger = ImmutableAuditLogger()
+                    cls._instance.backup_engine = BackupEngine()
+                    cls._instance.recovery_manager = CrashRecoveryManager()
+                    cls._instance.current_session: Optional[SessionToken] = None
         return cls._instance
 
     def authenticate_and_login(self, email: str, raw_password: str, stored_password_hash: str, role_str: str, user_id: int = 1) -> Optional[SessionToken]:

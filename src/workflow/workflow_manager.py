@@ -15,20 +15,25 @@ from .workflow_exceptions import WorkflowStateCorruptedError
 
 logger = logging.getLogger(__name__)
 
+import threading
+
 class WorkflowManager:
     """
     Facade and orchestrator for active engagement workflow state persistence,
     recovery after application restarts, and cross-module context coordination.
     """
     _instance = None
+    _lock = threading.Lock()
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(WorkflowManager, cls).__new__(cls)
-            cls._instance._engine = WorkflowEngine()
-            cls._instance._event_manager = WorkflowEventManager()
-            cls._instance._active_state: Optional[WorkflowState] = None
-            cls._instance._state_cache: Dict[int, WorkflowState] = {}
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super(WorkflowManager, cls).__new__(cls)
+                    cls._instance._engine = WorkflowEngine()
+                    cls._instance._event_manager = WorkflowEventManager()
+                    cls._instance._active_state: Optional[WorkflowState] = None
+                    cls._instance._state_cache: Dict[int, WorkflowState] = {}
         return cls._instance
 
     @property

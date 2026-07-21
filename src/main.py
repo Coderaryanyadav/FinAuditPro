@@ -9,11 +9,23 @@ from ui.styles import GLOBAL_QSS
 from ui.splash import SplashScreen
 from ui.login import LoginWindow
 from database.database import init_db
+from deployment.logger import setup_application_logging
+from deployment.crash_reporter import setup_global_crash_handler
+from deployment.migration import DatabaseMigrator
+from security.security_manager import SecurityManager
 
 def main():
-    # Initialize database
+    # 1. Setup Enterprise Logging & Global Crash Interceptor
+    setup_application_logging()
+    setup_global_crash_handler()
+
+    # 2. Database Schema Migration & Initialization
     init_db()
-    
+    DatabaseMigrator.migrate()
+
+    # 3. Security Manager Initialization
+    SecurityManager()
+
     app = QApplication(sys.argv)
     app.setStyleSheet(GLOBAL_QSS)
     

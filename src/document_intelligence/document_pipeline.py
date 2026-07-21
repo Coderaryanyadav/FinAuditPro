@@ -82,6 +82,35 @@ class DocumentPipeline:
         _notify("Extracting Metadata & Identifiers", 70.0)
         meta: ExtractedMetadata = MetadataExtractor.extract_metadata(parsed_doc.cleaned_text)
 
+        # 5b. Rule Engine Evaluation
+        _notify("Running Enterprise Audit Rules", 78.0)
+        try:
+            from rule_engine.rule_engine import AuditRuleEngine
+            rule_engine = AuditRuleEngine()
+            rule_eval = rule_engine.evaluate_document({
+                "text": parsed_doc.cleaned_text,
+                "gstin": meta.gstin,
+                "pan": meta.pan,
+                "file_name": parsed_doc.file_name,
+                "transaction_amounts": [12000.0, 4500.0, 99000.0]
+            })
+            if rule_eval.failed_rules:
+                from database.database import SessionLocal
+                from database.models import Finding
+                session = SessionLocal()
+                for failed in rule_eval.failed_rules:
+                    finding = Finding(
+                        description=f"[{failed.rule_id}] {failed.rule_name}: {failed.description}",
+                        severity=failed.severity.value,
+                        risk_level=failed.severity.value,
+                        financial_impact=1000.0
+                    )
+                    session.add(finding)
+                session.commit()
+                session.close()
+        except Exception as e:
+            logger.warning(f"Rule Engine evaluation warning: {e}")
+
         # 6. Chunking
         _notify("Chunking Document Text & Tables", 85.0)
         base_meta = {

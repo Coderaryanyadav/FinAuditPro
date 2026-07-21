@@ -475,7 +475,9 @@ class DashboardWindow(QWidget):
         self.ai_page = AIAuditWidget()
         self.stacked_widget.addWidget(self.ai_page)
         # 4: Financial Statements
-        self.stacked_widget.addWidget(PlaceholderWidget("Financial Statements"))
+        from .financial_statements import FinancialStatementsWidget
+        self.statements_page = FinancialStatementsWidget()
+        self.stacked_widget.addWidget(self.statements_page)
         # 5: GST Verification
         self.gst_page = GSTVerificationWidget()
         self.stacked_widget.addWidget(self.gst_page)

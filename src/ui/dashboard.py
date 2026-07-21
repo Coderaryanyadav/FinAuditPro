@@ -565,7 +565,8 @@ class DashboardWindow(QWidget):
                     self.ai_page.active_engagement_id = client_id
                 self.refresh_workflow_ui()
             except Exception as e:
-                print(f"Engagement change error: {e}")
+                import logging
+                logging.getLogger(__name__).warning(f"Engagement change error: {e}")
 
     def refresh_workflow_ui(self):
         summary = self.workflow_manager.get_dashboard_summary()

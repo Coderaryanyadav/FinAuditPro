@@ -66,6 +66,13 @@ class AuditHistoryWidget(QWidget):
         self.load_history()
 
     def load_history(self):
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.VIEW_AUDIT_LOGS):
+            self.table.setRowCount(0)
+            return
+
         from database.models import AuditLog
         logs = self.session.query(AuditLog).order_by(AuditLog.id.desc()).all()
         if not logs:

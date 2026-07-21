@@ -325,7 +325,8 @@ class AIAuditWidget(QWidget):
             self.worker.signals.error.connect(self.on_copilot_error)
             QThreadPool.globalInstance().start(self.worker)
         except Exception as e:
-            print(f"Copilot Error: {e}")
+            import logging
+            logging.getLogger(__name__).exception("Copilot Error")
             if self.current_ai_bubble:
                 self.current_ai_bubble.setText(f"Analysis error: {e}")
 

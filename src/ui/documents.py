@@ -51,7 +51,8 @@ class AIProcessWorker(QThread):
             self.progress.emit("AI Processing Complete", 100)
             self.finished.emit(True)
         except Exception as e:
-            print(f"Document Ingestion Error: {e}")
+            import logging
+            logging.getLogger(__name__).exception("Document Ingestion Error")
             self.finished.emit(False)
         finally:
             session.close()
@@ -282,6 +283,18 @@ class DocumentUploadWidget(QWidget):
             QMessageBox.information(self, "Processing Complete", "AI Document Ingestion Completed Successfully!")
         else:
             QMessageBox.critical(self, "Error", "AI Document Ingestion Failed.")
+
+    def delete_selected_document(self):
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.DELETE_DOCUMENTS):
+            QMessageBox.warning(self, "Access Denied", "Your role does not have permission to delete documents.")
+            return
+
+        item = self.file_list.currentItem()
+        if not item: return
+        self.file_list.takeItem(self.file_list.row(item))
 
     def closeEvent(self, event):
         self.session.close()

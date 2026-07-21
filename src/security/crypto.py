@@ -18,7 +18,26 @@ class AESCryptoEngine:
     def __init__(self, master_password: Optional[str] = None, salt: Optional[bytes] = None):
         import platform
         secret = master_password or f"FinAuditPro_Secret_{platform.node()}"
-        self.salt = salt or os.urandom(16)
+        if salt is None:
+            salt_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+            os.makedirs(salt_dir, exist_ok=True)
+            salt_file = os.path.join(salt_dir, ".crypto_salt")
+            if os.path.exists(salt_file):
+                try:
+                    with open(salt_file, "rb") as f:
+                        self.salt = f.read(16)
+                except Exception:
+                    self.salt = os.urandom(16)
+            else:
+                self.salt = os.urandom(16)
+                try:
+                    with open(salt_file, "wb") as f:
+                        f.write(self.salt)
+                except Exception as e:
+                    logger.warning(f"Could not persist crypto salt to disk: {e}")
+        else:
+            self.salt = salt
+
         self.key = hashlib.pbkdf2_hmac("sha256", secret.encode("utf-8"), self.salt, 100000)
         self._fernet = None
         self._init_fernet()

@@ -128,7 +128,7 @@ class RuleManagementWidget(QWidget):
             
             chk = QCheckBox()
             chk.setChecked(r.enabled)
-            chk.stateChanged.connect(lambda state, rid=r.rule_id: self.engine.registry.set_rule_enabled(rid, state == 2))
+            chk.stateChanged.connect(lambda state, rid=r.rule_id: self.toggle_rule(rid, state == 2))
             
             # Align checkbox center
             cell_widget = QWidget()
@@ -139,3 +139,14 @@ class RuleManagementWidget(QWidget):
             self.table.setCellWidget(row_idx, 5, cell_widget)
 
             row_idx += 1
+
+    def toggle_rule(self, rule_id, enabled):
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        from PySide6.QtWidgets import QMessageBox
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.MANAGE_RULES):
+            QMessageBox.warning(self, "Access Denied", "Your role does not have permission to manage audit rules.")
+            self.load_table_data()
+            return
+        self.engine.registry.set_rule_enabled(rule_id, enabled)

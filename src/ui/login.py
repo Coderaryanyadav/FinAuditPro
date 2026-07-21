@@ -128,6 +128,7 @@ class LoginWindow(QWidget):
         self.login_btn.setText("Signing In...")
         self.login_btn.setDisabled(True)
 
+        session = None
         try:
             from database.database import SessionLocal
             from database.repositories.user_repo import UserRepository
@@ -158,6 +159,9 @@ class LoginWindow(QWidget):
             self.login_btn.setText("Sign In")
             self.login_btn.setEnabled(True)
             QMessageBox.warning(self, "Authentication Failed", str(e))
+        finally:
+            if session:
+                session.close()
 
     def auth_success(self):
         self.login_successful.emit()

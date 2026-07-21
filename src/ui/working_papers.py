@@ -129,6 +129,13 @@ class WorkingPaperWidget(QWidget):
             self.conclusion_field.clear()
 
     def save_working_paper(self):
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.EDIT_WORKING_PAPERS):
+            QMessageBox.warning(self, "Access Denied", "Your role does not have permission to edit working papers.")
+            return
+
         proj_id = self.project_combo.currentData()
         if proj_id is None: return
         

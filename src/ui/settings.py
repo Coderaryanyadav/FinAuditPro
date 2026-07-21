@@ -99,7 +99,19 @@ class SettingsWidget(QWidget):
         main_layout.addWidget(content)
 
     def save_settings(self):
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.MANAGE_SETTINGS):
+            QMessageBox.warning(self, "Access Denied", "Your role does not have permission to modify system settings.")
+            return
         QMessageBox.information(self, "Settings Saved", "Application configuration successfully updated!")
 
     def backup_database(self):
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.PERFORM_BACKUP):
+            QMessageBox.warning(self, "Access Denied", "Your role does not have permission to trigger database backups.")
+            return
         QMessageBox.information(self, "Database Backup", "Database backup created in data/backups/ directory.")

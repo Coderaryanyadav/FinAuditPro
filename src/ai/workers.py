@@ -1,6 +1,8 @@
-from PySide6.QtCore import QRunnable, QObject, Signal, Slot
+from PySide6.QtCore import QRunnable, QObject, QThread, Signal, Slot
 from typing import Dict, Any, Callable
 import traceback
+from .ollama_client import OllamaClient
+
 
 class WorkerSignals(QObject):
     """
@@ -13,6 +15,7 @@ class WorkerSignals(QObject):
     finished = Signal()
     error = Signal(tuple)
     result = Signal(object)
+
 
 class AICopilotWorker(QRunnable):
     """
@@ -38,3 +41,27 @@ class AICopilotWorker(QRunnable):
             self.signals.result.emit(result)
         finally:
             self.signals.finished.emit()
+
+
+class OllamaWorker(QThread):
+    """QThread worker for streaming Ollama responses."""
+    chunk_received = Signal(str)
+    finished = Signal()
+    error = Signal(str)
+
+    def __init__(self, raw_query: str, system_prompt: str = ""):
+        super().__init__()
+        self.raw_query = raw_query
+        self.system_prompt = system_prompt
+        self.client = OllamaClient()
+
+    def run(self):
+        try:
+            response = self.client.generate_response(
+                prompt=self.raw_query,
+                system_prompt=self.system_prompt
+            )
+            self.chunk_received.emit(response)
+            self.finished.emit()
+        except Exception as e:
+            self.error.emit(str(e))

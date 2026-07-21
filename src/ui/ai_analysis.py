@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                                QPushButton, QFrame, QScrollArea, QLineEdit, QTextEdit, QSizePolicy)
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QFont
-from ai.engine import OllamaWorker
+from ai.workers import OllamaWorker
 
 def create_styled_button(text, bg_color, text_color, hover_color=None):
     btn = QPushButton(text)

@@ -58,3 +58,5 @@
 [2026-07-21 23:01:39] [WARNING] [security.audit_trail:88] Failed to persist audit log to DB: No module named 'sqlalchemy'
 [2026-07-21 23:01:39] [INFO] [security.audit_trail:69] [SECURITY AUDIT LOG] UPLOAD_DOC by user1@example.com (Partner) | Hash: 48ed5ed08286f356...
 [2026-07-21 23:01:39] [WARNING] [security.audit_trail:88] Failed to persist audit log to DB: No module named 'sqlalchemy'
+[2026-07-21 23:18:01] [INFO] [root:52] Initialized application logging -> /Users/aryanyadav/Desktop/PROJECTS/Audit/logs/finauditpro.log
+[2026-07-21 23:18:01] [INFO] [deployment.migration:42] Applied Database Migration 1: WAL mode enabled.

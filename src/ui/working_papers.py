@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
 from PySide6.QtCore import Qt
 from database.database import SessionLocal
 from database.models import Client, AuditProject, WorkingPaper
-from ai.engine import OllamaWorker
+from ai.workers import OllamaWorker
 
 class WorkingPaperWidget(QWidget):
     def __init__(self):

@@ -418,3 +418,4 @@ sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed
 [parameters: ('Technology', None, '2026-07-21 18:18:39.100527', '2026-07-21 18:18:39.100536')]
 (Background on this error at: https://sqlalche.me/e/20/gkpj)
 
+[2026-07-21 23:50:20] [INFO] [root:52] Initialized application logging -> /Users/aryanyadav/Desktop/PROJECTS/Audit/logs/finauditpro.log

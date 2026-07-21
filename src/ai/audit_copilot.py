@@ -30,8 +30,8 @@ class AuditCopilot:
         system_prompt = self.prompt_engine.get_system_prompt()
         full_prompt = f"CONTEXT:\n{context}\n\nTASK:\n{prompt}"
 
-        # 3. Generate raw response
-        raw_response = self.ollama.generate(full_prompt, system_prompt=system_prompt)
+        # 3. Generate raw response (enforcing JSON mode for structured parsing)
+        raw_response = self.ollama.generate(full_prompt, system_prompt=system_prompt, json_mode=True)
 
         # 4. Parse, repair, and validate JSON
         result = ResponseParser.parse_audit_finding(raw_response)

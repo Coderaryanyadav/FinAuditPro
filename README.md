@@ -92,4 +92,4 @@ pip install -r requirements.txt
 ## 📄 License & Author
 
 - **License**: MIT License
-- **Author**: Aryan Yadav ([Coderaryanyadav](https://github.com/Coderaryanyadav))
+- **Author**: Aryan Yadav / Jeet Shah / Hitansh Jasani ([Coderaryanyadav](https://github.com/Coderaryanyadav))

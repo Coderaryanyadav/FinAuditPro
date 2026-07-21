@@ -185,6 +185,13 @@ class DocumentUploadWidget(QWidget):
             self.file_list.addItem(f"{status_icon} {doc.file_name} (Status: {doc.doc_type or 'Uploaded'})")
 
     def browse_files(self):
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.UPLOAD_DOCUMENTS):
+            QMessageBox.warning(self, "Access Denied", "Your role does not have permission to upload documents.")
+            return
+
         proj_id = self.project_combo.currentData()
         if proj_id is None:
             QMessageBox.warning(self, "No Project Selected", "Please select or create an audit project first.")

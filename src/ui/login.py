@@ -103,14 +103,44 @@ class LoginWindow(QWidget):
         main_layout.addWidget(right_panel, stretch=1)
 
     def handle_login(self):
-        email = self.email_input.text()
-        password = self.password_input.text()
-        if email and password:
-            self.login_btn.setText("Signing In...")
-            self.login_btn.setDisabled(True)
-            # Simulate DB Auth network/auth delay
-            QTimer.singleShot(1000, self.auth_success)
-    
+        email = self.email_input.text().strip()
+        password = self.password_input.text().strip()
+        if not email or not password:
+            return
+
+        self.login_btn.setText("Signing In...")
+        self.login_btn.setDisabled(True)
+
+        try:
+            from database.database import SessionLocal
+            from database.repositories.user_repo import UserRepository
+            from services.auth_service import AuthenticationService
+            from database.models import User
+
+            session = SessionLocal()
+            user_repo = UserRepository(session)
+            
+            # Seed admin user if DB is empty
+            if session.query(User).count() == 0:
+                admin_user = User(
+                    username="admin",
+                    email="admin@finauditpro.com",
+                    password_hash="admin123",
+                    role="Audit Partner",
+                    is_active=True
+                )
+                session.add(admin_user)
+                session.commit()
+
+            auth_service = AuthenticationService(user_repo)
+            auth_service.login(email, password)
+            self.auth_success()
+        except Exception as e:
+            from PySide6.QtWidgets import QMessageBox
+            self.login_btn.setText("Sign In")
+            self.login_btn.setEnabled(True)
+            QMessageBox.warning(self, "Authentication Failed", str(e))
+
     def auth_success(self):
         self.login_successful.emit()
         self.close()

@@ -245,6 +245,13 @@ class ClientManagementWidget(QWidget):
         self.info_layout.addLayout(btn_box)
 
     def open_add_client_dialog(self):
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.MANAGE_CLIENTS):
+            QMessageBox.warning(self, "Access Denied", "Your role does not have permission to manage clients.")
+            return
+
         dialog = AddClientDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             name = dialog.name_input.text().strip()

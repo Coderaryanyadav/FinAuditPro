@@ -119,6 +119,13 @@ class ReportsWidget(QWidget):
         self.editor_content.setText(report_html)
 
     def export_pdf(self):
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.GENERATE_REPORTS):
+            QMessageBox.warning(self, "Access Denied", "Your role does not have permission to generate audit reports.")
+            return
+
         file_path, _ = QFileDialog.getSaveFileName(
             self,
             "Export Audit Report as PDF",

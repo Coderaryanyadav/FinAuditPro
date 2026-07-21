@@ -95,6 +95,19 @@ class Engagement(Base):
     wp_indices = relationship("WorkingPaperIndex", back_populates="engagement", cascade="all, delete-orphan")
     compliance_tasks = relationship("ComplianceTask", back_populates="engagement", cascade="all, delete-orphan")
 
+class AuditProject(Base):
+    __tablename__ = 'audit_projects'
+    id = Column(Integer, primary_key=True)
+    client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)
+    financial_year = Column(String(50), default='2025-26')
+    status = Column(String(50), default='In Progress')
+    risk_score = Column(Float, default=0.0)
+    risk_level = Column(String(50), default='Low')
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    client = relationship("Client")
+
 class AuditTeam(Base):
     __tablename__ = 'audit_teams'
     id = Column(Integer, primary_key=True)
@@ -124,10 +137,12 @@ class MaterialityCalculation(Base):
 class Document(Base):
     __tablename__ = 'documents'
     id = Column(Integer, primary_key=True)
-    engagement_id = Column(Integer, ForeignKey('engagements.id'), nullable=False)
+    engagement_id = Column(Integer, ForeignKey('engagements.id'), nullable=True)
+    audit_id = Column(Integer, nullable=True)
     file_name = Column(String(255), nullable=False)
     file_path = Column(String(255), nullable=False)
     document_type = Column(String(50), nullable=True)
+    doc_type = Column(String(50), default='Uploaded')
     upload_status = Column(String(50), default='Uploaded')
     is_vectorized = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
@@ -225,10 +240,11 @@ class EvidenceLink(Base):
 class Finding(Base):
     __tablename__ = 'findings'
     id = Column(Integer, primary_key=True)
-    working_paper_id = Column(Integer, ForeignKey('working_papers.id'), nullable=False)
+    working_paper_id = Column(Integer, ForeignKey('working_papers.id'), nullable=True)
     description = Column(Text, nullable=False)
     financial_impact = Column(Float, nullable=True)
     severity = Column(String(50), default='Low') # High, Medium, Low
+    risk_level = Column(String(50), default='Low')
     ai_confidence_score = Column(Integer, nullable=True)
     is_resolved = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)

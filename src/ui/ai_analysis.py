@@ -94,7 +94,7 @@ class AIAuditWidget(QWidget):
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(24, 0, 24, 0)
         
-        breadcrumbs = QLabel("<b>Workspace</b> <span style='color:#94a3b8;'>/</span> <span style='color:#0ea5e9;'>AI Audit Analysis</span> <span style='color:#94a3b8;'>/</span> <span style='background-color:#f1f5f9; padding:2px 6px; border-radius:4px; font-family:monospace; font-size:11px;'>TechCorp_Q3_Financials</span>")
+        breadcrumbs = QLabel("<b>Workspace</b> <span style='color:#94a3b8;'>/</span> <span style='color:#0ea5e9;'>AI Audit Analysis</span> <span style='color:#94a3b8;'>/</span> <span style='background-color:#f1f5f9; padding:2px 6px; border-radius:4px; font-family:monospace; font-size:11px;'>Active Engagement</span>")
         breadcrumbs.setStyleSheet("color: #0f172a; font-size: 13px; border: none;")
         header_layout.addWidget(breadcrumbs)
         header_layout.addStretch()

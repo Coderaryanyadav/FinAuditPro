@@ -326,8 +326,20 @@ class DashboardWindow(QWidget):
             l.addWidget(bar_bg)
             return w
             
-        ai_layout.addWidget(create_progress("Portfolio Risk Score", "24/100 (Low Risk)", 50))
-        ai_layout.addWidget(create_progress("Compliance Score", "92% (Excellent)", 200))
+        projects = self.session.query(AuditProject).all()
+        if projects:
+            avg_risk = sum([p.risk_score or 0.0 for p in projects]) / len(projects)
+            risk_label = f"{int(avg_risk)}/100 ({'High' if avg_risk > 60 else 'Medium' if avg_risk > 30 else 'Low'} Risk)"
+            comp_score = max(0, int(100 - avg_risk))
+            comp_label = f"{comp_score}% ({'Excellent' if comp_score > 80 else 'Good' if comp_score > 60 else 'Requires Review'})"
+        else:
+            avg_risk = 0
+            risk_label = "0/100 (No Projects)"
+            comp_score = 0
+            comp_label = "No Data Available"
+
+        ai_layout.addWidget(create_progress("Portfolio Risk Score", risk_label, int(avg_risk * 2)))
+        ai_layout.addWidget(create_progress("Compliance Score", comp_label, int(comp_score * 2)))
         
         findings_query = self.session.query(Finding).order_by(Finding.id.desc()).limit(3).all()
         if findings_query:

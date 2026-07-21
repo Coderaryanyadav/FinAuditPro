@@ -421,8 +421,8 @@ class DashboardWindow(QWidget):
             mid_layout.addWidget(pie_frame, 3)
         except Exception as e:
             # Fallback if QtCharts is not available
-            print(f"Chart skipped: {e}")
-            pass
+            import logging
+            logging.getLogger(__name__).warning(f"Chart skipped: {e}")
         
         body_layout.addLayout(mid_layout)
         
@@ -575,6 +575,16 @@ class DashboardWindow(QWidget):
             pct = int(summary.get("completion_percentage", 0))
             self.lbl_wf_stage.setText(f"Stage: {stage}")
             self.progress_bar.setValue(pct)
+
+    def advance_audit_stage(self):
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.APPROVE_AUDIT):
+            QMessageBox.warning(self, "Access Denied", "Your role does not have permission to approve or advance audit stages.")
+            return
+        self.workflow_manager.advance_stage()
+        self.refresh_workflow_ui()
 
     def closeEvent(self, event):
         self.session.close()

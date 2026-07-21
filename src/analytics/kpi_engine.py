@@ -67,11 +67,11 @@ class KPIEngine:
             avg_time_days = sum(audit_times) / len(audit_times) if audit_times else 0.0
 
             # Calculate actual avg_ocr_accuracy_pct from document records
-            ocr_accuracies = [getattr(d, 'ocr_confidence', 98.5) or 98.5 for d in docs]
+            ocr_accuracies = [float(getattr(d, 'ocr_confidence', 98.5) or 98.5) for d in docs]
             avg_ocr_accuracy = sum(ocr_accuracies) / len(ocr_accuracies) if ocr_accuracies else 0.0
 
             # Calculate actual avg_ai_confidence_pct from findings records
-            ai_confidences = [getattr(f, 'confidence_score', 95.0) or 95.0 for f in findings]
+            ai_confidences = [float(getattr(f, 'ai_confidence_score', 95.0) or 95.0) for f in findings]
             avg_ai_confidence = sum(ai_confidences) / len(ai_confidences) if ai_confidences else 0.0
 
             # Calculate actual hours_saved_count (approx. 1.5 manual audit hours saved per ingested document)

@@ -148,11 +148,11 @@ class ReportsWidget(QWidget):
 
             findings_list = [
                 {
-                    "rule_id": f.rule_id or "AUD-FINDING",
-                    "rule_name": f.title or "Audit Finding",
-                    "category": f.category or "General",
+                    "rule_id": f"FIND-{f.id}",
+                    "rule_name": (f.description or "Audit Finding")[:60],
+                    "category": f.risk_level or "General",
                     "severity": f.severity or "MEDIUM",
-                    "risk_score": float(f.confidence_score or 50.0)
+                    "risk_score": float(f.ai_confidence_score or 50.0)
                 } for f in db_findings
             ] if db_findings else [{"rule_id": "AUD-001", "rule_name": "Standard Audit Review", "category": "General", "severity": "LOW", "risk_score": 10.0}]
 

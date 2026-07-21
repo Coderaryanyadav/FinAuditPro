@@ -55,8 +55,15 @@ class DatabaseMigrator:
                 cur.execute("ALTER TABLE working_papers ADD COLUMN audit_id INTEGER REFERENCES audit_projects(id);")
                 logger.info("Applied Database Migration 3: Added audit_id column to working_papers table.")
 
-            if current_version < 3:
-                cur.execute("INSERT INTO schema_version (version) VALUES (3);")
+            # Migration 4: Add ocr_confidence column to documents table if missing
+            cur.execute("PRAGMA table_info(documents);")
+            doc_cols = [col[1] for col in cur.fetchall()]
+            if doc_cols and "ocr_confidence" not in doc_cols:
+                cur.execute("ALTER TABLE documents ADD COLUMN ocr_confidence FLOAT DEFAULT 98.5;")
+                logger.info("Applied Database Migration 4: Added ocr_confidence column to documents table.")
+
+            if current_version < 4:
+                cur.execute("INSERT INTO schema_version (version) VALUES (4);")
 
             con.commit()
             con.close()

@@ -153,6 +153,22 @@ class WorkingPaperWidget(QWidget):
         self.session.commit()
         QMessageBox.information(self, "Saved", "Working paper saved successfully!")
 
+    def review_working_paper(self):
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.REVIEW_WORKING_PAPERS):
+            QMessageBox.warning(self, "Access Denied", "Your role does not have permission to review working papers.")
+            return
+
+        proj_id = self.project_combo.currentData()
+        if proj_id is None: return
+        wp = self.session.query(WorkingPaper).filter_by(audit_id=proj_id).first()
+        if wp:
+            wp.status = "Reviewed"
+            self.session.commit()
+            QMessageBox.information(self, "Review Complete", "Working paper marked as Reviewed!")
+
     def generate_ai_draft(self):
         obj = self.objective_field.text().strip()
         proc = self.procedure_field.toPlainText().strip()

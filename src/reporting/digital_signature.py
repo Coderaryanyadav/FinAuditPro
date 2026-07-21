@@ -48,6 +48,12 @@ class DigitalSignatureManager:
         firm_registration_number: str,
         udin: Optional[str] = None
     ) -> SignatureBlock:
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.SIGN_REPORTS):
+            raise PermissionError("User role lacks permission SIGN_REPORTS to execute digital signature creation.")
+
         return SignatureBlock(
             ca_name=ca_name,
             membership_number=membership_number,

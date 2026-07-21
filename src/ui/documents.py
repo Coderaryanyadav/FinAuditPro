@@ -108,8 +108,9 @@ class DocumentUploadWidget(QWidget):
                 warn_lbl.setStyleSheet("color: #92400e; font-size: 13px; font-weight: 500; border: none; background: transparent;")
                 b_layout.addWidget(warn_lbl)
                 main_layout.addWidget(ocr_banner)
-        except Exception:
-            pass
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"OCR Banner initialization exception: {e}")
         
         # Content
         content_layout = QVBoxLayout()

@@ -79,5 +79,5 @@ class CrashRecoveryManager:
         if os.path.exists(self.state_file_path):
             try:
                 os.remove(self.state_file_path)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(f"Could not remove autosave state file: {e}")

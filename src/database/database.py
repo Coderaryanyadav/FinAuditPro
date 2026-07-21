@@ -31,8 +31,10 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db():
-    """Create all tables in the database if they don't exist."""
+    """Create all tables in the database if they don't exist and run migrations."""
+    from deployment.migration import DatabaseMigrator
     Base.metadata.create_all(bind=engine)
+    DatabaseMigrator.migrate(DB_PATH)
 
 from contextlib import contextmanager
 

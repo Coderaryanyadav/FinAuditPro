@@ -135,8 +135,8 @@ class OCREngine:
                         provider_used="Direct File Parser",
                         overall_confidence=0.90
                     )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Direct file parsing fallback encountered exception: {e}")
 
         return OCRResult(
             raw_text=f"[OCR Processing Disabled for {os.path.basename(file_path)}: {status_msg}]",

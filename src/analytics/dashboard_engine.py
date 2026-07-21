@@ -52,8 +52,9 @@ class ExecutiveDashboardEngine:
                 top_risks.append([c_name, c_ind, p.risk_level or "Low"])
                 
             session.close()
-        except Exception:
-            pass
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Dashboard metrics aggregation warning: {e}")
 
         return DashboardView(
             role_name="CEO Dashboard",
@@ -93,8 +94,9 @@ class ExecutiveDashboardEngine:
                 review_queue.append([client_name, proj.status, "CA Partner"])
             
             session.close()
-        except Exception:
-            pass
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Dashboard metrics aggregation warning: {e}")
 
         return DashboardView(
             role_name="Audit Partner Dashboard",

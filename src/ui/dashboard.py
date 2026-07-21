@@ -468,41 +468,47 @@ class DashboardWindow(QWidget):
         
         self.stacked_widget = QStackedWidget()
         
+        def safe_load(widget_cls, title):
+            try:
+                return widget_cls()
+            except Exception as e:
+                return PlaceholderWidget(f"Unable to load {title}: {e}")
+
         # 0: Dashboard
         self.stacked_widget.addWidget(scroll)
         # 1: Clients
-        self.clients_page = ClientManagementWidget()
+        self.clients_page = safe_load(ClientManagementWidget, "Client Management")
         self.stacked_widget.addWidget(self.clients_page)
         # 2: Upload Docs
-        self.docs_page = DocumentUploadWidget()
+        self.docs_page = safe_load(DocumentUploadWidget, "Document Upload")
         self.stacked_widget.addWidget(self.docs_page)
         # 3: AI Audit
-        self.ai_page = AIAuditWidget()
+        self.ai_page = safe_load(AIAuditWidget, "AI Audit Analysis")
         self.stacked_widget.addWidget(self.ai_page)
         # 4: Financial Statements
         from .financial_statements import FinancialStatementsWidget
-        self.statements_page = FinancialStatementsWidget()
+        self.statements_page = safe_load(FinancialStatementsWidget, "Financial Statements")
         self.stacked_widget.addWidget(self.statements_page)
         # 5: GST Verification
-        self.gst_page = GSTVerificationWidget()
+        self.gst_page = safe_load(GSTVerificationWidget, "GST Verification")
         self.stacked_widget.addWidget(self.gst_page)
         # 6: Compliance Monitoring
-        self.compliance_page = ComplianceWidget()
+        self.compliance_page = safe_load(ComplianceWidget, "Compliance Monitoring")
         self.stacked_widget.addWidget(self.compliance_page)
         # 7: Risk Analysis
-        self.risk_page = RiskAnalysisWidget()
+        self.risk_page = safe_load(RiskAnalysisWidget, "Risk Analysis")
         self.stacked_widget.addWidget(self.risk_page)
         # 8: Reports
-        self.reports_page = ReportsWidget()
+        self.reports_page = safe_load(ReportsWidget, "Report Generator")
         self.stacked_widget.addWidget(self.reports_page)
         # 9: Audit History
-        self.history_page = AuditHistoryWidget()
+        self.history_page = safe_load(AuditHistoryWidget, "Audit History")
         self.stacked_widget.addWidget(self.history_page)
         # 10: Settings
-        self.settings_page = SettingsWidget()
+        self.settings_page = safe_load(SettingsWidget, "System Settings")
         self.stacked_widget.addWidget(self.settings_page)
-        # 11: Working Papers (Accessible from somewhere if needed, but let's add it)
-        self.working_papers_page = WorkingPaperWidget()
+        # 11: Working Papers
+        self.working_papers_page = safe_load(WorkingPaperWidget, "Working Papers")
         self.stacked_widget.addWidget(self.working_papers_page)
         
         content_layout.addWidget(self.stacked_widget)

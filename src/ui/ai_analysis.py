@@ -308,8 +308,17 @@ class AIAuditWidget(QWidget):
             retriever = ContextRetriever()
             copilot = AuditCopilot(context_retriever=retriever)
             
+            active_id = getattr(self, 'active_engagement_id', None)
+            if active_id is None:
+                from database.database import SessionLocal
+                from database.models import AuditProject
+                session = SessionLocal()
+                active_proj = session.query(AuditProject).order_by(AuditProject.id.desc()).first()
+                active_id = active_proj.id if active_proj else 1
+                session.close()
+
             def run_analysis():
-                return copilot.analyze_document(text, engagement_id=1)
+                return copilot.analyze_document(text, engagement_id=active_id)
                 
             self.worker = AICopilotWorker(run_analysis)
             self.worker.signals.result.connect(self.on_copilot_result)

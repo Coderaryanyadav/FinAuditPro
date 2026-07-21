@@ -74,6 +74,8 @@ class LoginWindow(QWidget):
         forgot_lbl.setOpenExternalLinks(False)
         forgot_lbl.setStyleSheet("border: none; font-size: 13px; background: transparent;")
         
+        forgot_lbl.linkActivated.connect(self.handle_forgot_password)
+        
         options_layout.addWidget(self.remember_cb)
         options_layout.addStretch()
         options_layout.addWidget(forgot_lbl)
@@ -86,6 +88,7 @@ class LoginWindow(QWidget):
         offline_lbl = QLabel("<a href='#' style='color: #0b57d0; text-decoration: none;'>Continue Offline</a>")
         offline_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         offline_lbl.setStyleSheet("border: none; font-size: 13px; margin-top: 10px; background: transparent;")
+        offline_lbl.linkActivated.connect(self.handle_offline_mode)
         
         form_layout.addWidget(welcome_lbl)
         form_layout.addWidget(sub_lbl)
@@ -101,6 +104,20 @@ class LoginWindow(QWidget):
         
         main_layout.addWidget(left_panel, stretch=1)
         main_layout.addWidget(right_panel, stretch=1)
+
+    def handle_forgot_password(self, link=None):
+        QMessageBox.information(
+            self,
+            "Password Reset",
+            "FinAuditPro operates offline. To reset auditor account passwords, contact your System Administrator or execute password hashing via CLI."
+        )
+
+    def handle_offline_mode(self, link=None):
+        QMessageBox.information(
+            self,
+            "Air-Gapped Offline Mode",
+            "FinAuditPro runs 100% offline with zero cloud dependency.\n\nAll AI models, databases, and logs remain on local disk."
+        )
 
     def handle_login(self):
         email = self.email_input.text().strip()

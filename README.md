@@ -71,7 +71,7 @@ FinAuditPro/
 ```bash
 # Clone the repository
 git clone https://github.com/Coderaryanyadav/FinAuditPro.git
-cd Audit
+cd FinAuditPro
 
 # Create and activate virtual environment
 python3 -m venv .venv
@@ -81,10 +81,10 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # Run database schema migrations
-.venv/bin/python -c "from deployment.migration import DatabaseMigrator; DatabaseMigrator.migrate()"
+PYTHONPATH=src .venv/bin/python -c "from deployment.migration import DatabaseMigrator; DatabaseMigrator.migrate()"
 
 # Launch application
-.venv/bin/python src/main.py
+PYTHONPATH=src .venv/bin/python src/main.py
 ```
 
 ---

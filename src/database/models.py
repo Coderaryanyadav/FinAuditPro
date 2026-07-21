@@ -30,7 +30,10 @@ class ClientIndustry(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
     
-    clients = relationship("Client", back_populates="industry")
+    clients = relationship("Client", back_populates="industry_rel")
+
+    def __str__(self):
+        return self.industry_name or ""
 
 class Client(Base):
     __tablename__ = 'clients'
@@ -44,9 +47,27 @@ class Client(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
     
-    industry = relationship("ClientIndustry", back_populates="clients")
+    industry_rel = relationship("ClientIndustry", back_populates="clients")
     engagements = relationship("Engagement", back_populates="client", cascade="all, delete-orphan")
     kmps = relationship("KeyManagementPersonnel", back_populates="client", cascade="all, delete-orphan")
+
+    @property
+    def industry(self):
+        if self.industry_rel:
+            return self.industry_rel.industry_name
+        return getattr(self, '_temp_industry', None)
+
+    @industry.setter
+    def industry(self, value):
+        if isinstance(value, ClientIndustry):
+            self.industry_rel = value
+            self._temp_industry = value.industry_name
+        elif isinstance(value, str) and value.strip():
+            self._temp_industry = value.strip()
+            self.industry_rel = ClientIndustry(industry_name=value.strip())
+        else:
+            self.industry_rel = None
+            self._temp_industry = None
 
 class KeyManagementPersonnel(Base):
     __tablename__ = 'kmp'

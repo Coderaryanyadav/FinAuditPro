@@ -261,6 +261,7 @@ class EvidenceLink(Base):
 class Finding(Base):
     __tablename__ = 'findings'
     id = Column(Integer, primary_key=True)
+    audit_id = Column(Integer, ForeignKey('audit_projects.id'), nullable=True)
     working_paper_id = Column(Integer, ForeignKey('working_papers.id'), nullable=True)
     description = Column(Text, nullable=False)
     financial_impact = Column(Float, nullable=True)
@@ -271,6 +272,7 @@ class Finding(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
     
+    audit_project = relationship("AuditProject", backref="findings")
     working_paper = relationship("WorkingPaper", back_populates="findings")
 
 class ReviewNote(Base):

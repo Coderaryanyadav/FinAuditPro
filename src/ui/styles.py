@@ -3,7 +3,7 @@ from PySide6.QtGui import QColor
 
 GLOBAL_QSS = """
 * {
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', sans-serif;
+    font-family: 'Inter', 'SF Pro Display', 'Helvetica Neue', sans-serif;
     color: #0f172a; /* slate-900 */
 }
 

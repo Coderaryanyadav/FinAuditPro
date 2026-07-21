@@ -561,6 +561,8 @@ class DashboardWindow(QWidget):
         if client_id:
             try:
                 self.workflow_manager.initialize_engagement(engagement_id=client_id, client_id=client_id, financial_year="2025-26")
+                if hasattr(self, 'ai_page') and self.ai_page is not None:
+                    self.ai_page.active_engagement_id = client_id
                 self.refresh_workflow_ui()
             except Exception as e:
                 print(f"Engagement change error: {e}")

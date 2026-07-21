@@ -419,3 +419,24 @@ sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed
 (Background on this error at: https://sqlalche.me/e/20/gkpj)
 
 [2026-07-21 23:50:20] [INFO] [root:52] Initialized application logging -> /Users/aryanyadav/Desktop/PROJECTS/Audit/logs/finauditpro.log
+[2026-07-22 00:08:41] [INFO] [root:52] Initialized application logging -> /Users/aryanyadav/Desktop/PROJECTS/Audit/logs/finauditpro.log
+[2026-07-22 00:08:45] [INFO] [sentence_transformers.SentenceTransformer:196] Use pytorch device_name: mps
+[2026-07-22 00:08:45] [INFO] [sentence_transformers.SentenceTransformer:204] Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+[2026-07-22 00:08:48] [INFO] [document_intelligence.embedding_service:26] Loaded SentenceTransformer model: all-MiniLM-L6-v2
+[2026-07-22 00:08:52] [INFO] [reporting.pdf_generator:124] Generated PDF report at /var/folders/d8/s9f8fy217l3bd2hdhqr4ttx40000gn/T/Audit_Report_Clean_Co.pdf
+[2026-07-22 00:08:52] [INFO] [reporting.report_engine:118] Report Pack generated for Clean Co (ID: REP-1784659131) in 0.59s.
+[2026-07-22 00:08:52] [INFO] [reporting.pdf_generator:124] Generated PDF report at /var/folders/d8/s9f8fy217l3bd2hdhqr4ttx40000gn/T/Audit_Report_Fraud_Co.pdf
+[2026-07-22 00:08:52] [INFO] [reporting.report_engine:118] Report Pack generated for Fraud Co (ID: REP-1784659132) in 0.01s.
+[2026-07-22 00:08:52] [INFO] [sentence_transformers.SentenceTransformer:196] Use pytorch device_name: mps
+[2026-07-22 00:08:52] [INFO] [sentence_transformers.SentenceTransformer:204] Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+[2026-07-22 00:08:55] [INFO] [document_intelligence.embedding_service:26] Loaded SentenceTransformer model: all-MiniLM-L6-v2
+[2026-07-22 00:08:55] [INFO] [reporting.pdf_generator:124] Generated PDF report at /var/folders/d8/s9f8fy217l3bd2hdhqr4ttx40000gn/T/Audit_Report_TechCorp_Solutions.pdf
+[2026-07-22 00:08:55] [INFO] [reporting.report_engine:118] Report Pack generated for TechCorp Solutions (ID: REP-1784659135) in 0.01s.
+[2026-07-22 00:08:55] [INFO] [rule_engine.rule_engine:54] Rule Engine evaluated 7 rules in 0.0006s. Failed: 3
+[2026-07-22 00:08:55] [INFO] [rule_engine.rule_engine:54] Rule Engine evaluated 7 rules in 0.0004s. Failed: 3
+[2026-07-22 00:08:55] [INFO] [rule_engine.rule_engine:54] Rule Engine evaluated 7 rules in 0.0004s. Failed: 2
+[2026-07-22 00:08:55] [INFO] [rule_engine.rule_engine:54] Rule Engine evaluated 7 rules in 0.0004s. Failed: 3
+[2026-07-22 00:08:55] [INFO] [security.backup:70] Created compressed backup archive: BACKUP_20260721_183855.zip (0.00 MB)
+[2026-07-22 00:08:55] [INFO] [security.audit_trail:69] [SECURITY AUDIT LOG] CREATE_CLIENT by user1@example.com (Partner) | Hash: 04a4c52a110d6292...
+[2026-07-22 00:08:55] [INFO] [security.audit_trail:69] [SECURITY AUDIT LOG] UPLOAD_DOC by user1@example.com (Partner) | Hash: 2c07910dd2c50c61...
+[2026-07-22 00:08:55] [INFO] [workflow.workflow_manager:56] Initialized Workflow State for Engagement 1

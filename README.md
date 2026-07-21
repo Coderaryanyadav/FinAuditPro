@@ -80,11 +80,8 @@ source .venv/bin/activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Run database schema migrations
-PYTHONPATH=src .venv/bin/python -c "from deployment.migration import DatabaseMigrator; DatabaseMigrator.migrate()"
-
-# Launch application
-PYTHONPATH=src .venv/bin/python src/main.py
+# Launch application (database schema migrations run automatically on startup)
+python src/main.py
 ```
 
 ---

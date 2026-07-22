@@ -61,11 +61,11 @@ class EngagementService:
             if wm.current_state and wm.current_state.engagement_id == engagement_id:
                 return round(wm.current_state.completion_percentage, 1)
 
-            from database.database import SessionLocal
-            from database.models import WorkingPaper
-            session = SessionLocal()
-            wps = session.query(WorkingPaper).filter_by(audit_id=engagement_id).all()
-            session.close()
+            from database.models import WorkingPaper, WorkingPaperIndex
+            session = self.engagement_repo.session
+            wps = session.query(WorkingPaper).join(WorkingPaperIndex).filter(
+                WorkingPaperIndex.engagement_id == engagement_id
+            ).all()
 
             if wps:
                 completed = sum(1 for wp in wps if getattr(wp, 'status', None) == 'Reviewed' or getattr(wp, 'conclusion', None))
@@ -80,6 +80,8 @@ class EngagementService:
                 return 60.0
             elif engagement.status == 'Reporting':
                 return 85.0
-            return 50.0
-        except Exception:
-            return 25.0
+            return 0.0
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Error calculating progress for engagement {engagement_id}: {e}")
+            return 0.0

@@ -21,7 +21,7 @@ class SecurityAuditEntry:
     action: str
     details: str
     machine_id: str = field(default_factory=lambda: platform.node())
-    ip_address: str = field(default_factory=lambda: socket.gethostname())
+    ip_address: str = field(default_factory=lambda: "127.0.0.1")
     timestamp: datetime = field(default_factory=datetime.utcnow)
     previous_hash: str = "0000000000000000000000000000000000000000000000000000000000000000"
     entry_hash: str = ""
@@ -52,6 +52,38 @@ class ImmutableAuditLogger:
     def __init__(self):
         self.ledger: List[SecurityAuditEntry] = []
         self._last_hash = "0000000000000000000000000000000000000000000000000000000000000000"
+        self._load_ledger_from_db()
+
+    def _load_ledger_from_db(self):
+        """Reload audit log entries and hash chain state from SQLite database."""
+        try:
+            from database.database import SessionLocal
+            from database.models import AuditLog, User
+            session = SessionLocal()
+            logs = session.query(AuditLog).order_by(AuditLog.id.asc()).all()
+            user_cache = {u.id: (u.email or u.username) for u in session.query(User).all()}
+            session.close()
+
+            for log in logs:
+                u_email = user_cache.get(log.user_id, "system@finauditpro.local")
+                prev_h = log.previous_hash or self._last_hash
+                e_id = f"LOG-{log.id:06d}"
+                entry = SecurityAuditEntry(
+                    entry_id=e_id,
+                    user_email=u_email,
+                    role="User",
+                    action=log.action,
+                    details=log.target_entity or "",
+                    ip_address=log.ip_address or "127.0.0.1",
+                    timestamp=log.created_at or datetime.utcnow(),
+                    previous_hash=prev_h,
+                    entry_hash=log.entry_hash or ""
+                )
+                if entry.entry_hash:
+                    self._last_hash = entry.entry_hash
+                self.ledger.append(entry)
+        except Exception as e:
+            logger.debug(f"Audit log database load skipped: {e}")
 
     def log_action(self, user_email: str, role: str, action: str, details: str = "") -> SecurityAuditEntry:
         """Log an immutable security audit entry into memory and persistent SQLite database."""
@@ -79,7 +111,9 @@ class ImmutableAuditLogger:
                 user_id=user_id,
                 action=action,
                 target_entity=details or "SecurityAudit",
-                ip_address=entry.ip_address
+                ip_address=entry.ip_address,
+                previous_hash=entry.previous_hash,
+                entry_hash=entry.entry_hash
             )
             session.add(log_record)
             session.commit()

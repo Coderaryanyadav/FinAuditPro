@@ -340,5 +340,7 @@ class AuditLog(Base):
     action = Column(String(100), nullable=False)
     target_entity = Column(String(100), nullable=False)
     ip_address = Column(String(50), nullable=True)
+    previous_hash = Column(String(64), nullable=True)
+    entry_hash = Column(String(64), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 

@@ -62,8 +62,19 @@ class DatabaseMigrator:
                 cur.execute("ALTER TABLE documents ADD COLUMN ocr_confidence FLOAT DEFAULT 98.5;")
                 logger.info("Applied Database Migration 4: Added ocr_confidence column to documents table.")
 
-            if current_version < 4:
-                cur.execute("INSERT INTO schema_version (version) VALUES (4);")
+            # Migration 5: Add previous_hash and entry_hash columns to audit_logs table if missing
+            cur.execute("PRAGMA table_info(audit_logs);")
+            audit_cols = [col[1] for col in cur.fetchall()]
+            if audit_cols:
+                if "previous_hash" not in audit_cols:
+                    cur.execute("ALTER TABLE audit_logs ADD COLUMN previous_hash VARCHAR(64);")
+                    logger.info("Applied Database Migration 5: Added previous_hash column to audit_logs table.")
+                if "entry_hash" not in audit_cols:
+                    cur.execute("ALTER TABLE audit_logs ADD COLUMN entry_hash VARCHAR(64);")
+                    logger.info("Applied Database Migration 5: Added entry_hash column to audit_logs table.")
+
+            if current_version < 5:
+                cur.execute("INSERT INTO schema_version (version) VALUES (5);")
 
             con.commit()
             con.close()

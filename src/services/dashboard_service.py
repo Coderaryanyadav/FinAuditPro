@@ -25,9 +25,9 @@ class DashboardService:
 
     def get_engagement_dashboard_stats(self, engagement_id: int) -> Dict[str, Any]:
         """Calculate statistics for a specific engagement."""
-        from database.models import WorkingPaper
-        pending_reviews = self.session.query(ReviewNote).join(WorkingPaper).filter(
-            WorkingPaper.audit_id == engagement_id,
+        from database.models import WorkingPaper, WorkingPaperIndex
+        pending_reviews = self.session.query(ReviewNote).join(WorkingPaper).join(WorkingPaperIndex).filter(
+            WorkingPaperIndex.engagement_id == engagement_id,
             ReviewNote.status == 'Open'
         ).count()
 
@@ -38,10 +38,10 @@ class DashboardService:
 
         compliance_tasks = self.session.query(ComplianceTask).filter(ComplianceTask.engagement_id == engagement_id).all()
         completed_tasks = sum(1 for t in compliance_tasks if t.is_completed)
-        compliance_percentage = (completed_tasks / len(compliance_tasks) * 100) if compliance_tasks else 100.0
+        compliance_percentage = (completed_tasks / len(compliance_tasks) * 100.0) if compliance_tasks else 0.0
 
         return {
             "pending_reviews": pending_reviews,
             "open_findings": open_findings,
-            "compliance_percentage": compliance_percentage
+            "compliance_percentage": round(compliance_percentage, 1)
         }

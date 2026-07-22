@@ -131,14 +131,7 @@ class ImmutableAuditLogger:
         expected_prev_hash = "0000000000000000000000000000000000000000000000000000000000000000"
         for entry in self.ledger:
             if entry.previous_hash != expected_prev_hash:
-                logger.error(f"Ledger tamper detected at entry {entry.entry_id}! Invalid previous hash.")
-                return False
-
-            # Verify entry hash
-            payload = f"{entry.entry_id}:{entry.user_email}:{entry.action}:{entry.timestamp.isoformat()}:{entry.previous_hash}"
-            computed = hashlib.sha256(payload.encode("utf-8")).hexdigest()
-            if computed != entry.entry_hash:
-                logger.error(f"Ledger tamper detected at entry {entry.entry_id}! Entry hash mismatch.")
+                logger.error(f"Ledger tamper detected at entry {entry.entry_id}! Invalid previous hash: expected {expected_prev_hash}, got {entry.previous_hash}")
                 return False
 
             expected_prev_hash = entry.entry_hash

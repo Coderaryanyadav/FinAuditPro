@@ -310,7 +310,9 @@ class AIAuditWidget(QWidget):
         from PySide6.QtCore import QThreadPool
 
         try:
-            retriever = ContextRetriever()
+            from ai.vector_store import VectorStore
+            vstore = VectorStore()
+            retriever = ContextRetriever(vector_store=vstore)
             copilot = AuditCopilot(context_retriever=retriever)
             
             active_id = getattr(self, 'active_engagement_id', None)

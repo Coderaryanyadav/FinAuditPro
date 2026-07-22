@@ -12,8 +12,8 @@ class ContextRetriever:
     Enforces strict metadata filtering by engagement_id.
     """
 
-    def __init__(self, vector_store: VectorStore):
-        self.vector_store = vector_store
+    def __init__(self, vector_store: VectorStore = None):
+        self.vector_store = vector_store or VectorStore()
 
     def retrieve_context(self, query: str, engagement_id: int, client_id: int = None, k: int = 5) -> str:
         """

@@ -553,7 +553,19 @@ class DashboardWindow(QWidget):
         clients = self.session.query(Client).all()
         if clients:
             c = clients[0]
-            self.workflow_manager.initialize_engagement(engagement_id=c.id, client_id=c.id, financial_year="2025-26")
+            try:
+                from database.models import Engagement
+                eng = self.session.query(Engagement).filter_by(client_id=c.id, financial_year="2025-26").first()
+                if not eng:
+                    eng = Engagement(client_id=c.id, financial_year="2025-26", status="Execution")
+                    self.session.add(eng)
+                    self.session.commit()
+                self.workflow_manager.initialize_engagement(engagement_id=eng.id, client_id=c.id, financial_year="2025-26")
+                if hasattr(self, 'ai_page') and self.ai_page is not None:
+                    self.ai_page.active_engagement_id = eng.id
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"Startup engagement initialization warning: {e}")
 
     def populate_client_selector(self):
         self.client_selector.clear()

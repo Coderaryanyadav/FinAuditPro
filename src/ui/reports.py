@@ -90,10 +90,21 @@ class ReportsWidget(QWidget):
         self.load_report_draft()
         
     def load_report_draft(self):
-        client = self.session.query(Client).first()
+        active_id = getattr(self, 'active_engagement_id', None)
+        client = None
+        if active_id:
+            proj = self.session.query(AuditProject).filter_by(id=active_id).first()
+            if proj:
+                client = self.session.query(Client).filter_by(id=proj.client_id).first()
+            if not client:
+                from database.models import Engagement
+                eng = self.session.query(Engagement).filter_by(id=active_id).first()
+                if eng:
+                    client = self.session.query(Client).filter_by(id=eng.client_id).first()
+        if not client:
+            client = self.session.query(Client).first()
         client_name = client.name if client else "Unassigned Client Account"
         
-        active_id = getattr(self, 'active_engagement_id', None)
         if active_id:
             findings = self.session.query(Finding).filter_by(audit_id=active_id).all()
         else:
@@ -145,7 +156,19 @@ class ReportsWidget(QWidget):
             from reporting.report_engine import ReportEngine
             report_engine = ReportEngine()
             
-            client = self.session.query(Client).first()
+            active_id = getattr(self, 'active_engagement_id', None)
+            client = None
+            if active_id:
+                proj = self.session.query(AuditProject).filter_by(id=active_id).first()
+                if proj:
+                    client = self.session.query(Client).filter_by(id=proj.client_id).first()
+                if not client:
+                    from database.models import Engagement
+                    eng = self.session.query(Engagement).filter_by(id=active_id).first()
+                    if eng:
+                        client = self.session.query(Client).filter_by(id=eng.client_id).first()
+            if not client:
+                client = self.session.query(Client).first()
             client_name = client.name if client else "Unassigned Client Account"
 
             active_id = getattr(self, 'active_engagement_id', None)

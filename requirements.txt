@@ -17,7 +17,7 @@ paddlepaddle>=2.6.2; python_version < "3.13"
 # Deep Learning & AI Core
 torch>=2.5.1
 transformers>=4.48.0
-ollama==0.3.3
+ollama==0.6.2
 faiss-cpu==1.8.0.post1
 sentence-transformers==3.1.1
 

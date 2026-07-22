@@ -607,12 +607,19 @@ class DashboardWindow(QWidget):
                 eng_id = summary.get("engagement_id")
                 if eng_id:
                     notifications = ns.get_upcoming_deadlines(engagement_id=eng_id)
-                    if notifications:
-                        import logging
-                        logging.getLogger(__name__).info(f"Loaded {len(notifications)} active deadline notifications for Engagement {eng_id}")
                     pack = AnalyticsEngine().generate_executive_pack(audit_id=eng_id)
-                    import logging
-                    logging.getLogger(__name__).info(f"Generated Executive Intelligence Pack for Engagement {eng_id} in {pack.computation_time_seconds}s")
+
+                    if hasattr(self, 'ai_findings') and self.ai_findings:
+                        forecast_msg = f"<br/><br/><b>Executive Forecast Intelligence</b><br/>" \
+                                       f"• Est. Timeline: <b>{pack.forecast.predicted_completion_days} days</b><br/>" \
+                                       f"• Resource Load: <b>{pack.forecast.resource_utilization_pct}%</b>"
+                        if notifications:
+                            notif_items = "<br/>• ⚠️ " + "<br/>• ⚠️ ".join([n["message"] for n in notifications[:2]])
+                            forecast_msg += "<br/><br/><b>Active Compliance Deadlines</b>" + notif_items
+
+                        base_text = self.ai_findings.text()
+                        if "Executive Forecast Intelligence" not in base_text:
+                            self.ai_findings.setText(base_text + forecast_msg)
             except Exception as e:
                 import logging
                 logging.getLogger(__name__).warning(f"NotificationService / AnalyticsEngine fetch exception: {e}")

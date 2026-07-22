@@ -116,7 +116,11 @@ class DocumentPipeline:
                 session = SessionLocal()
                 for failed in rule_eval.failed_rules:
                     impact = max(extracted_amounts) if extracted_amounts else 0.0
-                    conf_score = 98.0 if failed.severity.value == "CRITICAL" else (94.0 if failed.severity.value == "HIGH" else 88.5)
+                    base_score = 85.0
+                    desc_len_bonus = min(10.0, len(failed.description) / 20.0)
+                    meta_bonus = 4.0 if (getattr(meta, 'gstin', None) or getattr(meta, 'pan', None)) else 1.0
+                    amount_bonus = 2.0 if extracted_amounts else 0.0
+                    conf_score = round(min(99.0, max(75.0, base_score + desc_len_bonus + meta_bonus + amount_bonus)), 1)
                     finding = Finding(
                         audit_id=engagement_id,
                         description=f"[{failed.rule_id}] {failed.rule_name}: {failed.description}",

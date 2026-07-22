@@ -111,31 +111,29 @@ class DocumentPipeline:
                 "transaction_amounts": extracted_amounts
             })
             if rule_eval.failed_rules:
-                from database.database import SessionLocal
+                from database.database import get_session
                 from database.models import Finding
-                session = SessionLocal()
-                for failed in rule_eval.failed_rules:
-                    impact = max(extracted_amounts) if extracted_amounts else 0.0
-                    # AI confidence score: heuristic estimate based on rule description length,
-                    # metadata presence (GSTIN/PAN), and extracted financial amounts.
-                    # This is NOT a model-derived confidence — no ML model scores rule matches.
-                    # Range: 75.0-99.0. Longer descriptions + richer metadata = higher score.
-                    base_score = 85.0
-                    desc_len_bonus = min(10.0, len(failed.description) / 20.0)
-                    meta_bonus = 4.0 if (getattr(meta, 'gstin', None) or getattr(meta, 'pan', None)) else 1.0
-                    amount_bonus = 2.0 if extracted_amounts else 0.0
-                    conf_score = round(min(99.0, max(75.0, base_score + desc_len_bonus + meta_bonus + amount_bonus)), 1)
-                    finding = Finding(
-                        audit_id=engagement_id,
-                        description=f"[{failed.rule_id}] {failed.rule_name}: {failed.description}",
-                        severity=failed.severity.value,
-                        risk_level=failed.severity.value,
-                        financial_impact=impact,
-                        ai_confidence_score=conf_score
-                    )
-                    session.add(finding)
-                session.commit()
-                session.close()
+                with get_session() as session:
+                    for failed in rule_eval.failed_rules:
+                        impact = max(extracted_amounts) if extracted_amounts else 0.0
+                        # AI confidence score: heuristic estimate based on rule description length,
+                        # metadata presence (GSTIN/PAN), and extracted financial amounts.
+                        # This is NOT a model-derived confidence — no ML model scores rule matches.
+                        # Range: 75.0-99.0. Longer descriptions + richer metadata = higher score.
+                        base_score = 85.0
+                        desc_len_bonus = min(10.0, len(failed.description) / 20.0)
+                        meta_bonus = 4.0 if (getattr(meta, 'gstin', None) or getattr(meta, 'pan', None)) else 1.0
+                        amount_bonus = 2.0 if extracted_amounts else 0.0
+                        conf_score = round(min(99.0, max(75.0, base_score + desc_len_bonus + meta_bonus + amount_bonus)), 1)
+                        finding = Finding(
+                            audit_id=engagement_id,
+                            description=f"[{failed.rule_id}] {failed.rule_name}: {failed.description}",
+                            severity=failed.severity.value,
+                            risk_level=failed.severity.value,
+                            financial_impact=impact,
+                            ai_confidence_score=conf_score
+                        )
+                        session.add(finding)
         except Exception as e:
             logger.warning(f"Rule Engine evaluation warning: {e}")
 
@@ -159,26 +157,24 @@ class DocumentPipeline:
         _notify("Generating Vector Embeddings & Indexing", 95.0)
         if document_id is None:
             try:
-                from database.database import SessionLocal
+                from database.database import get_session
                 from database.models import Document
                 ocr_conf = round(parsed_doc.ocr_result.overall_confidence * 100.0, 1) if (parsed_doc.ocr_result and hasattr(parsed_doc.ocr_result, 'overall_confidence')) else 98.5
-                session = SessionLocal()
-                doc = session.query(Document).filter_by(file_path=file_path).first()
-                if doc:
-                    doc.ocr_confidence = ocr_conf
-                    session.commit()
-                else:
-                    doc = Document(
-                        file_name=os.path.basename(file_path),
-                        file_path=file_path,
-                        audit_id=engagement_id,
-                        engagement_id=engagement_id,
-                        ocr_confidence=ocr_conf
-                    )
-                    session.add(doc)
-                    session.commit()
-                doc_id = doc.id
-                session.close()
+                with get_session() as session:
+                    doc = session.query(Document).filter_by(file_path=file_path).first()
+                    if doc:
+                        doc.ocr_confidence = ocr_conf
+                    else:
+                        doc = Document(
+                            file_name=os.path.basename(file_path),
+                            file_path=file_path,
+                            audit_id=engagement_id,
+                            engagement_id=engagement_id,
+                            ocr_confidence=ocr_conf
+                        )
+                        session.add(doc)
+                    session.flush()
+                    doc_id = doc.id
             except Exception as e:
                 logger.warning(f"Database document lookup warning: {e}")
                 import time

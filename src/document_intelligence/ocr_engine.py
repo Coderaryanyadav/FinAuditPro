@@ -96,6 +96,18 @@ class OCREngine:
         try:
             import pypdf
             reader = pypdf.PdfReader(file_path)
+
+            # Guard: reject password-protected / encrypted PDFs early
+            if reader.is_encrypted:
+                logger.warning(f"Skipping password-protected PDF: {file_path}")
+                return OCRResult(
+                    raw_text=f"[Password-Protected Document: {os.path.basename(file_path)}. "
+                             f"Please remove encryption before uploading.]",
+                    pages=[OCRPageResult(page_number=1, text="", confidence=0.0)],
+                    provider_used="Encrypted PDF Guard",
+                    overall_confidence=0.0
+                )
+
             pages = []
             full_text_parts = []
 

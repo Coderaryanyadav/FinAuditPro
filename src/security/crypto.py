@@ -48,7 +48,12 @@ class AESCryptoEngine:
     """Provides AES-256 file encryption and decryption for sensitive audit records."""
 
     def __init__(self, master_password: Optional[str] = None, salt: Optional[bytes] = None):
-        data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+        try:
+            from database.database import DATA_DIR
+            data_dir = DATA_DIR
+        except Exception:
+            data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+            os.makedirs(data_dir, exist_ok=True)
         
         if master_password:
             secret_bytes = master_password.encode("utf-8")

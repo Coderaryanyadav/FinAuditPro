@@ -1,14 +1,34 @@
 import os
+import platform
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from .models import Base
 
-# Determine database path. For an offline desktop app, store it in a 'data' folder.
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = os.path.join(BASE_DIR, 'data')
 
-if not os.path.exists(DATA_DIR):
-    os.makedirs(DATA_DIR)
+def _get_app_data_dir() -> str:
+    """
+    Resolve a user-writable data directory per platform.
+
+    On Windows this avoids writing into read-only C:\\Program Files\\ when
+    the application is installed via Inno Setup / NSIS for standard (non-admin)
+    domain users.  Falls back to the legacy relative path only when the
+    environment variable is absent (e.g. during pytest).
+    """
+    system = platform.system()
+    if system == "Windows":
+        base = os.environ.get("APPDATA", os.path.expanduser("~"))
+    elif system == "Darwin":
+        base = os.path.expanduser("~/Library/Application Support")
+    else:
+        base = os.environ.get("XDG_DATA_HOME", os.path.expanduser("~/.local/share"))
+    app_dir = os.path.join(base, "FinAuditPro")
+    os.makedirs(app_dir, exist_ok=True)
+    return app_dir
+
+
+# Determine database path — always in a user-writable location.
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = _get_app_data_dir()
 
 DB_PATH = os.path.join(DATA_DIR, 'finauditpro.db')
 DATABASE_URL = f"sqlite:///{DB_PATH}"

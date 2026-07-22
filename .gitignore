@@ -76,3 +76,8 @@ logs/
 temp/
 *.xlsx
 *.csv
+.crypto_key
+.crypto_salt
+*.crypto_key
+*.crypto_salt
+

@@ -12,6 +12,8 @@ from analytics.chart_engine import AnalyticsChartEngine
 class TestAnalyticsEngine(unittest.TestCase):
 
     def setUp(self):
+        from database.database import init_db
+        init_db()
         self.engine = AnalyticsEngine()
 
     def test_executive_pack_generation(self):

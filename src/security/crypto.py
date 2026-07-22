@@ -7,38 +7,75 @@ import os
 import tempfile
 import base64
 import hashlib
+import secrets
 import logging
 from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
+
+def _get_or_create_installation_key(data_dir: str) -> bytes:
+    """Retrieve or generate a 256-bit cryptographically secure installation key secret."""
+    key_file = os.path.join(data_dir, ".crypto_key")
+    if os.path.exists(key_file):
+        try:
+            with open(key_file, "rb") as f:
+                key_bytes = f.read()
+                if len(key_bytes) == 32:
+                    return key_bytes
+        except (OSError, IOError) as e:
+            logger.warning(f"Could not read existing crypto key file: {e}")
+
+    new_key = secrets.token_bytes(32)
+    try:
+        os.makedirs(data_dir, exist_ok=True)
+        # Attempt user-restricted file creation (0600)
+        flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+        mode = 0o600
+        try:
+            fd = os.open(key_file, flags, mode)
+            with open(fd, "wb") as f:
+                f.write(new_key)
+        except (AttributeError, OSError):
+            with open(key_file, "wb") as f:
+                f.write(new_key)
+    except (OSError, IOError) as e:
+        logger.warning(f"Could not persist installation crypto key to disk: {e}")
+    return new_key
+
+
 class AESCryptoEngine:
     """Provides AES-256 file encryption and decryption for sensitive audit records."""
 
     def __init__(self, master_password: Optional[str] = None, salt: Optional[bytes] = None):
-        import platform
-        secret = master_password or f"FinAuditPro_Secret_{platform.node()}"
+        data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+        
+        if master_password:
+            secret_bytes = master_password.encode("utf-8")
+        else:
+            secret_bytes = _get_or_create_installation_key(data_dir)
+
         if salt is None:
-            salt_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
-            os.makedirs(salt_dir, exist_ok=True)
-            salt_file = os.path.join(salt_dir, ".crypto_salt")
+            os.makedirs(data_dir, exist_ok=True)
+            salt_file = os.path.join(data_dir, ".crypto_salt")
             if os.path.exists(salt_file):
                 try:
                     with open(salt_file, "rb") as f:
                         self.salt = f.read(16)
-                except Exception:
-                    self.salt = os.urandom(16)
+                except (OSError, IOError) as e:
+                    logger.warning(f"Could not read crypto salt: {e}")
+                    self.salt = secrets.token_bytes(16)
             else:
-                self.salt = os.urandom(16)
+                self.salt = secrets.token_bytes(16)
                 try:
                     with open(salt_file, "wb") as f:
                         f.write(self.salt)
-                except Exception as e:
+                except (OSError, IOError) as e:
                     logger.warning(f"Could not persist crypto salt to disk: {e}")
         else:
             self.salt = salt
 
-        self.key = hashlib.pbkdf2_hmac("sha256", secret.encode("utf-8"), self.salt, 100000)
+        self.key = hashlib.pbkdf2_hmac("sha256", secret_bytes, self.salt, 100000)
         self._fernet = None
         self._init_fernet()
 
@@ -102,6 +139,7 @@ class SecureStorage:
                 try:
                     os.remove(path)
                     logger.debug(f"Securely deleted temp file: {path}")
-                except Exception as e:
+                except (OSError, IOError) as e:
                     logger.warning(f"Failed to delete temp file {path}: {e}")
         self.temp_files.clear()
+

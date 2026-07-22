@@ -47,12 +47,9 @@ class DashboardWindow(QWidget):
         self.workflow_manager = WorkflowManager()
         self.event_manager = WorkflowEventManager()
         
-        self.init_workflow_state()
-
         self.setWindowTitle("FinAuditPro - Enterprise Audit Workspace")
         self.resize(1440, 900)
         self.setObjectName("appBg")
-        self.setup_keyboard_shortcuts()
         
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -600,6 +597,7 @@ class DashboardWindow(QWidget):
 
         main_layout.addWidget(sidebar)
         main_layout.addWidget(main_content)
+        self.setup_keyboard_shortcuts()
 
     def init_workflow_state(self):
         clients = self.session.query(Client).all()

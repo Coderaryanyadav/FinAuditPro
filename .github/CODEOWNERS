@@ -1,0 +1,14 @@
+# Global Owners
+* @Coderaryanyadav
+
+# Database & Security
+/src/database/ @Coderaryanyadav
+/src/security/ @Coderaryanyadav
+
+# AI & Document Intelligence
+/src/ai/ @Coderaryanyadav
+/src/document_intelligence/ @Coderaryanyadav
+
+# Rule Engine & Workflows
+/src/rule_engine/ @Coderaryanyadav
+/src/workflow/ @Coderaryanyadav

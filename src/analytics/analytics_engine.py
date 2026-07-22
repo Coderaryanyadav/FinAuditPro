@@ -27,6 +27,8 @@ class ExecutiveIntelligencePack:
     computation_time_seconds: float
 
 
+from typing import Dict, Any, List, Optional, Union
+
 class AnalyticsEngine:
     """Master Facade for Enterprise Business Intelligence & Executive Analytics."""
 
@@ -37,13 +39,13 @@ class AnalyticsEngine:
         self.heatmap_engine = HeatmapEngine()
         self.benchmark_engine = BenchmarkEngine()
 
-    def generate_executive_pack(self, projects_data: Optional[List[Dict[str, Any]]] = None) -> ExecutiveIntelligencePack:
+    def generate_executive_pack(self, audit_id: Optional[Union[int, List[Dict[str, Any]]]] = None) -> ExecutiveIntelligencePack:
         """Computes complete BI executive intelligence pack."""
         start_time = time.time()
 
-        kpis = self.kpi_engine.calculate_kpis(projects_data)
-        trends = self.trend_engine.compute_trends(projects_data)
-        forecast = self.forecast_engine.forecast_workload(len(projects_data) if projects_data else 10)
+        kpis = self.kpi_engine.calculate_kpis(audit_id)
+        trends = self.trend_engine.compute_trends(audit_id)
+        forecast = self.forecast_engine.forecast_workload(audit_id if isinstance(audit_id, int) else None)
         heatmap = self.heatmap_engine.generate_industry_risk_heatmap()
         benchmark = self.benchmark_engine.compare_year_over_year()
 

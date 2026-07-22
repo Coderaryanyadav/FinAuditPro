@@ -590,6 +590,7 @@ class DashboardWindow(QWidget):
 
             try:
                 from services.notification_service import NotificationService
+                from analytics.analytics_engine import AnalyticsEngine
                 ns = NotificationService(self.session)
                 eng_id = summary.get("engagement_id")
                 if eng_id:
@@ -597,9 +598,12 @@ class DashboardWindow(QWidget):
                     if notifications:
                         import logging
                         logging.getLogger(__name__).info(f"Loaded {len(notifications)} active deadline notifications for Engagement {eng_id}")
+                    pack = AnalyticsEngine().generate_executive_pack(audit_id=eng_id)
+                    import logging
+                    logging.getLogger(__name__).info(f"Generated Executive Intelligence Pack for Engagement {eng_id} in {pack.computation_time_seconds}s")
             except Exception as e:
                 import logging
-                logging.getLogger(__name__).warning(f"NotificationService fetch exception: {e}")
+                logging.getLogger(__name__).warning(f"NotificationService / AnalyticsEngine fetch exception: {e}")
 
     def advance_audit_stage(self):
         from security.security_manager import SecurityManager

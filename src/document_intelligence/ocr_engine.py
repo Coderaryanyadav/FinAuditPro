@@ -77,6 +77,19 @@ class OCREngine:
         cls._ocr_status_cache = (False, msg)
         return cls._ocr_status_cache
 
+    @staticmethod
+    def _compute_text_confidence(text: str, default_base: float = 0.90) -> float:
+        """Compute dynamic confidence score based on text entropy and structure."""
+        if not text or not text.strip():
+            return 0.50
+        alpha_chars = sum(1 for c in text if c.isalnum() or c.isspace())
+        ratio = alpha_chars / len(text) if len(text) > 0 else 0.5
+        words = text.split()
+        avg_word_len = sum(len(w) for w in words) / len(words) if words else 0
+        bonus = 0.08 if (3 <= avg_word_len <= 12 and ratio > 0.80) else 0.02
+        conf = min(0.99, max(0.55, default_base - 0.10 + (ratio * 0.15) + bonus))
+        return round(conf, 4)
+
     @classmethod
     def process_pdf_native(cls, file_path: str) -> Optional[OCRResult]:
         """Attempt primary digital text extraction via pypdf / pdfplumber."""
@@ -88,16 +101,18 @@ class OCREngine:
 
             for idx, page in enumerate(reader.pages, start=1):
                 page_text = page.extract_text() or ""
-                pages.append(OCRPageResult(page_number=idx, text=page_text, confidence=0.98))
+                p_conf = cls._compute_text_confidence(page_text, default_base=0.96)
+                pages.append(OCRPageResult(page_number=idx, text=page_text, confidence=p_conf))
                 full_text_parts.append(page_text)
 
             raw_text = "\n\n".join(full_text_parts).strip()
+            overall_conf = cls._compute_text_confidence(raw_text, default_base=0.96)
             if len(raw_text) > 50:  # Valid native digital PDF text
                 return OCRResult(
                     raw_text=raw_text,
                     pages=pages,
                     provider_used="PyPDF Native Parser",
-                    overall_confidence=0.98
+                    overall_confidence=overall_conf
                 )
         except Exception as e:
             logger.warning(f"Native PyPDF extraction failed for {file_path}: {e}")
@@ -114,12 +129,15 @@ class OCREngine:
                 import pytesseract
                 from PIL import Image
                 img = Image.open(file_path)
+                data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
+                conf_list = [float(c) for c in data.get('conf', []) if str(c).replace('-', '').isdigit() and float(c) > 0]
+                avg_conf = round((sum(conf_list) / len(conf_list) / 100.0), 4) if conf_list else 0.85
                 text = pytesseract.image_to_string(img)
                 return OCRResult(
                     raw_text=text,
-                    pages=[OCRPageResult(page_number=1, text=text, confidence=0.88)],
+                    pages=[OCRPageResult(page_number=1, text=text, confidence=avg_conf)],
                     provider_used="Tesseract OCR",
-                    overall_confidence=0.88
+                    overall_confidence=avg_conf
                 )
             except Exception as e:
                 logger.warning(f"OCR execution failed: {e}")
@@ -129,11 +147,12 @@ class OCREngine:
             with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                 content = f.read()
                 if content.strip():
+                    f_conf = cls._compute_text_confidence(content, default_base=0.92)
                     return OCRResult(
                         raw_text=content,
-                        pages=[OCRPageResult(page_number=1, text=content, confidence=0.90)],
+                        pages=[OCRPageResult(page_number=1, text=content, confidence=f_conf)],
                         provider_used="Direct File Parser",
-                        overall_confidence=0.90
+                        overall_confidence=f_conf
                     )
         except Exception as e:
             logger.warning(f"Direct file parsing fallback encountered exception: {e}")

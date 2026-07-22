@@ -4,7 +4,7 @@ Predicts audit completion timelines and resource load strictly using live databa
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from database.database import SessionLocal
 from database.models import AuditProject, Finding
 
@@ -28,12 +28,16 @@ class ForecastEngine:
     """Computes predictive models for audit resource planning from live database records."""
 
     @staticmethod
-    def forecast_workload(current_engagements_count: int = 0) -> ForecastMetrics:
+    def forecast_workload(audit_id: Optional[int] = None) -> ForecastMetrics:
         """Forecasts completion timelines and resource load based on active database projects."""
         session = SessionLocal()
         try:
-            active_count = session.query(AuditProject).filter(AuditProject.status != "Completed").count()
-            findings = session.query(Finding).order_by(Finding.id.desc()).limit(3).all()
+            if audit_id:
+                active_count = session.query(AuditProject).filter(AuditProject.id == audit_id, AuditProject.status != "Completed").count()
+                findings = session.query(Finding).filter(Finding.audit_id == audit_id).order_by(Finding.id.desc()).limit(3).all()
+            else:
+                active_count = session.query(AuditProject).filter(AuditProject.status != "Completed").count()
+                findings = session.query(Finding).order_by(Finding.id.desc()).limit(3).all()
             
             if active_count == 0:
                 return ForecastMetrics()

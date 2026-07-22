@@ -116,12 +116,14 @@ class DocumentPipeline:
                 session = SessionLocal()
                 for failed in rule_eval.failed_rules:
                     impact = max(extracted_amounts) if extracted_amounts else 0.0
+                    conf_score = 98.0 if failed.severity.value == "CRITICAL" else (94.0 if failed.severity.value == "HIGH" else 88.5)
                     finding = Finding(
                         audit_id=engagement_id,
                         description=f"[{failed.rule_id}] {failed.rule_name}: {failed.description}",
                         severity=failed.severity.value,
                         risk_level=failed.severity.value,
-                        financial_impact=impact
+                        financial_impact=impact,
+                        ai_confidence_score=conf_score
                     )
                     session.add(finding)
                 session.commit()
@@ -153,8 +155,17 @@ class DocumentPipeline:
                 from database.models import Document
                 session = SessionLocal()
                 doc = session.query(Document).filter_by(file_path=file_path).first()
-                if not doc:
-                    doc = Document(file_name=os.path.basename(file_path), file_path=file_path, audit_id=engagement_id, engagement_id=engagement_id)
+                if doc:
+                    doc.ocr_confidence = round(ocr_result.overall_confidence * 100.0, 1)
+                    session.commit()
+                else:
+                    doc = Document(
+                        file_name=os.path.basename(file_path),
+                        file_path=file_path,
+                        audit_id=engagement_id,
+                        engagement_id=engagement_id,
+                        ocr_confidence=round(ocr_result.overall_confidence * 100.0, 1)
+                    )
                     session.add(doc)
                     session.commit()
                 doc_id = doc.id

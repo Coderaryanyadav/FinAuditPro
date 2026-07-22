@@ -116,6 +116,10 @@ class DocumentPipeline:
                 session = SessionLocal()
                 for failed in rule_eval.failed_rules:
                     impact = max(extracted_amounts) if extracted_amounts else 0.0
+                    # AI confidence score: heuristic estimate based on rule description length,
+                    # metadata presence (GSTIN/PAN), and extracted financial amounts.
+                    # This is NOT a model-derived confidence — no ML model scores rule matches.
+                    # Range: 75.0-99.0. Longer descriptions + richer metadata = higher score.
                     base_score = 85.0
                     desc_len_bonus = min(10.0, len(failed.description) / 20.0)
                     meta_bonus = 4.0 if (getattr(meta, 'gstin', None) or getattr(meta, 'pan', None)) else 1.0

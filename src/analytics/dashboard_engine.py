@@ -166,17 +166,19 @@ class ExecutiveDashboardEngine:
             rows = []
             for d in docs:
                 c_name = "Unassigned"
-                if getattr(d, 'audit_id', None):
+                if d.audit_id:
                     proj = session.query(AuditProject).filter_by(id=d.audit_id).first()
                     if proj:
                         cl = session.query(Client).filter_by(id=proj.client_id).first()
-                        if cl: c_name = cl.name
-                elif getattr(d, 'engagement_id', None):
+                        if cl:
+                            c_name = cl.name
+                if c_name == "Unassigned" and d.engagement_id:
                     from database.models import Engagement
                     eng = session.query(Engagement).filter_by(id=d.engagement_id).first()
                     if eng:
                         cl = session.query(Client).filter_by(id=eng.client_id).first()
-                        if cl: c_name = cl.name
+                        if cl:
+                            c_name = cl.name
 
                 rows.append([d.file_name, c_name, d.doc_type or "Ingested"])
 

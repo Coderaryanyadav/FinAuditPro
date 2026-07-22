@@ -554,15 +554,14 @@ class DashboardWindow(QWidget):
         if clients:
             c = clients[0]
             try:
-                from database.models import Engagement
-                eng = self.session.query(Engagement).filter_by(client_id=c.id, financial_year="2025-26").first()
-                if not eng:
-                    eng = Engagement(client_id=c.id, financial_year="2025-26", status="Execution")
-                    self.session.add(eng)
+                proj = self.session.query(AuditProject).filter_by(client_id=c.id).first()
+                if not proj:
+                    proj = AuditProject(client_id=c.id, financial_year="2025-26", status="Execution")
+                    self.session.add(proj)
                     self.session.commit()
-                self.workflow_manager.initialize_engagement(engagement_id=eng.id, client_id=c.id, financial_year="2025-26")
+                self.workflow_manager.initialize_engagement(engagement_id=proj.id, client_id=c.id, financial_year=proj.financial_year or "2025-26")
                 if hasattr(self, 'ai_page') and self.ai_page is not None:
-                    self.ai_page.active_engagement_id = eng.id
+                    self.ai_page.active_engagement_id = proj.id
             except Exception as e:
                 import logging
                 logging.getLogger(__name__).warning(f"Startup engagement initialization warning: {e}")
@@ -571,22 +570,23 @@ class DashboardWindow(QWidget):
         self.client_selector.clear()
         clients = self.session.query(Client).all()
         for c in clients:
-            self.client_selector.addItem(f"{c.name} (FY 2025-26)", c.id)
+            proj = self.session.query(AuditProject).filter_by(client_id=c.id).first()
+            fy = proj.financial_year if proj else "2025-26"
+            self.client_selector.addItem(f"{c.name} (FY {fy})", c.id)
 
     def on_active_engagement_changed(self, index):
         client_id = self.client_selector.currentData()
         if client_id:
             try:
-                from database.models import Engagement
-                eng = self.session.query(Engagement).filter_by(client_id=client_id, financial_year="2025-26").first()
-                if not eng:
-                    eng = Engagement(client_id=client_id, financial_year="2025-26", status="Execution")
-                    self.session.add(eng)
+                proj = self.session.query(AuditProject).filter_by(client_id=client_id).first()
+                if not proj:
+                    proj = AuditProject(client_id=client_id, financial_year="2025-26", status="Execution")
+                    self.session.add(proj)
                     self.session.commit()
 
-                self.workflow_manager.initialize_engagement(engagement_id=eng.id, client_id=client_id, financial_year="2025-26")
+                self.workflow_manager.initialize_engagement(engagement_id=proj.id, client_id=client_id, financial_year=proj.financial_year or "2025-26")
                 if hasattr(self, 'ai_page') and self.ai_page is not None:
-                    self.ai_page.active_engagement_id = eng.id
+                    self.ai_page.active_engagement_id = proj.id
                 self.refresh_workflow_ui()
             except Exception as e:
                 import logging
@@ -627,11 +627,21 @@ class DashboardWindow(QWidget):
     def advance_audit_stage(self):
         from security.security_manager import SecurityManager
         from security.rbac import Permission
+        from workflow.workflow_state import AuditStage
         sm = SecurityManager()
         if sm.current_session and not sm.check_permission(Permission.APPROVE_AUDIT):
             QMessageBox.warning(self, "Access Denied", "Your role does not have permission to approve or advance audit stages.")
             return
-        self.workflow_manager.advance_stage()
+        try:
+            current = self.workflow_manager.current_state
+            if current:
+                stages = list(AuditStage)
+                idx = stages.index(current.current_stage)
+                if idx + 1 < len(stages):
+                    self.workflow_manager.advance_current_stage(stages[idx + 1], {}, "DashboardUser")
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Advance stage error: {e}")
         self.refresh_workflow_ui()
 
     def closeEvent(self, event):

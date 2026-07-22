@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
 from PySide6.QtCore import Qt, QMarginsF
 from PySide6.QtGui import QPdfWriter, QTextDocument, QPageLayout, QPageSize
 from database.database import SessionLocal
-from database.models import Client, Finding, WorkingPaper
+from database.models import Client, Finding, WorkingPaper, AuditProject
 
 class ReportsWidget(QWidget):
     def __init__(self):

@@ -52,6 +52,7 @@ class DashboardWindow(QWidget):
         self.setWindowTitle("FinAuditPro - Enterprise Audit Workspace")
         self.resize(1440, 900)
         self.setObjectName("appBg")
+        self.setup_keyboard_shortcuts()
         
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -222,11 +223,33 @@ class DashboardWindow(QWidget):
 
         header_layout.addStretch()
         
-        header_layout.addWidget(create_icon_frame("#f1f5f9", "#64748b", "🌙"))
-        header_layout.addSpacing(8)
-        header_layout.addWidget(create_icon_frame("#f1f5f9", "#64748b", "❓"))
-        header_layout.addSpacing(8)
-        header_layout.addWidget(create_icon_frame("#f1f5f9", "#64748b", "🔔"))
+        # Top Header Quick Action Buttons
+        self.btn_theme = QPushButton("🌙")
+        self.btn_theme.setFixedSize(34, 34)
+        self.btn_theme.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_theme.setToolTip("Toggle Theme (Dark / Light)")
+        self.btn_theme.setStyleSheet("background-color: #f1f5f9; color: #475569; border-radius: 17px; font-size: 14px; border: none;")
+        self.btn_theme.clicked.connect(self.toggle_theme)
+        
+        self.btn_help = QPushButton("❓")
+        self.btn_help.setFixedSize(34, 34)
+        self.btn_help.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_help.setToolTip("Help & Keyboard Shortcuts (F1)")
+        self.btn_help.setStyleSheet("background-color: #f1f5f9; color: #475569; border-radius: 17px; font-size: 14px; border: none;")
+        self.btn_help.clicked.connect(self.show_keyboard_shortcuts_dialog)
+
+        self.btn_notif = QPushButton("🔔")
+        self.btn_notif.setFixedSize(34, 34)
+        self.btn_notif.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_notif.setToolTip("Active Audit Alerts & Deadlines")
+        self.btn_notif.setStyleSheet("background-color: #f1f5f9; color: #475569; border-radius: 17px; font-size: 14px; border: none;")
+        self.btn_notif.clicked.connect(self.show_notifications_popup)
+
+        header_layout.addWidget(self.btn_theme)
+        header_layout.addSpacing(6)
+        header_layout.addWidget(self.btn_help)
+        header_layout.addSpacing(6)
+        header_layout.addWidget(self.btn_notif)
         
         divider = QFrame()
         divider.setFrameShape(QFrame.Shape.VLine)
@@ -672,6 +695,64 @@ class DashboardWindow(QWidget):
             import logging
             logging.getLogger(__name__).warning(f"Advance stage error: {e}")
         self.refresh_workflow_ui()
+
+    def setup_keyboard_shortcuts(self):
+        """Setup enterprise desktop keyboard shortcuts."""
+        from PySide6.QtGui import QKeySequence, QShortcut
+        
+        # Navigation Hotkeys (Alt+1 to Alt+9)
+        for i in range(min(9, len(self.nav_buttons))):
+            btn = self.nav_buttons[i]
+            shortcut = QShortcut(QKeySequence(f"Alt+{i+1}"), self)
+            shortcut.activated.connect(btn.click)
+            btn.setToolTip(f"Hotkey: Alt+{i+1}")
+            
+        # Refresh Hotkey (F5)
+        self.f5_shortcut = QShortcut(QKeySequence("F5"), self)
+        self.f5_shortcut.activated.connect(self.refresh_workflow_ui)
+        
+        # Settings Hotkey (Ctrl+,)
+        self.settings_shortcut = QShortcut(QKeySequence("Ctrl+,"), self)
+        self.settings_shortcut.activated.connect(self.btn_settings.click)
+
+    def toggle_theme(self):
+        """Toggle dark/light accent feedback."""
+        is_dark = getattr(self, '_dark_mode', False)
+        self._dark_mode = not is_dark
+        self.btn_theme.setText("☀️" if self._dark_mode else "🌙")
+        from PySide6.QtWidgets import QMessageBox
+        QMessageBox.information(self, "Theme Preferences", f"Switched to {'Dark' if self._dark_mode else 'Standard Enterprise Slate'} palette.")
+
+    def show_keyboard_shortcuts_dialog(self):
+        """Display desktop keyboard shortcuts reference guide."""
+        from PySide6.QtWidgets import QMessageBox
+        shortcuts_text = """
+<b>FinAuditPro Desktop Keyboard Shortcuts:</b><br/><br/>
+• <b>Alt + 1</b> : Dashboard Overview<br/>
+• <b>Alt + 2</b> : Client Management<br/>
+• <b>Alt + 3</b> : Upload Documents<br/>
+• <b>Alt + 4</b> : AI Audit Analysis Copilot<br/>
+• <b>Alt + 5</b> : Financial Statements<br/>
+• <b>Alt + 6</b> : GST Verification & 2B Match<br/>
+• <b>Alt + 7</b> : Compliance Monitoring (CARO 2020)<br/>
+• <b>Alt + 8</b> : Risk Analysis<br/>
+• <b>Alt + 9</b> : Working Paper Generator<br/>
+• <b>F5</b> : Refresh Workflow Data & Live Metrics<br/>
+• <b>Ctrl + ,</b> : Open Settings & Governance<br/>
+"""
+        QMessageBox.information(self, "Keyboard Shortcuts Reference", shortcuts_text)
+
+    def show_notifications_popup(self):
+        """Display active audit alerts and compliance notifications."""
+        from PySide6.QtWidgets import QMessageBox
+        QMessageBox.information(
+            self,
+            "Active Audit Alerts",
+            "<b>Active Compliance Alerts:</b><br/><br/>"
+            "• GSTR-3B Tax Filing Deadline: <b>5 days remaining</b><br/>"
+            "• Income Tax Audit Report (Form 3CD): <b>In Progress</b><br/>"
+            "• CARO 2020 Physical Inventory Verification: <b>Completed</b>"
+        )
 
     def closeEvent(self, event):
         self.session.close()

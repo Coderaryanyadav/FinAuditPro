@@ -53,14 +53,22 @@ class WorkflowManager:
 
         try:
             from database.database import SessionLocal
-            from database.models import AuditProject
+            from database.models import AuditProject, Engagement
             session = SessionLocal()
+            eng = session.query(Engagement).filter_by(id=engagement_id).first()
             proj = session.query(AuditProject).filter_by(id=engagement_id).first()
-            if not proj:
+            if not proj and client_id:
                 proj = session.query(AuditProject).filter_by(client_id=client_id).first()
-            if proj and proj.status:
+
+            saved_status = None
+            if eng and getattr(eng, 'status', None):
+                saved_status = eng.status
+            elif proj and proj.status:
+                saved_status = proj.status
+
+            if saved_status:
                 for s in AuditStage:
-                    if s.value.lower() == proj.status.lower() or s.name.lower() == proj.status.lower():
+                    if s.value.lower() == saved_status.lower() or s.name.lower() == saved_status.lower():
                         stage = s
                         completion_pct = WorkflowProgressTracker.calculate_completion(s)
                         break
@@ -120,14 +128,17 @@ class WorkflowManager:
 
         try:
             from database.database import SessionLocal
-            from database.models import AuditProject
+            from database.models import AuditProject, Engagement
             session = SessionLocal()
+            eng = session.query(Engagement).filter_by(id=updated_state.engagement_id).first()
+            if eng:
+                eng.status = updated_state.current_stage.value
             proj = session.query(AuditProject).filter_by(id=updated_state.engagement_id).first()
             if not proj:
                 proj = session.query(AuditProject).filter_by(client_id=updated_state.client_id).first()
             if proj:
                 proj.status = updated_state.current_stage.value
-                session.commit()
+            session.commit()
             session.close()
         except Exception as e:
             logger.warning(f"Failed to persist workflow stage update to DB: {e}")

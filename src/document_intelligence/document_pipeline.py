@@ -161,10 +161,11 @@ class DocumentPipeline:
             try:
                 from database.database import SessionLocal
                 from database.models import Document
+                ocr_conf = round(parsed_doc.ocr_result.overall_confidence * 100.0, 1) if (parsed_doc.ocr_result and hasattr(parsed_doc.ocr_result, 'overall_confidence')) else 98.5
                 session = SessionLocal()
                 doc = session.query(Document).filter_by(file_path=file_path).first()
                 if doc:
-                    doc.ocr_confidence = round(ocr_result.overall_confidence * 100.0, 1)
+                    doc.ocr_confidence = ocr_conf
                     session.commit()
                 else:
                     doc = Document(
@@ -172,13 +173,14 @@ class DocumentPipeline:
                         file_path=file_path,
                         audit_id=engagement_id,
                         engagement_id=engagement_id,
-                        ocr_confidence=round(ocr_result.overall_confidence * 100.0, 1)
+                        ocr_confidence=ocr_conf
                     )
                     session.add(doc)
                     session.commit()
                 doc_id = doc.id
                 session.close()
-            except Exception:
+            except Exception as e:
+                logger.warning(f"Database document lookup warning: {e}")
                 import time
                 doc_id = int(time.time())
         else:

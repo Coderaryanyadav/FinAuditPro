@@ -16,8 +16,9 @@ You must NEVER output free conversational text. You must ONLY output a valid JSO
 
     @classmethod
     def build_audit_analysis_prompt(cls, document_text: str, schema_template: str) -> str:
-        # Sanitize boundaries
-        clean_text = document_text.replace("</untrusted_document_context>", "")
+        import re
+        # Sanitize boundaries case-insensitively
+        clean_text = re.sub(r'(?i)</?untrusted_document_context>', '', document_text)
         return f"""
 Analyze the following financial document extract and identify any audit risks, anomalies, or compliance issues.
 

@@ -64,4 +64,5 @@ class OllamaWorker(QThread):
             self.chunk_received.emit(response)
             self.finished.emit()
         except Exception as e:
-            self.error.emit(str(e))
+            traceback.print_exc()
+            self.error.emit(f"{str(e)}\n{traceback.format_exc()}")

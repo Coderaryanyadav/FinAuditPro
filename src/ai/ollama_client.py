@@ -59,7 +59,7 @@ class OllamaClient:
                 response = requests.post(url, json=payload, timeout=self.timeout)
                 response.raise_for_status()
                 return response.json().get("response", "")
-            except (requests.Timeout, requests.ConnectionError) as e:
+            except requests.RequestException as e:
                 if attempt == retries - 1:
                     raise OllamaClientError(f"Ollama connection failed after {retries} attempts: {e}")
                 time.sleep(2 ** attempt)

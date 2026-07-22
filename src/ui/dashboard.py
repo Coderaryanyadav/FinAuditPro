@@ -57,27 +57,38 @@ class DashboardWindow(QWidget):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # 1. Sidebar
+        # 1. Sidebar (Dark Slate Corporate Palette)
         sidebar = QFrame()
         sidebar.setFixedWidth(260)
-        sidebar.setStyleSheet("background-color: #ffffff; border-right: 1px solid #e2e8f0;")
+        sidebar.setStyleSheet("background-color: #0f172a; border-right: 1px solid #1e293b;")
         sidebar_layout = QVBoxLayout(sidebar)
         sidebar_layout.setContentsMargins(0, 0, 0, 0)
         
         logo_container = QFrame()
         logo_container.setFixedHeight(80)
-        logo_container.setStyleSheet("border-bottom: 1px solid #f1f5f9; border-right: none;")
+        logo_container.setStyleSheet("background-color: #090d16; border-bottom: 1px solid #1e293b; border-right: none;")
         logo_layout = QHBoxLayout(logo_container)
         logo_layout.setContentsMargins(24, 0, 24, 0)
+        
+        logo_badge = QLabel("⚡")
+        logo_badge.setFixedSize(32, 32)
+        logo_badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        logo_badge.setStyleSheet("background-color: #0284c7; color: #ffffff; border-radius: 8px; font-size: 16px; font-weight: bold;")
+        
         app_title = QLabel("FinAuditPro")
-        app_title.setStyleSheet("font-size: 20px; font-weight: bold; color: #0f172a; border: none;")
+        app_title.setStyleSheet("font-size: 20px; font-weight: 800; color: #ffffff; border: none; font-family: 'Inter', sans-serif;")
+        logo_layout.addWidget(logo_badge)
+        logo_layout.addSpacing(10)
         logo_layout.addWidget(app_title, alignment=Qt.AlignmentFlag.AlignVCenter)
+        logo_layout.addStretch()
         sidebar_layout.addWidget(logo_container)
         
         nav_scroll = QScrollArea()
         nav_scroll.setWidgetResizable(True)
         nav_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        nav_scroll.setStyleSheet("background-color: #0f172a; border: none;")
         nav_widget = QWidget()
+        nav_widget.setStyleSheet("background-color: #0f172a;")
         nav_layout = QVBoxLayout(nav_widget)
         nav_layout.setContentsMargins(12, 16, 12, 16)
         nav_layout.setSpacing(4)
@@ -93,7 +104,7 @@ class DashboardWindow(QWidget):
             return btn
             
         menu_label = QLabel("MAIN MENU")
-        menu_label.setStyleSheet("font-size: 10px; font-weight: 600; color: #94a3b8; padding-left: 12px; margin-bottom: 4px; border: none;")
+        menu_label.setStyleSheet("font-size: 11px; font-weight: 700; color: #94a3b8; padding-left: 12px; margin-bottom: 6px; border: none; letter-spacing: 0.5px;")
         nav_layout.addWidget(menu_label)
         
         self.btn_dashboard = create_nav_btn("Dashboard", True)
@@ -105,7 +116,7 @@ class DashboardWindow(QWidget):
         
         nav_layout.addSpacing(20)
         audit_label = QLabel("AUDIT WORKSPACE")
-        audit_label.setStyleSheet("font-size: 10px; font-weight: 600; color: #94a3b8; padding-left: 12px; margin-bottom: 4px; border: none;")
+        audit_label.setStyleSheet("font-size: 11px; font-weight: 700; color: #94a3b8; padding-left: 12px; margin-bottom: 6px; border: none; letter-spacing: 0.5px;")
         nav_layout.addWidget(audit_label)
         
         self.btn_ai = create_nav_btn("AI Audit Analysis")
@@ -123,7 +134,7 @@ class DashboardWindow(QWidget):
 
         nav_layout.addSpacing(20)
         settings_label = QLabel("SETTINGS & LOGS")
-        settings_label.setStyleSheet("font-size: 10px; font-weight: 600; color: #94a3b8; padding-left: 12px; margin-bottom: 4px; border: none;")
+        settings_label.setStyleSheet("font-size: 11px; font-weight: 700; color: #94a3b8; padding-left: 12px; margin-bottom: 6px; border: none; letter-spacing: 0.5px;")
         nav_layout.addWidget(settings_label)
 
         self.btn_reports = create_nav_btn("Reports")
@@ -145,12 +156,30 @@ class DashboardWindow(QWidget):
         sidebar_layout.addWidget(nav_scroll)
         
         profile_frame = QFrame()
-        profile_frame.setFixedHeight(70)
-        profile_frame.setStyleSheet("border-top: 1px solid #e2e8f0; background-color: #f8fafc;")
+        profile_frame.setFixedHeight(72)
+        profile_frame.setStyleSheet("border-top: 1px solid #1e293b; background-color: #090d16;")
         profile_layout = QHBoxLayout(profile_frame)
-        profile_lbl = QLabel("CA User\nChartered Accountant")
-        profile_lbl.setStyleSheet("font-size: 12px; font-weight: 600; color: #0f172a; border: none;")
-        profile_layout.addWidget(profile_lbl)
+        profile_layout.setContentsMargins(16, 0, 16, 0)
+        
+        avatar_lbl = QLabel("CA")
+        avatar_lbl.setFixedSize(36, 36)
+        avatar_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        avatar_lbl.setStyleSheet("background-color: #0284c7; color: #ffffff; border-radius: 18px; font-weight: bold; font-size: 13px;")
+        
+        profile_info = QVBoxLayout()
+        profile_info.setSpacing(2)
+        profile_info.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        name_lbl = QLabel("CA User")
+        name_lbl.setStyleSheet("font-size: 13px; font-weight: 700; color: #ffffff; border: none;")
+        role_lbl = QLabel("Audit Partner")
+        role_lbl.setStyleSheet("font-size: 11px; color: #94a3b8; border: none;")
+        profile_info.addWidget(name_lbl)
+        profile_info.addWidget(role_lbl)
+        
+        profile_layout.addWidget(avatar_lbl)
+        profile_layout.addSpacing(10)
+        profile_layout.addLayout(profile_info)
+        profile_layout.addStretch()
         sidebar_layout.addWidget(profile_frame)
         
         # 2. Main Content Area
@@ -250,21 +279,21 @@ class DashboardWindow(QWidget):
             # Header with title and icon
             h_layout = QHBoxLayout()
             t_lbl = QLabel(title)
-            t_lbl.setStyleSheet("color: #64748b; font-size: 14px; font-weight: 500; border: none;")
+            t_lbl.setStyleSheet("color: #334155; font-size: 14px; font-weight: 700; border: none;")
             
             icon_lbl = QLabel(icon_char)
-            icon_lbl.setFixedSize(28, 28)
+            icon_lbl.setFixedSize(30, 30)
             icon_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            icon_lbl.setStyleSheet(f"background-color: {icon_bg}; color: {icon_fg}; border-radius: 14px; font-size: 12px; border: none;")
+            icon_lbl.setStyleSheet(f"background-color: {icon_bg}; color: {icon_fg}; border-radius: 15px; font-size: 13px; border: none; font-weight: bold;")
             
             h_layout.addWidget(t_lbl)
             h_layout.addStretch()
             h_layout.addWidget(icon_lbl)
             
             v_lbl = QLabel(value)
-            v_lbl.setStyleSheet("color: #0f172a; font-size: 32px; font-weight: bold; border: none;")
+            v_lbl.setStyleSheet("color: #0f172a; font-size: 32px; font-weight: 800; border: none;")
             s_lbl = QLabel(subtitle)
-            s_lbl.setStyleSheet(f"color: {text_color}; font-size: 11px; font-weight: 600; background-color: {bg_color}; padding: 2px 6px; border-radius: 4px; border: none;")
+            s_lbl.setStyleSheet(f"color: {text_color}; font-size: 11px; font-weight: 700; background-color: {bg_color}; padding: 3px 8px; border-radius: 6px; border: none;")
             s_lbl.setFixedSize(s_lbl.sizeHint())
             
             val_layout = QHBoxLayout()

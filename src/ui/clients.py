@@ -144,7 +144,7 @@ class ClientManagementWidget(QWidget):
         # Right Side (Details Panel)
         self.details_panel = QFrame()
         self.details_panel.setStyleSheet("background-color: white; border-left: 1px solid #e2e8f0;")
-        self.details_panel.setFixedWidth(380)
+        self.details_panel.setMinimumWidth(340)
         self.details_layout = QVBoxLayout(self.details_panel)
         self.details_layout.setContentsMargins(24, 24, 24, 24)
         self.details_layout.setSpacing(16)

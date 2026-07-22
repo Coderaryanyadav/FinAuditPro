@@ -3,7 +3,7 @@ from PySide6.QtGui import QColor
 
 GLOBAL_QSS = """
 * {
-    font-family: 'Inter', 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    font-family: 'Inter', 'SF Pro Display', 'Segoe UI', -apple-system, sans-serif;
     color: #0f172a; /* slate-900 */
 }
 
@@ -55,7 +55,7 @@ QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
 QLineEdit, QTextEdit {
     border: 1px solid #cbd5e1;
     border-radius: 8px;
-    padding: 8px 12px;
+    padding: 9px 14px;
     background-color: #ffffff;
     font-size: 13px;
     color: #0f172a;
@@ -70,11 +70,11 @@ QLineEdit:focus, QTextEdit:focus {
 QComboBox {
     border: 1px solid #cbd5e1;
     border-radius: 8px;
-    padding: 7px 12px;
+    padding: 7px 14px;
     background-color: #ffffff;
     color: #0f172a;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
 }
 QComboBox::drop-down {
     border: none;
@@ -95,7 +95,7 @@ QTableWidget {
 }
 QHeaderView::section {
     background-color: #f8fafc;
-    color: #475569;
+    color: #334155;
     padding: 12px;
     font-weight: 700;
     font-size: 11px;
@@ -107,7 +107,7 @@ QHeaderView::section {
 QTableWidget::item {
     padding: 12px;
     border-bottom: 1px solid #f1f5f9;
-    color: #1e293b;
+    color: #0f172a;
 }
 QTableWidget::item:selected {
     background-color: #f0f9ff;
@@ -117,7 +117,7 @@ QTableWidget::item:selected {
 /* Buttons */
 QPushButton {
     font-size: 13px;
-    padding: 8px 16px;
+    padding: 9px 18px;
     border-radius: 8px;
     font-weight: 600;
     border: none;
@@ -133,30 +133,30 @@ QPushButton#primaryButton:pressed {
     background-color: #0369a1;
 }
 
+/* Sidebar Navigation Buttons - Dark Theme High Contrast */
 QPushButton#navButton {
     background-color: transparent;
-    color: #64748b;
+    color: #cbd5e1; /* High contrast Slate 300 on dark sidebar */
     border: none;
     border-radius: 8px;
     text-align: left;
     padding-left: 20px;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
 }
 QPushButton#navButton:hover {
-    background-color: #f1f5f9;
-    color: #0f172a;
+    background-color: #1e293b; /* Slate 800 hover */
+    color: #ffffff;
 }
 QPushButton#navButton[active="true"] {
-    background-color: #e0f2fe;
-    color: #0369a1;
-    border-left: 4px solid #0ea5e9;
-    padding-left: 16px;
+    background-color: #0284c7; /* Vibrant Sky Blue Active */
+    color: #ffffff;
+    padding-left: 20px;
     font-weight: 700;
 }
 """
 
-def apply_shadow(widget, blur=20, dx=0, dy=4, alpha=12):
+def apply_shadow(widget, blur=24, dx=0, dy=4, alpha=15):
     """
     Applies a clean, modern soft drop shadow effect to any QWidget.
     """

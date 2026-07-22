@@ -120,7 +120,7 @@ class DocumentUploadWidget(QWidget):
         # Upload Area
         self.upload_area = QFrame()
         self.upload_area.setStyleSheet("""
-            QFrame { background-color: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; }
+            QFrame { background-color: #f0f9ff; border: 2px dashed #0ea5e9; border-radius: 12px; }
         """)
         self.upload_area.setFixedHeight(220)
         upload_layout = QVBoxLayout(self.upload_area)
@@ -131,7 +131,7 @@ class DocumentUploadWidget(QWidget):
         icon_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         desc_lbl = QLabel("Drag & drop financial documents here\nor click to browse (PDF, Excel, Images)")
-        desc_lbl.setStyleSheet("color: #64748b; font-size: 14px; text-align: center; border: none; background: transparent;")
+        desc_lbl.setStyleSheet("color: #334155; font-size: 14px; font-weight: 500; text-align: center; border: none; background: transparent;")
         desc_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         self.btn_browse = QPushButton("Browse Files")
@@ -156,8 +156,8 @@ class DocumentUploadWidget(QWidget):
         
         self.file_list = QListWidget()
         self.file_list.setStyleSheet("""
-            QListWidget { background-color: white; border: 1px solid #e2e8f0; border-radius: 8px; }
-            QListWidget::item { padding: 12px; border-bottom: 1px solid #f1f5f9; color: #0f172a; }
+            QListWidget { background-color: white; border: 1px solid #cbd5e1; border-radius: 8px; }
+            QListWidget::item { padding: 12px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-weight: 500; }
         """)
         content_layout.addWidget(self.file_list)
         
@@ -165,16 +165,17 @@ class DocumentUploadWidget(QWidget):
         self.progress_bar = QProgressBar()
         self.progress_bar.setVisible(False)
         self.progress_bar.setStyleSheet("""
-            QProgressBar { border: 1px solid #cbd5e1; border-radius: 6px; text-align: center; background-color: #e2e8f0; }
-            QProgressBar::chunk { background-color: #10b981; }
+            QProgressBar { border: 1px solid #cbd5e1; border-radius: 6px; text-align: center; background-color: #e2e8f0; color: #0f172a; font-weight: bold; }
+            QProgressBar::chunk { background-color: #0ea5e9; }
         """)
         content_layout.addWidget(self.progress_bar)
         
         self.btn_process = QPushButton("Process Documents with AI")
         self.btn_process.setFixedHeight(45)
         self.btn_process.setStyleSheet("""
-            QPushButton { background-color: #10b981; color: white; font-weight: bold; font-size: 14px; border-radius: 8px; }
-            QPushButton:hover { background-color: #059669; }
+            QPushButton { background-color: #0ea5e9; color: white; font-weight: bold; font-size: 14px; border-radius: 8px; }
+            QPushButton:hover { background-color: #0284c7; }
+            QPushButton:pressed { background-color: #0369a1; }
         """)
         self.btn_process.clicked.connect(self.start_ai_processing)
         content_layout.addWidget(self.btn_process)

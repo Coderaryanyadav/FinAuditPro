@@ -155,15 +155,31 @@ Comprehensive technical documentation is available in the [`docs/`](docs/) direc
 
 ---
 
-## 💻 Installation & Quickstart
+## 💻 One-Click Auto-Installer & Quickstart
 
-### System Requirements
-- **OS**: Windows 10/11 (64-bit), macOS 12+, or Ubuntu 22.04 LTS
-- **RAM**: 8 GB minimum (16 GB recommended for local LLM inference)
-- **Disk Space**: 5 GB free space
-- **Prerequisites**: Python 3.11+, [Ollama](https://ollama.ai/) installed locally
+FinAuditPro includes a **universal auto-installer bootstrapper** that automatically detects your OS, checks runtime prerequisites, creates virtual environments, installs Python dependencies, and launches the app.
 
-### Step-by-Step Setup
+### ⚡ One-Click Run (Zero Configuration Required)
+
+- **Windows**: Double-click `install.bat` or run in terminal:
+  ```cmd
+  install.bat
+  ```
+
+- **macOS & Linux**: Run in terminal:
+  ```bash
+  chmod +x install.sh
+  ./install.sh
+  ```
+
+- **Manual Bootstrapper Execution**:
+  ```bash
+  python scripts/bootstrap_env.py
+  ```
+
+---
+
+### Step-by-Step Manual Setup
 
 1. **Clone Repository**:
    ```bash

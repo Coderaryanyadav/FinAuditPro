@@ -111,6 +111,12 @@ class RiskAnalysisWidget(QWidget):
     def load_findings(self):
         active_id = getattr(self, 'active_engagement_id', None)
         if active_id:
+            try:
+                from services.risk_service import RiskService
+                from database.repositories.risk_repo import RiskRepository
+                rs = RiskService(RiskRepository(self.session))
+            except Exception:
+                pass
             findings = self.session.query(Finding).filter_by(audit_id=active_id).all()
         else:
             findings = self.session.query(Finding).all()

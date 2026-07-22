@@ -198,7 +198,14 @@ class DocumentUploadWidget(QWidget):
         proj_id = self.project_combo.currentData()
         if proj_id is None: return
         
-        docs = self.session.query(Document).filter_by(audit_id=proj_id).all()
+        try:
+            from services.document_service import DocumentService
+            from database.repositories.document_repo import DocumentRepository
+            ds = DocumentService(DocumentRepository(self.session))
+            docs = ds.get_engagement_documents(proj_id)
+        except Exception:
+            docs = self.session.query(Document).filter_by(audit_id=proj_id).all()
+
         for doc in docs:
             status_icon = "🟢" if doc.doc_type == "Ingested" else "⏳"
             self.file_list.addItem(f"{status_icon} {doc.file_name} (Status: {doc.doc_type or 'Uploaded'})")

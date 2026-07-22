@@ -113,6 +113,15 @@ class ComplianceWidget(QWidget):
         active_id = getattr(self, 'active_engagement_id', None)
         if active_id:
             findings = self.session.query(Finding).filter_by(audit_id=active_id).all()
+            try:
+                from services.compliance_service import ComplianceService
+                from database.repositories.compliance_repo import ComplianceRepository
+                cs = ComplianceService(ComplianceRepository(self.session))
+                tasks = cs.get_tasks(active_id)
+                if tasks:
+                    completed_count = sum(1 for t in tasks if t.is_completed)
+            except Exception:
+                pass
         else:
             findings = self.session.query(Finding).all()
 

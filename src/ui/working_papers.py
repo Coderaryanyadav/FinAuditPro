@@ -114,6 +114,14 @@ class WorkingPaperWidget(QWidget):
         proj_id = self.project_combo.currentData()
         if proj_id is None: return
         
+        try:
+            from services.working_paper_service import WorkingPaperService
+            from database.repositories.working_paper_repo import WorkingPaperRepository
+            wps_service = WorkingPaperService(WorkingPaperRepository(self.session))
+            indices = wps_service.get_indices(proj_id)
+        except Exception:
+            pass
+
         wp = self.session.query(WorkingPaper).filter_by(audit_id=proj_id).first()
         if wp:
             self.objective_field.setText(wp.objective or "")

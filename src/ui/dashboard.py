@@ -620,33 +620,56 @@ class DashboardWindow(QWidget):
         self.client_selector.clear()
         clients = self.session.query(Client).all()
         for c in clients:
-            proj = self.session.query(AuditProject).filter_by(client_id=c.id).first()
-            fy = proj.financial_year if proj else "2025-26"
-            self.client_selector.addItem(f"{c.name} (FY {fy})", c.id)
+            projs = self.session.query(AuditProject).filter_by(client_id=c.id).all()
+            if projs:
+                for proj in projs:
+                    fy = proj.financial_year or "2025-26"
+                    self.client_selector.addItem(f"{c.name} (FY {fy})", proj.id)
+            else:
+                self.client_selector.addItem(f"{c.name} (FY 2025-26)", f"client_{c.id}")
 
     def on_active_engagement_changed(self, index):
-        client_id = self.client_selector.currentData()
-        if client_id:
-            try:
-                proj = self.session.query(AuditProject).filter_by(client_id=client_id).first()
-                if not proj:
-                    proj = AuditProject(client_id=client_id, financial_year="2025-26", status="Execution")
-                    self.session.add(proj)
-                    self.session.commit()
+        data = self.client_selector.currentData()
+        if not data:
+            return
+        try:
+            if isinstance(data, str) and data.startswith("client_"):
+                client_id = int(data.split("_")[1])
+                proj = AuditProject(client_id=client_id, financial_year="2025-26", status="Execution")
+                self.session.add(proj)
+                self.session.commit()
+                proj_id = proj.id
+            else:
+                proj_id = int(data)
+                proj = self.session.query(AuditProject).filter_by(id=proj_id).first()
 
-                self.workflow_manager.initialize_engagement(engagement_id=proj.id, client_id=client_id, financial_year=proj.financial_year or "2025-26")
+            if proj:
+                self.workflow_manager.initialize_engagement(engagement_id=proj.id, client_id=proj.client_id, financial_year=proj.financial_year or "2025-26")
                 if hasattr(self, 'ai_page') and self.ai_page is not None:
                     self.ai_page.active_engagement_id = proj.id
                 self.refresh_workflow_ui()
-            except Exception as e:
-                import logging
-                logging.getLogger(__name__).warning(f"Engagement change error: {e}")
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Engagement change error: {e}")
 
     def refresh_workflow_ui(self):
         summary = self.workflow_manager.get_dashboard_summary()
         if summary.get("active_engagement"):
             stage = summary.get("current_stage", "ENGAGEMENT_CREATED")
             pct = int(summary.get("completion_percentage", 0))
+            
+            eng_id = summary.get("engagement_id")
+            if eng_id:
+                try:
+                    from services.engagement_service import EngagementService
+                    from database.repositories.engagement_repo import EngagementRepository
+                    eng_service = EngagementService(EngagementRepository(self.session))
+                    calc_pct = eng_service.calculate_progress(eng_id)
+                    if calc_pct > 0:
+                        pct = int(calc_pct)
+                except Exception:
+                    pass
+
             self.lbl_wf_stage.setText(f"Stage: {stage}")
             self.progress_bar.setValue(pct)
 

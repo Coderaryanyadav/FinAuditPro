@@ -30,10 +30,10 @@ class ReportsWidget(QWidget):
         h_layout.addStretch()
         
         preview_btn = QPushButton("Preview")
-        preview_btn.setStyleSheet("background-color: #f1f5f9; color: #475569; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; margin-right: 8px;")
+        preview_btn.setStyleSheet("background-color: #f1f5f9; color: #334155; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; margin-right: 8px;")
         
-        export_btn = QPushButton("Export PDF")
-        export_btn.setStyleSheet("background-color: #10b981; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px;")
+        export_btn = QPushButton("Export PDF Report")
+        export_btn.setStyleSheet("background-color: #0ea5e9; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px;")
         export_btn.clicked.connect(self.export_pdf)
         
         h_layout.addWidget(preview_btn)

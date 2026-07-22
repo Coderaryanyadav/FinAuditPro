@@ -93,8 +93,8 @@ class RiskAnalysisWidget(QWidget):
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table.setStyleSheet("""
             QTableWidget { border: none; gridline-color: #f1f5f9; }
-            QHeaderView::section { background-color: #f8fafc; color: #64748b; padding: 8px; border: none; border-bottom: 1px solid #e2e8f0; font-weight: bold; text-align: left; }
-            QTableWidget::item { padding: 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+            QHeaderView::section { background-color: #f8fafc; color: #334155; padding: 10px; border: none; border-bottom: 2px solid #e2e8f0; font-weight: 700; text-transform: uppercase; font-size: 11px; text-align: left; }
+            QTableWidget::item { padding: 12px; border-bottom: 1px solid #f1f5f9; color: #0f172a; }
         """)
         self.table.setShowGrid(False)
         self.table.verticalHeader().setVisible(False)

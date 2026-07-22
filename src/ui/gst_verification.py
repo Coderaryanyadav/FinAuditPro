@@ -51,10 +51,10 @@ class GSTVerificationWidget(QWidget):
             
             top_h = QHBoxLayout()
             t_lbl = QLabel(title)
-            t_lbl.setStyleSheet("color: #64748b; font-size: 13px; font-weight: 500; border: none;")
+            t_lbl.setStyleSheet("color: #334155; font-size: 13px; font-weight: 700; border: none;")
             
             tag_lbl = QLabel(tag)
-            tag_lbl.setStyleSheet(f"background-color: {bg_tag}; color: {fg_tag}; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none;")
+            tag_lbl.setStyleSheet(f"background-color: {bg_tag}; color: {fg_tag}; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 4px; border: none;")
             
             top_h.addWidget(t_lbl)
             top_h.addStretch()
@@ -62,11 +62,11 @@ class GSTVerificationWidget(QWidget):
             clayout.addLayout(top_h)
             
             v_lbl = QLabel(value)
-            v_lbl.setStyleSheet("color: #0f172a; font-size: 24px; font-weight: bold; border: none;")
+            v_lbl.setStyleSheet("color: #0f172a; font-size: 24px; font-weight: 800; border: none;")
             clayout.addWidget(v_lbl)
             
             s_lbl = QLabel(subtitle)
-            s_lbl.setStyleSheet("color: #94a3b8; font-size: 11px; border: none;")
+            s_lbl.setStyleSheet("color: #475569; font-size: 11px; font-weight: 600; border: none;")
             clayout.addWidget(s_lbl)
             
             apply_shadow(card, blur=10, dy=2, alpha=10)

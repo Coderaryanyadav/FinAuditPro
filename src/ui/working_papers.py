@@ -41,12 +41,12 @@ class WorkingPaperWidget(QWidget):
         
         h_layout.addStretch()
         
-        self.ai_btn = QPushButton("Generate AI Draft")
-        self.ai_btn.setStyleSheet("background-color: #8b5cf6; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; margin-right: 8px;")
+        self.ai_btn = QPushButton("⚡ Generate AI Draft")
+        self.ai_btn.setStyleSheet("background-color: #0284c7; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; margin-right: 8px;")
         self.ai_btn.clicked.connect(self.generate_ai_draft)
         
-        self.save_btn = QPushButton("Save")
-        self.save_btn.setStyleSheet("background-color: #10b981; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px;")
+        self.save_btn = QPushButton("Save Working Paper")
+        self.save_btn.setStyleSheet("background-color: #0ea5e9; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px;")
         self.save_btn.clicked.connect(self.save_working_paper)
         
         h_layout.addWidget(self.ai_btn)

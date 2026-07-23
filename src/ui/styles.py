@@ -166,3 +166,91 @@ def apply_shadow(widget, blur=24, dx=0, dy=4, alpha=15):
     shadow.setYOffset(dy)
     shadow.setColor(QColor(15, 23, 42, alpha))
     widget.setGraphicsEffect(shadow)
+
+# Standardized Visual State Widgets for FinAuditPro
+
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame, QProgressBar
+from PySide6.QtCore import Qt
+
+class EmptyStateWidget(QWidget):
+    """Reusable empty state component when tables/lists have no records."""
+    def __init__(self, title: str = "No Records Found", description: str = "There is no data to display for the selected criteria."):
+        super().__init__()
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        container = QFrame()
+        container.setStyleSheet("background-color: #ffffff; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 32px;")
+        cl = QVBoxLayout(container)
+        cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        icon_lbl = QLabel("📂")
+        icon_lbl.setStyleSheet("font-size: 32px; border: none;")
+        icon_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        title_lbl = QLabel(title)
+        title_lbl.setStyleSheet("font-size: 16px; font-weight: 700; color: #334155; border: none; margin-top: 8px;")
+        title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        desc_lbl = QLabel(description)
+        desc_lbl.setStyleSheet("font-size: 13px; color: #64748b; border: none; margin-top: 4px;")
+        desc_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        desc_lbl.setWordWrap(True)
+        
+        cl.addWidget(icon_lbl)
+        cl.addWidget(title_lbl)
+        cl.addWidget(desc_lbl)
+        layout.addWidget(container)
+
+class LoadingStateWidget(QWidget):
+    """Reusable loading spinner/progress component during DB queries, LLM calls, or OCR processing."""
+    def __init__(self, message: str = "Processing requested operation..."):
+        super().__init__()
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        container = QFrame()
+        container.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px;")
+        cl = QVBoxLayout(container)
+        cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        msg_lbl = QLabel(message)
+        msg_lbl.setStyleSheet("font-size: 14px; font-weight: 600; color: #0ea5e9; border: none;")
+        msg_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        pbar = QProgressBar()
+        pbar.setRange(0, 0) # Indeterminate progress animation
+        pbar.setFixedHeight(6)
+        pbar.setStyleSheet("""
+            QProgressBar { border: none; background-color: #e0f2fe; border-radius: 3px; }
+            QProgressBar::chunk { background-color: #0ea5e9; border-radius: 3px; }
+        """)
+        
+        cl.addWidget(msg_lbl)
+        cl.addWidget(pbar)
+        layout.addWidget(container)
+
+class ErrorStateWidget(QWidget):
+    """Reusable explicit error banner component displaying exact details."""
+    def __init__(self, title: str = "Operation Error", details: str = "An unexpected error occurred while executing the request."):
+        super().__init__()
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        container = QFrame()
+        container.setStyleSheet("background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 24px;")
+        cl = QVBoxLayout(container)
+        
+        title_lbl = QLabel(f"⚠️ {title}")
+        title_lbl.setStyleSheet("font-size: 16px; font-weight: 700; color: #dc2626; border: none;")
+        title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        details_lbl = QLabel(str(details))
+        details_lbl.setStyleSheet("font-size: 13px; color: #991b1b; border: none; margin-top: 8px;")
+        details_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        details_lbl.setWordWrap(True)
+        
+        cl.addWidget(title_lbl)
+        cl.addWidget(details_lbl)
+        layout.addWidget(container)
+

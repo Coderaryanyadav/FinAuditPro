@@ -36,10 +36,24 @@ class PlaceholderWidget(QWidget):
         super().__init__()
         self.setStyleSheet("background-color: #f8fafc;")
         l = QVBoxLayout(self)
-        lbl = QLabel(f"<b>{title_text}</b><br/><br/>This module is fully integrated with FinAuditPro backend services.")
-        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl.setStyleSheet("color: #64748b; font-size: 16px;")
-        l.addWidget(lbl)
+        l.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        container = QFrame()
+        container.setStyleSheet("background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 24px;")
+        cl = QVBoxLayout(container)
+        
+        lbl_title = QLabel("⚠️ Module Load Error")
+        lbl_title.setStyleSheet("color: #dc2626; font-size: 18px; font-weight: bold; border: none;")
+        lbl_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        lbl_desc = QLabel(str(title_text))
+        lbl_desc.setWordWrap(True)
+        lbl_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lbl_desc.setStyleSheet("color: #991b1b; font-size: 14px; margin-top: 8px; border: none;")
+        
+        cl.addWidget(lbl_title)
+        cl.addWidget(lbl_desc)
+        l.addWidget(container)
 
 class DashboardWindow(QWidget):
     def __init__(self):

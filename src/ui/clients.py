@@ -102,7 +102,7 @@ class CreateAuditProjectDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Create New Audit Project")
         self.setStyleSheet("background-color: #ffffff; color: #0f172a;")
-        self.resize(480, 340)
+        self.resize(480, 420)
         self.session = session
         
         layout = QVBoxLayout(self)
@@ -125,12 +125,20 @@ class CreateAuditProjectDialog(QDialog):
         self.audit_type_combo = QComboBox()
         self.audit_type_combo.addItems(["Statutory Audit (Companies Act 2013)", "Tax Audit u/s 44AB", "Internal Audit", "GST Audit", "Concurrent Bank Audit"])
         
-        for cb in [self.client_combo, self.fy_combo, self.audit_type_combo]:
+        self.stage_combo = QComboBox()
+        self.stage_combo.addItems(["Planning", "Fieldwork", "Review", "Completed"])
+
+        self.risk_combo = QComboBox()
+        self.risk_combo.addItems(["Low", "Medium", "High"])
+
+        for cb in [self.client_combo, self.fy_combo, self.audit_type_combo, self.stage_combo, self.risk_combo]:
             cb.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; color: #0f172a; background-color: #f8fafc;")
             
         form_layout.addRow("Target Client *", self.client_combo)
         form_layout.addRow("Financial Year *", self.fy_combo)
         form_layout.addRow("Audit Engagement Type", self.audit_type_combo)
+        form_layout.addRow("Audit Stage", self.stage_combo)
+        form_layout.addRow("Initial Risk Level", self.risk_combo)
         
         layout.addWidget(form_frame)
         

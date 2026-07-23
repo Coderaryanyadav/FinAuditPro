@@ -663,10 +663,10 @@ class DashboardWindow(QWidget):
         dialog = CreateAuditProjectDialog(self.session, self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             client_id = dialog.client_combo.currentData()
-            fy = dialog.fy_combo.currentText().strip() or "2025-26"
-            audit_type = dialog.audit_type_combo.currentText().strip()
-            status = dialog.stage_combo.currentText().strip()
-            risk = dialog.risk_combo.currentText().strip()
+            fy = dialog.fy_combo.currentText().strip() if hasattr(dialog, 'fy_combo') else "2025-26"
+            audit_type = dialog.audit_type_combo.currentText().strip() if hasattr(dialog, 'audit_type_combo') else "Statutory Audit"
+            status = dialog.stage_combo.currentText().strip() if hasattr(dialog, 'stage_combo') else "Planning"
+            risk = dialog.risk_combo.currentText().strip() if hasattr(dialog, 'risk_combo') else "Medium"
 
             proj = AuditProject(
                 client_id=client_id,

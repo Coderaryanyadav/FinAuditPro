@@ -1,18 +1,19 @@
-from PySide6.QtWidgets import QGraphicsDropShadowEffect
+from PySide6.QtWidgets import QGraphicsDropShadowEffect, QWidget, QVBoxLayout, QLabel, QFrame, QProgressBar
 from PySide6.QtGui import QColor
+from PySide6.QtCore import Qt
 
 GLOBAL_QSS = """
 * {
-    font-family: 'Inter', 'SF Pro Display', 'Segoe UI', -apple-system, sans-serif;
-    color: #0f172a; /* slate-900 */
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #0f172a;
 }
 
-/* Base Window Backgrounds */
+/* Base Window & Widget Backgrounds */
 QMainWindow, QDialog, QWidget#appBg {
-    background-color: #f8fafc; /* slate-50 */
+    background-color: #f8fafc;
 }
 
-/* Custom Scrollbars */
+/* Custom Sleek Scrollbars */
 QScrollBar:vertical {
     border: none;
     background: transparent;
@@ -25,7 +26,7 @@ QScrollBar::handle:vertical {
     min-height: 24px;
 }
 QScrollBar::handle:vertical:hover {
-    background: #94a3b8;
+    background: #0ea5e9;
 }
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
     border: none;
@@ -44,14 +45,14 @@ QScrollBar::handle:horizontal {
     min-width: 24px;
 }
 QScrollBar::handle:horizontal:hover {
-    background: #94a3b8;
+    background: #0ea5e9;
 }
 QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
     border: none;
     background: none;
 }
 
-/* Line Edits & Text Fields */
+/* Line Edits & Text Inputs */
 QLineEdit, QTextEdit {
     border: 1px solid #cbd5e1;
     border-radius: 8px;
@@ -62,11 +63,11 @@ QLineEdit, QTextEdit {
     selection-background-color: #e0f2fe;
 }
 QLineEdit:focus, QTextEdit:focus {
-    border: 2px solid #0ea5e9; /* FinAuditPro Sky Blue */
+    border: 2px solid #0ea5e9;
     background-color: #ffffff;
 }
 
-/* ComboBoxes */
+/* Dropdown ComboBoxes */
 QComboBox {
     border: 1px solid #cbd5e1;
     border-radius: 8px;
@@ -84,7 +85,7 @@ QComboBox:focus {
     border: 2px solid #0ea5e9;
 }
 
-/* Table Widgets */
+/* Tables */
 QTableWidget {
     background-color: #ffffff;
     gridline-color: #f1f5f9;
@@ -95,12 +96,12 @@ QTableWidget {
 }
 QHeaderView::section {
     background-color: #f8fafc;
-    color: #334155;
+    color: #475569;
     padding: 12px;
     font-weight: 700;
     font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
     border: none;
     border-bottom: 2px solid #e2e8f0;
 }
@@ -111,7 +112,8 @@ QTableWidget::item {
 }
 QTableWidget::item:selected {
     background-color: #f0f9ff;
-    color: #0369a1;
+    color: #0284c7;
+    font-weight: 600;
 }
 
 /* Buttons */
@@ -133,44 +135,37 @@ QPushButton#primaryButton:pressed {
     background-color: #0369a1;
 }
 
-/* Sidebar Navigation Buttons - Dark Theme High Contrast */
+/* Sidebar Navigation Buttons - FAIGN Dark Glassmorphism */
 QPushButton#navButton {
     background-color: transparent;
-    color: #cbd5e1; /* High contrast Slate 300 on dark sidebar */
+    color: #94a3b8;
     border: none;
     border-radius: 8px;
     text-align: left;
-    padding-left: 20px;
+    padding-left: 18px;
     font-size: 13px;
     font-weight: 600;
 }
 QPushButton#navButton:hover {
-    background-color: #1e293b; /* Slate 800 hover */
-    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #f8fafc;
 }
 QPushButton#navButton[active="true"] {
-    background-color: #0284c7; /* Vibrant Sky Blue Active */
+    background-color: #0ea5e9;
     color: #ffffff;
-    padding-left: 20px;
+    padding-left: 18px;
     font-weight: 700;
 }
 """
 
 def apply_shadow(widget, blur=24, dx=0, dy=4, alpha=15):
-    """
-    Applies a clean, modern soft drop shadow effect to any QWidget.
-    """
+    """Applies a clean, modern soft drop shadow effect to any QWidget."""
     shadow = QGraphicsDropShadowEffect(widget)
     shadow.setBlurRadius(blur)
     shadow.setXOffset(dx)
     shadow.setYOffset(dy)
     shadow.setColor(QColor(15, 23, 42, alpha))
     widget.setGraphicsEffect(shadow)
-
-# Standardized Visual State Widgets for FinAuditPro
-
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame, QProgressBar
-from PySide6.QtCore import Qt
 
 class EmptyStateWidget(QWidget):
     """Reusable empty state component when tables/lists have no records."""
@@ -219,7 +214,7 @@ class LoadingStateWidget(QWidget):
         msg_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         pbar = QProgressBar()
-        pbar.setRange(0, 0) # Indeterminate progress animation
+        pbar.setRange(0, 0)
         pbar.setFixedHeight(6)
         pbar.setStyleSheet("""
             QProgressBar { border: none; background-color: #e0f2fe; border-radius: 3px; }
@@ -253,4 +248,3 @@ class ErrorStateWidget(QWidget):
         cl.addWidget(title_lbl)
         cl.addWidget(details_lbl)
         layout.addWidget(container)
-

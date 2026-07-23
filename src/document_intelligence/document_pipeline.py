@@ -113,26 +113,29 @@ class DocumentPipeline:
                 "file_name": parsed_doc.file_name,
                 "transaction_amounts": extracted_amounts
             })
-            if rule_eval.failed_rules:
+            failed_list = rule_eval.get("failed_rules", []) if isinstance(rule_eval, dict) else getattr(rule_eval, "failed_rules", [])
+            if failed_list:
                 from database.database import get_session
                 from database.models import Finding
                 with get_session() as session:
-                    for failed in rule_eval.failed_rules:
+                    for failed in failed_list:
                         impact = max(extracted_amounts) if extracted_amounts else 0.0
-                        # AI confidence score: heuristic estimate based on rule description length,
-                        # metadata presence (GSTIN/PAN), and extracted financial amounts.
-                        # This is NOT a model-derived confidence — no ML model scores rule matches.
-                        # Range: 75.0-99.0. Longer descriptions + richer metadata = higher score.
+                        r_id = failed.get("rule_id", "RULE") if isinstance(failed, dict) else getattr(failed, "rule_id", "RULE")
+                        r_name = failed.get("rule_name", "") if isinstance(failed, dict) else getattr(failed, "rule_name", "")
+                        r_desc = failed.get("description", "") if isinstance(failed, dict) else getattr(failed, "description", "")
+                        r_sev = failed.get("severity", "LOW") if isinstance(failed, dict) else getattr(failed, "severity", "LOW")
+                        if hasattr(r_sev, 'value'): r_sev = r_sev.value
+
                         base_score = 85.0
-                        desc_len_bonus = min(10.0, len(failed.description) / 20.0)
+                        desc_len_bonus = min(10.0, len(str(r_desc)) / 20.0)
                         meta_bonus = 4.0 if (getattr(meta, 'gstin', None) or getattr(meta, 'pan', None)) else 1.0
                         amount_bonus = 2.0 if extracted_amounts else 0.0
                         conf_score = round(min(99.0, max(75.0, base_score + desc_len_bonus + meta_bonus + amount_bonus)), 1)
                         finding = Finding(
                             audit_id=engagement_id,
-                            description=f"[{failed.rule_id}] {failed.rule_name}: {failed.description}",
-                            severity=failed.severity.value,
-                            risk_level=failed.severity.value,
+                            description=f"[{r_id}] {r_name}: {r_desc}",
+                            severity=str(r_sev),
+                            risk_level=str(r_sev),
                             financial_impact=impact,
                             ai_confidence_score=conf_score
                         )

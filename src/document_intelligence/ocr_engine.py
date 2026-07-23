@@ -41,28 +41,20 @@ class OCREngine:
     def is_ocr_available(cls) -> Tuple[bool, str]:
         """
         Graceful feature detection for OCR capability.
-        Checks for presence of PaddleOCR, Tesseract, or EasyOCR without raising fatal errors.
+        Checks for presence of PaddleOCR, PyTesseract, or EasyOCR without raising fatal errors.
         """
-        if cls._ocr_status_cache is not None:
+        if cls._ocr_status_cache is not None and cls._ocr_status_cache[0]:
             return cls._ocr_status_cache
 
         reasons = []
 
-        # Check PaddleOCR
-        try:
-            import paddleocr  # noqa: F401
-            cls._ocr_status_cache = (True, "PaddleOCR Engine Active")
-            return cls._ocr_status_cache
-        except (ImportError, OSError, ValueError, RuntimeError) as e:
-            reasons.append(f"PaddleOCR disabled: {e}")
-
-        # Check Tesseract / PyTesseract
+        # Check PyTesseract
         try:
             import pytesseract  # noqa: F401
-            cls._ocr_status_cache = (True, "Tesseract OCR Engine Active")
+            cls._ocr_status_cache = (True, "PyTesseract OCR Engine Active")
             return cls._ocr_status_cache
         except (ImportError, OSError, ValueError, RuntimeError) as e:
-            reasons.append(f"Tesseract disabled: {e}")
+            reasons.append(f"PyTesseract disabled: {e}")
 
         # Check EasyOCR
         try:
@@ -71,6 +63,14 @@ class OCREngine:
             return cls._ocr_status_cache
         except (ImportError, OSError, ValueError, RuntimeError) as e:
             reasons.append(f"EasyOCR disabled: {e}")
+
+        # Check PaddleOCR
+        try:
+            import paddleocr  # noqa: F401
+            cls._ocr_status_cache = (True, "PaddleOCR Engine Active")
+            return cls._ocr_status_cache
+        except (ImportError, OSError, ValueError, RuntimeError) as e:
+            reasons.append(f"PaddleOCR disabled: {e}")
 
         msg = "OCR Engine Unavailable - Digital PDF & Document Parser Active (" + "; ".join(reasons) + ")"
         logger.warning(msg)

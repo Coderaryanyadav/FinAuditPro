@@ -43,6 +43,33 @@ def classify_document_type(file_name: str) -> str:
         return "Legal / Governance"
     return "General Document"
 
+class DropZoneFrame(QFrame):
+    """Interactive Drag-and-Drop and Click-to-Upload Frame."""
+    def __init__(self, callback, parent=None):
+        super().__init__(parent)
+        self.callback = callback
+        self.setAcceptDrops(True)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+            self.setStyleSheet("background-color: #e0f2fe; border: 2px dashed #0284c7; border-radius: 8px;")
+
+    def dragLeaveEvent(self, event):
+        self.setStyleSheet("background-color: #f0f9ff; border: 2px dashed #0ea5e9; border-radius: 8px;")
+
+    def dropEvent(self, event):
+        self.setStyleSheet("background-color: #f0f9ff; border: 2px dashed #0ea5e9; border-radius: 8px;")
+        urls = event.mimeData().urls()
+        files = [u.toLocalFile() for u in urls if u.isLocalFile()]
+        if files and self.callback:
+            self.callback(files)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton and self.callback:
+            self.callback()
+
 class AIProcessWorker(QThread):
     progress = Signal(str, int)  # status message, percentage
     finished = Signal(bool)
@@ -170,8 +197,8 @@ class DocumentUploadWidget(QWidget):
         left_layout.setContentsMargins(16, 16, 16, 16)
         left_layout.setSpacing(12)
 
-        # Compact Drag & Drop Zone
-        self.upload_area = QFrame()
+        # Interactive Drag & Drop Zone Frame
+        self.upload_area = DropZoneFrame(callback=self.browse_files)
         self.upload_area.setFixedHeight(90)
         self.upload_area.setStyleSheet("background-color: #f0f9ff; border: 2px dashed #0ea5e9; border-radius: 8px;")
         upload_l = QVBoxLayout(self.upload_area)
@@ -257,9 +284,20 @@ class DocumentUploadWidget(QWidget):
     def load_audit_projects(self):
         self.project_combo.clear()
         projects = self.session.query(AuditProject).all()
+        if not projects:
+            client = self.session.query(Client).first()
+            if not client:
+                client = Client(name="Default Audit Client", gst_number="27AADCT1234E1Z5", pan_number="AADCT1234E")
+                self.session.add(client)
+                self.session.commit()
+            proj = AuditProject(client_id=client.id, financial_year="2025-26", status="Active", risk_level="Low")
+            self.session.add(proj)
+            self.session.commit()
+            projects = [proj]
+
         for proj in projects:
             client = self.session.query(Client).filter_by(id=proj.client_id).first()
-            name = client.name if client else "Unknown Client"
+            name = client.name if client else f"Client #{proj.client_id}"
             display_text = f"{name} (FY {proj.financial_year})"
             self.project_combo.addItem(display_text, proj.id)
             
@@ -315,7 +353,7 @@ class DocumentUploadWidget(QWidget):
         else:
             self.text_preview.setPlainText("Document file not found on local disk.")
 
-    def browse_files(self):
+    def browse_files(self, file_paths=None):
         from security.security_manager import SecurityManager
         from security.rbac import Permission
         sm = SecurityManager()
@@ -325,21 +363,26 @@ class DocumentUploadWidget(QWidget):
 
         proj_id = self.project_combo.currentData()
         if proj_id is None:
-            QMessageBox.warning(self, "No Project Selected", "Please select or create an audit project first.")
-            return
-            
-        files, _ = QFileDialog.getOpenFileNames(
-            self,
-            "Select Financial Documents",
-            "",
-            "Documents (*.pdf *.xls *.xlsx *.csv *.txt)"
-        )
+            self.load_audit_projects()
+            proj_id = self.project_combo.currentData()
+
+        if not file_paths:
+            files, _ = QFileDialog.getOpenFileNames(
+                self,
+                "Select Financial Documents",
+                "",
+                "Documents (*.pdf *.xls *.xlsx *.csv *.txt *.png *.jpg *.jpeg)"
+            )
+        else:
+            files = file_paths
+
         if files:
             dest_dir = f"data/documents/proj_{proj_id}"
             os.makedirs(dest_dir, exist_ok=True)
             uploaded_count = 0
             
             for file_path in files:
+                if not os.path.exists(file_path): continue
                 filename = os.path.basename(file_path)
                 dest_path = os.path.join(dest_dir, filename)
                 shutil.copy(file_path, dest_path)

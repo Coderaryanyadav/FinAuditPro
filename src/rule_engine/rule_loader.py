@@ -264,8 +264,9 @@ class RuleLoader:
     """Instantiates and registers standard enterprise rules."""
 
     @classmethod
-    def load_all_rules(cls) -> RuleRegistry:
-        registry = RuleRegistry()
+    def load_all_rules(cls, registry: Optional[RuleRegistry] = None) -> RuleRegistry:
+        if registry is None:
+            registry = RuleRegistry()
         registry.register(MissingGSTINRule())
         registry.register(GSTMismatchRule())
         registry.register(MissingPANRule())

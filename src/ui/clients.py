@@ -366,29 +366,67 @@ class ClientManagementWidget(QWidget):
     def open_add_client_dialog(self):
         dialog = AddClientDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            c = Client(
-                name=dialog.name_input.text().strip(),
-                gst_number=dialog.gst_input.text().strip(),
-                pan_number=dialog.pan_input.text().strip(),
-                industry=dialog.industry_input.text().strip()
-            )
-            self.session.add(c)
-            self.session.commit()
-            self.load_clients()
-            QMessageBox.information(self, "Client Added", f"Successfully registered client '{c.name}'.")
+            try:
+                name = dialog.name_input.text().strip()
+                gst = dialog.gst_input.text().strip() or None
+                pan = dialog.pan_input.text().strip() or None
+                cin = dialog.cin_input.text().strip() or None
+                kmp_name = dialog.kmp_input.text().strip() or None
+                industry_name = dialog.industry_input.text().strip() or "General"
+                
+                # Check for existing ClientIndustry or create new
+                from database.models import ClientIndustry
+                ind = self.session.query(ClientIndustry).filter_by(industry_name=industry_name).first()
+                if not ind:
+                    ind = ClientIndustry(industry_name=industry_name)
+                    self.session.add(ind)
+                    self.session.flush()
+
+                c = Client(
+                    name=name,
+                    gst_number=gst,
+                    pan_number=pan,
+                    cin=cin,
+                    industry_rel=ind
+                )
+                self.session.add(c)
+                self.session.flush()
+
+                if kmp_name:
+                    from database.models import KeyManagementPersonnel
+                    kmp = KeyManagementPersonnel(
+                        client_id=c.id,
+                        name=kmp_name,
+                        designation="Managing Director"
+                    )
+                    self.session.add(kmp)
+
+                self.session.commit()
+                self.load_clients()
+                QMessageBox.information(self, "Client Added", f"Successfully registered client '{c.name}'.")
+            except Exception as e:
+                self.session.rollback()
+                QMessageBox.critical(self, "Error Creating Client", f"Failed to register client: {e}")
 
     def open_create_audit_dialog(self):
         dialog = CreateAuditProjectDialog(self.session, self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            client_id = dialog.client_combo.currentData()
-            fy = dialog.fy_combo.currentText()
-            audit_type = dialog.audit_type_combo.currentText()
-            
-            proj = AuditProject(client_id=client_id, financial_year=fy, status="Planning", risk_level="Medium")
-            self.session.add(proj)
-            self.session.commit()
-            self.load_clients()
-            QMessageBox.information(self, "Audit Created", f"Successfully created new {audit_type} for FY {fy}.")
+            try:
+                client_id = dialog.client_combo.currentData()
+                if not client_id:
+                    QMessageBox.warning(self, "Validation Error", "Please select a valid client.")
+                    return
+                fy = dialog.fy_combo.currentText()
+                audit_type = dialog.audit_type_combo.currentText()
+                
+                proj = AuditProject(client_id=client_id, financial_year=fy, status="Planning", risk_level="Medium")
+                self.session.add(proj)
+                self.session.commit()
+                self.load_clients()
+                QMessageBox.information(self, "Audit Created", f"Successfully created new {audit_type} for FY {fy}.")
+            except Exception as e:
+                self.session.rollback()
+                QMessageBox.critical(self, "Error Creating Audit Project", f"Failed to create audit project: {e}")
 
     def closeEvent(self, event):
         self.session.close()

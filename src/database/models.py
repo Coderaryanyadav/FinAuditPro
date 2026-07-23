@@ -73,7 +73,7 @@ class Client(Base):
                 else:
                     self.industry_rel = ClientIndustry(industry_name=val_str)
             else:
-                self.industry_rel = ClientIndustry(industry_name=val_str)
+                self.industry_rel = None
         else:
             self.industry_rel = None
             self._temp_industry = None

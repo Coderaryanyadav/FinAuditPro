@@ -41,7 +41,7 @@ def classify_document_type(file_name: str) -> str:
         return "Purchase Invoice"
     elif any(k in fn for k in ["resolution", "minutes", "board", "moa", "aoa"]):
         return "Legal / Governance"
-    return "General Financial Document"
+    return "General Document"
 
 class AIProcessWorker(QThread):
     progress = Signal(str, int)  # status message, percentage
@@ -132,7 +132,7 @@ class DocumentUploadWidget(QWidget):
         btn_upload.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
         btn_upload.clicked.connect(self.browse_files)
 
-        btn_process = QPushButton("⚡ Process with AI & OCR")
+        btn_process = QPushButton("⚡ Process with AI OCR")
         btn_process.setStyleSheet("padding: 8px 14px; background-color: #0284c7; color: white; font-weight: bold; border-radius: 6px; border: none;")
         btn_process.clicked.connect(self.start_ai_processing)
         self.btn_process = btn_process
@@ -142,17 +142,18 @@ class DocumentUploadWidget(QWidget):
         action_layout.addWidget(btn_process)
         main_layout.addWidget(action_bar)
         
-        # 2. OCR Graceful Feature Detection Banner
+        # 2. Compact OCR Feature Banner
         try:
             from document_intelligence.ocr_engine import OCREngine
             ocr_ok, ocr_msg = OCREngine.is_ocr_available()
             if not ocr_ok:
                 ocr_banner = QFrame()
+                ocr_banner.setFixedHeight(34)
                 ocr_banner.setStyleSheet("background-color: #fef3c7; border-bottom: 1px solid #f59e0b;")
                 b_layout = QHBoxLayout(ocr_banner)
-                b_layout.setContentsMargins(24, 6, 24, 6)
+                b_layout.setContentsMargins(24, 0, 24, 0)
                 warn_lbl = QLabel(f"ℹ️ {ocr_msg}")
-                warn_lbl.setStyleSheet("color: #92400e; font-size: 12px; font-weight: bold; border: none; background: transparent;")
+                warn_lbl.setStyleSheet("color: #92400e; font-size: 11px; font-weight: 600; border: none; background: transparent;")
                 b_layout.addWidget(warn_lbl)
                 main_layout.addWidget(ocr_banner)
         except (SQLAlchemyError, OSError, ValueError):
@@ -167,10 +168,11 @@ class DocumentUploadWidget(QWidget):
         left_container.setStyleSheet("background-color: #ffffff; border-right: 1px solid #e2e8f0;")
         left_layout = QVBoxLayout(left_container)
         left_layout.setContentsMargins(16, 16, 16, 16)
+        left_layout.setSpacing(12)
 
-        # Drag & Drop Zone Frame
+        # Compact Drag & Drop Zone
         self.upload_area = QFrame()
-        self.upload_area.setFixedHeight(120)
+        self.upload_area.setFixedHeight(90)
         self.upload_area.setStyleSheet("background-color: #f0f9ff; border: 2px dashed #0ea5e9; border-radius: 8px;")
         upload_l = QVBoxLayout(self.upload_area)
         upload_l.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -186,22 +188,29 @@ class DocumentUploadWidget(QWidget):
         self.progress_bar = QProgressBar()
         self.progress_bar.setVisible(False)
         self.progress_bar.setStyleSheet("""
-            QProgressBar { border: 1px solid #cbd5e1; border-radius: 6px; text-align: center; background-color: #e2e8f0; color: #0f172a; font-weight: bold; }
+            QProgressBar { border: 1px solid #cbd5e1; border-radius: 6px; text-align: center; background-color: #e2e8f0; color: #0f172a; font-weight: bold; height: 18px; }
             QProgressBar::chunk { background-color: #0ea5e9; }
         """)
         left_layout.addWidget(self.progress_bar)
 
         # Ingested Files Table
         table_lbl = QLabel("INGESTED DOCUMENTS & FAISS STATUS")
-        table_lbl.setStyleSheet("font-size: 11px; font-weight: bold; color: #64748b; margin-top: 8px; letter-spacing: 0.5px;")
+        table_lbl.setStyleSheet("font-size: 11px; font-weight: bold; color: #64748b; letter-spacing: 0.5px;")
         left_layout.addWidget(table_lbl)
 
         self.doc_table = QTableWidget(0, 4)
         self.doc_table.setHorizontalHeaderLabels(["Category Tag", "Document File Name", "SHA-256 Hash", "Status"])
+        self.doc_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         self.doc_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.doc_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        self.doc_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        self.doc_table.verticalHeader().setVisible(False)
+        self.doc_table.setShowGrid(False)
         self.doc_table.setStyleSheet("""
             QTableWidget { border: 1px solid #e2e8f0; gridline-color: #f1f5f9; background: white; border-radius: 6px; }
-            QHeaderView::section { background-color: #f8fafc; color: #334155; font-weight: bold; padding: 8px; border: none; border-bottom: 1px solid #e2e8f0; }
+            QHeaderView::section { background-color: #f8fafc; color: #334155; font-weight: bold; padding: 6px 10px; border: none; border-bottom: 1px solid #e2e8f0; font-size: 11px; }
+            QTableWidget::item { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-size: 12px; }
+            QTableWidget::item:selected { background-color: #f0f9ff; color: #0284c7; font-weight: bold; }
         """)
         self.doc_table.itemSelectionChanged.connect(self.on_doc_selected)
         left_layout.addWidget(self.doc_table)
@@ -212,24 +221,24 @@ class DocumentUploadWidget(QWidget):
         right_container = QFrame()
         right_container.setStyleSheet("background-color: #f8fafc;")
         right_layout = QVBoxLayout(right_container)
-        right_layout.setContentsMargins(20, 20, 20, 20)
-        right_layout.setSpacing(12)
+        right_layout.setContentsMargins(16, 16, 16, 16)
+        right_layout.setSpacing(10)
 
         inspector_lbl = QLabel("DOCUMENT INSPECTOR & INTEGRITY AUDIT")
         inspector_lbl.setStyleSheet("font-size: 11px; font-weight: bold; color: #64748b; letter-spacing: 0.5px;")
         right_layout.addWidget(inspector_lbl)
 
         self.doc_title_lbl = QLabel("No Document Selected")
-        self.doc_title_lbl.setStyleSheet("font-size: 16px; font-weight: bold; color: #0f172a;")
+        self.doc_title_lbl.setStyleSheet("font-size: 15px; font-weight: bold; color: #0f172a;")
         right_layout.addWidget(self.doc_title_lbl)
 
         self.hash_info_lbl = QLabel("SHA-256 Integrity Hash: N/A")
         self.hash_info_lbl.setWordWrap(True)
-        self.hash_info_lbl.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 11px; color: #334155;")
+        self.hash_info_lbl.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; padding: 8px; border-radius: 6px; font-family: monospace; font-size: 11px; color: #334155;")
         right_layout.addWidget(self.hash_info_lbl)
 
         preview_t = QLabel("Extracted Text & Metadata Preview:")
-        preview_t.setStyleSheet("font-size: 12px; font-weight: bold; color: #334155;")
+        preview_t.setStyleSheet("font-size: 11px; font-weight: bold; color: #334155;")
         right_layout.addWidget(preview_t)
 
         self.text_preview = QTextEdit()
@@ -241,7 +250,7 @@ class DocumentUploadWidget(QWidget):
         splitter.addWidget(right_container)
         splitter.setSizes([750, 450])
 
-        main_layout.addWidget(splitter)
+        main_layout.addWidget(splitter, 1)
         
         self.load_audit_projects()
         

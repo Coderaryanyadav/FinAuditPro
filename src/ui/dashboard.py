@@ -225,15 +225,15 @@ class DashboardWindow(QWidget):
         header_layout.addWidget(btn_new_audit)
         
         header_layout.addSpacing(16)
-        self.lbl_wf_stage = QLabel("Stage: AI_ANALYSIS")
-        self.lbl_wf_stage.setStyleSheet("background-color: #e0f2fe; color: #0369a1; font-weight: 600; font-size: 11px; padding: 4px 8px; border-radius: 4px;")
+        self.lbl_wf_stage = QLabel("Stage: NO ACTIVE AUDIT")
+        self.lbl_wf_stage.setStyleSheet("background-color: #f1f5f9; color: #64748b; font-weight: 600; font-size: 11px; padding: 4px 8px; border-radius: 4px;")
         header_layout.addWidget(self.lbl_wf_stage)
         
         header_layout.addSpacing(12)
         self.progress_bar = QProgressBar()
         self.progress_bar.setFixedWidth(140)
         self.progress_bar.setFixedHeight(14)
-        self.progress_bar.setValue(50)
+        self.progress_bar.setValue(0)
         self.progress_bar.setStyleSheet("""
             QProgressBar { border: 1px solid #cbd5e1; border-radius: 7px; text-align: center; font-size: 9px; font-weight: bold; color: #0f172a; }
             QProgressBar::chunk { background-color: #0ea5e9; border-radius: 6px; }
@@ -430,20 +430,8 @@ class DashboardWindow(QWidget):
         mid_layout.addWidget(ai_summary, 4)
         
         try:
-            progress_chart = QChart()
-            progress_chart.legend().hide()
-            series = QLineSeries()
-            series.append(0, 12)
-            series.append(1, 19)
-            series.append(2, 15)
-            series.append(3, 25)
-            series.append(4, 22)
-            series.append(5, 30)
-            progress_chart.addSeries(series)
-            progress_chart.createDefaultAxes()
-            progress_view = QChartView(progress_chart)
-            progress_view.setRenderHint(QPainter.RenderHint.Antialiasing)
-            progress_view.setStyleSheet("border: none;")
+            from .styles import EmptyStateWidget
+            total_audits = self.session.query(AuditProject).count()
             
             progress_frame = QFrame()
             progress_frame.setStyleSheet("background-color: white; border: 1px solid #e2e8f0; border-radius: 12px;")
@@ -451,50 +439,73 @@ class DashboardWindow(QWidget):
             p_title = QLabel("Audit Progress")
             p_title.setStyleSheet("font-weight: bold; font-size: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; border-left: none; border-top: none; border-right: none;")
             progress_layout.addWidget(p_title)
-            progress_layout.addWidget(progress_view)
-            apply_shadow(progress_frame, blur=15, dy=3, alpha=15)
-            mid_layout.addWidget(progress_frame, 5)
-            
-            pie_chart = QChart()
-            pie_chart.legend().hide()
-            pie_series = QPieSeries()
-            pie_series.setHoleSize(0.6) # Sleek doughnut size
-            
-            from PySide6.QtGui import QColor
-            low_risk = self.session.query(AuditProject).filter_by(risk_level='Low').count()
-            med_risk = self.session.query(AuditProject).filter_by(risk_level='Medium').count()
-            high_risk = self.session.query(AuditProject).filter_by(risk_level='High').count()
-            total_audits = self.session.query(AuditProject).count()
-            
-            slice1 = pie_series.append("Low", low_risk if total_audits > 0 else 95)
-            slice1.setBrush(QColor("#10b981"))
-            slice2 = pie_series.append("Medium", med_risk if total_audits > 0 else 45)
-            slice2.setBrush(QColor("#f59e0b"))
-            slice3 = pie_series.append("High", high_risk if total_audits > 0 else 10)
-            slice3.setBrush(QColor("#ef4444"))
-            
-            pie_chart.addSeries(pie_series)
-            pie_view = QChartView(pie_chart)
-            pie_view.setRenderHint(QPainter.RenderHint.Antialiasing)
-            pie_view.setStyleSheet("border: none;")
-            
-            center_lbl_val = total_audits if total_audits > 0 else 150
-            center_label = QLabel(f"<b>{center_lbl_val}</b><br/><span style='color:#64748b; font-size:10px; font-weight:normal;'>Total Audits</span>", pie_view)
-            center_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            center_label.setStyleSheet("border: none; background: transparent; font-size: 16px; color: #0f172a; text-align: center;")
-            
-            pie_overlay = QVBoxLayout(pie_view)
-            pie_overlay.addWidget(center_label, alignment=Qt.AlignmentFlag.AlignCenter)
-            
+
             pie_frame = QFrame()
             pie_frame.setStyleSheet("background-color: white; border: 1px solid #e2e8f0; border-radius: 12px;")
             pie_layout = QVBoxLayout(pie_frame)
             pie_title = QLabel("Risk Distribution")
             pie_title.setStyleSheet("font-weight: bold; font-size: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; border-left: none; border-top: none; border-right: none;")
             pie_layout.addWidget(pie_title)
-            pie_layout.addWidget(pie_view)
+
+            if total_audits == 0:
+                progress_layout.addWidget(EmptyStateWidget("No Progress Data", "Milestone trendlines will populate as engagements progress."))
+                pie_layout.addWidget(EmptyStateWidget("No Risk Data Available", "Create an audit project to visualize risk metrics."))
+            else:
+                progress_chart = QChart()
+                progress_chart.legend().hide()
+                series = QLineSeries()
+                # Compute milestone completion trends from projects
+                projects_list = self.session.query(AuditProject).order_by(AuditProject.id.asc()).all()
+                for idx, p in enumerate(projects_list[:6]):
+                    pct_val = 100 if p.status == "Completed" else 60 if p.status == "Execution" else 20
+                    series.append(idx, pct_val)
+                progress_chart.addSeries(series)
+                progress_chart.createDefaultAxes()
+                progress_view = QChartView(progress_chart)
+                progress_view.setRenderHint(QPainter.RenderHint.Antialiasing)
+                progress_view.setStyleSheet("border: none;")
+                progress_layout.addWidget(progress_view)
+
+                pie_chart = QChart()
+                pie_chart.legend().hide()
+                pie_series = QPieSeries()
+                pie_series.setHoleSize(0.6) # Sleek doughnut size
+                
+                from PySide6.QtGui import QColor
+                low_risk = self.session.query(AuditProject).filter_by(risk_level='Low').count()
+                med_risk = self.session.query(AuditProject).filter_by(risk_level='Medium').count()
+                high_risk = self.session.query(AuditProject).filter_by(risk_level='High').count()
+                unknown_risk = total_audits - (low_risk + med_risk + high_risk)
+                if unknown_risk > 0:
+                    low_risk += unknown_risk
+
+                slice1 = pie_series.append("Low", low_risk)
+                slice1.setBrush(QColor("#10b981"))
+                slice2 = pie_series.append("Medium", med_risk)
+                slice2.setBrush(QColor("#f59e0b"))
+                slice3 = pie_series.append("High", high_risk)
+                slice3.setBrush(QColor("#ef4444"))
+                
+                pie_chart.addSeries(pie_series)
+                pie_view = QChartView(pie_chart)
+                pie_view.setRenderHint(QPainter.RenderHint.Antialiasing)
+                pie_view.setStyleSheet("border: none;")
+                
+                center_label = QLabel(f"<b>{total_audits}</b><br/><span style='color:#64748b; font-size:10px; font-weight:normal;'>Total Audits</span>", pie_view)
+                center_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                center_label.setStyleSheet("border: none; background: transparent; font-size: 16px; color: #0f172a; text-align: center;")
+                
+                pie_overlay = QVBoxLayout(pie_view)
+                pie_overlay.addWidget(center_label, alignment=Qt.AlignmentFlag.AlignCenter)
+                pie_layout.addWidget(pie_view)
+
+            apply_shadow(progress_frame, blur=15, dy=3, alpha=15)
             apply_shadow(pie_frame, blur=15, dy=3, alpha=15)
+            mid_layout.addWidget(progress_frame, 5)
             mid_layout.addWidget(pie_frame, 3)
+        except (SQLAlchemyError, ValueError, RuntimeError) as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Chart skipped: {e}")
         except (SQLAlchemyError, ValueError, RuntimeError) as e:
             # Fallback if QtCharts is not available
             import logging

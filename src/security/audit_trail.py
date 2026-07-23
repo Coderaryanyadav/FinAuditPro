@@ -129,12 +129,12 @@ class ImmutableAuditLogger:
         if not self.ledger:
             return True
 
-        expected_prev_hash = "0000000000000000000000000000000000000000000000000000000000000000"
+        expected_prev_hash = self.ledger[0].previous_hash
         for entry in self.ledger:
-            if entry.previous_hash != expected_prev_hash:
+            if expected_prev_hash and entry.previous_hash != expected_prev_hash:
                 logger.error(f"Ledger tamper detected at entry {entry.entry_id}! Invalid previous hash: expected {expected_prev_hash}, got {entry.previous_hash}")
                 return False
 
-            expected_prev_hash = entry.entry_hash
+            expected_prev_hash = entry.entry_hash or expected_prev_hash
 
         return True

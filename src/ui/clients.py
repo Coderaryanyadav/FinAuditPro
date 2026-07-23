@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                                QPushButton, QFrame, QLineEdit, QTableWidget, 
                                QTableWidgetItem, QHeaderView, QSplitter, QDialog, 
-                               QDialogButtonBox, QFormLayout, QMessageBox)
+                               QDialogButtonBox, QFormLayout, QMessageBox, QComboBox)
 from PySide6.QtCore import Qt
 from database.database import SessionLocal
 from database.models import Client, AuditProject, ClientIndustry
@@ -75,6 +75,78 @@ class AddClientDialog(QDialog):
 
         self.accept()
 
+
+class CreateAuditProjectDialog(QDialog):
+    def __init__(self, session, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Create New Audit Project")
+        self.setStyleSheet("background-color: #ffffff; color: #0f172a;")
+        self.resize(480, 360)
+        self.session = session
+        
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(24, 24, 24, 24)
+        
+        title = QLabel("Create New Audit Project")
+        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0f172a; margin-bottom: 12px;")
+        layout.addWidget(title)
+        
+        form_frame = QFrame()
+        form_layout = QFormLayout(form_frame)
+        form_layout.setSpacing(12)
+        
+        self.client_combo = QComboBox()
+        self.populate_clients()
+        
+        self.fy_combo = QComboBox()
+        self.fy_combo.addItems(["2025-26", "2024-25", "2023-24", "2026-27"])
+        self.fy_combo.setEditable(True)
+        
+        self.audit_type_combo = QComboBox()
+        self.audit_type_combo.addItems(["Statutory Audit", "Tax Audit", "Internal Audit", "GST Audit"])
+        
+        self.stage_combo = QComboBox()
+        self.stage_combo.addItems(["Execution", "Planning", "Reporting"])
+        
+        self.risk_combo = QComboBox()
+        self.risk_combo.addItems(["Low", "Medium", "High"])
+        
+        for widget in [self.client_combo, self.fy_combo, self.audit_type_combo, self.stage_combo, self.risk_combo]:
+            widget.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; color: #0f172a; background-color: #f8fafc;")
+            
+        form_layout.addRow("Audit Client *", self.client_combo)
+        form_layout.addRow("Financial Year *", self.fy_combo)
+        form_layout.addRow("Audit Type", self.audit_type_combo)
+        form_layout.addRow("Initial Stage", self.stage_combo)
+        form_layout.addRow("Risk Level", self.risk_combo)
+        
+        layout.addWidget(form_frame)
+        
+        self.buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        self.buttons.setStyleSheet("""
+            QPushButton { padding: 6px 16px; border-radius: 4px; }
+            QPushButton[text="OK"] { background-color: #0ea5e9; color: white; border: none; font-weight: bold; }
+            QPushButton[text="Cancel"] { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        """)
+        self.buttons.accepted.connect(self.validate_and_accept)
+        self.buttons.rejected.connect(self.reject)
+        layout.addWidget(self.buttons)
+
+    def populate_clients(self):
+        clients = self.session.query(Client).all()
+        for c in clients:
+            self.client_combo.addItem(c.name, c.id)
+
+    def validate_and_accept(self):
+        if self.client_combo.currentIndex() < 0:
+            QMessageBox.warning(self, "Validation Error", "Please select a client or create one first!")
+            return
+        if not self.fy_combo.currentText().strip():
+            QMessageBox.warning(self, "Validation Error", "Financial Year is required!")
+            return
+        self.accept()
+
+
 class ClientManagementWidget(QWidget):
     def __init__(self):
         super().__init__()
@@ -107,12 +179,17 @@ class ClientManagementWidget(QWidget):
         
         action_layout.addStretch()
         
-        # Buttons
-        btn_add = QPushButton("Add New Client")
-        btn_add.setStyleSheet("padding: 8px 16px; border: none; border-radius: 6px; background-color: #0ea5e9; color: white; font-weight: bold;")
+        btn_add = QPushButton("+ Add Client")
+        btn_add.setStyleSheet("padding: 8px 14px; border: none; border-radius: 6px; background-color: #f1f5f9; color: #0ea5e9; font-weight: bold; border: 1px solid #bae6fd;")
         btn_add.clicked.connect(self.open_add_client_dialog)
+
+        btn_new_audit = QPushButton("⚡ Create New Audit")
+        btn_new_audit.setStyleSheet("padding: 8px 16px; border: none; border-radius: 6px; background-color: #0ea5e9; color: white; font-weight: bold;")
+        btn_new_audit.clicked.connect(self.open_create_audit_dialog)
         
         action_layout.addWidget(btn_add)
+        action_layout.addSpacing(8)
+        action_layout.addWidget(btn_new_audit)
         main_layout.addWidget(action_bar)
         
         # Splitter for Main Content
@@ -178,16 +255,14 @@ class ClientManagementWidget(QWidget):
         search_text = self.search_box.text().strip()
         query = self.session.query(Client)
         if search_text:
-            query = query.filter(Client.name.like(f"%{search_text}%") | 
-                                 Client.gst_number.like(f"%{search_text}%") | 
-                                 Client.pan_number.like(f"%{search_text}%"))
-        clients = query.all()
-        
-        self.table.setRowCount(0)
-        for r, client in enumerate(clients):
-            self.table.insertRow(r)
+            query = query.filter((Client.name.ilike(f"%{search_text}%")) |
+                                 (Client.gst_number.ilike(f"%{search_text}%")) |
+                                 (Client.pan_number.ilike(f"%{search_text}%")))
             
-            # Fetch latest audit project info
+        clients = query.all()
+        self.table.setRowCount(len(clients))
+        
+        for r, client in enumerate(clients):
             latest_audit = self.session.query(AuditProject).filter_by(client_id=client.id).order_by(AuditProject.id.desc()).first()
             status = latest_audit.status if latest_audit else "Not Started"
             risk = latest_audit.risk_level if latest_audit else "Unknown"
@@ -198,7 +273,6 @@ class ClientManagementWidget(QWidget):
             self.table.setItem(r, 3, QTableWidgetItem(status))
             self.table.setItem(r, 4, QTableWidgetItem(risk))
             
-            # Attach Client ID to item for retrieval on selection
             self.table.item(r, 0).setData(Qt.ItemDataRole.UserRole, client.id)
 
     def on_client_selected(self):
@@ -212,7 +286,6 @@ class ClientManagementWidget(QWidget):
         self.header_lbl.setText(client.name)
         self.industry_lbl.setText(f"{client.industry or 'General'} Sector")
         
-        # Clear old details layout
         for i in reversed(range(self.info_layout.count())): 
             self.info_layout.itemAt(i).widget().setParent(None)
             
@@ -229,7 +302,6 @@ class ClientManagementWidget(QWidget):
         add_info_to_details("PAN", client.pan_number or "N/A")
         add_info_to_details("Created At", client.created_at.strftime("%d-%b-%Y") if client.created_at else "N/A")
 
-        # Action buttons for selected client
         btn_box = QHBoxLayout()
         btn_edit = QPushButton("Edit Client")
         btn_edit.setStyleSheet("padding: 6px 12px; background-color: #f1f5f9; color: #0ea5e9; border: 1px solid #bae6fd; border-radius: 6px; font-weight: 600;")
@@ -283,12 +355,57 @@ class ClientManagementWidget(QWidget):
                 QMessageBox.critical(self, "Creation Error", f"Failed to create client: {e}")
                 return
             
-            # Auto add default audit project
             ap = AuditProject(client_id=new_client.id, financial_year="2025-26", status="Not Started", risk_level="Unknown")
             self.session.add(ap)
             self.session.commit()
             
+            from services.engagement_service import EngagementService
+            from database.repositories.engagement_repo import EngagementRepository
+            eng_service = EngagementService(EngagementRepository(self.session))
+            try:
+                eng_service.ensure_engagement_for_project(ap.id)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"Engagement sync warning: {e}")
+
             self.load_clients()
+
+    def open_create_audit_dialog(self):
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.MANAGE_CLIENTS):
+            QMessageBox.warning(self, "Access Denied", "Your role does not have permission to create audit projects.")
+            return
+
+        dialog = CreateAuditProjectDialog(self.session, self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            client_id = dialog.client_combo.currentData()
+            fy = dialog.fy_combo.currentText().strip() or "2025-26"
+            audit_type = dialog.audit_type_combo.currentText().strip()
+            status = dialog.stage_combo.currentText().strip()
+            risk = dialog.risk_combo.currentText().strip()
+
+            proj = AuditProject(
+                client_id=client_id,
+                financial_year=fy,
+                status=status,
+                risk_level=risk
+            )
+            self.session.add(proj)
+            self.session.commit()
+
+            from services.engagement_service import EngagementService
+            from database.repositories.engagement_repo import EngagementRepository
+            eng_service = EngagementService(EngagementRepository(self.session))
+            try:
+                eng_service.ensure_engagement_for_project(proj.id)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"Engagement sync warning: {e}")
+
+            self.load_clients()
+            QMessageBox.information(self, "Audit Created", f"Successfully initialized new {audit_type} for FY {fy}.")
 
     def open_edit_client_dialog(self, client_id):
         client = self.session.query(Client).filter_by(id=client_id).first()
@@ -344,4 +461,3 @@ class ClientManagementWidget(QWidget):
     def closeEvent(self, event):
         self.session.close()
         event.accept()
-

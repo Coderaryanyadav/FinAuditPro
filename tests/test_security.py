@@ -52,6 +52,8 @@ class TestSecurityArchitecture(unittest.TestCase):
 
     def test_immutable_audit_logger(self):
         logger = ImmutableAuditLogger()
+        logger.ledger = []
+        logger._last_hash = "0000000000000000000000000000000000000000000000000000000000000000"
         entry1 = logger.log_action("user1@example.com", "Partner", "CREATE_CLIENT", "Created TechCorp")
         entry2 = logger.log_action("user1@example.com", "Partner", "UPLOAD_DOC", "Uploaded Invoice")
         

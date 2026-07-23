@@ -217,6 +217,13 @@ class DashboardWindow(QWidget):
         self.client_selector.currentIndexChanged.connect(self.on_active_engagement_changed)
         header_layout.addWidget(self.client_selector)
         
+        btn_new_audit = QPushButton("⚡ + New Audit")
+        btn_new_audit.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_new_audit.setToolTip("Create a new Audit Project for a Client & Financial Year")
+        btn_new_audit.setStyleSheet("padding: 6px 12px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
+        btn_new_audit.clicked.connect(self.open_create_audit_dialog)
+        header_layout.addWidget(btn_new_audit)
+        
         header_layout.addSpacing(16)
         self.lbl_wf_stage = QLabel("Stage: AI_ANALYSIS")
         self.lbl_wf_stage.setStyleSheet("background-color: #e0f2fe; color: #0369a1; font-weight: 600; font-size: 11px; padding: 4px 8px; border-radius: 4px;")
@@ -630,6 +637,52 @@ class DashboardWindow(QWidget):
             except (SQLAlchemyError, ValueError, RuntimeError) as e:
                 import logging
                 logging.getLogger(__name__).warning(f"Startup engagement initialization warning: {e}")
+
+    def open_create_audit_dialog(self):
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        from PySide6.QtWidgets import QMessageBox, QDialog
+        from .clients import CreateAuditProjectDialog
+
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.MANAGE_CLIENTS):
+            QMessageBox.warning(self, "Access Denied", "Your role does not have permission to create audit projects.")
+            return
+
+        dialog = CreateAuditProjectDialog(self.session, self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            client_id = dialog.client_combo.currentData()
+            fy = dialog.fy_combo.currentText().strip() or "2025-26"
+            audit_type = dialog.audit_type_combo.currentText().strip()
+            status = dialog.stage_combo.currentText().strip()
+            risk = dialog.risk_combo.currentText().strip()
+
+            proj = AuditProject(
+                client_id=client_id,
+                financial_year=fy,
+                status=status,
+                risk_level=risk
+            )
+            self.session.add(proj)
+            self.session.commit()
+
+            # Ensure canonical Engagement model row is also instantiated & synchronized
+            from services.engagement_service import EngagementService
+            from database.repositories.engagement_repo import EngagementRepository
+            eng_service = EngagementService(EngagementRepository(self.session))
+            try:
+                eng_service.ensure_engagement_for_project(proj.id)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"Engagement sync warning: {e}")
+
+            self.populate_client_selector()
+            # Select newly created audit project in client_selector
+            idx = self.client_selector.findData(proj.id)
+            if idx >= 0:
+                self.client_selector.setCurrentIndex(idx)
+
+            QMessageBox.information(self, "Audit Created", f"Successfully initialized new {audit_type} for FY {fy}.")
 
     def populate_client_selector(self):
         self.client_selector.clear()

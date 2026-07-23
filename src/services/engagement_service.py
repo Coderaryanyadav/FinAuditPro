@@ -86,3 +86,41 @@ class EngagementService:
             import logging
             logging.getLogger(__name__).warning(f"Error calculating progress for engagement {engagement_id}: {e}")
             return 0.0
+
+    def ensure_engagement_for_project(self, project_id: int) -> Engagement:
+        """
+        Unifies AuditProject and Engagement data models.
+        Ensures a canonical Engagement row exists for the given AuditProject ID.
+        """
+        session = self.engagement_repo.session
+        from database.models import AuditProject, FinancialYear
+        proj = session.query(AuditProject).filter_by(id=project_id).first()
+        if not proj:
+            raise EntityNotFoundError(f"AuditProject {project_id} not found.")
+
+        fy_label = proj.financial_year or "2025-26"
+        fy = session.query(FinancialYear).filter_by(label=fy_label).first()
+        if not fy:
+            import datetime
+            start_yr = int(fy_label.split('-')[0]) if '-' in fy_label else 2025
+            fy = FinancialYear(
+                label=fy_label,
+                start_date=datetime.datetime(start_yr, 4, 1),
+                end_date=datetime.datetime(start_yr + 1, 3, 31)
+            )
+            session.add(fy)
+            session.flush()
+
+        eng = session.query(Engagement).filter_by(client_id=proj.client_id, financial_year_id=fy.id).first()
+        if not eng:
+            eng = Engagement(
+                client_id=proj.client_id,
+                financial_year_id=fy.id,
+                audit_type="Statutory Audit",
+                status=proj.status or "Execution"
+            )
+            session.add(eng)
+            session.commit()
+            session.refresh(eng)
+        return eng
+

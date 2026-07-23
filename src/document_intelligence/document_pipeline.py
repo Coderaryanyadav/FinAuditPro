@@ -94,7 +94,9 @@ class DocumentPipeline:
             if parsed_doc.tables:
                 import re
                 for tbl in parsed_doc.tables:
-                    for cell in tbl.get("cells", []):
+                    rows = getattr(tbl, "rows", []) if hasattr(tbl, "rows") else tbl.get("rows", []) if isinstance(tbl, dict) else []
+                    cells = [c for r in rows for c in r] if rows else (tbl.get("cells", []) if isinstance(tbl, dict) else [])
+                    for cell in cells:
                         matches = re.findall(r"\b\d{1,3}(?:,\d{3})*(?:\.\d{2})?\b", str(cell))
                         for m in matches:
                             try:

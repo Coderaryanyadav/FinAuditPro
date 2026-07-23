@@ -259,7 +259,10 @@ class AIAuditWidget(QWidget):
         self.add_message("You", text, True)
         self.current_ai_bubble = self.add_message("FinAudit Copilot", "", False)
         
-        self.worker = OllamaWorker(raw_query=text)
+        doc_context = self.doc_content.text()
+        system_prompt = f"You are FinAudit Copilot, an expert AI Chartered Accountant assistant adhering strictly to ICAI Standards on Auditing (SA 200-790) and Companies Act 2013.\n\nFinancial Document Context:\n{doc_context[:2000]}"
+
+        self.worker = OllamaWorker(raw_query=text, system_prompt=system_prompt)
         self.worker.chunk_received.connect(self.on_ai_chunk)
         self.worker.finished.connect(self.on_ai_finished)
         self.worker.start()

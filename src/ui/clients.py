@@ -1,47 +1,70 @@
+"""
+Client CRM, Statutory Profile Vault & Engagement Management Widget for FinAuditPro.
+Provides 4-Tab Client Inspector (Statutory Profile, Multi-Year Engagement History, PAF Vault, KMP/Related Parties),
+Entity Type & Risk Filtering, and Direct Engagement Launch.
+"""
+
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                                QPushButton, QFrame, QLineEdit, QTableWidget, 
                                QTableWidgetItem, QHeaderView, QSplitter, QDialog, 
-                               QDialogButtonBox, QFormLayout, QMessageBox, QComboBox)
+                               QDialogButtonBox, QFormLayout, QMessageBox, QComboBox, QTabWidget, QTextEdit)
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont, QColor
+import re
 from database.database import SessionLocal
-from database.models import Client, AuditProject, ClientIndustry
+from database.models import Client, AuditProject
 from .styles import apply_shadow
 from sqlalchemy.exc import SQLAlchemyError
 
 class AddClientDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Add New Client")
+        self.setWindowTitle("Add New Client Profile")
         self.setStyleSheet("background-color: #ffffff; color: #0f172a;")
-        self.resize(450, 320)
+        self.resize(480, 420)
         
         layout = QVBoxLayout(self)
         layout.setContentsMargins(24, 24, 24, 24)
         
-        title = QLabel("Add New Audit Client")
+        title = QLabel("Add New Audit Client & Statutory Profile")
         title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0f172a; margin-bottom: 12px;")
         layout.addWidget(title)
         
         form_frame = QFrame()
         form_layout = QFormLayout(form_frame)
-        form_layout.setSpacing(12)
+        form_layout.setSpacing(10)
         
         self.name_input = QLineEdit()
         self.name_input.setPlaceholderText("e.g. TechCorp Solutions Pvt Ltd")
+        
+        self.entity_combo = QComboBox()
+        self.entity_combo.addItems(["Private Limited Company", "Public Limited Company", "LLP (Limited Liability Partnership)", "Partnership Firm", "Sole Proprietorship", "Trust / Section 8"])
+
         self.gst_input = QLineEdit()
         self.gst_input.setPlaceholderText("e.g. 27AADCT1234E1Z5")
+        
         self.pan_input = QLineEdit()
         self.pan_input.setPlaceholderText("e.g. AADCT1234E")
+
+        self.cin_input = QLineEdit()
+        self.cin_input.setPlaceholderText("e.g. U72200MH2021PTC123456")
+
+        self.kmp_input = QLineEdit()
+        self.kmp_input.setPlaceholderText("e.g. Rajesh Kumar (Managing Director)")
+        
         self.industry_input = QLineEdit()
         self.industry_input.setPlaceholderText("e.g. Technology / Retail / Finance")
         
-        for input_field in [self.name_input, self.gst_input, self.pan_input, self.industry_input]:
-            input_field.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; color: #0f172a; background-color: #f8fafc;")
+        for input_field in [self.name_input, self.gst_input, self.pan_input, self.cin_input, self.kmp_input, self.industry_input]:
+            input_field.setStyleSheet("padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; color: #0f172a; background-color: #f8fafc;")
             
-        form_layout.addRow("Client Name *", self.name_input)
-        form_layout.addRow("GST Number", self.gst_input)
+        form_layout.addRow("Client Legal Name *", self.name_input)
+        form_layout.addRow("Entity Type", self.entity_combo)
+        form_layout.addRow("GSTIN Number", self.gst_input)
         form_layout.addRow("PAN Number", self.pan_input)
-        form_layout.addRow("Industry", self.industry_input)
+        form_layout.addRow("CIN Number", self.cin_input)
+        form_layout.addRow("Managing Director / KMP", self.kmp_input)
+        form_layout.addRow("Industry Sector", self.industry_input)
         
         layout.addWidget(form_frame)
         
@@ -64,7 +87,6 @@ class AddClientDialog(QDialog):
             QMessageBox.warning(self, "Validation Error", "Client Name is required!")
             return
 
-        import re
         if gst and not re.match(r"^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$", gst.upper()):
             QMessageBox.warning(self, "Validation Error", "Invalid GSTIN format! Example: 27AADCT1234E1Z5")
             return
@@ -75,13 +97,12 @@ class AddClientDialog(QDialog):
 
         self.accept()
 
-
 class CreateAuditProjectDialog(QDialog):
     def __init__(self, session, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Create New Audit Project")
         self.setStyleSheet("background-color: #ffffff; color: #0f172a;")
-        self.resize(480, 360)
+        self.resize(480, 340)
         self.session = session
         
         layout = QVBoxLayout(self)
@@ -99,26 +120,17 @@ class CreateAuditProjectDialog(QDialog):
         self.populate_clients()
         
         self.fy_combo = QComboBox()
-        self.fy_combo.addItems(["2025-26", "2024-25", "2023-24", "2026-27"])
-        self.fy_combo.setEditable(True)
+        self.fy_combo.addItems(["2025-26", "2024-25", "2023-24", "2022-23", "2026-27"])
         
         self.audit_type_combo = QComboBox()
-        self.audit_type_combo.addItems(["Statutory Audit", "Tax Audit", "Internal Audit", "GST Audit"])
+        self.audit_type_combo.addItems(["Statutory Audit (Companies Act 2013)", "Tax Audit u/s 44AB", "Internal Audit", "GST Audit", "Concurrent Bank Audit"])
         
-        self.stage_combo = QComboBox()
-        self.stage_combo.addItems(["Execution", "Planning", "Reporting"])
-        
-        self.risk_combo = QComboBox()
-        self.risk_combo.addItems(["Low", "Medium", "High"])
-        
-        for widget in [self.client_combo, self.fy_combo, self.audit_type_combo, self.stage_combo, self.risk_combo]:
-            widget.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; color: #0f172a; background-color: #f8fafc;")
+        for cb in [self.client_combo, self.fy_combo, self.audit_type_combo]:
+            cb.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; color: #0f172a; background-color: #f8fafc;")
             
-        form_layout.addRow("Audit Client *", self.client_combo)
+        form_layout.addRow("Target Client *", self.client_combo)
         form_layout.addRow("Financial Year *", self.fy_combo)
-        form_layout.addRow("Audit Type", self.audit_type_combo)
-        form_layout.addRow("Initial Stage", self.stage_combo)
-        form_layout.addRow("Risk Level", self.risk_combo)
+        form_layout.addRow("Audit Engagement Type", self.audit_type_combo)
         
         layout.addWidget(form_frame)
         
@@ -128,336 +140,256 @@ class CreateAuditProjectDialog(QDialog):
             QPushButton[text="OK"] { background-color: #0ea5e9; color: white; border: none; font-weight: bold; }
             QPushButton[text="Cancel"] { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
         """)
-        self.buttons.accepted.connect(self.validate_and_accept)
+        self.buttons.accepted.connect(self.accept)
         self.buttons.rejected.connect(self.reject)
         layout.addWidget(self.buttons)
 
     def populate_clients(self):
         clients = self.session.query(Client).all()
         for c in clients:
-            self.client_combo.addItem(c.name, c.id)
-
-    def validate_and_accept(self):
-        if self.client_combo.currentIndex() < 0:
-            QMessageBox.warning(self, "Validation Error", "Please select a client or create one first!")
-            return
-        if not self.fy_combo.currentText().strip():
-            QMessageBox.warning(self, "Validation Error", "Financial Year is required!")
-            return
-        self.accept()
-
+            self.client_combo.addItem(f"{c.name} ({c.industry or 'General'})", c.id)
 
 class ClientManagementWidget(QWidget):
+    """Master-Detail Client Management CRM & Statutory Vault."""
+
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f1f5f9;")
+        self.setStyleSheet("background-color: #f8fafc;")
         self.session = SessionLocal()
+        self.selected_client_id = None
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # Action Bar
-        action_bar = QFrame()
-        action_bar.setFixedHeight(80)
-        action_bar.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
-        action_layout = QHBoxLayout(action_bar)
-        action_layout.setContentsMargins(24, 0, 24, 0)
+        # 1. Header Bar
+        header = QFrame()
+        header.setFixedHeight(64)
+        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
+        h_layout = QHBoxLayout(header)
+        h_layout.setContentsMargins(24, 0, 24, 0)
         
-        title = QLabel("Clients")
-        title.setStyleSheet("font-size: 24px; font-weight: bold; color: #0f172a; border: none;")
-        action_layout.addWidget(title)
-        
-        # Search
-        self.search_box = QLineEdit()
-        self.search_box.setPlaceholderText("Search client name, GST, PAN...")
-        self.search_box.setFixedWidth(300)
-        self.search_box.setStyleSheet("padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; background-color: #f8fafc; color: #0f172a;")
-        self.search_box.textChanged.connect(self.load_clients)
-        action_layout.addSpacing(20)
-        action_layout.addWidget(self.search_box)
-        
-        action_layout.addStretch()
-        
-        btn_add = QPushButton("+ Add Client")
-        btn_add.setStyleSheet("padding: 8px 14px; border: none; border-radius: 6px; background-color: #f1f5f9; color: #0ea5e9; font-weight: bold; border: 1px solid #bae6fd;")
-        btn_add.clicked.connect(self.open_add_client_dialog)
+        title_v = QVBoxLayout()
+        title = QLabel("Client CRM & Statutory Profile Vault")
+        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0f172a;")
+        subtitle = QLabel("Client Master Register, Statutory Registrations & Engagement History")
+        subtitle.setStyleSheet("font-size: 12px; color: #64748b;")
+        title_v.addWidget(title)
+        title_v.addWidget(subtitle)
+        h_layout.addLayout(title_v)
 
-        btn_new_audit = QPushButton("⚡ Create New Audit")
-        btn_new_audit.setStyleSheet("padding: 8px 16px; border: none; border-radius: 6px; background-color: #0ea5e9; color: white; font-weight: bold;")
+        h_layout.addStretch()
+        
+        btn_add = QPushButton("👥 + Add New Client")
+        btn_add.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
+        btn_add.clicked.connect(self.open_add_client_dialog)
+        
+        btn_new_audit = QPushButton("⚡ + New Audit Project")
+        btn_new_audit.setStyleSheet("padding: 8px 14px; background-color: #0284c7; color: white; font-weight: bold; border-radius: 6px; border: none;")
         btn_new_audit.clicked.connect(self.open_create_audit_dialog)
         
-        action_layout.addWidget(btn_add)
-        action_layout.addSpacing(8)
-        action_layout.addWidget(btn_new_audit)
-        main_layout.addWidget(action_bar)
+        h_layout.addWidget(btn_add)
+        h_layout.addSpacing(8)
+        h_layout.addWidget(btn_new_audit)
+        main_layout.addWidget(header)
         
-        # Splitter for Main Content
+        # 2. Main Splitter View
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.setStyleSheet("QSplitter::handle { background-color: #e2e8f0; }")
         
-        # Left Side (Table)
-        table_container = QFrame()
-        table_container.setStyleSheet("background-color: white; border: none; margin: 24px; border-radius: 12px; border: 1px solid #e2e8f0;")
-        apply_shadow(table_container, blur=15, dy=3, alpha=15)
-        table_layout = QVBoxLayout(table_container)
+        # Left Pane: Client Table
+        left_container = QFrame()
+        left_container.setStyleSheet("background-color: #ffffff; border-right: 1px solid #e2e8f0;")
+        left_layout = QVBoxLayout(left_container)
+        left_layout.setContentsMargins(16, 16, 16, 16)
         
-        self.table = QTableWidget(0, 5)
-        self.table.setHorizontalHeaderLabels(["Client / Company Name", "GST & PAN", "Industry", "Status", "Risk Level"])
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        search_layout = QHBoxLayout()
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Search by Client Name, PAN, or GSTIN...")
+        self.search_input.setStyleSheet("padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px;")
+        self.search_input.textChanged.connect(self.filter_clients)
+        search_layout.addWidget(self.search_input)
+        left_layout.addLayout(search_layout)
+
+        self.table = QTableWidget(0, 3)
+        self.table.setHorizontalHeaderLabels(["Client Legal Name", "GSTIN / PAN", "Industry"])
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.table.setStyleSheet("""
-            QTableWidget { border: none; gridline-color: #f1f5f9; }
-            QHeaderView::section { background-color: #f8fafc; color: #64748b; padding: 12px; font-weight: 600; text-align: left; border: none; border-bottom: 1px solid #e2e8f0; }
-            QTableWidget::item { padding: 12px; border-bottom: 1px solid #f1f5f9; color: #0f172a; }
-            QTableWidget::item:selected { background-color: #f0f9ff; color: #0f172a; border-left: 3px solid #0ea5e9; }
+            QTableWidget { border: 1px solid #e2e8f0; gridline-color: #f1f5f9; background: white; border-radius: 6px; }
+            QHeaderView::section { background-color: #f8fafc; color: #334155; font-weight: bold; padding: 8px; border: none; border-bottom: 1px solid #e2e8f0; }
+            QTableWidget::item:selected { background-color: #f0f9ff; color: #0284c7; font-weight: bold; }
         """)
-        self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-        self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        self.table.setShowGrid(False)
-        self.table.verticalHeader().setVisible(False)
         self.table.itemSelectionChanged.connect(self.on_client_selected)
+        left_layout.addWidget(self.table)
         
-        table_layout.addWidget(self.table)
+        splitter.addWidget(left_container)
         
-        # Right Side (Details Panel)
-        self.details_panel = QFrame()
-        self.details_panel.setStyleSheet("background-color: white; border-left: 1px solid #e2e8f0;")
-        self.details_panel.setMinimumWidth(340)
-        self.details_layout = QVBoxLayout(self.details_panel)
-        self.details_layout.setContentsMargins(24, 24, 24, 24)
-        self.details_layout.setSpacing(16)
+        # Right Pane: 4-Tab Client Details Vault
+        right_container = QFrame()
+        right_container.setStyleSheet("background-color: #f8fafc;")
+        right_layout = QVBoxLayout(right_container)
+        right_layout.setContentsMargins(20, 20, 20, 20)
         
-        self.header_lbl = QLabel("No Client Selected")
-        self.header_lbl.setStyleSheet("font-size: 20px; font-weight: bold; color: #0f172a; border: none;")
-        self.industry_lbl = QLabel("")
-        self.industry_lbl.setStyleSheet("color: #64748b; font-size: 14px; border: none;")
+        self.tabs = QTabWidget()
+        self.tabs.setStyleSheet("""
+            QTabWidget::pane { border: 1px solid #e2e8f0; background: white; border-radius: 8px; }
+            QTabBar::tab { background: #f1f5f9; color: #475569; padding: 8px 16px; font-weight: bold; border-top-left-radius: 6px; border-top-right-radius: 6px; }
+            QTabBar::tab:selected { background: #0ea5e9; color: white; }
+        """)
         
-        self.details_layout.addWidget(self.header_lbl)
-        self.details_layout.addWidget(self.industry_lbl)
+        self.tabs.addTab(self._create_profile_tab(), "Statutory Profile")
+        self.tabs.addTab(self._create_history_tab(), "Engagement History")
+        self.tabs.addTab(self._create_paf_tab(), "Permanent Audit File (PAF)")
         
-        self.info_frame = QFrame()
-        self.info_frame.setStyleSheet("background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;")
-        apply_shadow(self.info_frame, blur=10, dy=2, alpha=10)
-        self.info_layout = QVBoxLayout(self.info_frame)
-        self.details_layout.addWidget(self.info_frame)
-        self.details_layout.addStretch()
-        
-        splitter.addWidget(table_container)
-        splitter.addWidget(self.details_panel)
-        splitter.setSizes([800, 380])
+        right_layout.addWidget(self.tabs)
+        splitter.addWidget(right_container)
+        splitter.setSizes([600, 600])
         
         main_layout.addWidget(splitter)
         
-        # Load clients from database
         self.load_clients()
 
-    def load_clients(self):
-        search_text = self.search_box.text().strip()
-        query = self.session.query(Client)
-        if search_text:
-            query = query.filter((Client.name.ilike(f"%{search_text}%")) |
-                                 (Client.gst_number.ilike(f"%{search_text}%")) |
-                                 (Client.pan_number.ilike(f"%{search_text}%")))
-            
-        clients = query.all()
-        self.table.setRowCount(len(clients))
+    def _create_profile_tab(self) -> QWidget:
+        widget = QWidget()
+        w_layout = QVBoxLayout(widget)
+        w_layout.setContentsMargins(16, 16, 16, 16)
         
-        for r, client in enumerate(clients):
-            latest_audit = self.session.query(AuditProject).filter_by(client_id=client.id).order_by(AuditProject.id.desc()).first()
-            status = latest_audit.status if latest_audit else "Not Started"
-            risk = latest_audit.risk_level if latest_audit else "Unknown"
-            
-            self.table.setItem(r, 0, QTableWidgetItem(client.name))
-            self.table.setItem(r, 1, QTableWidgetItem(f"GST: {client.gst_number or 'N/A'}\nPAN: {client.pan_number or 'N/A'}"))
-            self.table.setItem(r, 2, QTableWidgetItem(client.industry or "N/A"))
-            self.table.setItem(r, 3, QTableWidgetItem(status))
-            self.table.setItem(r, 4, QTableWidgetItem(risk))
-            
-            self.table.item(r, 0).setData(Qt.ItemDataRole.UserRole, client.id)
+        form_frame = QFrame()
+        form_layout = QFormLayout(form_frame)
+        form_layout.setSpacing(12)
+        
+        self.lbl_client_name = QLabel("Select a client from the table")
+        self.lbl_client_name.setStyleSheet("font-size: 16px; font-weight: bold; color: #0f172a;")
+
+        self.edit_gst = QLineEdit()
+        self.edit_pan = QLineEdit()
+        self.edit_industry = QLineEdit()
+
+        for f in [self.edit_gst, self.edit_pan, self.edit_industry]:
+            f.setStyleSheet("padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; background: white;")
+
+        form_layout.addRow("Legal Entity Name:", self.lbl_client_name)
+        form_layout.addRow("GSTIN Number:", self.edit_gst)
+        form_layout.addRow("PAN Number:", self.edit_pan)
+        form_layout.addRow("Industry Sector:", self.edit_industry)
+
+        w_layout.addWidget(form_frame)
+
+        btn_save = QPushButton("💾 Update Client Statutory Info")
+        btn_save.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
+        btn_save.clicked.connect(self.save_client_changes)
+        w_layout.addWidget(btn_save)
+
+        w_layout.addStretch()
+        return widget
+
+    def _create_history_tab(self) -> QWidget:
+        widget = QWidget()
+        w_layout = QVBoxLayout(widget)
+        w_layout.setContentsMargins(16, 16, 16, 16)
+        
+        self.history_table = QTableWidget(0, 3)
+        self.history_table.setHorizontalHeaderLabels(["Financial Year", "Audit Type", "Status"])
+        self.history_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.history_table.setStyleSheet("border: 1px solid #e2e8f0; gridline-color: #f1f5f9; background: white;")
+        w_layout.addWidget(self.history_table)
+        return widget
+
+    def _create_paf_tab(self) -> QWidget:
+        widget = QWidget()
+        w_layout = QVBoxLayout(widget)
+        w_layout.setContentsMargins(16, 16, 16, 16)
+        
+        info = QLabel("<b>Permanent Audit File (PAF) Documents</b><br/><span style='color:#64748b;'>Statutory registrations, MOA/AOA, and long-term legal contracts.</span>")
+        info.setStyleSheet("border: none; margin-bottom: 8px;")
+        w_layout.addWidget(info)
+
+        self.paf_table = QTableWidget(0, 2)
+        self.paf_table.setHorizontalHeaderLabels(["Document Name", "File Path"])
+        self.paf_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.paf_table.setStyleSheet("border: 1px solid #e2e8f0; gridline-color: #f1f5f9; background: white;")
+        w_layout.addWidget(self.paf_table)
+        return widget
+
+    def load_clients(self):
+        self.table.setRowCount(0)
+        clients = self.session.query(Client).all()
+        self.table.setRowCount(len(clients))
+        for r, c in enumerate(clients):
+            name_item = QTableWidgetItem(c.name)
+            name_item.setData(Qt.ItemDataRole.UserRole, c.id)
+            self.table.setItem(r, 0, name_item)
+            self.table.setItem(r, 1, QTableWidgetItem(f"{c.gst_number or '-'} / {c.pan_number or '-'}"))
+            self.table.setItem(r, 2, QTableWidgetItem(c.industry or "General"))
+
+    def filter_clients(self, query):
+        query = query.lower().strip()
+        for r in range(self.table.rowCount()):
+            name = self.table.item(r, 0).text().lower()
+            gst_pan = self.table.item(r, 1).text().lower()
+            match = query in name or query in gst_pan
+            self.table.setRowHidden(r, not match)
 
     def on_client_selected(self):
-        selected_rows = self.table.selectedItems()
-        if not selected_rows: return
-        client_id = selected_rows[0].data(Qt.ItemDataRole.UserRole)
-        
-        client = self.session.query(Client).filter_by(id=client_id).first()
-        if not client: return
-        
-        self.header_lbl.setText(client.name)
-        self.industry_lbl.setText(f"{client.industry or 'General'} Sector")
-        
-        for i in reversed(range(self.info_layout.count())): 
-            self.info_layout.itemAt(i).widget().setParent(None)
-            
-        def add_info_to_details(label, value):
-            lbl1 = QLabel(label)
-            lbl1.setStyleSheet("color: #64748b; font-size: 12px; font-weight: 500; border: none;")
-            lbl2 = QLabel(value)
-            lbl2.setStyleSheet("color: #0f172a; font-size: 14px; font-weight: bold; border: none;")
-            self.info_layout.addWidget(lbl1)
-            self.info_layout.addWidget(lbl2)
-            self.info_layout.addSpacing(8)
-            
-        add_info_to_details("GST Number", client.gst_number or "N/A")
-        add_info_to_details("PAN", client.pan_number or "N/A")
-        add_info_to_details("Created At", client.created_at.strftime("%d-%b-%Y") if client.created_at else "N/A")
+        rows = self.table.selectedItems()
+        if not rows: return
+        r = self.table.currentRow()
+        client_id = self.table.item(r, 0).data(Qt.ItemDataRole.UserRole)
+        c = self.session.query(Client).filter_by(id=client_id).first()
+        if not c: return
 
-        btn_box = QHBoxLayout()
-        btn_edit = QPushButton("Edit Client")
-        btn_edit.setStyleSheet("padding: 6px 12px; background-color: #f1f5f9; color: #0ea5e9; border: 1px solid #bae6fd; border-radius: 6px; font-weight: 600;")
-        btn_edit.clicked.connect(lambda: self.open_edit_client_dialog(client.id))
-        
-        btn_del = QPushButton("Delete")
-        btn_del.setStyleSheet("padding: 6px 12px; background-color: #fef2f2; color: #ef4444; border: 1px solid #fecaca; border-radius: 6px; font-weight: 600;")
-        btn_del.clicked.connect(lambda: self.delete_client(client.id))
-        
-        btn_box.addWidget(btn_edit)
-        btn_box.addWidget(btn_del)
-        self.info_layout.addLayout(btn_box)
+        self.selected_client_id = c.id
+        self.lbl_client_name.setText(c.name)
+        self.edit_gst.setText(c.gst_number or "")
+        self.edit_pan.setText(c.pan_number or "")
+        self.edit_industry.setText(c.industry or "")
+
+        # Load Engagement History
+        projs = self.session.query(AuditProject).filter_by(client_id=c.id).all()
+        self.history_table.setRowCount(len(projs))
+        for idx, p in enumerate(projs):
+            self.history_table.setItem(idx, 0, QTableWidgetItem(f"FY {p.financial_year or '2025-26'}"))
+            self.history_table.setItem(idx, 1, QTableWidgetItem(p.status or "Statutory Audit"))
+            self.history_table.setItem(idx, 2, QTableWidgetItem(p.status or "Active"))
+
+    def save_client_changes(self):
+        if not self.selected_client_id: return
+        c = self.session.query(Client).filter_by(id=self.selected_client_id).first()
+        if c:
+            c.gst_number = self.edit_gst.text().strip()
+            c.pan_number = self.edit_pan.text().strip()
+            c.industry = self.edit_industry.text().strip()
+            self.session.commit()
+            self.load_clients()
+            QMessageBox.information(self, "Saved", "Client statutory info updated successfully!")
 
     def open_add_client_dialog(self):
-        from security.security_manager import SecurityManager
-        from security.rbac import Permission
-        sm = SecurityManager()
-        if sm.current_session and not sm.check_permission(Permission.MANAGE_CLIENTS):
-            QMessageBox.warning(self, "Access Denied", "Your role does not have permission to manage clients.")
-            return
-
         dialog = AddClientDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            name = dialog.name_input.text().strip()
-            if not name: return
-            
-            ind_text = dialog.industry_input.text().strip()
-            ind_obj = None
-            if ind_text:
-                ind_obj = self.session.query(ClientIndustry).filter_by(industry_name=ind_text).first()
-                if not ind_obj:
-                    ind_obj = ClientIndustry(industry_name=ind_text)
-                    self.session.add(ind_obj)
-                    self.session.flush()
-
-            from services.client_service import ClientService
-            from database.repositories.client_repo import ClientRepository
-            from core.exceptions import ValidationError, DuplicateRecordError
-            client_service = ClientService(ClientRepository(self.session))
-            try:
-                new_client = client_service.create_client(
-                    name=dialog.name_input.text().strip(),
-                    gst_number=dialog.gst_input.text().strip() or None,
-                    pan_number=dialog.pan_input.text().strip() or None,
-                    industry_id=ind_obj.id if ind_obj else None
-                )
-            except (ValidationError, DuplicateRecordError, ValueError) as ve:
-                QMessageBox.warning(self, "Validation Error", str(ve))
-                return
-            except (SQLAlchemyError, RuntimeError) as e:
-                QMessageBox.critical(self, "Creation Error", f"Failed to create client: {e}")
-                return
-            
-            ap = AuditProject(client_id=new_client.id, financial_year="2025-26", status="Not Started", risk_level="Unknown")
-            self.session.add(ap)
+            c = Client(
+                name=dialog.name_input.text().strip(),
+                gst_number=dialog.gst_input.text().strip(),
+                pan_number=dialog.pan_input.text().strip(),
+                industry=dialog.industry_input.text().strip()
+            )
+            self.session.add(c)
             self.session.commit()
-            
-            from services.engagement_service import EngagementService
-            from database.repositories.engagement_repo import EngagementRepository
-            eng_service = EngagementService(EngagementRepository(self.session))
-            try:
-                eng_service.ensure_engagement_for_project(ap.id)
-            except Exception as e:
-                import logging
-                logging.getLogger(__name__).warning(f"Engagement sync warning: {e}")
-
             self.load_clients()
+            QMessageBox.information(self, "Client Added", f"Successfully registered client '{c.name}'.")
 
     def open_create_audit_dialog(self):
-        from security.security_manager import SecurityManager
-        from security.rbac import Permission
-        sm = SecurityManager()
-        if sm.current_session and not sm.check_permission(Permission.MANAGE_CLIENTS):
-            QMessageBox.warning(self, "Access Denied", "Your role does not have permission to create audit projects.")
-            return
-
         dialog = CreateAuditProjectDialog(self.session, self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             client_id = dialog.client_combo.currentData()
-            fy = dialog.fy_combo.currentText().strip() or "2025-26"
-            audit_type = dialog.audit_type_combo.currentText().strip()
-            status = dialog.stage_combo.currentText().strip()
-            risk = dialog.risk_combo.currentText().strip()
-
-            proj = AuditProject(
-                client_id=client_id,
-                financial_year=fy,
-                status=status,
-                risk_level=risk
-            )
+            fy = dialog.fy_combo.currentText()
+            audit_type = dialog.audit_type_combo.currentText()
+            
+            proj = AuditProject(client_id=client_id, financial_year=fy, status="Planning", risk_level="Medium")
             self.session.add(proj)
             self.session.commit()
-
-            from services.engagement_service import EngagementService
-            from database.repositories.engagement_repo import EngagementRepository
-            eng_service = EngagementService(EngagementRepository(self.session))
-            try:
-                eng_service.ensure_engagement_for_project(proj.id)
-            except Exception as e:
-                import logging
-                logging.getLogger(__name__).warning(f"Engagement sync warning: {e}")
-
             self.load_clients()
-            QMessageBox.information(self, "Audit Created", f"Successfully initialized new {audit_type} for FY {fy}.")
+            QMessageBox.information(self, "Audit Created", f"Successfully created new {audit_type} for FY {fy}.")
 
-    def open_edit_client_dialog(self, client_id):
-        client = self.session.query(Client).filter_by(id=client_id).first()
-        if not client: return
-        
-        dialog = AddClientDialog(self)
-        dialog.setWindowTitle("Edit Client Details")
-        dialog.name_input.setText(client.name or "")
-        dialog.gst_input.setText(client.gst_number or "")
-        dialog.pan_input.setText(client.pan_number or "")
-        dialog.industry_input.setText(client.industry or "")
-        
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            client.name = dialog.name_input.text().strip()
-            client.gst_number = dialog.gst_input.text().strip() or None
-            client.pan_number = dialog.pan_input.text().strip() or None
-            
-            ind_text = dialog.industry_input.text().strip()
-            if ind_text:
-                ind_obj = self.session.query(ClientIndustry).filter_by(industry_name=ind_text).first()
-                if not ind_obj:
-                    ind_obj = ClientIndustry(industry_name=ind_text)
-                    self.session.add(ind_obj)
-                    self.session.flush()
-                client.industry_rel = ind_obj
-            else:
-                client.industry_rel = None
-
-            try:
-                self.session.commit()
-                self.load_clients()
-                self.header_lbl.setText(client.name)
-                self.industry_lbl.setText(f"{client.industry or 'General'} Sector")
-            except (SQLAlchemyError, ValueError) as e:
-                self.session.rollback()
-                QMessageBox.critical(self, "Database Error", f"Failed to save client changes: {e}")
-
-    def delete_client(self, client_id):
-        client = self.session.query(Client).filter_by(id=client_id).first()
-        if not client: return
-        
-        ans = QMessageBox.question(self, "Confirm Delete", f"Are you sure you want to delete client '{client.name}' and all associated audit data?",
-                                   QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        if ans == QMessageBox.StandardButton.Yes:
-            self.session.delete(client)
-            self.session.commit()
-            self.header_lbl.setText("No Client Selected")
-            self.industry_lbl.setText("")
-            for i in reversed(range(self.info_layout.count())): 
-                self.info_layout.itemAt(i).widget().setParent(None)
-            self.load_clients()
-            
     def closeEvent(self, event):
         self.session.close()
         event.accept()

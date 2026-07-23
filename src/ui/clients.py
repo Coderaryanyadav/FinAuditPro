@@ -266,18 +266,20 @@ class ClientManagementWidget(QWidget):
                     self.session.flush()
 
             from services.client_service import ClientService
-            client_service = ClientService(self.session)
+            from database.repositories.client_repo import ClientRepository
+            from core.exceptions import ValidationError, DuplicateRecordError
+            client_service = ClientService(ClientRepository(self.session))
             try:
                 new_client = client_service.create_client(
                     name=dialog.name_input.text().strip(),
-                    gstin=dialog.gst_input.text().strip() or None,
-                    pan=dialog.pan_input.text().strip() or None,
+                    gst_number=dialog.gst_input.text().strip() or None,
+                    pan_number=dialog.pan_input.text().strip() or None,
                     industry_id=ind_obj.id if ind_obj else None
                 )
-            except ValueError as ve:
+            except (ValidationError, DuplicateRecordError, ValueError) as ve:
                 QMessageBox.warning(self, "Validation Error", str(ve))
                 return
-            except (SQLAlchemyError, ValueError) as e:
+            except (SQLAlchemyError, RuntimeError) as e:
                 QMessageBox.critical(self, "Creation Error", f"Failed to create client: {e}")
                 return
             

@@ -233,8 +233,15 @@ class DocumentUploadWidget(QWidget):
         if files:
             dest_dir = f"data/documents/proj_{proj_id}"
             os.makedirs(dest_dir, exist_ok=True)
+            allowed_exts = ('.pdf', '.xls', '.xlsx', '.csv', '.txt')
+            uploaded_count = 0
             
             for file_path in files:
+                ext = os.path.splitext(file_path)[1].lower()
+                if ext not in allowed_exts:
+                    QMessageBox.warning(self, "Invalid File Type", f"Skipped '{os.path.basename(file_path)}': Only PDF, Excel, and CSV files are allowed.")
+                    continue
+
                 filename = os.path.basename(file_path)
                 dest_path = os.path.join(dest_dir, filename)
                 
@@ -256,9 +263,12 @@ class DocumentUploadWidget(QWidget):
                     doc_type="Uploaded"
                 )
                 self.session.add(doc)
-                self.session.commit()
+                uploaded_count += 1
                 
+            self.session.commit()
             self.load_uploaded_files()
+            if uploaded_count > 0:
+                QMessageBox.information(self, "Upload Success", f"Successfully uploaded {uploaded_count} document(s).")
 
     def start_ai_processing(self):
         proj_id = self.project_combo.currentData()

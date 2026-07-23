@@ -15,6 +15,7 @@ from typing import Dict, Any, List, Optional
 import shutil
 import tempfile
 from security.crypto import AESCryptoEngine, SecureStorage
+from sqlalchemy.exc import SQLAlchemyError
 
 logger = logging.getLogger(__name__)
 
@@ -143,7 +144,7 @@ class BackupEngine:
                     logger.info(f"Restored {len(doc_entries)} document(s) to {target_docs_dir}")
 
                 return True
-        except Exception as e:
+        except (OSError, IOError, SQLAlchemyError) as e:
             logger.error(f"Failed to restore backup: {e}")
             raise
         finally:

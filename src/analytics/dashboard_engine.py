@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional
 from database.database import SessionLocal
 from database.models import Client, AuditProject, Document, Finding, WorkingPaper
+from sqlalchemy.exc import SQLAlchemyError
 from .kpi_engine import KPIMetrics
 from .trend_engine import TrendMetrics
 from .forecast_engine import ForecastMetrics
@@ -52,7 +53,7 @@ class ExecutiveDashboardEngine:
                 top_risks.append([c_name, c_ind, p.risk_level or "Low"])
                 
             session.close()
-        except Exception as e:
+        except (SQLAlchemyError, OSError) as e:
             import logging
             logging.getLogger(__name__).warning(f"Dashboard metrics aggregation warning: {e}")
 
@@ -94,7 +95,7 @@ class ExecutiveDashboardEngine:
                 review_queue.append([client_name, proj.status, "CA Partner"])
             
             session.close()
-        except Exception as e:
+        except (SQLAlchemyError, OSError) as e:
             import logging
             logging.getLogger(__name__).warning(f"Dashboard metrics aggregation warning: {e}")
 

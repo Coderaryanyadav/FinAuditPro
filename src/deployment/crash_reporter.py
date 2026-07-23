@@ -11,6 +11,7 @@ import logging
 try:
     from PySide6.QtWidgets import QMessageBox, QApplication
 except ImportError:
+    logging.getLogger(__name__).warning("PySide6 not available. GUI crash dialogs disabled.")
     QMessageBox, QApplication = None, None
 
 logger = logging.getLogger(__name__)

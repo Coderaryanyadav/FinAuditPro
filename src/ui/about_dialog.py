@@ -8,6 +8,8 @@ try:
                                    QPushButton, QFrame, QTextEdit)
     from PySide6.QtCore import Qt
 except ImportError:
+    import logging
+    logging.getLogger(__name__).warning("PySide6 not available. About dialog disabled.")
     QDialog = object
     QVBoxLayout = QHBoxLayout = QLabel = QPushButton = QFrame = QTextEdit = Qt = None
 from deployment.version_checker import VersionChecker

@@ -57,6 +57,7 @@ def init_db():
     DatabaseMigrator.migrate(DB_PATH)
 
 from contextlib import contextmanager
+from sqlalchemy.exc import SQLAlchemyError
 
 @contextmanager
 def get_session():
@@ -65,7 +66,7 @@ def get_session():
     try:
         yield session
         session.commit()
-    except Exception as e:
+    except (SQLAlchemyError, OSError) as e:
         session.rollback()
         raise e
     finally:

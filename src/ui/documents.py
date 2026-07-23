@@ -7,6 +7,7 @@ from PySide6.QtCore import Qt, QThread, Signal
 from database.database import SessionLocal
 from database.models import Client, AuditProject, Document
 from .styles import apply_shadow
+from sqlalchemy.exc import SQLAlchemyError
 
 # class AIProcessWorker... (Skipping class code since we edit widget __init__)
 
@@ -50,7 +51,7 @@ class AIProcessWorker(QThread):
             
             self.progress.emit("AI Processing Complete", 100)
             self.finished.emit(True)
-        except Exception as e:
+        except (SQLAlchemyError, OSError, ValueError) as e:
             import logging
             logging.getLogger(__name__).exception("Document Ingestion Error")
             self.finished.emit(False)
@@ -108,7 +109,7 @@ class DocumentUploadWidget(QWidget):
                 warn_lbl.setStyleSheet("color: #92400e; font-size: 13px; font-weight: 500; border: none; background: transparent;")
                 b_layout.addWidget(warn_lbl)
                 main_layout.addWidget(ocr_banner)
-        except Exception as e:
+        except (SQLAlchemyError, OSError, ValueError) as e:
             import logging
             logging.getLogger(__name__).warning(f"OCR Banner initialization exception: {e}")
         
@@ -203,7 +204,7 @@ class DocumentUploadWidget(QWidget):
             from database.repositories.document_repo import DocumentRepository
             ds = DocumentService(DocumentRepository(self.session))
             docs = ds.get_engagement_documents(proj_id)
-        except Exception:
+        except (SQLAlchemyError, OSError, ValueError):
             docs = self.session.query(Document).filter_by(audit_id=proj_id).all()
 
         for doc in docs:

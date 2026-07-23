@@ -27,7 +27,7 @@ class ExcelReportExporter:
                 for row in findings:
                     writer.writerow(row)
             return output_path
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.error(f"CSV export failed: {e}")
             return ""
 
@@ -50,7 +50,7 @@ class ExcelReportExporter:
                     df_wp.to_excel(writer, sheet_name="Working Papers", index=False)
 
             return output_path
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.warning(f"Pandas/OpenPyXL not available ({e}). Falling back to CSV export.")
             csv_path = output_path.replace(".xlsx", ".csv")
             return ExcelReportExporter.export_findings_to_csv(findings, csv_path)

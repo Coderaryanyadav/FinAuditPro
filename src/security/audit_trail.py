@@ -10,6 +10,7 @@ import platform
 import socket
 from typing import Dict, Any, List, Optional
 import logging
+from sqlalchemy.exc import SQLAlchemyError
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +83,7 @@ class ImmutableAuditLogger:
                 if entry.entry_hash:
                     self._last_hash = entry.entry_hash
                 self.ledger.append(entry)
-        except Exception as e:
+        except (SQLAlchemyError, OSError) as e:
             logger.debug(f"Audit log database load skipped: {e}")
 
     def log_action(self, user_email: str, role: str, action: str, details: str = "") -> SecurityAuditEntry:
@@ -118,7 +119,7 @@ class ImmutableAuditLogger:
             session.add(log_record)
             session.commit()
             session.close()
-        except Exception as e:
+        except (SQLAlchemyError, OSError) as e:
             logger.warning(f"Failed to persist audit log to DB: {e}")
 
         return entry

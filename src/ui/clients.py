@@ -6,6 +6,7 @@ from PySide6.QtCore import Qt
 from database.database import SessionLocal
 from database.models import Client, AuditProject, ClientIndustry
 from .styles import apply_shadow
+from sqlalchemy.exc import SQLAlchemyError
 
 class AddClientDialog(QDialog):
     def __init__(self, parent=None):
@@ -276,7 +277,7 @@ class ClientManagementWidget(QWidget):
             except ValueError as ve:
                 QMessageBox.warning(self, "Validation Error", str(ve))
                 return
-            except Exception as e:
+            except (SQLAlchemyError, ValueError) as e:
                 QMessageBox.critical(self, "Creation Error", f"Failed to create client: {e}")
                 return
             
@@ -319,7 +320,7 @@ class ClientManagementWidget(QWidget):
                 self.load_clients()
                 self.header_lbl.setText(client.name)
                 self.industry_lbl.setText(f"{client.industry or 'General'} Sector")
-            except Exception as e:
+            except (SQLAlchemyError, ValueError) as e:
                 self.session.rollback()
                 QMessageBox.critical(self, "Database Error", f"Failed to save client changes: {e}")
 

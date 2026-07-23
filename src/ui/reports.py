@@ -5,6 +5,7 @@ from PySide6.QtCore import Qt, QMarginsF
 from PySide6.QtGui import QPdfWriter, QTextDocument, QPageLayout, QPageSize
 from database.database import SessionLocal
 from database.models import Client, Finding, WorkingPaper, AuditProject
+from sqlalchemy.exc import SQLAlchemyError
 
 class ReportsWidget(QWidget):
     def __init__(self):
@@ -219,7 +220,7 @@ class ReportsWidget(QWidget):
                 f"SHA-256 Hash: {result.document_hash[:16]}...\n"
                 f"Output: {file_path}"
             )
-        except Exception as e:
+        except (SQLAlchemyError, OSError, ValueError) as e:
             # Fallback to Qt PDF compilation if ReportLab unavailable
             try:
                 doc = QTextDocument()
@@ -229,7 +230,7 @@ class ReportsWidget(QWidget):
                 writer.setPageMargins(QMarginsF(40, 40, 40, 40))
                 doc.print_(writer)
                 QMessageBox.information(self, "Export Successful", f"PDF report exported to:\n{file_path}")
-            except Exception as ex:
+            except (SQLAlchemyError, OSError, ValueError) as ex:
                 QMessageBox.critical(self, "Export Failed", f"An error occurred: {ex}")
 
     def closeEvent(self, event):

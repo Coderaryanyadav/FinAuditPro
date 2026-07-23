@@ -68,7 +68,7 @@ class SettingsWidget(QWidget):
                     self.model_combo.addItem("No Ollama Models Found")
             else:
                 self.model_combo.addItem("llama3.2")
-        except Exception:
+        except (OSError, ValueError):
             self.model_combo.addItem("llama3.2 (Ollama Offline)")
 
         form_layout.addRow("LLM Model Target:", self.model_combo)

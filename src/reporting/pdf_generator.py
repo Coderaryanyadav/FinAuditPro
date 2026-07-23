@@ -129,6 +129,6 @@ class PDFReportGenerator:
             with open(txt_path, "w") as f:
                 f.write(f"=== {report_title} ===\nClient: {client_name}\nFY: {financial_year}\n\nSummary:\n{summary_text}\n")
             return txt_path
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.error(f"Failed to compile PDF report: {e}")
             return file_path

@@ -66,5 +66,5 @@ class DocumentValidator:
                 raise DocumentValidationError("PDF has no readable pages.")
         except DocumentValidationError:
             raise
-        except Exception as e:
+        except (OSError, ValueError) as e:
             raise DocumentValidationError(f"Corrupt or unreadable PDF file: {e}")

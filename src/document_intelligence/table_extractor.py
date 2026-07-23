@@ -53,7 +53,7 @@ class TableExtractor:
                         tables.append(ExtractedTable(page_number=idx, headers=headers, rows=rows))
         except ImportError:
             logger.warning("pdfplumber not installed. PDF table extraction skipped.")
-        except Exception as e:
+        except (OSError, ValueError, csv.Error) as e:
             logger.error(f"Failed PDF table extraction for {file_path}: {e}")
         return tables
 
@@ -69,7 +69,7 @@ class TableExtractor:
                     headers = [str(c).strip() for c in all_rows[0]]
                     rows = [[str(cell).strip() for cell in r] for r in all_rows[1:]]
                     tables.append(ExtractedTable(page_number=1, headers=headers, rows=rows))
-        except Exception as e:
+        except (OSError, ValueError, csv.Error) as e:
             logger.error(f"Failed CSV table extraction for {file_path}: {e}")
         return tables
 
@@ -88,7 +88,7 @@ class TableExtractor:
                 tables.append(ExtractedTable(page_number=idx, headers=headers, rows=rows))
         except ImportError:
             logger.warning("pandas / openpyxl not installed. Excel table extraction skipped.")
-        except Exception as e:
+        except (OSError, ValueError, csv.Error) as e:
             logger.error(f"Failed Excel table extraction for {file_path}: {e}")
         return tables
 

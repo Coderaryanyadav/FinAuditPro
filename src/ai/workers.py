@@ -34,7 +34,7 @@ class AICopilotWorker(QRunnable):
         """Execute the function and emit the appropriate signals."""
         try:
             result = self.fn(*self.args, **self.kwargs)
-        except Exception as e:
+        except (ConnectionError, TimeoutError, OSError, RuntimeError) as e:
             traceback.print_exc()
             self.signals.error.emit((e, traceback.format_exc()))
         else:
@@ -63,6 +63,6 @@ class OllamaWorker(QThread):
             )
             self.chunk_received.emit(response)
             self.finished.emit()
-        except Exception as e:
+        except (ConnectionError, TimeoutError, OSError, RuntimeError) as e:
             traceback.print_exc()
             self.error.emit(f"{str(e)}\n{traceback.format_exc()}")

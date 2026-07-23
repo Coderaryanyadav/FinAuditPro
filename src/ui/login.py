@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                              QLineEdit, QPushButton, QCheckBox, QFrame)
 from PySide6.QtCore import Qt, Signal, QTimer
+from sqlalchemy.exc import SQLAlchemyError
 
 class LoginWindow(QWidget):
     login_successful = Signal()
@@ -154,7 +155,7 @@ class LoginWindow(QWidget):
             auth_service = AuthenticationService(user_repo)
             auth_service.login(email, password)
             self.auth_success()
-        except Exception as e:
+        except (SQLAlchemyError, ValueError) as e:
             from PySide6.QtWidgets import QMessageBox
             self.login_btn.setText("Sign In")
             self.login_btn.setEnabled(True)

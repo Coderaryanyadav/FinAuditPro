@@ -10,6 +10,7 @@ from PySide6.QtCore import Qt
 from database.database import SessionLocal
 from database.models import AuditProject, Finding, Client
 from .styles import apply_shadow
+from sqlalchemy.exc import SQLAlchemyError
 
 class ComplianceWidget(QWidget):
     def __init__(self):
@@ -120,7 +121,7 @@ class ComplianceWidget(QWidget):
                 tasks = cs.get_tasks(active_id)
                 if tasks:
                     completed_count = sum(1 for t in tasks if t.is_completed)
-            except Exception:
+            except (SQLAlchemyError, ValueError):
                 pass
         else:
             findings = self.session.query(Finding).all()

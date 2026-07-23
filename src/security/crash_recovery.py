@@ -55,7 +55,7 @@ class CrashRecoveryManager:
                 json.dump(state.to_dict(), f, indent=2)
             logger.debug(f"Autosaved session state to {self.state_file_path}")
             return True
-        except Exception as e:
+        except (OSError, IOError, RuntimeError) as e:
             logger.error(f"Failed to autosave session state: {e}")
             return False
 
@@ -70,7 +70,7 @@ class CrashRecoveryManager:
             state = SessionState.from_dict(data)
             logger.info(f"Recovered crashed session for user {state.user_email} at screen index {state.active_screen_index}")
             return state
-        except Exception as e:
+        except (OSError, IOError, RuntimeError) as e:
             logger.error(f"Failed to recover session state: {e}")
             return None
 
@@ -79,5 +79,5 @@ class CrashRecoveryManager:
         if os.path.exists(self.state_file_path):
             try:
                 os.remove(self.state_file_path)
-            except Exception as e:
+            except (OSError, IOError, RuntimeError) as e:
                 logger.warning(f"Could not remove autosave state file: {e}")

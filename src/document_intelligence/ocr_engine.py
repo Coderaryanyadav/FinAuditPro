@@ -53,7 +53,7 @@ class OCREngine:
             import paddleocr  # noqa: F401
             cls._ocr_status_cache = (True, "PaddleOCR Engine Active")
             return cls._ocr_status_cache
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             reasons.append(f"PaddleOCR disabled: {e}")
 
         # Check Tesseract / PyTesseract
@@ -61,7 +61,7 @@ class OCREngine:
             import pytesseract  # noqa: F401
             cls._ocr_status_cache = (True, "Tesseract OCR Engine Active")
             return cls._ocr_status_cache
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             reasons.append(f"Tesseract disabled: {e}")
 
         # Check EasyOCR
@@ -69,7 +69,7 @@ class OCREngine:
             import easyocr  # noqa: F401
             cls._ocr_status_cache = (True, "EasyOCR Engine Active")
             return cls._ocr_status_cache
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             reasons.append(f"EasyOCR disabled: {e}")
 
         msg = "OCR Engine Unavailable - Digital PDF & Document Parser Active (" + "; ".join(reasons) + ")"
@@ -126,7 +126,7 @@ class OCREngine:
                     provider_used="PyPDF Native Parser",
                     overall_confidence=overall_conf
                 )
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.warning(f"Native PyPDF extraction failed for {file_path}: {e}")
 
         return None
@@ -151,7 +151,7 @@ class OCREngine:
                     provider_used="Tesseract OCR",
                     overall_confidence=avg_conf
                 )
-            except Exception as e:
+            except (OSError, ValueError, RuntimeError) as e:
                 logger.warning(f"OCR execution failed: {e}")
 
         # Fallback to direct file parsing for text/CSV/MD files
@@ -166,7 +166,7 @@ class OCREngine:
                         provider_used="Direct File Parser",
                         overall_confidence=f_conf
                     )
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.warning(f"Direct file parsing fallback encountered exception: {e}")
 
         return OCRResult(

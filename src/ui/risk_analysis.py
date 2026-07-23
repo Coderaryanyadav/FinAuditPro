@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
 from PySide6.QtCore import Qt
 from database.database import SessionLocal
 from database.models import Finding, AuditProject
+from sqlalchemy.exc import SQLAlchemyError
 
 def create_risk_card(title, count, bg_color, text_color):
     card = QFrame()
@@ -115,7 +116,7 @@ class RiskAnalysisWidget(QWidget):
                 from services.risk_service import RiskService
                 from database.repositories.risk_repo import RiskRepository
                 rs = RiskService(RiskRepository(self.session))
-            except Exception:
+            except (SQLAlchemyError, ValueError):
                 pass
             findings = self.session.query(Finding).filter_by(audit_id=active_id).all()
         else:

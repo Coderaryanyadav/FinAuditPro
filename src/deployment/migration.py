@@ -6,6 +6,7 @@ Applies automatic SQLite database schema migrations and user configuration upgra
 import sqlite3
 import os
 import logging
+from sqlalchemy.exc import SQLAlchemyError
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +80,6 @@ class DatabaseMigrator:
             con.commit()
             con.close()
             return True
-        except Exception as e:
+        except (SQLAlchemyError, OSError) as e:
             logger.error(f"Database migration failed: {e}")
             return False

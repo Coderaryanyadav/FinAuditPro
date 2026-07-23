@@ -22,6 +22,7 @@ from workflow.workflow_events import WorkflowEventManager, EventType, WorkflowEv
 from workflow.workflow_state import AuditStage, AuditStatus
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QPieSeries
 from .styles import apply_shadow
+from sqlalchemy.exc import SQLAlchemyError
 
 def create_icon_frame(color_bg, color_fg, text):
     lbl = QLabel(text)
@@ -473,7 +474,7 @@ class DashboardWindow(QWidget):
             pie_layout.addWidget(pie_view)
             apply_shadow(pie_frame, blur=15, dy=3, alpha=15)
             mid_layout.addWidget(pie_frame, 3)
-        except Exception as e:
+        except (SQLAlchemyError, ValueError, RuntimeError) as e:
             # Fallback if QtCharts is not available
             import logging
             logging.getLogger(__name__).warning(f"Chart skipped: {e}")
@@ -525,7 +526,7 @@ class DashboardWindow(QWidget):
         def safe_load(widget_cls, title):
             try:
                 return widget_cls()
-            except Exception as e:
+            except (SQLAlchemyError, ValueError, RuntimeError) as e:
                 return PlaceholderWidget(f"Unable to load {title}: {e}")
 
         # 0: Dashboard
@@ -612,7 +613,7 @@ class DashboardWindow(QWidget):
                 self.workflow_manager.initialize_engagement(engagement_id=proj.id, client_id=c.id, financial_year=proj.financial_year or "2025-26")
                 if hasattr(self, 'ai_page') and self.ai_page is not None:
                     self.ai_page.active_engagement_id = proj.id
-            except Exception as e:
+            except (SQLAlchemyError, ValueError, RuntimeError) as e:
                 import logging
                 logging.getLogger(__name__).warning(f"Startup engagement initialization warning: {e}")
 
@@ -648,7 +649,7 @@ class DashboardWindow(QWidget):
                 if hasattr(self, 'ai_page') and self.ai_page is not None:
                     self.ai_page.active_engagement_id = proj.id
                 self.refresh_workflow_ui()
-        except Exception as e:
+        except (SQLAlchemyError, ValueError, RuntimeError) as e:
             import logging
             logging.getLogger(__name__).warning(f"Engagement change error: {e}")
 
@@ -667,7 +668,7 @@ class DashboardWindow(QWidget):
                     calc_pct = eng_service.calculate_progress(eng_id)
                     if calc_pct > 0:
                         pct = int(calc_pct)
-                except Exception:
+                except (SQLAlchemyError, ValueError, RuntimeError):
                     pass
 
             self.lbl_wf_stage.setText(f"Stage: {stage}")
@@ -693,7 +694,7 @@ class DashboardWindow(QWidget):
                         base_text = self.ai_findings.text()
                         if "Executive Forecast Intelligence" not in base_text:
                             self.ai_findings.setText(base_text + forecast_msg)
-            except Exception as e:
+            except (SQLAlchemyError, ValueError, RuntimeError) as e:
                 import logging
                 logging.getLogger(__name__).warning(f"NotificationService / AnalyticsEngine fetch exception: {e}")
 
@@ -712,7 +713,7 @@ class DashboardWindow(QWidget):
                 idx = stages.index(current.current_stage)
                 if idx + 1 < len(stages):
                     self.workflow_manager.advance_current_stage(stages[idx + 1], {}, "DashboardUser")
-        except Exception as e:
+        except (SQLAlchemyError, ValueError, RuntimeError) as e:
             import logging
             logging.getLogger(__name__).warning(f"Advance stage error: {e}")
         self.refresh_workflow_ui()

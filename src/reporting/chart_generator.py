@@ -43,7 +43,7 @@ class ReportChartGenerator:
             plt.savefig(output_path, transparent=True)
             plt.close(fig)
             return output_path
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.error(f"Failed to generate risk distribution chart: {e}")
             return ""
 
@@ -67,6 +67,6 @@ class ReportChartGenerator:
             plt.savefig(output_path, transparent=True)
             plt.close(fig)
             return output_path
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.error(f"Failed to generate compliance chart: {e}")
             return ""

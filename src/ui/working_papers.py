@@ -5,6 +5,7 @@ from PySide6.QtCore import Qt
 from database.database import SessionLocal
 from database.models import Client, AuditProject, WorkingPaper
 from ai.workers import OllamaWorker
+from sqlalchemy.exc import SQLAlchemyError
 
 class WorkingPaperWidget(QWidget):
     def __init__(self):
@@ -119,7 +120,7 @@ class WorkingPaperWidget(QWidget):
             from database.repositories.working_paper_repo import WorkingPaperRepository
             wps_service = WorkingPaperService(WorkingPaperRepository(self.session))
             indices = wps_service.get_indices(proj_id)
-        except Exception:
+        except (SQLAlchemyError, ValueError):
             pass
 
         wp = self.session.query(WorkingPaper).filter_by(audit_id=proj_id).first()

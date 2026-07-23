@@ -2,6 +2,7 @@ from typing import List, Optional
 from core.exceptions import ValidationError, EntityNotFoundError
 from database.repositories.engagement_repo import EngagementRepository
 from database.models import Engagement
+from sqlalchemy.exc import SQLAlchemyError
 
 class EngagementService:
     """
@@ -81,7 +82,7 @@ class EngagementService:
             elif engagement.status == 'Reporting':
                 return 85.0
             return 0.0
-        except Exception as e:
+        except (SQLAlchemyError, ValueError) as e:
             import logging
             logging.getLogger(__name__).warning(f"Error calculating progress for engagement {engagement_id}: {e}")
             return 0.0

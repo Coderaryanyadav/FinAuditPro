@@ -27,7 +27,7 @@ class RuleExecutor:
             result = rule.evaluate(data, context)
             logger.debug(f"Evaluated rule {rule.rule_id} in {round(time.time() - start_time, 4)}s -> Passed: {result.passed}")
             return result
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Rule execution error for {rule.rule_id}: {e}", exc_info=True)
             return RuleResult(
                 rule_id=rule.rule_id,

@@ -69,7 +69,7 @@ class WorkflowEventManager:
         for callback in callbacks:
             try:
                 callback(event)
-            except Exception as e:
+            except (ValueError, RuntimeError) as e:
                 logger.error(f"Error in event listener for {event.event_type.value}: {e}", exc_info=True)
 
     def get_history(self, engagement_id: int = None) -> List[WorkflowEvent]:

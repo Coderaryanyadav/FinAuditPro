@@ -78,7 +78,7 @@ class DocumentParser:
                 import docx
                 doc = docx.Document(file_path)
                 raw_text = "\n".join([p.text for p in doc.paragraphs if p.text])
-            except Exception as e:
+            except (OSError, ValueError, RuntimeError) as e:
                 logger.error(f"Docx parsing failed for {file_path}: {e}")
                 raw_text = ""
 

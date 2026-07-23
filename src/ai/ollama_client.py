@@ -33,7 +33,7 @@ class OllamaClient:
                 if models:
                     logger.info(f"Selected first available Ollama model: {models[0]}")
                     return models[0]
-        except Exception as e:
+        except (ConnectionError, TimeoutError, OSError, ValueError) as e:
             logger.warning(f"Failed to query Ollama models: {e}")
         return "llama3.2"
 
@@ -87,5 +87,5 @@ class OllamaClient:
                     if line:
                         chunk = json.loads(line)
                         yield chunk.get("response", "")
-        except Exception as e:
+        except (ConnectionError, TimeoutError, OSError, ValueError) as e:
             raise OllamaClientError(f"Streaming failed: {e}")

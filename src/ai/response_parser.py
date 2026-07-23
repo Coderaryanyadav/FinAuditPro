@@ -49,5 +49,5 @@ class ResponseParser:
             return validated.dict()
         except json.JSONDecodeError as e:
             raise JSONParseError(f"Failed to parse LLM response into JSON. Raw: {raw_response[:100]}...") from e
-        except Exception as e: # Catch Pydantic validation errors
+        except (ValueError, KeyError, TypeError) as e: # Catch Pydantic validation errors
             raise JSONParseError(f"LLM Response failed schema validation: {e}")

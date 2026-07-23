@@ -24,7 +24,7 @@ class EmbeddingService:
             from sentence_transformers import SentenceTransformer
             self._model = SentenceTransformer(self.model_name)
             logger.info(f"Loaded SentenceTransformer model: {self.model_name}")
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.error(f"SentenceTransformer not available ({e}). Vector embedding capabilities disabled.")
 
     def generate_embedding(self, text: str) -> List[float]:
@@ -33,7 +33,7 @@ class EmbeddingService:
             try:
                 embedding = self._model.encode(text).tolist()
                 return embedding
-            except Exception as e:
+            except (OSError, ValueError, RuntimeError) as e:
                 logger.error(f"Embedding encoding failed: {e}")
                 raise RuntimeError(f"Embedding encoding failed: {e}")
 
@@ -45,7 +45,7 @@ class EmbeddingService:
             try:
                 embeddings = self._model.encode(texts).tolist()
                 return embeddings
-            except Exception as e:
+            except (OSError, ValueError, RuntimeError) as e:
                 logger.error(f"Batch embedding failed: {e}")
                 raise RuntimeError(f"Batch embedding failed: {e}")
 

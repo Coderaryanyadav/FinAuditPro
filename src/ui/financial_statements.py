@@ -6,6 +6,7 @@ Renders Balance Sheet, Profit & Loss Statement, and Cash Flow ledgers.
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                                QPushButton, QFrame, QTableWidget, QTableWidgetItem, QHeaderView, QTabWidget)
 from PySide6.QtCore import Qt
+from sqlalchemy.exc import SQLAlchemyError
 
 class FinancialStatementsWidget(QWidget):
     """Renders financial statement ledger tables for audit verification."""
@@ -63,7 +64,7 @@ class FinancialStatementsWidget(QWidget):
             docs = session.query(Document).all()
             session.close()
             table.setRowCount(0)
-        except Exception:
+        except (SQLAlchemyError, ValueError):
             table.setRowCount(0)
 
         w_layout.addWidget(table)

@@ -16,6 +16,8 @@ except ImportError:
 import logging
 
 logger = logging.getLogger(__name__)
+if requests is None:
+    logger.warning("requests library not installed. Network diagnostics disabled.")
 
 @dataclass
 class DiagnosticReport:
@@ -66,7 +68,7 @@ class SystemDiagnostics:
             con = sqlite3.connect(":memory:")
             con.close()
             sqlite_status = "Healthy (SQLite3)"
-        except Exception as e:
+        except (OSError, RuntimeError) as e:
             sqlite_status = f"Error: {e}"
             issues.append(f"SQLite database engine error: {e}")
 
@@ -79,7 +81,7 @@ class SystemDiagnostics:
                 else:
                     ollama_status = f"Ollama HTTP {res.status_code}"
                     issues.append("Ollama API responded with non-200 code.")
-            except Exception:
+            except (OSError, RuntimeError):
                 ollama_status = "Offline (Ollama service not running on localhost:11434)"
                 issues.append("Ollama daemon is offline. Run 'ollama serve' for local AI functionality.")
         else:

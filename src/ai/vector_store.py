@@ -33,14 +33,14 @@ class VectorStore:
             from document_intelligence.embedding_service import EmbeddingService
             self._embedding_service = EmbeddingService()
             self._dim = self._embedding_service.EMBEDDING_DIM
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.warning(f"EmbeddingService initialization in VectorStore: {e}")
 
         try:
             import faiss
             self._index = faiss.IndexFlatL2(self._dim)
             logger.info("Initialized FAISS IndexFlatL2 for VectorStore.")
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.warning(f"FAISS not available ({e}). Falling back to memory search.")
             self._index = None
 
@@ -58,7 +58,7 @@ class VectorStore:
         if embeddings is None and self._embedding_service:
             try:
                 embeddings = self._embedding_service.generate_embeddings_batch(texts)
-            except Exception as e:
+            except (OSError, ValueError, RuntimeError) as e:
                 logger.warning(f"Embedding batch generation fallback: {e}")
 
         if self._index is not None and embeddings:
@@ -66,7 +66,7 @@ class VectorStore:
                 import numpy as np
                 vecs = np.array(embeddings, dtype=np.float32)
                 self._index.add(vecs)
-            except Exception as e:
+            except (OSError, ValueError, RuntimeError) as e:
                 logger.warning(f"Failed to add vectors to FAISS index: {e}")
 
         for i, meta in enumerate(metadatas):
@@ -96,7 +96,7 @@ class VectorStore:
                         item["score"] = float(dist)
                         results.append(item)
                 return results
-            except Exception as e:
+            except (OSError, ValueError, RuntimeError) as e:
                 logger.warning(f"FAISS search failed ({e}). Falling back to keyword matching.")
 
         # Fallback keyword match search

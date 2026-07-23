@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QFont
 from ai.workers import OllamaWorker
+from sqlalchemy.exc import SQLAlchemyError
 
 def create_styled_button(text, bg_color, text_color, hover_color=None):
     btn = QPushButton(text)
@@ -246,7 +247,7 @@ class AIAuditWidget(QWidget):
             else:
                 self.doc_content.setText("<b>NO ACTIVE DOCUMENT</b><br/><br/>Upload financial documents to inspect OCR text and line items.")
             session.close()
-        except Exception as e:
+        except (SQLAlchemyError, ConnectionError, ValueError, RuntimeError) as e:
             self.doc_content.setText(f"Document load error: {e}")
 
     def load_database_findings(self):
@@ -288,7 +289,7 @@ class AIAuditWidget(QWidget):
                     "#b91c1c" if sev.upper() in ["HIGH", "CRITICAL"] else "#b45309"
                 )
                 self.f_layout.addWidget(card)
-        except Exception as e:
+        except (SQLAlchemyError, ConnectionError, ValueError, RuntimeError) as e:
             lbl = QLabel(f"Findings load status: {e}")
             lbl.setStyleSheet("color: #64748b; font-size: 11px;")
             self.f_layout.addWidget(lbl)
@@ -331,7 +332,7 @@ class AIAuditWidget(QWidget):
             self.worker.signals.result.connect(self.on_copilot_result)
             self.worker.signals.error.connect(self.on_copilot_error)
             QThreadPool.globalInstance().start(self.worker)
-        except Exception as e:
+        except (SQLAlchemyError, ConnectionError, ValueError, RuntimeError) as e:
             import logging
             logging.getLogger(__name__).exception("Copilot Error")
             if self.current_ai_bubble:

@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional
 import time
 import logging
+from sqlalchemy.exc import SQLAlchemyError
 
 from .document_validator import DocumentValidator
 from .document_hash import DocumentHasher
@@ -59,7 +60,7 @@ class DocumentPipeline:
             if progress_callback:
                 try:
                     progress_callback(stage_name, percent)
-                except Exception as e:
+                except (SQLAlchemyError, OSError, ValueError) as e:
                     logger.warning(f"Progress callback error: {e}")
 
         # 1. Validation
@@ -134,7 +135,7 @@ class DocumentPipeline:
                             ai_confidence_score=conf_score
                         )
                         session.add(finding)
-        except Exception as e:
+        except (SQLAlchemyError, OSError, ValueError) as e:
             logger.warning(f"Rule Engine evaluation warning: {e}")
 
         # 6. Chunking
@@ -175,7 +176,7 @@ class DocumentPipeline:
                         session.add(doc)
                     session.flush()
                     doc_id = doc.id
-            except Exception as e:
+            except (SQLAlchemyError, OSError, ValueError) as e:
                 logger.warning(f"Database document lookup warning: {e}")
                 import time
                 doc_id = int(time.time())

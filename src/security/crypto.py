@@ -51,7 +51,7 @@ class AESCryptoEngine:
         try:
             from database.database import DATA_DIR
             data_dir = DATA_DIR
-        except Exception:
+        except (OSError, ValueError):
             data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
             os.makedirs(data_dir, exist_ok=True)
         

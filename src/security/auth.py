@@ -44,7 +44,7 @@ class PasswordHasher:
             salt = bytes.fromhex(salt_hex)
             computed_hash = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, cls.ITERATIONS)
             return computed_hash.hex() == hash_hex
-        except Exception:
+        except (ValueError, RuntimeError):
             return False
 
 

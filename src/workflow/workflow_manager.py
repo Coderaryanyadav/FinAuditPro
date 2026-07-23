@@ -16,6 +16,7 @@ from .workflow_exceptions import WorkflowStateCorruptedError
 logger = logging.getLogger(__name__)
 
 import threading
+from sqlalchemy.exc import SQLAlchemyError
 
 class WorkflowManager:
     """
@@ -73,7 +74,7 @@ class WorkflowManager:
                         completion_pct = WorkflowProgressTracker.calculate_completion(s)
                         break
             session.close()
-        except Exception as e:
+        except (SQLAlchemyError, ValueError, RuntimeError) as e:
             logger.warning(f"Failed to query DB for workflow state recovery: {e}")
 
         state = WorkflowState(
@@ -105,7 +106,7 @@ class WorkflowManager:
                 self._active_state = state
                 logger.info(f"Recovered Workflow State for Engagement {engagement_id} at stage {state.current_stage.value}")
                 return state
-            except Exception as e:
+            except (SQLAlchemyError, ValueError, RuntimeError) as e:
                 raise WorkflowStateCorruptedError(f"Failed to recover workflow state for engagement {engagement_id}: {e}")
 
         raise WorkflowStateCorruptedError(f"No state found or cached for engagement ID {engagement_id}")
@@ -140,7 +141,7 @@ class WorkflowManager:
                 proj.status = updated_state.current_stage.value
             session.commit()
             session.close()
-        except Exception as e:
+        except (SQLAlchemyError, ValueError, RuntimeError) as e:
             logger.warning(f"Failed to persist workflow stage update to DB: {e}")
 
         return updated_state

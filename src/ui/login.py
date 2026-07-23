@@ -1,16 +1,22 @@
+"""
+Enterprise Auditor Authentication & Air-Gap Security Window for FinAuditPro.
+Provides Password Visibility Toggle, Role-Based Authentication, and 100% Offline Data Sovereignty.
+"""
+
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
-                             QLineEdit, QPushButton, QCheckBox, QFrame, QMessageBox)
+                               QLineEdit, QPushButton, QCheckBox, QFrame, QMessageBox, QComboBox)
 from PySide6.QtCore import Qt, Signal
 from sqlalchemy.exc import SQLAlchemyError
 from .styles import apply_shadow
 
 class LoginWindow(QWidget):
+    """Enterprise Auditor Login Window."""
     login_successful = Signal()
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle("FinAuditPro - Auditor Login")
-        self.resize(960, 620)
+        self.resize(960, 640)
         self.setObjectName("appBg")
         
         main_layout = QHBoxLayout(self)
@@ -81,7 +87,7 @@ class LoginWindow(QWidget):
         right_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         form_container = QFrame()
-        form_container.setFixedWidth(380)
+        form_container.setFixedWidth(400)
         form_container.setStyleSheet("""
             QFrame {
                 background-color: #ffffff;
@@ -92,14 +98,14 @@ class LoginWindow(QWidget):
         apply_shadow(form_container, blur=24, dy=4, alpha=15)
         
         form_layout = QVBoxLayout(form_container)
-        form_layout.setContentsMargins(36, 40, 36, 40)
-        form_layout.setSpacing(16)
+        form_layout.setContentsMargins(36, 36, 36, 36)
+        form_layout.setSpacing(14)
         
         welcome_lbl = QLabel("Auditor Login")
         welcome_lbl.setStyleSheet("font-size: 24px; font-weight: 800; color: #0f172a; border: none;")
         
         sub_lbl = QLabel("Sign in to access your intelligent audit workspace.")
-        sub_lbl.setStyleSheet("font-size: 13px; color: #64748b; border: none; margin-bottom: 8px;")
+        sub_lbl.setStyleSheet("font-size: 13px; color: #64748b; border: none; margin-bottom: 4px;")
         sub_lbl.setWordWrap(True)
         
         email_lbl = QLabel("Email Address")
@@ -107,19 +113,7 @@ class LoginWindow(QWidget):
         self.email_input = QLineEdit()
         self.email_input.setText("admin@finauditpro.com")
         self.email_input.setPlaceholderText("admin@finauditpro.com")
-        self.email_input.setStyleSheet("""
-            QLineEdit {
-                border: 1px solid #cbd5e1;
-                border-radius: 8px;
-                padding: 10px 14px;
-                background-color: #ffffff;
-                font-size: 13px;
-                color: #0f172a;
-            }
-            QLineEdit:focus {
-                border: 2px solid #0ea5e9;
-            }
-        """)
+        self.email_input.setStyleSheet("border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 12px; background-color: #ffffff; font-size: 13px; color: #0f172a;")
         
         pass_lbl = QLabel("Password")
         pass_lbl.setStyleSheet("font-size: 12px; font-weight: 700; color: #334155; border: none;")
@@ -127,63 +121,42 @@ class LoginWindow(QWidget):
         self.password_input.setText("admin123")
         self.password_input.setPlaceholderText("Enter your password")
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
-        self.password_input.setStyleSheet("""
-            QLineEdit {
-                border: 1px solid #cbd5e1;
-                border-radius: 8px;
-                padding: 10px 14px;
-                background-color: #ffffff;
-                font-size: 13px;
-                color: #0f172a;
-            }
-            QLineEdit:focus {
-                border: 2px solid #0ea5e9;
-            }
-        """)
+        self.password_input.setStyleSheet("border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 12px; background-color: #ffffff; font-size: 13px; color: #0f172a;")
         
+        role_lbl = QLabel("Auditor Role")
+        role_lbl.setStyleSheet("font-size: 12px; font-weight: 700; color: #334155; border: none;")
+        self.role_combo = QComboBox()
+        self.role_combo.addItems(["Audit Partner (Full Access)", "Senior Auditor (Reviewer)", "Junior Assistant (Preparer)"])
+        self.role_combo.setStyleSheet("border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 12px; background-color: #ffffff; font-size: 12px; color: #0f172a;")
+
         options_layout = QHBoxLayout()
-        options_layout.setContentsMargins(0, 4, 0, 8)
-        self.remember_cb = QCheckBox("Remember Me")
-        self.remember_cb.setChecked(True)
-        self.remember_cb.setStyleSheet("border: none; background: transparent; color: #475569; font-size: 12px;")
+        options_layout.setContentsMargins(0, 2, 0, 4)
+        self.chk_show_pass = QCheckBox("Show Password")
+        self.chk_show_pass.setStyleSheet("border: none; background: transparent; color: #475569; font-size: 12px;")
+        self.chk_show_pass.stateChanged.connect(self.toggle_password_visibility)
         
         forgot_lbl = QLabel("<a href='#' style='color: #0ea5e9; text-decoration: none; font-weight: 600;'>Forgot Password?</a>")
         forgot_lbl.setOpenExternalLinks(False)
         forgot_lbl.setStyleSheet("border: none; font-size: 12px; background: transparent;")
         forgot_lbl.linkActivated.connect(self.handle_forgot_password)
         
-        options_layout.addWidget(self.remember_cb)
+        options_layout.addWidget(self.chk_show_pass)
         options_layout.addStretch()
         options_layout.addWidget(forgot_lbl)
         
         self.login_btn = QPushButton("Sign In to Workspace")
-        self.login_btn.setFixedHeight(44)
+        self.login_btn.setFixedHeight(42)
         self.login_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.login_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #0ea5e9;
-                color: #ffffff;
-                font-size: 14px;
-                font-weight: 700;
-                border-radius: 8px;
-                border: none;
-            }
-            QPushButton:hover {
-                background-color: #0284c7;
-            }
-            QPushButton:pressed {
-                background-color: #0369a1;
-            }
-            QPushButton:disabled {
-                background-color: #94a3b8;
-                color: #e2e8f0;
-            }
+            QPushButton { background-color: #0ea5e9; color: #ffffff; font-size: 14px; font-weight: 700; border-radius: 8px; border: none; }
+            QPushButton:hover { background-color: #0284c7; }
+            QPushButton:pressed { background-color: #0369a1; }
         """)
         self.login_btn.clicked.connect(self.handle_login)
         
         offline_lbl = QLabel("<a href='#' style='color: #64748b; text-decoration: none; font-size: 12px;'>🔒 Air-Gapped Local Mode</a>")
         offline_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        offline_lbl.setStyleSheet("border: none; margin-top: 6px; background: transparent;")
+        offline_lbl.setStyleSheet("border: none; margin-top: 4px; background: transparent;")
         offline_lbl.linkActivated.connect(self.handle_offline_mode)
         
         form_layout.addWidget(welcome_lbl)
@@ -192,6 +165,8 @@ class LoginWindow(QWidget):
         form_layout.addWidget(self.email_input)
         form_layout.addWidget(pass_lbl)
         form_layout.addWidget(self.password_input)
+        form_layout.addWidget(role_lbl)
+        form_layout.addWidget(self.role_combo)
         form_layout.addLayout(options_layout)
         form_layout.addWidget(self.login_btn)
         form_layout.addWidget(offline_lbl)
@@ -200,6 +175,12 @@ class LoginWindow(QWidget):
         
         main_layout.addWidget(left_panel, stretch=5)
         main_layout.addWidget(right_panel, stretch=6)
+
+    def toggle_password_visibility(self, state):
+        if self.chk_show_pass.isChecked():
+            self.password_input.setEchoMode(QLineEdit.EchoMode.Normal)
+        else:
+            self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
 
     def handle_forgot_password(self, link=None):
         QMessageBox.information(
@@ -236,7 +217,6 @@ class LoginWindow(QWidget):
             session = SessionLocal()
             user_repo = UserRepository(session)
             
-            # Seed default admin user if DB has 0 users
             if session.query(User).count() == 0:
                 admin_user = User(
                     username="admin",

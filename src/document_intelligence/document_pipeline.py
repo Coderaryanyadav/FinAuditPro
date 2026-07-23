@@ -178,7 +178,6 @@ class DocumentPipeline:
                     doc_id = doc.id
             except (SQLAlchemyError, OSError, ValueError) as e:
                 logger.warning(f"Database document lookup warning: {e}")
-                import time
                 doc_id = int(time.time())
         else:
             doc_id = document_id

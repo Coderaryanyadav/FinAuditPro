@@ -1,28 +1,30 @@
 """
 Enterprise Dashboard Module for FinAuditPro.
-Redesigned with FAANG-grade Desktop UI/UX, QtCharts Analytics, Reusable Component Architecture,
-Interactive Metric Cards, RAG Risk Summary, and Custom Multi-Segment Risk Distribution Engine.
+Redesigned with Model-View Architecture (QAbstractTableModel + QTableView + QStyledItemDelegate),
+Real-Time Signal/Slot Automatic Data Refresh, QtCharts QSplineSeries & QPieSeries,
+and RAG AI Executive Summary Card.
 """
 
 import os
+from typing import List, Any
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                                QPushButton, QFrame, QScrollArea, QGridLayout, 
-                               QTableWidget, QTableWidgetItem, QHeaderView, QStackedWidget, QLineEdit, QComboBox, QProgressBar, QMenu)
-from PySide6.QtCore import Qt, QSize, Slot, QPropertyAnimation, QEasingCurve, QRect, QMargins
-from PySide6.QtGui import QPainter, QColor, QFont, QIcon, QAction, QBrush, QLinearGradient, QPen
-from PySide6.QtCharts import QChart, QChartView, QSplineSeries, QPieSeries, QPieSlice, QValueAxis, QCategoryAxis
+                               QTableView, QHeaderView, QStackedWidget, QLineEdit, 
+                               QComboBox, QProgressBar, QMenu, QStyledItemDelegate, QStyleOptionViewItem)
+from PySide6.QtCore import Qt, QSize, Slot, QAbstractTableModel, QModelIndex, QRect, Signal, QMargins
+from PySide6.QtGui import QPainter, QColor, QFont, QIcon, QBrush, QPen
+from PySide6.QtCharts import QChart, QChartView, QSplineSeries, QPieSeries, QValueAxis, QCategoryAxis
 
 from database.database import SessionLocal
 from database.models import Client, AuditProject, Finding
 from services.client_service import ClientService
 from services.dashboard_service import DashboardService
 from workflow.workflow_manager import WorkflowManager
-from workflow.workflow_events import WorkflowEventManager, EventType, WorkflowEvent
-from workflow.workflow_state import AuditStage, AuditStatus
+from workflow.workflow_events import WorkflowEventManager
 from .styles import apply_shadow, EmptyStateWidget, LoadingStateWidget, ErrorStateWidget
 from sqlalchemy.exc import SQLAlchemyError
 
-# Importing pages for StackedWidget
+# Sub-module imports for QStackedWidget pages
 from .clients import ClientManagementWidget
 from .documents import DocumentUploadWidget
 from .ai_analysis import AIAuditWidget
@@ -36,17 +38,129 @@ from .history import AuditHistoryWidget
 from .financial_statements import FinancialStatementsWidget
 
 # ==============================================================================
-# REUSABLE ENTERPRISE UI COMPONENTS
+# MODEL-VIEW ARCHITECTURE (QAbstractTableModel + QStyledItemDelegate)
+# ==============================================================================
+
+class AuditProjectsTableModel(QAbstractTableModel):
+    """Real-time SQLAlchemy-backed Table Model for Audit Projects."""
+    
+    HEADERS = ["CLIENT NAME", "AUDIT TYPE", "STATUS", "RISK LEVEL", "LAST UPDATED"]
+    
+    def __init__(self, projects: List[AuditProject] = None, parent=None):
+        super().__init__(parent)
+        self._projects = projects or []
+        self._client_cache = {}
+        self._load_client_cache()
+
+    def _load_client_cache(self):
+        session = SessionLocal()
+        try:
+            clients = session.query(Client).all()
+            self._client_cache = {c.id: c.name for c in clients}
+        finally:
+            session.close()
+
+    def rowCount(self, parent=QModelIndex()) -> int:
+        return len(self._projects)
+
+    def columnCount(self, parent=QModelIndex()) -> int:
+        return len(self.HEADERS)
+
+    def data(self, index: QModelIndex, role: int = Qt.ItemDataRole.DisplayRole) -> Any:
+        if not index.isValid() or not (0 <= index.row() < len(self._projects)):
+            return None
+
+        proj = self._projects[index.row()]
+        col = index.column()
+
+        if role == Qt.ItemDataRole.DisplayRole:
+            if col == 0:
+                client_name = self._client_cache.get(proj.client_id, f"Client #{proj.client_id}")
+                return f"🏢 {client_name}"
+            elif col == 1:
+                return f"Statutory Audit (FY {proj.financial_year or '2025-26'})"
+            elif col == 2:
+                return proj.status or "Active"
+            elif col == 3:
+                return proj.risk_level or "Low"
+            elif col == 4:
+                return proj.created_at.strftime("%d-%b-%Y %H:%M") if hasattr(proj, 'created_at') and proj.created_at else "Today"
+
+        elif role == Qt.ItemDataRole.UserRole:
+            return proj.id
+
+        elif role == Qt.ItemDataRole.TextAlignmentRole:
+            if col in (2, 3):
+                return int(Qt.AlignmentFlag.AlignCenter)
+            return int(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+
+        return None
+
+    def headerData(self, section: int, orientation: Qt.Orientation, role: int = Qt.ItemDataRole.DisplayRole) -> Any:
+        if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
+            return self.HEADERS[section]
+        return None
+
+    def update_projects(self, new_projects: List[AuditProject]):
+        self.beginResetModel()
+        self._load_client_cache()
+        self._projects = new_projects
+        self.endResetModel()
+
+class AuditStatusDelegate(QStyledItemDelegate):
+    """Custom Delegate to draw status pill badges and colored risk dots in QTableView."""
+    def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
+        col = index.column()
+        text = str(index.data(Qt.ItemDataRole.DisplayRole) or "")
+        
+        painter.save()
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        rect = option.rect
+        
+        if col == 2: # Status Pill
+            bg_color = QColor("#f0f9ff") if "Active" in text or "Execution" in text else QColor("#dcfce7") if "Completed" in text else QColor("#fef3c7")
+            text_color = QColor("#0284c7") if "Active" in text or "Execution" in text else QColor("#16a34a") if "Completed" in text else QColor("#d97706")
+            
+            pill_rect = rect.adjusted(12, 6, -12, -6)
+            painter.setBrush(QBrush(bg_color))
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.drawRoundedRect(pill_rect, 6, 6)
+            
+            painter.setPen(QPen(text_color))
+            painter.setFont(QFont("Inter", 9, QFont.Weight.Bold))
+            painter.drawText(pill_rect, Qt.AlignmentFlag.AlignCenter, text)
+
+        elif col == 3: # Risk Dot & Text
+            dot_color = QColor("#10b981") if "Low" in text else QColor("#f59e0b") if "Medium" in text else QColor("#ef4444")
+            
+            dot_x = rect.left() + 16
+            dot_y = rect.top() + (rect.height() // 2) - 4
+            painter.setBrush(QBrush(dot_color))
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.drawEllipse(dot_x, dot_y, 8, 8)
+            
+            text_rect = rect.adjusted(30, 0, 0, 0)
+            painter.setPen(QPen(QColor("#0f172a")))
+            painter.setFont(QFont("Inter", 9, QFont.Weight.Bold))
+            painter.drawText(text_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, text)
+            
+        else:
+            super().paint(painter, option, index)
+            
+        painter.restore()
+
+# ==============================================================================
+# REUSABLE ENTERPRISE WIDGET COMPONENTS
 # ==============================================================================
 
 class SidebarButton(QPushButton):
-    """Modern Enterprise Sidebar Button with active glow and smooth hover state."""
+    """Modern Enterprise Sidebar Button with active indicator tab."""
     def __init__(self, text, icon_str="", is_active=False, parent=None):
         super().__init__(parent)
         self.setObjectName("navButton")
         self.setFixedHeight(42)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.icon_str = icon_str
         self.setText(f"  {icon_str}   {text}" if icon_str else f"  {text}")
         self.set_active(is_active)
 
@@ -56,20 +170,13 @@ class SidebarButton(QPushButton):
         self.style().polish(self)
 
 class GlobalSearchWidget(QFrame):
-    """Global Desktop Search Bar with hotkey hint."""
+    """Global Desktop Search Bar with ⌘K hotkey badge."""
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedSize(360, 36)
         self.setStyleSheet("""
-            QFrame {
-                background-color: #f1f5f9;
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
-            }
-            QFrame:focus-within {
-                background-color: #ffffff;
-                border: 2px solid #0ea5e9;
-            }
+            QFrame { background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; }
+            QFrame:focus-within { background-color: #ffffff; border: 2px solid #0ea5e9; }
         """)
         layout = QHBoxLayout(self)
         layout.setContentsMargins(10, 0, 10, 0)
@@ -90,7 +197,7 @@ class GlobalSearchWidget(QFrame):
         layout.addWidget(shortcut_lbl)
 
 class MetricCard(QFrame):
-    """Enterprise KPI Metric Card with pill badge and subtle shadow."""
+    """Enterprise Metric KPI Card."""
     def __init__(self, title, value, subtitle, badge_bg, badge_fg, icon_str, parent=None):
         super().__init__(parent)
         self.setFixedHeight(115)
@@ -100,121 +207,112 @@ class MetricCard(QFrame):
         layout.setContentsMargins(16, 14, 16, 14)
         layout.setSpacing(6)
         
-        # Header Row
         h_layout = QHBoxLayout()
         h_layout.setContentsMargins(0, 0, 0, 0)
         
-        title_lbl = QLabel(title)
-        title_lbl.setStyleSheet("color: #64748b; font-size: 12px; font-weight: 700; border: none; letter-spacing: 0.2px;")
+        self.title_lbl = QLabel(title)
+        self.title_lbl.setStyleSheet("color: #64748b; font-size: 12px; font-weight: 700; border: none;")
         
-        icon_lbl = QLabel(icon_str)
-        icon_lbl.setFixedSize(30, 30)
-        icon_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        icon_lbl.setStyleSheet(f"background-color: {badge_bg}; color: {badge_fg}; border-radius: 8px; font-size: 13px; border: none;")
+        self.icon_lbl = QLabel(icon_str)
+        self.icon_lbl.setFixedSize(30, 30)
+        self.icon_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.icon_lbl.setStyleSheet(f"background-color: {badge_bg}; color: {badge_fg}; border-radius: 8px; font-size: 13px; border: none;")
         
-        h_layout.addWidget(title_lbl)
+        h_layout.addWidget(self.title_lbl)
         h_layout.addStretch()
-        h_layout.addWidget(icon_lbl)
+        h_layout.addWidget(self.icon_lbl)
         
-        # Value & Pill Badge Row
         val_layout = QHBoxLayout()
         val_layout.setContentsMargins(0, 0, 0, 0)
         val_layout.setSpacing(10)
         
-        val_lbl = QLabel(str(value))
-        val_lbl.setStyleSheet("color: #0f172a; font-size: 28px; font-weight: 800; border: none;")
+        self.val_lbl = QLabel(str(value))
+        self.val_lbl.setStyleSheet("color: #0f172a; font-size: 28px; font-weight: 800; border: none;")
         
-        badge_lbl = QLabel(subtitle)
-        badge_lbl.setStyleSheet(f"color: {badge_fg}; font-size: 10px; font-weight: 700; background-color: {badge_bg}; padding: 3px 8px; border-radius: 6px; border: none;")
+        self.badge_lbl = QLabel(subtitle)
+        self.badge_lbl.setStyleSheet(f"color: {badge_fg}; font-size: 10px; font-weight: 700; background-color: {badge_bg}; padding: 3px 8px; border-radius: 6px; border: none;")
         
-        val_layout.addWidget(val_lbl)
-        val_layout.addWidget(badge_lbl)
+        val_layout.addWidget(self.val_lbl)
+        val_layout.addWidget(self.badge_lbl)
         val_layout.addStretch()
         
         layout.addLayout(h_layout)
         layout.addLayout(val_layout)
         apply_shadow(self, blur=14, dy=3, alpha=12)
 
+    def update_value(self, value):
+        self.val_lbl.setText(str(value))
+
 class AIAuditSummaryCard(QFrame):
-    """Redesigned AI Audit Executive Summary Widget."""
+    """RAG AI Audit Executive Summary Card."""
     def __init__(self, risk_score: int, comp_score: int, findings: list, parent=None):
         super().__init__(parent)
         self.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;")
         
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 18, 20, 18)
-        layout.setSpacing(14)
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(20, 18, 20, 18)
+        self.layout.setSpacing(14)
         
-        # Header
         h_layout = QHBoxLayout()
         h_layout.setContentsMargins(0, 0, 0, 0)
         title_lbl = QLabel("⚡ AI Audit Summary")
         title_lbl.setStyleSheet("font-weight: 800; font-size: 15px; color: #0f172a; border: none;")
         h_layout.addWidget(title_lbl)
         h_layout.addStretch()
-        layout.addLayout(h_layout)
+        self.layout.addLayout(h_layout)
         
-        # Risk & Compliance Progress Bars
-        def create_bar(label_text, val_text, val_pct, bar_color):
-            w = QWidget()
-            l = QVBoxLayout(w)
-            l.setContentsMargins(0, 0, 0, 0)
-            l.setSpacing(4)
-            
-            top_h = QHBoxLayout()
-            t_lbl = QLabel(label_text)
-            t_lbl.setStyleSheet("font-size: 12px; color: #64748b; font-weight: 600; border: none;")
-            v_lbl = QLabel(val_text)
-            v_lbl.setStyleSheet(f"font-size: 12px; font-weight: 800; color: {bar_color}; border: none;")
-            top_h.addWidget(t_lbl)
-            top_h.addStretch()
-            top_h.addWidget(v_lbl)
-            l.addLayout(top_h)
-            
-            pbar = QProgressBar()
-            pbar.setFixedHeight(8)
-            pbar.setValue(val_pct)
-            pbar.setTextVisible(False)
-            pbar.setStyleSheet(f"""
-                QProgressBar {{ border: none; background-color: #f1f5f9; border-radius: 4px; }}
-                QProgressBar::chunk {{ background-color: {bar_color}; border-radius: 4px; }}
-            """)
-            l.addWidget(pbar)
-            return w
-            
-        risk_color = "#10b981" if risk_score < 30 else "#f59e0b" if risk_score < 60 else "#ef4444"
-        risk_txt = f"{risk_score}/100 ({'Low Risk' if risk_score < 30 else 'Medium Risk' if risk_score < 60 else 'High Risk'})"
-        layout.addWidget(create_bar("Portfolio Risk Score", risk_txt, min(100, risk_score), risk_color))
+        self.risk_bar_widget = self.create_bar("Portfolio Risk Score", risk_score, "#10b981" if risk_score < 30 else "#f59e0b")
+        self.comp_bar_widget = self.create_bar("Compliance Score", comp_score, "#0ea5e9")
+        self.layout.addWidget(self.risk_bar_widget)
+        self.layout.addWidget(self.comp_bar_widget)
         
-        comp_color = "#0ea5e9"
-        comp_txt = f"{comp_score}% ({'Excellent' if comp_score >= 80 else 'Requires Review'})"
-        layout.addWidget(create_bar("Compliance Score", comp_txt, min(100, comp_score), comp_color))
+        self.f_box = QFrame()
+        self.f_box.setStyleSheet("background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 10px;")
+        self.f_layout = QVBoxLayout(self.f_box)
+        self.f_layout.setContentsMargins(8, 8, 8, 8)
+        self.f_layout.setSpacing(6)
         
-        # Recent AI Findings Box
-        f_box = QFrame()
-        f_box.setStyleSheet("background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 10px;")
-        f_layout = QVBoxLayout(f_box)
-        f_layout.setContentsMargins(8, 8, 8, 8)
-        f_layout.setSpacing(6)
-        
-        f_lbl = QLabel("RECENT AI FINDINGS & AUDIT ANOMALIES")
+        f_lbl = QLabel("RECENT AI FINDINGS & ANOMALIES")
         f_lbl.setStyleSheet("font-size: 10px; font-weight: bold; color: #64748b; letter-spacing: 0.5px; border: none;")
-        f_layout.addWidget(f_lbl)
+        self.f_layout.addWidget(f_lbl)
         
         if findings:
             for item in findings[:2]:
                 item_lbl = QLabel(f"• {item}")
                 item_lbl.setWordWrap(True)
                 item_lbl.setStyleSheet("font-size: 11px; color: #334155; border: none;")
-                f_layout.addWidget(item_lbl)
+                self.f_layout.addWidget(item_lbl)
         else:
             no_findings = QLabel("No AI findings recorded. Ingest documents to run live RAG analysis.")
             no_findings.setStyleSheet("font-size: 11px; color: #94a3b8; border: none;")
-            f_layout.addWidget(no_findings)
+            self.f_layout.addWidget(no_findings)
             
-        layout.addWidget(f_box)
-        layout.addStretch()
+        self.layout.addWidget(self.f_box)
+        self.layout.addStretch()
         apply_shadow(self, blur=15, dy=3, alpha=15)
+
+    def create_bar(self, label_text, val_pct, color_hex):
+        w = QWidget()
+        l = QVBoxLayout(w)
+        l.setContentsMargins(0, 0, 0, 0)
+        l.setSpacing(4)
+        top_h = QHBoxLayout()
+        t_lbl = QLabel(label_text)
+        t_lbl.setStyleSheet("font-size: 12px; color: #64748b; font-weight: 600; border: none;")
+        v_lbl = QLabel(f"{val_pct}%")
+        v_lbl.setStyleSheet(f"font-size: 12px; font-weight: 800; color: {color_hex}; border: none;")
+        top_h.addWidget(t_lbl)
+        top_h.addStretch()
+        top_h.addWidget(v_lbl)
+        l.addLayout(top_h)
+        
+        pbar = QProgressBar()
+        pbar.setFixedHeight(8)
+        pbar.setValue(min(100, val_pct))
+        pbar.setTextVisible(False)
+        pbar.setStyleSheet(f"QProgressBar {{ border: none; background-color: #f1f5f9; border-radius: 4px; }} QProgressBar::chunk {{ background-color: {color_hex}; border-radius: 4px; }}")
+        l.addWidget(pbar)
+        return w
 
 class AuditProgressChart(QFrame):
     """Spline Area Fill QtChart for Audit Completion Trends."""
@@ -247,8 +345,7 @@ class AuditProgressChart(QFrame):
         chart.setMargins(QMargins(0, 0, 0, 0))
         
         series = QSplineSeries()
-        pen = QPen(QColor("#0ea5e9"), 3)
-        series.setPen(pen)
+        series.setPen(QPen(QColor("#0ea5e9"), 3))
         
         months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
         data_points = [12, 18, 15, 25, 22, 28]
@@ -261,16 +358,14 @@ class AuditProgressChart(QFrame):
             
         chart.addSeries(series)
         
-        # Axis setup
         axis_x = QCategoryAxis()
-        for i, m in enumerate(months):
-            axis_x.append(m, i)
+        for i, m in enumerate(months): axis_x.append(m, i)
         axis_x.setLabelsColor(QColor("#64748b"))
         chart.addAxis(axis_x, Qt.AlignmentFlag.AlignBottom)
         series.attachAxis(axis_x)
         
         axis_y = QValueAxis()
-        axis_y.setRange(0, 35)
+        axis_y.setRange(0, 100)
         axis_y.setLabelsColor(QColor("#64748b"))
         chart.addAxis(axis_y, Qt.AlignmentFlag.AlignLeft)
         series.attachAxis(axis_y)
@@ -283,7 +378,7 @@ class AuditProgressChart(QFrame):
         apply_shadow(self, blur=15, dy=3, alpha=15)
 
 class RiskDistributionChart(QFrame):
-    """Enterprise Multi-Segment Donut Chart for Audit Risk Classification."""
+    """Enterprise Multi-Segment Donut Chart for Risk Level Classification."""
     def __init__(self, low: int, med: int, high: int, parent=None):
         super().__init__(parent)
         self.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;")
@@ -325,7 +420,6 @@ class RiskDistributionChart(QFrame):
         overlay.addWidget(center_lbl, alignment=Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(chart_view)
         
-        # Legend Row
         leg_layout = QHBoxLayout()
         leg_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         leg_layout.setSpacing(12)
@@ -350,88 +444,14 @@ class RiskDistributionChart(QFrame):
         
         apply_shadow(self, blur=15, dy=3, alpha=15)
 
-class AuditTable(QFrame):
-    """Enterprise Recent Audit Projects Table with Status Badges and Review Action."""
-    def __init__(self, projects: list, on_review_callback=None, parent=None):
-        super().__init__(parent)
-        self.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;")
-        
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(16, 14, 16, 14)
-        layout.setSpacing(12)
-        
-        # Header Row with Title and View All
-        h_layout = QHBoxLayout()
-        title_lbl = QLabel("Recent Audit Projects")
-        title_lbl.setStyleSheet("font-weight: 800; font-size: 15px; color: #0f172a; border: none;")
-        
-        view_all_btn = QPushButton("View All →")
-        view_all_btn.setStyleSheet("color: #0ea5e9; font-weight: 700; font-size: 12px; border: none; background: transparent;")
-        
-        h_layout.addWidget(title_lbl)
-        h_layout.addStretch()
-        h_layout.addWidget(view_all_btn)
-        layout.addLayout(h_layout)
-        
-        table = QTableWidget(0, 5)
-        table.setHorizontalHeaderLabels(["CLIENT NAME", "AUDIT TYPE", "STATUS", "RISK LEVEL", "ACTION"])
-        table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-        table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-        table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
-        table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
-        table.verticalHeader().setVisible(False)
-        table.setShowGrid(False)
-        table.setStyleSheet("""
-            QTableWidget { border: none; gridline-color: #f1f5f9; background: white; }
-            QHeaderView::section { background-color: #f8fafc; color: #475569; padding: 10px; border: none; border-bottom: 1px solid #e2e8f0; font-weight: 700; font-size: 10px; letter-spacing: 0.5px; }
-            QTableWidget::item { padding: 10px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-size: 12px; }
-        """)
-        
-        session = SessionLocal()
-        table.setRowCount(len(projects))
-        for r, proj in enumerate(projects):
-            client = session.query(Client).filter_by(id=proj.client_id).first()
-            c_name = client.name if client else "Unknown Client"
-            
-            # Client Avatar & Name Item
-            c_item = QTableWidgetItem(f"🏢  {c_name}")
-            c_item.setFont(QFont("Inter", 10, QFont.Weight.Bold))
-            table.setItem(r, 0, c_item)
-            
-            # Audit Type
-            type_item = QTableWidgetItem(f"Statutory Audit FY {proj.financial_year or '2025-26'}")
-            table.setItem(r, 1, type_item)
-            
-            # Status Badge
-            st = proj.status or "Active"
-            st_item = QTableWidgetItem(f"  {st}  ")
-            st_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            table.setItem(r, 2, st_item)
-            
-            # Risk Level Dot
-            risk = proj.risk_level or "Low"
-            risk_icon = "🟢 Low" if risk == "Low" else "🟡 Medium" if risk == "Medium" else "🔴 High"
-            risk_item = QTableWidgetItem(risk_icon)
-            table.setItem(r, 3, risk_item)
-            
-            # Review Button Action Cell
-            btn_rev = QPushButton("Review")
-            btn_rev.setStyleSheet("background-color: #f0f9ff; color: #0284c7; font-weight: bold; border: 1px solid #bae6fd; border-radius: 4px; padding: 3px 10px; font-size: 11px;")
-            if on_review_callback:
-                btn_rev.clicked.connect(lambda _, p_id=proj.id: on_review_callback(p_id))
-            table.setCellWidget(r, 4, btn_rev)
-            
-        session.close()
-        layout.addWidget(table)
-        apply_shadow(self, blur=15, dy=3, alpha=15)
-
 # ==============================================================================
-# MAIN DASHBOARD WINDOW IMPLEMENTATION
+# MASTER DASHBOARD WINDOW & CONTROLLER
 # ==============================================================================
 
 class DashboardWindow(QWidget):
     """Master Dashboard Window & Navigation Controller for FinAuditPro."""
+
+    data_changed = Signal()
 
     def __init__(self):
         super().__init__()
@@ -447,7 +467,7 @@ class DashboardWindow(QWidget):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # 1. FAANG-Grade Dark Sidebar Navigation
+        # 1. FAANG Dark Sidebar Navigation
         sidebar = QFrame()
         sidebar.setFixedWidth(250)
         sidebar.setStyleSheet("background-color: #0b0f19; border-right: 1px solid #1e293b;")
@@ -455,7 +475,6 @@ class DashboardWindow(QWidget):
         sidebar_layout.setContentsMargins(0, 0, 0, 0)
         sidebar_layout.setSpacing(0)
         
-        # Logo Container
         logo_container = QFrame()
         logo_container.setFixedHeight(70)
         logo_container.setStyleSheet("background-color: #0b0f19; border-bottom: 1px solid #1e293b;")
@@ -475,7 +494,6 @@ class DashboardWindow(QWidget):
         logo_layout.addStretch()
         sidebar_layout.addWidget(logo_container)
         
-        # Navigation Scroll Area
         nav_scroll = QScrollArea()
         nav_scroll.setWidgetResizable(True)
         nav_scroll.setFrameShape(QFrame.Shape.NoFrame)
@@ -532,7 +550,6 @@ class DashboardWindow(QWidget):
         nav_scroll.setWidget(nav_widget)
         sidebar_layout.addWidget(nav_scroll)
         
-        # Profile Card Footer
         profile_frame = QFrame()
         profile_frame.setFixedHeight(68)
         profile_frame.setStyleSheet("border-top: 1px solid #1e293b; background-color: #0b0f19;")
@@ -567,14 +584,12 @@ class DashboardWindow(QWidget):
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
         
-        # Top Navigation Bar
         header = QFrame()
         header.setFixedHeight(64)
         header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(24, 0, 24, 0)
         
-        # Global Search
         self.search_bar = GlobalSearchWidget()
         header_layout.addWidget(self.search_bar)
         
@@ -595,7 +610,6 @@ class DashboardWindow(QWidget):
         
         header_layout.addStretch()
         
-        # Action Icons
         self.btn_theme = QPushButton("🌙")
         self.btn_theme.setFixedSize(34, 34)
         self.btn_theme.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -622,7 +636,7 @@ class DashboardWindow(QWidget):
         
         content_layout.addWidget(header)
         
-        # Dashboard Body Page
+        # Scroll Area Body
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
@@ -632,7 +646,6 @@ class DashboardWindow(QWidget):
         body_layout.setContentsMargins(32, 28, 32, 32)
         body_layout.setSpacing(24)
         
-        # Hero Section Header
         hero_frame = QFrame()
         hero_frame.setStyleSheet("border: none; background: transparent;")
         hero_v = QVBoxLayout(hero_frame)
@@ -648,7 +661,7 @@ class DashboardWindow(QWidget):
         hero_v.addWidget(hero_sub)
         body_layout.addWidget(hero_frame)
         
-        # 4 KPI Cards Grid Row
+        # 4 KPI Cards Row
         stats_layout = QHBoxLayout()
         stats_layout.setSpacing(16)
         
@@ -657,14 +670,19 @@ class DashboardWindow(QWidget):
         pending_reviews = self.session.query(AuditProject).filter_by(status='Pending Review').count()
         high_risk_cases = self.session.query(AuditProject).filter_by(risk_level='High').count()
 
-        stats_layout.addWidget(MetricCard("Total Clients", str(total_clients), "+12%", "#e0f2fe", "#0284c7", "👥"))
-        stats_layout.addWidget(MetricCard("Completed Audits", str(completed_audits), "This Year", "#dcfce7", "#16a34a", "✅"))
-        stats_layout.addWidget(MetricCard("Pending Reviews", str(pending_reviews), "Action Req.", "#fef3c7", "#d97706", "🕒"))
-        stats_layout.addWidget(MetricCard("High Risk Cases", str(high_risk_cases), "Flagged by AI", "#fee2e2", "#dc2626", "⚠️"))
+        self.card_clients = MetricCard("Total Clients", str(total_clients), "+12%", "#e0f2fe", "#0284c7", "👥")
+        self.card_completed = MetricCard("Completed Audits", str(completed_audits), "This Year", "#dcfce7", "#16a34a", "✅")
+        self.card_pending = MetricCard("Pending Reviews", str(pending_reviews), "Action Req.", "#fef3c7", "#d97706", "🕒")
+        self.card_high_risk = MetricCard("High Risk Cases", str(high_risk_cases), "Flagged by AI", "#fee2e2", "#dc2626", "⚠️")
+
+        stats_layout.addWidget(self.card_clients)
+        stats_layout.addWidget(self.card_completed)
+        stats_layout.addWidget(self.card_pending)
+        stats_layout.addWidget(self.card_high_risk)
         
         body_layout.addLayout(stats_layout)
         
-        # Middle 3-Card Row (AI Summary, Audit Progress Spline Chart, Risk Donut Chart)
+        # Middle Analytics Row
         mid_layout = QHBoxLayout()
         mid_layout.setSpacing(16)
         
@@ -691,15 +709,49 @@ class DashboardWindow(QWidget):
         
         body_layout.addLayout(mid_layout)
         
-        # Recent Audit Projects Table Row
-        recent_projs = self.session.query(AuditProject).order_by(AuditProject.id.desc()).limit(5).all()
-        table_widget = AuditTable(recent_projs, on_review_callback=self.on_review_project)
-        body_layout.addWidget(table_widget)
+        # QTableView Model-View Section
+        table_frame = QFrame()
+        table_frame.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;")
+        t_layout = QVBoxLayout(table_frame)
+        t_layout.setContentsMargins(16, 14, 16, 14)
+        t_layout.setSpacing(10)
         
+        t_header = QHBoxLayout()
+        t_title = QLabel("Recent Audit Projects")
+        t_title.setStyleSheet("font-weight: 800; font-size: 15px; color: #0f172a; border: none;")
+        t_header.addWidget(t_title)
+        t_header.addStretch()
+        t_layout.addLayout(t_header)
+        
+        recent_projs = self.session.query(AuditProject).order_by(AuditProject.id.desc()).limit(10).all()
+        self.table_model = AuditProjectsTableModel(recent_projs)
+        
+        self.table_view = QTableView()
+        self.table_view.setModel(self.table_model)
+        self.table_view.setItemDelegate(AuditStatusDelegate(self.table_view))
+        self.table_view.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.table_view.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        self.table_view.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        self.table_view.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        self.table_view.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+        self.table_view.verticalHeader().setVisible(False)
+        self.table_view.setShowGrid(False)
+        self.table_view.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
+        self.table_view.setStyleSheet("""
+            QTableView { border: none; background: white; }
+            QHeaderView::section { background-color: #f8fafc; color: #475569; padding: 10px; border: none; border-bottom: 1px solid #e2e8f0; font-weight: 700; font-size: 10px; letter-spacing: 0.5px; }
+            QTableView::item { padding: 10px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-size: 12px; }
+        """)
+        self.table_view.doubleClicked.connect(self.on_table_double_clicked)
+        
+        t_layout.addWidget(self.table_view)
+        apply_shadow(table_frame, blur=15, dy=3, alpha=15)
+        
+        body_layout.addWidget(table_frame)
         body_layout.addStretch()
         scroll.setWidget(body_widget)
         
-        # Stacked Widget Pages Indexing
+        # QStackedWidget Page Indexing (12 Pages)
         self.stacked_widget = QStackedWidget()
         
         def safe_load(widget_cls, title):
@@ -747,13 +799,13 @@ class DashboardWindow(QWidget):
         content_layout.addWidget(self.stacked_widget)
         
         def reset_buttons():
-            for btn in self.nav_buttons:
-                btn.set_active(False)
+            for btn in self.nav_buttons: btn.set_active(False)
                 
         def nav_click(index, btn):
             self.stacked_widget.setCurrentIndex(index)
             reset_buttons()
             btn.set_active(True)
+            self.refresh_realtime_data()
             
         self.btn_dashboard.clicked.connect(lambda: nav_click(0, self.btn_dashboard))
         self.btn_clients.clicked.connect(lambda: nav_click(1, self.btn_clients))
@@ -770,11 +822,33 @@ class DashboardWindow(QWidget):
         main_layout.addWidget(sidebar)
         main_layout.addWidget(main_content)
         self.setup_keyboard_shortcuts()
+        
+        self.data_changed.connect(self.refresh_realtime_data)
 
-    def on_review_project(self, project_id: int):
-        self.stacked_widget.setCurrentIndex(11) # Navigate to Working Papers
+    def on_table_double_clicked(self, index: QModelIndex):
+        self.stacked_widget.setCurrentIndex(11) # Working Papers
         for btn in self.nav_buttons: btn.set_active(False)
         self.btn_working_papers.set_active(True)
+
+    def refresh_realtime_data(self):
+        """Refreshes metrics and QTableView Model from database."""
+        try:
+            self.session.expire_all()
+            total_clients = self.session.query(Client).count()
+            completed_audits = self.session.query(AuditProject).filter_by(status='Completed').count()
+            pending_reviews = self.session.query(AuditProject).filter_by(status='Pending Review').count()
+            high_risk_cases = self.session.query(AuditProject).filter_by(risk_level='High').count()
+
+            self.card_clients.update_value(total_clients)
+            self.card_completed.update_value(completed_audits)
+            self.card_pending.update_value(pending_reviews)
+            self.card_high_risk.update_value(high_risk_cases)
+
+            recent_projs = self.session.query(AuditProject).order_by(AuditProject.id.desc()).limit(10).all()
+            self.table_model.update_projects(recent_projs)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Realtime refresh warning: {e}")
 
     def open_create_audit_dialog(self):
         from security.security_manager import SecurityManager
@@ -802,6 +876,7 @@ class DashboardWindow(QWidget):
             self.populate_client_selector()
             idx = self.client_selector.findData(proj.id)
             if idx >= 0: self.client_selector.setCurrentIndex(idx)
+            self.data_changed.emit()
             QMessageBox.information(self, "Audit Created", f"Successfully initialized new {audit_type} for FY {fy}.")
 
     def populate_client_selector(self):
@@ -847,7 +922,7 @@ class DashboardWindow(QWidget):
             btn.setToolTip(f"Hotkey: Alt+{i+1}")
             
         self.f5_shortcut = QShortcut(QKeySequence("F5"), self)
-        self.f5_shortcut.activated.connect(self.repaint)
+        self.f5_shortcut.activated.connect(self.refresh_realtime_data)
         
         self.settings_shortcut = QShortcut(QKeySequence("Ctrl+,"), self)
         self.settings_shortcut.activated.connect(self.btn_settings.click)
@@ -872,7 +947,7 @@ class DashboardWindow(QWidget):
 • <b>Alt + 7</b> : Compliance Monitoring (CARO 2020)<br/>
 • <b>Alt + 8</b> : Risk Analysis<br/>
 • <b>Alt + 9</b> : Working Paper Generator<br/>
-• <b>F5</b> : Refresh Data<br/>
+• <b>F5</b> : Refresh Realtime Data<br/>
 • <b>Ctrl + ,</b> : Open Settings & Governance<br/>
 """
         QMessageBox.information(self, "Keyboard Shortcuts Reference", shortcuts_text)

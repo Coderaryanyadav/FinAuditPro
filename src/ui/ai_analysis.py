@@ -367,7 +367,13 @@ class AIAuditWidget(QWidget):
             if active_id:
                 wp = session.query(WorkingPaper).filter_by(audit_id=active_id).first()
                 if not wp:
-                    wp = WorkingPaper(audit_id=active_id)
+                    from database.models import WorkingPaperIndex
+                    wp_idx = session.query(WorkingPaperIndex).filter_by(engagement_id=active_id).first()
+                    if not wp_idx:
+                        wp_idx = WorkingPaperIndex(engagement_id=active_id, ref_code="A-100", title="Audit Planning & General Index")
+                        session.add(wp_idx)
+                        session.flush()
+                    wp = WorkingPaper(audit_id=active_id, index_id=wp_idx.id)
                     session.add(wp)
                 wp.observation = f"{wp.observation or ''}\n• [AI Finding] {title}: {desc}".strip()
                 wp.evidence = f"{wp.evidence or ''}\n• {evidence}".strip()

@@ -273,7 +273,13 @@ class WorkingPaperWidget(QWidget):
 
         wp = self.session.query(WorkingPaper).filter_by(audit_id=proj_id).first()
         if not wp:
-            wp = WorkingPaper(audit_id=proj_id)
+            from database.models import WorkingPaperIndex
+            wp_idx = self.session.query(WorkingPaperIndex).filter_by(engagement_id=proj_id).first()
+            if not wp_idx:
+                wp_idx = WorkingPaperIndex(engagement_id=proj_id, ref_code="A-100", title="Audit Planning & General Index")
+                self.session.add(wp_idx)
+                self.session.flush()
+            wp = WorkingPaper(audit_id=proj_id, index_id=wp_idx.id)
             self.session.add(wp)
 
         wp.objective = self.objective_field.text().strip()

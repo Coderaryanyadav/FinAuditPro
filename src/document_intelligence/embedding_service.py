@@ -24,7 +24,7 @@ class EmbeddingService:
             from sentence_transformers import SentenceTransformer
             self._model = SentenceTransformer(self.model_name)
             logger.info(f"Loaded SentenceTransformer model: {self.model_name}")
-        except (OSError, ValueError, RuntimeError) as e:
+        except (ImportError, OSError, ValueError, RuntimeError, Exception) as e:
             logger.error(f"SentenceTransformer not available ({e}). Vector embedding capabilities disabled.")
 
     def generate_embedding(self, text: str) -> List[float]:

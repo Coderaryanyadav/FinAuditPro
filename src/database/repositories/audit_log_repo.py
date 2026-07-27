@@ -24,3 +24,6 @@ class AuditLogRepository:
 
     def get_recent(self, limit: int = 50) -> List[AuditLog]:
         return self.session.query(AuditLog).order_by(AuditLog.created_at.desc()).limit(limit).all()
+
+    def get_all(self) -> List[AuditLog]:
+        return self.session.query(AuditLog).order_by(AuditLog.id.desc()).all()

@@ -20,3 +20,7 @@ class AuditTrailService:
     def get_engagement_logs(self, engagement_id: int) -> List[AuditLog]:
         """Fetch all logs for a specific engagement."""
         return self.log_repo.get_by_engagement(engagement_id)
+
+    def get_all_logs(self) -> List[AuditLog]:
+        """Fetch all audit logs in reverse chronological order."""
+        return self.log_repo.get_all()

@@ -49,3 +49,20 @@ class WorkingPaperService:
         self.wp_repo.session.commit()
         self.wp_repo.session.refresh(paper)
         return paper
+
+    def add_observation(self, audit_id: int, observation: str, evidence: str = "") -> WorkingPaper:
+        """Append observation and evidence to working paper for audit project."""
+        wp = self.wp_repo.session.query(WorkingPaper).filter_by(audit_id=audit_id).first()
+        if not wp:
+            wp_idx = self.wp_repo.session.query(WorkingPaperIndex).filter_by(engagement_id=audit_id).first()
+            if not wp_idx:
+                wp_idx = WorkingPaperIndex(engagement_id=audit_id, ref_code="A-100", title="Audit Planning & General Index")
+                self.wp_repo.session.add(wp_idx)
+                self.wp_repo.session.flush()
+            wp = WorkingPaper(audit_id=audit_id, index_id=wp_idx.id)
+            self.wp_repo.session.add(wp)
+        wp.observation = f"{wp.observation or ''}\n• {observation}".strip()
+        if evidence:
+            wp.evidence = f"{wp.evidence or ''}\n• {evidence}".strip()
+        self.wp_repo.session.commit()
+        return wp

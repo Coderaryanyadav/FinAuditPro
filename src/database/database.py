@@ -26,9 +26,11 @@ def _get_app_data_dir() -> str:
     return app_dir
 
 
+from core.config import config
+
 # Determine database path — always in a user-writable location.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = _get_app_data_dir()
+DATA_DIR = config.data_dir
 
 DB_PATH = os.path.join(DATA_DIR, 'finauditpro.db')
 DATABASE_URL = f"sqlite:///{DB_PATH}"

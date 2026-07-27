@@ -12,7 +12,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QColor
 import re
 from database.database import SessionLocal
-from database.models import Client, AuditProject
+from database.models import Client, AuditProject, KeyManagementPersonnel, ClientIndustry
 from .styles import apply_shadow
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -383,7 +383,6 @@ class ClientManagementWidget(QWidget):
                 industry_name = dialog.industry_input.text().strip() or "General"
                 
                 # Check for existing ClientIndustry or create new
-                from database.models import ClientIndustry
                 ind = self.session.query(ClientIndustry).filter_by(industry_name=industry_name).first()
                 if not ind:
                     ind = ClientIndustry(industry_name=industry_name)
@@ -401,7 +400,6 @@ class ClientManagementWidget(QWidget):
                 self.session.flush()
 
                 if kmp_name:
-                    from database.models import KeyManagementPersonnel
                     kmp = KeyManagementPersonnel(
                         client_id=c.id,
                         name=kmp_name,

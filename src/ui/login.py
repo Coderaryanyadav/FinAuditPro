@@ -7,6 +7,11 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                                QLineEdit, QPushButton, QCheckBox, QFrame, QMessageBox, QComboBox)
 from PySide6.QtCore import Qt, Signal
 from sqlalchemy.exc import SQLAlchemyError
+from database.database import get_session
+from database.models import User
+from database.repositories.user_repo import UserRepository
+from services.auth_service import AuthenticationService
+from security.auth import PasswordHasher
 from .styles import apply_shadow
 
 class LoginWindow(QWidget):
@@ -206,38 +211,28 @@ class LoginWindow(QWidget):
         self.login_btn.setText("Signing In...")
         self.login_btn.setDisabled(True)
 
-        session = None
         try:
-            from database.database import SessionLocal
-            from database.repositories.user_repo import UserRepository
-            from services.auth_service import AuthenticationService
-            from database.models import User
-            from security.auth import PasswordHasher
+            with get_session() as session:
+                user_repo = UserRepository(session)
+                
+                if session.query(User).count() == 0:
+                    admin_user = User(
+                        username="admin",
+                        email="admin@finauditpro.com",
+                        password_hash=PasswordHasher.hash_password("admin123"),
+                        role="Audit Partner",
+                        is_active=True
+                    )
+                    session.add(admin_user)
+                    session.commit()
 
-            session = SessionLocal()
-            user_repo = UserRepository(session)
-            
-            if session.query(User).count() == 0:
-                admin_user = User(
-                    username="admin",
-                    email="admin@finauditpro.com",
-                    password_hash=PasswordHasher.hash_password("admin123"),
-                    role="Audit Partner",
-                    is_active=True
-                )
-                session.add(admin_user)
-                session.commit()
-
-            auth_service = AuthenticationService(user_repo)
-            auth_service.login(email, password)
+                auth_service = AuthenticationService(user_repo)
+                auth_service.login(email, password)
             self.auth_success()
         except (SQLAlchemyError, ValueError) as e:
             self.login_btn.setText("Sign In to Workspace")
             self.login_btn.setEnabled(True)
             QMessageBox.warning(self, "Authentication Failed", str(e))
-        finally:
-            if session:
-                session.close()
 
     def auth_success(self):
         self.login_successful.emit()

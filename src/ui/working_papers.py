@@ -10,8 +10,12 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                                QSplitter, QHeaderView)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QColor
-from database.database import SessionLocal
-from database.models import Client, AuditProject, WorkingPaper
+from database.database import get_session
+from database.models import Client, AuditProject, WorkingPaper, WorkingPaperIndex
+from database.repositories.working_paper_repo import WorkingPaperRepository
+from services.working_paper_service import WorkingPaperService
+from security.security_manager import SecurityManager
+from security.rbac import Permission
 from ai.workers import OllamaWorker
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -21,7 +25,6 @@ class WorkingPaperWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.setStyleSheet("background-color: #f8fafc;")
-        self.session = SessionLocal()
         self.active_wp = None
 
         main_layout = QVBoxLayout(self)
@@ -220,11 +223,12 @@ class WorkingPaperWidget(QWidget):
 
     def load_audit_projects(self):
         self.project_combo.clear()
-        projects = self.session.query(AuditProject).all()
-        for proj in projects:
-            client = self.session.query(Client).filter_by(id=proj.client_id).first()
-            name = client.name if client else "Unknown Client"
-            self.project_combo.addItem(f"{name} (FY {proj.financial_year})", proj.id)
+        with get_session() as session:
+            projects = session.query(AuditProject).all()
+            for proj in projects:
+                client = session.query(Client).filter_by(id=proj.client_id).first()
+                name = client.name if client else "Unknown Client"
+                self.project_combo.addItem(f"{name} (FY {proj.financial_year})", proj.id)
 
     def on_project_changed(self):
         self.load_working_paper()
@@ -240,29 +244,28 @@ class WorkingPaperWidget(QWidget):
         proj_id = self.project_combo.currentData()
         if proj_id is None: return
 
-        wp = self.session.query(WorkingPaper).filter_by(audit_id=proj_id).first()
-        if wp:
-            self.active_wp = wp
-            self.objective_field.setText(wp.objective or "")
-            self.procedure_field.setPlainText(wp.procedure or "")
-            self.evidence_field.setText(wp.evidence or "")
-            self.observation_field.setPlainText(wp.observation or "")
-            self.conclusion_field.setText(wp.conclusion or "")
-            
-            st = wp.status or "Draft"
-            if st == "Reviewed":
-                self.lbl_prepared.setText("Prepared & Reviewed [Senior Done]")
-                self.lbl_prepared.setStyleSheet("font-size: 12px; font-weight: bold; color: #0284c7; background: #e0f2fe; padding: 4px 8px; border-radius: 4px;")
-            elif st == "Approved":
-                self.lbl_prepared.setText("Fully Approved & Signed Off [Partner Done]")
-                self.lbl_prepared.setStyleSheet("font-size: 12px; font-weight: bold; color: #7c3aed; background: #f5f3ff; padding: 4px 8px; border-radius: 4px;")
-            else:
-                self.lbl_prepared.setText("Prepared By: Junior Assistant [Done]")
-                self.lbl_prepared.setStyleSheet("font-size: 12px; font-weight: bold; color: #047857; background: #ecfdf5; padding: 4px 8px; border-radius: 4px;")
+        with get_session() as session:
+            wp = session.query(WorkingPaper).filter_by(audit_id=proj_id).first()
+            if wp:
+                self.active_wp = wp
+                self.objective_field.setText(wp.objective or "")
+                self.procedure_field.setPlainText(wp.procedure or "")
+                self.evidence_field.setText(wp.evidence or "")
+                self.observation_field.setPlainText(wp.observation or "")
+                self.conclusion_field.setText(wp.conclusion or "")
+                
+                st = wp.status or "Draft"
+                if st == "Reviewed":
+                    self.lbl_prepared.setText("Prepared & Reviewed [Senior Done]")
+                    self.lbl_prepared.setStyleSheet("font-size: 12px; font-weight: bold; color: #0284c7; background: #e0f2fe; padding: 4px 8px; border-radius: 4px;")
+                elif st == "Approved":
+                    self.lbl_prepared.setText("Fully Approved & Signed Off [Partner Done]")
+                    self.lbl_prepared.setStyleSheet("font-size: 12px; font-weight: bold; color: #7c3aed; background: #f5f3ff; padding: 4px 8px; border-radius: 4px;")
+                else:
+                    self.lbl_prepared.setText("Prepared By: Junior Assistant [Done]")
+                    self.lbl_prepared.setStyleSheet("font-size: 12px; font-weight: bold; color: #047857; background: #ecfdf5; padding: 4px 8px; border-radius: 4px;")
 
     def save_working_paper(self):
-        from security.security_manager import SecurityManager
-        from security.rbac import Permission
         sm = SecurityManager()
         if sm.current_session and not sm.check_permission(Permission.EDIT_WORKING_PAPERS):
             QMessageBox.warning(self, "Access Denied", "Your role does not have permission to edit working papers.")
@@ -271,46 +274,50 @@ class WorkingPaperWidget(QWidget):
         proj_id = self.project_combo.currentData()
         if proj_id is None: return
 
-        wp = self.session.query(WorkingPaper).filter_by(audit_id=proj_id).first()
-        if not wp:
-            from database.models import WorkingPaperIndex
-            wp_idx = self.session.query(WorkingPaperIndex).filter_by(engagement_id=proj_id).first()
-            if not wp_idx:
-                wp_idx = WorkingPaperIndex(engagement_id=proj_id, ref_code="A-100", title="Audit Planning & General Index")
-                self.session.add(wp_idx)
-                self.session.flush()
-            wp = WorkingPaper(audit_id=proj_id, index_id=wp_idx.id)
-            self.session.add(wp)
+        with get_session() as session:
+            wp = session.query(WorkingPaper).filter_by(audit_id=proj_id).first()
+            if not wp:
+                wp_idx = session.query(WorkingPaperIndex).filter_by(engagement_id=proj_id).first()
+                if not wp_idx:
+                    wp_idx = WorkingPaperIndex(engagement_id=proj_id, ref_code="A-100", title="Audit Planning & General Index")
+                    session.add(wp_idx)
+                    session.flush()
+                wp = WorkingPaper(audit_id=proj_id, index_id=wp_idx.id)
+                session.add(wp)
 
-        wp.objective = self.objective_field.text().strip()
-        wp.procedure = self.procedure_field.toPlainText().strip()
-        wp.evidence = self.evidence_field.text().strip()
-        wp.observation = self.observation_field.toPlainText().strip()
-        wp.conclusion = self.conclusion_field.text().strip()
-        wp.status = "Prepared"
+            wp.objective = self.objective_field.text().strip()
+            wp.procedure = self.procedure_field.toPlainText().strip()
+            wp.evidence = self.evidence_field.text().strip()
+            wp.observation = self.observation_field.toPlainText().strip()
+            wp.conclusion = self.conclusion_field.text().strip()
+            wp.status = "Prepared"
 
-        self.session.commit()
+            session.commit()
         QMessageBox.information(self, "Saved", "Working paper saved and indexed successfully under SA 230!")
 
     def review_working_paper(self):
         proj_id = self.project_combo.currentData()
         if proj_id is None: return
-        wp = self.session.query(WorkingPaper).filter_by(audit_id=proj_id).first()
-        if wp:
-            wp.status = "Reviewed"
-            self.session.commit()
-            self.load_working_paper()
-            QMessageBox.information(self, "Review Complete", "Working paper marked as Reviewed by Senior Auditor!")
+        with get_session() as session:
+            wp_repo = WorkingPaperRepository(session)
+            wp_service = WorkingPaperService(wp_repo)
+            wp = session.query(WorkingPaper).filter_by(audit_id=proj_id).first()
+            if wp:
+                wp_service.update_status(wp, "Review")
+        self.load_working_paper()
+        QMessageBox.information(self, "Review Complete", "Working paper marked as Reviewed by Senior Auditor!")
 
     def approve_working_paper(self):
         proj_id = self.project_combo.currentData()
         if proj_id is None: return
-        wp = self.session.query(WorkingPaper).filter_by(audit_id=proj_id).first()
-        if wp:
-            wp.status = "Approved"
-            self.session.commit()
-            self.load_working_paper()
-            QMessageBox.information(self, "Partner Sign-Off Complete", "Working paper granted final sign-off by Audit Partner!")
+        with get_session() as session:
+            wp_repo = WorkingPaperRepository(session)
+            wp_service = WorkingPaperService(wp_repo)
+            wp = session.query(WorkingPaper).filter_by(audit_id=proj_id).first()
+            if wp:
+                wp_service.update_status(wp, "Completed")
+        self.load_working_paper()
+        QMessageBox.information(self, "Partner Sign-Off Complete", "Working paper granted final sign-off by Audit Partner!")
 
     def generate_ai_draft(self):
         obj = self.objective_field.text().strip()
@@ -346,5 +353,4 @@ class WorkingPaperWidget(QWidget):
             self.conclusion_field.setText(conclusion)
 
     def closeEvent(self, event):
-        self.session.close()
         event.accept()

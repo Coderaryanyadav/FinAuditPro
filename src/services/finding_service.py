@@ -43,3 +43,9 @@ class FindingService:
         self.wp_repo.session.commit()
         self.wp_repo.session.refresh(finding)
         return finding
+
+    def get_all_findings(self) -> List[Finding]:
+        return self.wp_repo.session.query(Finding).all()
+
+    def get_findings_by_audit_id(self, audit_id: int) -> List[Finding]:
+        return self.wp_repo.session.query(Finding).filter_by(audit_id=audit_id).all()

@@ -11,7 +11,9 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                                QFormLayout, QMessageBox, QCheckBox, QTabWidget, QFileDialog)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QColor
+import requests
 from .styles import apply_shadow
+from core.config import config
 
 class SettingsWidget(QWidget):
     """CA Firm Settings & AI Ollama Model Configuration Manager Widget."""
@@ -102,7 +104,7 @@ class SettingsWidget(QWidget):
         f_layout = QFormLayout(card)
         f_layout.setSpacing(12)
 
-        self.ollama_url = QLineEdit("http://localhost:11434")
+        self.ollama_url = QLineEdit(config.ollama_host)
         self.ollama_url.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;")
         f_layout.addRow("Ollama Local Endpoint URL:", self.ollama_url)
 
@@ -110,8 +112,7 @@ class SettingsWidget(QWidget):
         self.model_combo.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;")
         
         try:
-            import requests
-            res = requests.get("http://localhost:11434/api/tags", timeout=2)
+            res = requests.get(f"{config.ollama_host}/api/tags", timeout=2)
             if res.status_code == 200:
                 models = [m.get("name", "") for m in res.json().get("models", [])]
                 if models:
@@ -164,7 +165,6 @@ class SettingsWidget(QWidget):
 
     def test_ollama(self):
         try:
-            import requests
             url = self.ollama_url.text().strip()
             res = requests.get(f"{url}/api/tags", timeout=3)
             if res.status_code == 200:

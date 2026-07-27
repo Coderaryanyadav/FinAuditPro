@@ -4,16 +4,25 @@ Provides Drag-and-Drop Ingestion, SHA-256 Anti-Tamper Evidence Hashing, Document
 Real-Time OCR & FAISS Index Status, and Split-View Document Inspector.
 """
 
+import logging
 import os
 import shutil
 import hashlib
+
+logger = logging.getLogger(__name__)
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                                QPushButton, QFrame, QFileDialog, QTableWidget, QTableWidgetItem,
                                QProgressBar, QComboBox, QMessageBox, QSplitter, QTextEdit, QHeaderView)
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QFont, QColor
-from database.database import SessionLocal
+from database.database import get_session
 from database.models import Client, AuditProject, Document
+from database.repositories.document_repo import DocumentRepository
+from services.document_service import DocumentService
+from security.security_manager import SecurityManager
+from security.rbac import Permission
+from document_intelligence.document_pipeline import DocumentPipeline
+from document_intelligence.ocr_engine import OCREngine
 from .styles import apply_shadow
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -79,39 +88,37 @@ class AIProcessWorker(QThread):
         self.document_ids = document_ids
 
     def run(self):
-        session = SessionLocal()
         try:
-            from document_intelligence.document_pipeline import DocumentPipeline
-            pipeline = DocumentPipeline()
-            total = len(self.document_ids)
-            for i, doc_id in enumerate(self.document_ids):
-                doc = session.query(Document).filter_by(id=doc_id).first()
-                if not doc: continue
-                
-                def progress_cb(stage_name, pct):
-                    overall_pct = int((i / total) * 100 + (pct / total))
-                    self.progress.emit(f"Ingesting {doc.file_name} ({stage_name})...", overall_pct)
-                
-                result = pipeline.process_and_ingest(
-                    file_path=doc.file_path,
-                    engagement_id=doc.audit_id,
-                    client_id=doc.audit_id,
-                    document_id=doc.id,
-                    progress_callback=progress_cb
-                )
-                
-                if result and result.status == "SUCCESS":
-                    doc.doc_type = "Ingested"
-                    session.commit()
-                else:
-                    doc.doc_type = "Failed"
-                    session.commit()
+            with get_session() as session:
+                pipeline = DocumentPipeline()
+                total = len(self.document_ids)
+                for i, doc_id in enumerate(self.document_ids):
+                    doc = session.query(Document).filter_by(id=doc_id).first()
+                    if not doc: continue
+                    
+                    def progress_cb(stage_name, pct):
+                        overall_pct = int((i / total) * 100 + (pct / total))
+                        self.progress.emit(f"Ingesting {doc.file_name} ({stage_name})...", overall_pct)
+                    
+                    result = pipeline.process_and_ingest(
+                        file_path=doc.file_path,
+                        engagement_id=doc.audit_id,
+                        client_id=doc.audit_id,
+                        document_id=doc.id,
+                        progress_callback=progress_cb
+                    )
+                    
+                    if result and result.status == "SUCCESS":
+                        doc.doc_type = "Ingested"
+                        session.commit()
+                    else:
+                        doc.doc_type = "Failed"
+                        session.commit()
             
             self.progress.emit("AI Processing Complete", 100)
             self.finished.emit(True)
         except (SQLAlchemyError, OSError, ValueError) as e:
-            import logging
-            logging.getLogger(__name__).exception("Document Ingestion Error")
+            logger.exception("Document Ingestion Error")
             self.finished.emit(False)
         finally:
             session.close()
@@ -122,7 +129,6 @@ class DocumentUploadWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.setStyleSheet("background-color: #f8fafc;")
-        self.session = SessionLocal()
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -131,15 +137,15 @@ class DocumentUploadWidget(QWidget):
         # 1. Action Bar
         action_bar = QFrame()
         action_bar.setFixedHeight(64)
-        action_bar.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
+        action_bar.setObjectName("headerBar")
         action_layout = QHBoxLayout(action_bar)
         action_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
         title = QLabel("Document Ingestion & Intelligence Pipeline")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0f172a;")
+        title.setObjectName("headerTitle")
         subtitle = QLabel("Auto-Classification, OCR & SHA-256 Anti-Tamper Verification")
-        subtitle.setStyleSheet("font-size: 12px; color: #64748b;")
+        subtitle.setObjectName("headerSubtitle")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         action_layout.addLayout(title_v)
@@ -149,18 +155,18 @@ class DocumentUploadWidget(QWidget):
         
         self.project_combo = QComboBox()
         self.project_combo.setFixedWidth(240)
-        self.project_combo.setStyleSheet("QComboBox { padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff; color: #0f172a; }")
+        self.project_combo.setObjectName("formCombo")
         self.project_combo.currentIndexChanged.connect(self.load_uploaded_files)
         action_layout.addWidget(self.project_combo)
         
         action_layout.addStretch()
         
         btn_upload = QPushButton("📁 Select Files to Upload")
-        btn_upload.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
+        btn_upload.setObjectName("primaryButton")
         btn_upload.clicked.connect(self.browse_files)
 
         btn_process = QPushButton("⚡ Process with AI OCR")
-        btn_process.setStyleSheet("padding: 8px 14px; background-color: #0284c7; color: white; font-weight: bold; border-radius: 6px; border: none;")
+        btn_process.setObjectName("secondaryButton")
         btn_process.clicked.connect(self.start_ai_processing)
         self.btn_process = btn_process
 
@@ -171,7 +177,6 @@ class DocumentUploadWidget(QWidget):
         
         # 2. Compact OCR Feature Banner
         try:
-            from document_intelligence.ocr_engine import OCREngine
             ocr_ok, ocr_msg = OCREngine.is_ocr_available()
             if not ocr_ok:
                 ocr_banner = QFrame()
@@ -283,79 +288,86 @@ class DocumentUploadWidget(QWidget):
         
     def load_audit_projects(self):
         self.project_combo.clear()
-        projects = self.session.query(AuditProject).all()
-        if not projects:
-            client = self.session.query(Client).first()
-            if not client:
-                client = Client(name="Default Audit Client", gst_number="27AADCT1234E1Z5", pan_number="AADCT1234E")
-                self.session.add(client)
-                self.session.commit()
-            proj = AuditProject(client_id=client.id, financial_year="2025-26", status="Active", risk_level="Low")
-            self.session.add(proj)
-            self.session.commit()
-            projects = [proj]
+        with get_session() as session:
+            projects = session.query(AuditProject).all()
+            if not projects:
+                client = session.query(Client).first()
+                if not client:
+                    client = Client(name="Default Audit Client", gst_number="27AADCT1234E1Z5", pan_number="AADCT1234E")
+                    session.add(client)
+                    session.commit()
+                proj = AuditProject(client_id=client.id, financial_year="2025-26", status="Active", risk_level="Low")
+                session.add(proj)
+                session.commit()
+                projects = [proj]
 
-        for proj in projects:
-            client = self.session.query(Client).filter_by(id=proj.client_id).first()
-            name = client.name if client else f"Client #{proj.client_id}"
-            display_text = f"{name} (FY {proj.financial_year})"
-            self.project_combo.addItem(display_text, proj.id)
+            for proj in projects:
+                client = session.query(Client).filter_by(id=proj.client_id).first()
+                name = client.name if client else f"Client #{proj.client_id}"
+                display_text = f"{name} (FY {proj.financial_year})"
+                self.project_combo.addItem(display_text, proj.id)
             
     def load_uploaded_files(self):
         self.doc_table.setRowCount(0)
         proj_id = self.project_combo.currentData()
         if proj_id is None: return
         
-        docs = self.session.query(Document).filter_by(audit_id=proj_id).all()
-        self.doc_table.setRowCount(len(docs))
+        with get_session() as session:
+            repo = DocumentRepository(session)
+            service = DocumentService(repo)
+            docs = service.get_audit_documents(proj_id)
+            self.doc_table.setRowCount(len(docs))
 
-        for r, doc in enumerate(docs):
-            cat = classify_document_type(doc.file_name)
-            sha_hash = compute_sha256(doc.file_path) if os.path.exists(doc.file_path) else "N/A"
-            trunc_hash = f"{sha_hash[:12]}..." if len(sha_hash) > 12 else sha_hash
+            for r, doc in enumerate(docs):
+                cat = classify_document_type(doc.file_name)
+                sha_hash = compute_sha256(doc.file_path) if os.path.exists(doc.file_path) else "N/A"
+                trunc_hash = f"{sha_hash[:12]}..." if len(sha_hash) > 12 else sha_hash
 
-            tag_item = QTableWidgetItem(cat)
-            tag_item.setFont(QFont("Inter", 9, QFont.Weight.Bold))
-            self.doc_table.setItem(r, 0, tag_item)
+                tag_item = QTableWidgetItem(cat)
+                tag_item.setFont(QFont("Inter", 9, QFont.Weight.Bold))
+                self.doc_table.setItem(r, 0, tag_item)
 
-            name_item = QTableWidgetItem(doc.file_name)
-            name_item.setData(Qt.ItemDataRole.UserRole, doc.id)
-            self.doc_table.setItem(r, 1, name_item)
+                name_item = QTableWidgetItem(doc.file_name)
+                name_item.setData(Qt.ItemDataRole.UserRole, doc.id)
+                self.doc_table.setItem(r, 1, name_item)
 
-            hash_item = QTableWidgetItem(trunc_hash)
-            hash_item.setToolTip(sha_hash)
-            self.doc_table.setItem(r, 2, hash_item)
+                hash_item = QTableWidgetItem(trunc_hash)
+                hash_item.setToolTip(sha_hash)
+                self.doc_table.setItem(r, 2, hash_item)
 
-            st = doc.doc_type or "Uploaded"
-            st_text = "🟢 Ingested" if st == "Ingested" else "🔵 Digital Parsed" if st == "Uploaded" else "⏳ Pending"
-            st_item = QTableWidgetItem(st_text)
-            self.doc_table.setItem(r, 3, st_item)
+                st = doc.doc_type or "Uploaded"
+                st_text = "🟢 Ingested" if st == "Ingested" else "🔵 Digital Parsed" if st == "Uploaded" else "⏳ Pending"
+                st_item = QTableWidgetItem(st_text)
+                self.doc_table.setItem(r, 3, st_item)
 
     def on_doc_selected(self):
         selected_rows = self.doc_table.selectedItems()
         if not selected_rows: return
         r = self.doc_table.currentRow()
         doc_id = self.doc_table.item(r, 1).data(Qt.ItemDataRole.UserRole)
-        doc = self.session.query(Document).filter_by(id=doc_id).first()
-        if not doc: return
-
-        self.doc_title_lbl.setText(doc.file_name)
-        sha_hash = compute_sha256(doc.file_path) if os.path.exists(doc.file_path) else "N/A"
-        self.hash_info_lbl.setText(f"SHA-256 Anti-Tamper Evidence Hash:\n{sha_hash}")
-
-        if os.path.exists(doc.file_path):
+        with get_session() as session:
+            repo = DocumentRepository(session)
+            service = DocumentService(repo)
             try:
-                with open(doc.file_path, "r", encoding="utf-8", errors="ignore") as f:
-                    snippet = f.read(3000)
-                    self.text_preview.setPlainText(snippet or f"Binary Document ({os.path.basename(doc.file_path)}). Ingested into local FAISS Vector Index.")
+                doc = service.get_document(doc_id)
             except Exception:
-                self.text_preview.setPlainText(f"File Path: {doc.file_path}\nStatus: Ingested & FAISS Vector Index Active.")
-        else:
-            self.text_preview.setPlainText("Document file not found on local disk.")
+                return
+
+            self.doc_title_lbl.setText(doc.file_name)
+            sha_hash = compute_sha256(doc.file_path) if os.path.exists(doc.file_path) else "N/A"
+            self.hash_info_lbl.setText(f"SHA-256 Anti-Tamper Evidence Hash:\n{sha_hash}")
+
+            if os.path.exists(doc.file_path):
+                try:
+                    with open(doc.file_path, "r", encoding="utf-8", errors="ignore") as f:
+                        snippet = f.read(3000)
+                        self.text_preview.setPlainText(snippet or f"Binary Document ({os.path.basename(doc.file_path)}). Ingested into local FAISS Vector Index.")
+                except Exception:
+                    self.text_preview.setPlainText(f"File Path: {doc.file_path}\nStatus: Ingested & FAISS Vector Index Active.")
+            else:
+                self.text_preview.setPlainText("Document file not found on local disk.")
 
     def browse_files(self, file_paths=None):
-        from security.security_manager import SecurityManager
-        from security.rbac import Permission
         sm = SecurityManager()
         if sm.current_session and not sm.check_permission(Permission.UPLOAD_DOCUMENTS):
             QMessageBox.warning(self, "Access Denied", "Your role does not have permission to upload documents.")
@@ -381,22 +393,18 @@ class DocumentUploadWidget(QWidget):
             os.makedirs(dest_dir, exist_ok=True)
             uploaded_count = 0
             
-            for file_path in files:
-                if not os.path.exists(file_path): continue
-                filename = os.path.basename(file_path)
-                dest_path = os.path.join(dest_dir, filename)
-                shutil.copy(file_path, dest_path)
+            with get_session() as session:
+                repo = DocumentRepository(session)
+                service = DocumentService(repo)
+                for file_path in files:
+                    if not os.path.exists(file_path): continue
+                    filename = os.path.basename(file_path)
+                    dest_path = os.path.join(dest_dir, filename)
+                    shutil.copy(file_path, dest_path)
+                    
+                    service.upload_audit_document(audit_id=proj_id, file_path=dest_path, doc_type="Uploaded")
+                    uploaded_count += 1
                 
-                doc = Document(
-                    audit_id=proj_id,
-                    file_path=dest_path,
-                    file_name=filename,
-                    doc_type="Uploaded"
-                )
-                self.session.add(doc)
-                uploaded_count += 1
-                
-            self.session.commit()
             self.load_uploaded_files()
             if uploaded_count > 0:
                 QMessageBox.information(self, "Upload Success", f"Successfully uploaded {uploaded_count} document(s) with SHA-256 evidence hashing.")
@@ -405,12 +413,13 @@ class DocumentUploadWidget(QWidget):
         proj_id = self.project_combo.currentData()
         if proj_id is None: return
         
-        docs = self.session.query(Document).filter_by(audit_id=proj_id).filter(Document.doc_type != "Ingested").all()
-        if not docs:
-            QMessageBox.information(self, "Up to Date", "All documents in this project are already processed and indexed!")
-            return
-            
-        doc_ids = [d.id for d in docs]
+        with get_session() as session:
+            docs = session.query(Document).filter_by(audit_id=proj_id).filter(Document.doc_type != "Ingested").all()
+            if not docs:
+                QMessageBox.information(self, "Up to Date", "All documents in this project are already processed and indexed!")
+                return
+                
+            doc_ids = [d.id for d in docs]
         
         self.progress_bar.setVisible(True)
         self.btn_process.setEnabled(False)
@@ -435,5 +444,4 @@ class DocumentUploadWidget(QWidget):
             QMessageBox.critical(self, "Error", "AI Document Ingestion Failed.")
 
     def closeEvent(self, event):
-        self.session.close()
         event.accept()

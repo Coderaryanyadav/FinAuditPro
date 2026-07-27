@@ -5,6 +5,8 @@ import logging
 from typing import Dict, Any, Generator, Optional
 from core.exceptions import FinAuditError
 
+from core.config import config
+
 logger = logging.getLogger(__name__)
 
 class OllamaClientError(FinAuditError):
@@ -15,8 +17,8 @@ class OllamaClient:
     Handles robust communication with the local Ollama daemon.
     Automatically detects installed local models (llama3.2, qwen2.5-coder, etc.).
     """
-    def __init__(self, base_url: str = "http://localhost:11434", model: Optional[str] = None):
-        self.base_url = base_url
+    def __init__(self, base_url: Optional[str] = None, model: Optional[str] = None):
+        self.base_url = base_url or config.ollama_host
         self.timeout = 120  # 2 minutes for deep audit reasoning
         self.model = model or self._auto_detect_model()
 

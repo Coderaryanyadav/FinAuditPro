@@ -41,6 +41,14 @@ class TestDeploymentSystem(unittest.TestCase):
             if os.path.exists(temp_db):
                 os.remove(temp_db)
 
+    def test_pyinstaller_spec_validity(self):
+        spec_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "FinAuditPro.spec")
+        self.assertTrue(os.path.exists(spec_path))
+        with open(spec_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("src/main.py", content)
+        self.assertIn("('src/data', 'data')", content)
+
 
 if __name__ == "__main__":
     unittest.main()

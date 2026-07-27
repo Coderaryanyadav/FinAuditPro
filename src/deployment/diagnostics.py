@@ -4,7 +4,7 @@ Performs pre-flight checks on Python runtime, Qt environment, local Ollama LLM d
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 import sys
 import os
 import shutil
@@ -43,11 +43,15 @@ class DiagnosticReport:
         }
 
 
+from core.config import config
+
+
 class SystemDiagnostics:
     """Performs full pre-flight health diagnostic checks."""
 
     @classmethod
-    def run_diagnostics(cls, ollama_url: str = "http://localhost:11434") -> DiagnosticReport:
+    def run_diagnostics(cls, ollama_url: Optional[str] = None) -> DiagnosticReport:
+        ollama_url = ollama_url or config.ollama_host
         issues = []
 
         # 1. OS & Python

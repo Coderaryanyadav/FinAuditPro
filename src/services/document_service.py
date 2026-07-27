@@ -43,6 +43,22 @@ class DocumentService:
         """Get all documents for a specific engagement."""
         return self.document_repo.get_by_engagement_id(engagement_id)
 
+    def get_audit_documents(self, audit_id: int) -> List[Document]:
+        """Get all documents for a specific audit project."""
+        return self.document_repo.get_by_audit_id(audit_id)
+
+    def upload_audit_document(self, audit_id: int, file_path: str, doc_type: str = "Uploaded") -> Document:
+        """Register a document for an audit project after validating file existence."""
+        if not os.path.exists(file_path):
+            raise ValidationError(f"File does not exist at path: {file_path}")
+        file_name = os.path.basename(file_path)
+        return self.document_repo.create(
+            audit_id=audit_id,
+            file_name=file_name,
+            file_path=file_path,
+            doc_type=doc_type
+        )
+
     def mark_as_vectorized(self, document_id: int) -> None:
         """Update status once AI pipeline finishes processing."""
         self.document_repo.mark_vectorized(document_id)

@@ -11,6 +11,13 @@ from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QFont, QColor
 from ai.workers import OllamaWorker
 from sqlalchemy.exc import SQLAlchemyError
+from database.database import get_session
+from database.models import AuditProject, Document
+from database.repositories.document_repo import DocumentRepository
+from database.repositories.working_paper_repo import WorkingPaperRepository
+from services.document_service import DocumentService
+from services.finding_service import FindingService
+from services.working_paper_service import WorkingPaperService
 
 PROMPT_LIBRARY = [
     ("📋 CARO 2020 Clause (ii) Inventory", "Analyze uploaded inventory sheets and physical verification records under CARO 2020 Clause (ii). Highlight any discrepancies > 10%."),
@@ -83,6 +90,7 @@ class AIAuditWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.setStyleSheet("background-color: #f8fafc;")
+        
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
@@ -90,12 +98,12 @@ class AIAuditWidget(QWidget):
         # 1. Header
         header = QFrame()
         header.setFixedHeight(50)
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
+        header.setObjectName("headerBar")
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(24, 0, 24, 0)
         
         title = QLabel("AI Audit Copilot & Anomalies Detector")
-        title.setStyleSheet("color: #0f172a; font-size: 15px; font-weight: bold; border: none;")
+        title.setObjectName("headerTitle")
         header_layout.addWidget(title)
         header_layout.addStretch()
         
@@ -301,28 +309,24 @@ class AIAuditWidget(QWidget):
 
     def load_active_document_view(self):
         try:
-            from database.database import SessionLocal
-            from database.models import Document
-            session = SessionLocal()
-            doc = session.query(Document).order_by(Document.id.desc()).first()
-            if doc and os.path.exists(doc.file_path):
-                with open(doc.file_path, "r", errors="ignore") as f:
-                    content = f.read(1500)
-                self.doc_content.setText(f"<b>ACTIVE DOCUMENT: {doc.file_name}</b><br/><br/>" + content.replace("\n", "<br/>"))
-            else:
-                self.doc_content.setText("<b>NO DOCUMENT INDEXED</b><br/><br/>Upload client Trial Balance or Financial Statements to view RAG context.")
-            session.close()
+            with get_session() as session:
+                doc = session.query(Document).order_by(Document.id.desc()).first()
+                if doc and os.path.exists(doc.file_path):
+                    with open(doc.file_path, "r", errors="ignore") as f:
+                        content = f.read(1500)
+                    self.doc_content.setText(f"<b>ACTIVE DOCUMENT: {doc.file_name}</b><br/><br/>" + content.replace("\n", "<br/>"))
+                else:
+                    self.doc_content.setText("<b>NO DOCUMENT INDEXED</b><br/><br/>Upload client Trial Balance or Financial Statements to view RAG context.")
         except Exception as e:
             self.doc_content.setText(f"Document load status: {e}")
 
     def load_database_findings(self):
         try:
-            from database.database import SessionLocal
-            from database.models import Finding
-            session = SessionLocal()
             active_id = getattr(self, 'active_engagement_id', None)
-            findings = session.query(Finding).filter_by(audit_id=active_id).all() if active_id else session.query(Finding).all()
-            session.close()
+            with get_session() as session:
+                wp_repo = WorkingPaperRepository(session)
+                finding_service = FindingService(wp_repo)
+                findings = finding_service.get_findings_by_audit_id(active_id) if active_id else finding_service.get_all_findings()
 
             if not findings:
                 empty_card = QFrame()
@@ -356,35 +360,25 @@ class AIAuditWidget(QWidget):
 
     def add_finding_to_working_paper(self, title, desc, evidence):
         try:
-            from database.database import SessionLocal
-            from database.models import WorkingPaper, AuditProject
-            session = SessionLocal()
             active_id = getattr(self, 'active_engagement_id', None)
-            if not active_id:
-                proj = session.query(AuditProject).order_by(AuditProject.id.desc()).first()
-                if proj: active_id = proj.id
+            with get_session() as session:
+                if not active_id:
+                    proj = session.query(AuditProject).order_by(AuditProject.id.desc()).first()
+                    if proj: active_id = proj.id
 
-            if active_id:
-                wp = session.query(WorkingPaper).filter_by(audit_id=active_id).first()
-                if not wp:
-                    from database.models import WorkingPaperIndex
-                    wp_idx = session.query(WorkingPaperIndex).filter_by(engagement_id=active_id).first()
-                    if not wp_idx:
-                        wp_idx = WorkingPaperIndex(engagement_id=active_id, ref_code="A-100", title="Audit Planning & General Index")
-                        session.add(wp_idx)
-                        session.flush()
-                    wp = WorkingPaper(audit_id=active_id, index_id=wp_idx.id)
-                    session.add(wp)
-                wp.observation = f"{wp.observation or ''}\n• [AI Finding] {title}: {desc}".strip()
-                wp.evidence = f"{wp.evidence or ''}\n• {evidence}".strip()
-                session.commit()
-                QMessageBox.information(self, "Added to Working Papers", f"Successfully ingested finding '{title}' into SA 230 Working Papers!")
-            else:
-                QMessageBox.warning(self, "No Engagement", "Please select or create an audit project first.")
-            session.close()
+                if active_id:
+                    wp_repo = WorkingPaperRepository(session)
+                    wp_service = WorkingPaperService(wp_repo)
+                    wp_service.add_observation(
+                        audit_id=active_id,
+                        observation=f"[AI Finding] {title}: {desc}",
+                        evidence=evidence
+                    )
+                    QMessageBox.information(self, "Added to Working Papers", f"Successfully ingested finding '{title}' into SA 230 Working Papers!")
+                else:
+                    QMessageBox.warning(self, "No Engagement", "Please select or create an audit project first.")
         except Exception as e:
             QMessageBox.critical(self, "Ingestion Error", f"Failed to ingest finding: {e}")
 
     def closeEvent(self, event):
-        self.session.close()
         event.accept()

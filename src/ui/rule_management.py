@@ -5,10 +5,12 @@ Provides UI interface to view, filter, enable/disable, and monitor automated aud
 
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                               QPushButton, QFrame, QTableWidget, QTableWidgetItem, 
-                              QHeaderView, QLineEdit, QComboBox, QCheckBox)
+                              QHeaderView, QLineEdit, QComboBox, QCheckBox, QMessageBox)
 from PySide6.QtCore import Qt
 from rule_engine.rule_engine import AuditRuleEngine
 from rule_engine.severity import RuleCategory, RuleSeverity
+from security.security_manager import SecurityManager
+from security.rbac import Permission
 from .styles import apply_shadow
 
 class RuleManagementWidget(QWidget):
@@ -141,9 +143,6 @@ class RuleManagementWidget(QWidget):
             row_idx += 1
 
     def toggle_rule(self, rule_id, enabled):
-        from security.security_manager import SecurityManager
-        from security.rbac import Permission
-        from PySide6.QtWidgets import QMessageBox
         sm = SecurityManager()
         if sm.current_session and not sm.check_permission(Permission.MANAGE_RULES):
             QMessageBox.warning(self, "Access Denied", "Your role does not have permission to manage audit rules.")

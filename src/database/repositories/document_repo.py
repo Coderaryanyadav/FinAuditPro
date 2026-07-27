@@ -10,14 +10,19 @@ class DocumentRepository:
         return self.session.query(Document).filter(Document.id == document_id).first()
 
     def get_by_engagement_id(self, engagement_id: int) -> List[Document]:
-        return self.session.query(Document).filter(Document.engagement_id == engagement_id).all()
+        return self.session.query(Document).filter((Document.engagement_id == engagement_id) | (Document.audit_id == engagement_id)).all()
 
-    def create(self, engagement_id: int, file_name: str, file_path: str, document_type: str = None) -> Document:
+    def get_by_audit_id(self, audit_id: int) -> List[Document]:
+        return self.session.query(Document).filter((Document.audit_id == audit_id) | (Document.engagement_id == audit_id)).all()
+
+    def create(self, engagement_id: int = None, audit_id: int = None, file_name: str = "", file_path: str = "", document_type: str = None, doc_type: str = "Uploaded") -> Document:
         document = Document(
-            engagement_id=engagement_id,
+            engagement_id=engagement_id or audit_id,
+            audit_id=audit_id or engagement_id,
             file_name=file_name,
             file_path=file_path,
-            document_type=document_type
+            document_type=document_type,
+            doc_type=doc_type
         )
         self.session.add(document)
         self.session.commit()

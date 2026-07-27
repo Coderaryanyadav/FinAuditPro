@@ -44,6 +44,15 @@ class AuthenticationService:
         if not is_valid:
             raise AuthenticationError("Invalid username or password.")
 
+        # Transparently upgrade legacy or low-iteration password hashes
+        if PasswordHasher.needs_rehash(user.password_hash):
+            user.password_hash = PasswordHasher.hash_password(password)
+            if hasattr(self.user_repo, 'session') and self.user_repo.session:
+                try:
+                    self.user_repo.session.commit()
+                except Exception:
+                    pass
+
         if not user.is_active:
             raise AuthenticationError("User account is inactive.")
 

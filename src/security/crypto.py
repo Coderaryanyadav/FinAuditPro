@@ -1,6 +1,17 @@
 """
 AES-256 File Encryption & Secure Storage Engine for FinAuditPro.
 Provides AES-256 local file encryption, secure temp files, and automatic disk cleanup.
+
+THREAT MODEL & KEY DERIVATION ARCHITECTURE:
+1. Installation Key Mode (Default):
+   - Derives AES-256 key from a 256-bit secret stored in `.crypto_key`.
+   - Threat Model: Protects data against unauthorized remote extraction and cold disk access outside the app data folder.
+   - Limitation: Any local OS user with read permissions to `.crypto_key` can derive the encryption key.
+
+2. Master Password Derived Key Mode (User Opt-In / High Security):
+   - Derives AES-256 key directly from user login or master password using PBKDF2-HMAC-SHA256 (600,000 iterations).
+   - Threat Model: Protects against full local machine compromise and physical disk theft.
+   - Security Guarantee: No master key is written to `.crypto_key`. Audit records cannot be decrypted without the user's password.
 """
 
 import os
@@ -15,7 +26,13 @@ logger = logging.getLogger(__name__)
 
 
 def _get_or_create_installation_key(data_dir: str) -> bytes:
-    """Retrieve or generate a 256-bit cryptographically secure installation key secret."""
+    """
+    Retrieve or generate a 256-bit cryptographically secure installation key secret.
+    
+    THREAT MODEL WARNING:
+    This key is persisted to `.crypto_key` for machine-bound offline execution without a user password.
+    Users requiring protection against local file access should initialize AESCryptoEngine with master_password.
+    """
     key_file = os.path.join(data_dir, ".crypto_key")
     if os.path.exists(key_file):
         try:
@@ -44,25 +61,32 @@ def _get_or_create_installation_key(data_dir: str) -> bytes:
     return new_key
 
 
+from core.config import config
+
+
 class AESCryptoEngine:
     """Provides AES-256 file encryption and decryption for sensitive audit records."""
 
+    ITERATIONS = config.pbkdf2_iterations
+
     def __init__(self, master_password: Optional[str] = None, salt: Optional[bytes] = None):
-        try:
-            from database.database import DATA_DIR
-            data_dir = DATA_DIR
-        except (OSError, ValueError):
-            data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
-            os.makedirs(data_dir, exist_ok=True)
-        
+        data_dir = config.data_dir
+        os.makedirs(data_dir, exist_ok=True)
+
+        self.is_master_password_protected = bool(master_password)
+
         if master_password:
+            # High-Security Mode: Key derived directly from master password
             secret_bytes = master_password.encode("utf-8")
+            salt_filename = ".master_crypto_salt"
         else:
+            # Installation Mode: Machine-bound secret key
             secret_bytes = _get_or_create_installation_key(data_dir)
+            salt_filename = ".crypto_salt"
 
         if salt is None:
             os.makedirs(data_dir, exist_ok=True)
-            salt_file = os.path.join(data_dir, ".crypto_salt")
+            salt_file = os.path.join(data_dir, salt_filename)
             if os.path.exists(salt_file):
                 try:
                     with open(salt_file, "rb") as f:
@@ -80,7 +104,7 @@ class AESCryptoEngine:
         else:
             self.salt = salt
 
-        self.key = hashlib.pbkdf2_hmac("sha256", secret_bytes, self.salt, 100000)
+        self.key = hashlib.pbkdf2_hmac("sha256", secret_bytes, self.salt, self.ITERATIONS)
         self._fernet = None
         self._init_fernet()
 

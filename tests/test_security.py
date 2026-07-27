@@ -26,29 +26,82 @@ class TestSecurityArchitecture(unittest.TestCase):
     def test_password_hasher(self):
         password = "SecretPassword123!"
         hashed = PasswordHasher.hash_password(password)
+        self.assertTrue(hashed.startswith("pbkdf2$600000$"))
         self.assertTrue(PasswordHasher.verify_password(password, hashed))
         self.assertFalse(PasswordHasher.verify_password("WrongPassword", hashed))
+        self.assertFalse(PasswordHasher.needs_rehash(hashed))
+
+        # Test legacy unversioned hash format (salt$hash with 100k iterations)
+        import hashlib, os
+        salt = os.urandom(16)
+        legacy_bytes = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 100000)
+        legacy_hash = f"{salt.hex()}${legacy_bytes.hex()}"
+        self.assertTrue(PasswordHasher.verify_password(password, legacy_hash))
+        self.assertTrue(PasswordHasher.needs_rehash(legacy_hash))
 
     def test_auth_manager_session(self):
-        auth = AuthManager(session_timeout_minutes=60)
-        session = auth.create_session(user_id=1, user_email="ca@example.com", role=UserRole.AUDIT_PARTNER.value)
-        self.assertIsNotNone(session.token_str)
-        
-        val_session = auth.validate_session(session.token_str)
-        self.assertIsNotNone(val_session)
-        self.assertEqual(val_session.user_email, "ca@example.com")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            storage_file = os.path.join(temp_dir, "sessions.dat")
+            auth = AuthManager(session_timeout_minutes=60, storage_path=storage_file)
+            session = auth.create_session(user_id=1, user_email="ca@example.com", role=UserRole.AUDIT_PARTNER.value)
+            self.assertIsNotNone(session.token_str)
+            
+            val_session = auth.validate_session(session.token_str)
+            self.assertIsNotNone(val_session)
+            self.assertEqual(val_session.user_email, "ca@example.com")
+
+    def test_auth_manager_session_persistence(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            storage_file = os.path.join(temp_dir, "sessions.dat")
+            auth1 = AuthManager(session_timeout_minutes=60, storage_path=storage_file)
+            s1 = auth1.create_session(user_id=42, user_email="persisted@example.com", role=UserRole.AUDIT_PARTNER.value, is_remember_me=True)
+            
+            # Restart AuthManager pointing to same storage file
+            auth2 = AuthManager(session_timeout_minutes=60, storage_path=storage_file)
+            s2 = auth2.validate_session(s1.token_str)
+            self.assertIsNotNone(s2)
+            self.assertEqual(s2.user_email, "persisted@example.com")
+            self.assertTrue(s2.is_remember_me)
+
+            # Test revocation deletes from disk
+            auth2.revoke_session(s1.token_str)
+            auth3 = AuthManager(session_timeout_minutes=60, storage_path=storage_file)
+            self.assertIsNone(auth3.validate_session(s1.token_str))
+
+    def test_session_tampering_protection(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            storage_file = os.path.join(temp_dir, "sessions.dat")
+            auth1 = AuthManager(session_timeout_minutes=60, storage_path=storage_file)
+            s1 = auth1.create_session(user_id=99, user_email="tamper@example.com", role=UserRole.ADMINISTRATOR.value)
+            
+            # Corrupt storage file with invalid payload
+            with open(storage_file, "wb") as f:
+                f.write(b"TAMPERED_INVALID_CYPHERTEXT_BYTES")
+
+            # Restart AuthManager — should handle corrupt data gracefully without crash
+            auth2 = AuthManager(session_timeout_minutes=60, storage_path=storage_file)
+            self.assertIsNone(auth2.validate_session(s1.token_str))
 
     def test_aes_crypto_engine(self):
-        engine = AESCryptoEngine(master_password="TestMasterKey")
+        # Master Password Mode
+        engine_master = AESCryptoEngine(master_password="TestMasterKey")
+        self.assertTrue(engine_master.is_master_password_protected)
         original_data = b"Sensitive Audit Data Records"
-        if engine._fernet is None:
-            with self.assertRaises(RuntimeError):
-                engine.encrypt_bytes(original_data)
-        else:
-            encrypted = engine.encrypt_bytes(original_data)
-            self.assertNotEqual(encrypted, original_data)
-            decrypted = engine.decrypt_bytes(encrypted)
-            self.assertEqual(decrypted, original_data)
+        encrypted = engine_master.encrypt_bytes(original_data)
+        self.assertNotEqual(encrypted, original_data)
+        decrypted = engine_master.decrypt_bytes(encrypted)
+        self.assertEqual(decrypted, original_data)
+
+        # Installation Key Mode (Default)
+        engine_inst = AESCryptoEngine()
+        self.assertFalse(engine_inst.is_master_password_protected)
+        enc_inst = engine_inst.encrypt_bytes(original_data)
+        dec_inst = engine_inst.decrypt_bytes(enc_inst)
+        self.assertEqual(dec_inst, original_data)
+
+        # Cross-key decryption failure test (Master Key != Installation Key)
+        with self.assertRaises(Exception):
+            engine_inst.decrypt_bytes(encrypted)
 
     def test_immutable_audit_logger(self):
         logger = ImmutableAuditLogger()

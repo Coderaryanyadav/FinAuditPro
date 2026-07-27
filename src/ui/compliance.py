@@ -9,9 +9,11 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                                QHeaderView, QTabWidget, QComboBox, QMessageBox)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QColor
-from database.database import SessionLocal
+from database.database import get_session
 from database.models import AuditProject, Finding, Client
-from .styles import apply_shadow
+from database.repositories.compliance_repo import ComplianceRepository
+from services.compliance_service import ComplianceService
+from .styles import apply_shadow, EmptyStateWidget, LoadingStateWidget, ErrorStateWidget
 from sqlalchemy.exc import SQLAlchemyError
 
 CARO_2020_CLAUSES = [
@@ -53,7 +55,6 @@ class ComplianceWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.setStyleSheet("background-color: #f8fafc;")
-        self.session = SessionLocal()
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -167,5 +168,4 @@ class ComplianceWidget(QWidget):
         pass
 
     def closeEvent(self, event):
-        self.session.close()
         event.accept()

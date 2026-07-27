@@ -1,7 +1,10 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
-                              QPushButton, QFrame, QTableWidget, QTableWidgetItem, 
-                              QHeaderView, QLineEdit, QComboBox, QMessageBox)
+                               QPushButton, QFrame, QTableWidget, QTableWidgetItem, 
+                               QHeaderView, QLineEdit, QComboBox, QMessageBox)
 from PySide6.QtCore import Qt
+from database.database import get_session
+from database.repositories.working_paper_repo import WorkingPaperRepository
+from services.finding_service import FindingService
 from .styles import apply_shadow
 
 class GSTVerificationWidget(QWidget):
@@ -115,15 +118,16 @@ class GSTVerificationWidget(QWidget):
         self.table.setShowGrid(False)
         self.table.verticalHeader().setVisible(False)
         
-        from database.database import SessionLocal
-        from database.models import Finding
-        session = SessionLocal()
-        try:
-            active_id = getattr(self, 'active_engagement_id', None)
+        active_id = getattr(self, 'active_engagement_id', None)
+        with get_session() as session:
+            wp_repo = WorkingPaperRepository(session)
+            finding_service = FindingService(wp_repo)
             if active_id:
-                gst_findings = session.query(Finding).filter(Finding.audit_id == active_id, Finding.description.ilike('%GST%')).all()
+                all_f = finding_service.get_findings_by_audit_id(active_id)
             else:
-                gst_findings = session.query(Finding).filter(Finding.description.ilike('%GST%')).all()
+                all_f = finding_service.get_all_findings()
+            gst_findings = [f for f in all_f if 'gst' in str(f.description or '').lower()]
+            
             if gst_findings:
                 self.table.setRowCount(len(gst_findings))
                 for r, f in enumerate(gst_findings):
@@ -132,11 +136,9 @@ class GSTVerificationWidget(QWidget):
                     self.table.setItem(r, 2, QTableWidgetItem(f"₹ {f.financial_impact or 0:.2f}"))
                     self.table.setItem(r, 3, QTableWidgetItem("₹ 0.00"))
                     self.table.setItem(r, 4, QTableWidgetItem(f"₹ {f.financial_impact or 0:.2f}"))
-                    self.table.setItem(r, 5, QTableWidgetItem(f.severity))
+                    self.table.setItem(r, 5, QTableWidgetItem(f.severity or "Medium"))
             else:
                 self.table.setRowCount(0)
-        finally:
-            session.close()
                 
         table_v.addWidget(self.table)
         content_layout.addWidget(table_card)

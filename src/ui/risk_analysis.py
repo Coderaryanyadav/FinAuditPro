@@ -9,9 +9,13 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                                QTableWidgetItem, QHeaderView, QComboBox, QLineEdit, QFormLayout)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QColor
-from database.database import SessionLocal
+from database.database import get_session
 from database.models import Finding, AuditProject
-from .styles import apply_shadow
+from database.repositories.risk_repo import RiskRepository
+from database.repositories.working_paper_repo import WorkingPaperRepository
+from services.risk_service import RiskService
+from services.finding_service import FindingService
+from .styles import apply_shadow, EmptyStateWidget, ErrorStateWidget, LoadingStateWidget
 from sqlalchemy.exc import SQLAlchemyError
 
 class RiskAnalysisWidget(QWidget):
@@ -20,7 +24,6 @@ class RiskAnalysisWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.setStyleSheet("background-color: #f8fafc;")
-        self.session = SessionLocal()
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -158,29 +161,39 @@ class RiskAnalysisWidget(QWidget):
 
     def load_findings(self):
         active_id = getattr(self, 'active_engagement_id', None)
-        findings = self.session.query(Finding).filter_by(audit_id=active_id).all() if active_id else self.session.query(Finding).all()
-        self.table.setRowCount(len(findings))
+        try:
+            with get_session() as session:
+                wp_repo = WorkingPaperRepository(session)
+                finding_service = FindingService(wp_repo)
+                findings = finding_service.get_findings_by_audit_id(active_id) if active_id else finding_service.get_all_findings()
+                
+                if not findings:
+                    self.table.setRowCount(0)
+                    return
 
-        for r, f in enumerate(findings):
-            parts = [p.strip() for p in f.description.split("|")]
-            issue = parts[0] if parts else f.description
-            amount_str = parts[1] if len(parts) > 1 else "₹ 0.00"
-            rec = parts[3] if len(parts) > 3 else "Substantive audit testing required"
+                self.table.setRowCount(len(findings))
 
-            self.table.setItem(r, 0, QTableWidgetItem(issue))
-            
-            risk_item = QTableWidgetItem(f.risk_level or "Medium")
-            risk_item.setFont(QFont("Inter", 9, QFont.Weight.Bold))
-            self.table.setItem(r, 1, risk_item)
+                for r, f in enumerate(findings):
+                    parts = [p.strip() for p in f.description.split("|")]
+                    issue = parts[0] if parts else f.description
+                    amount_str = parts[1] if len(parts) > 1 else "₹ 0.00"
+                    rec = parts[3] if len(parts) > 3 else "Substantive audit testing required"
 
-            self.table.setItem(r, 2, QTableWidgetItem(amount_str))
+                    self.table.setItem(r, 0, QTableWidgetItem(issue))
+                    
+                    risk_item = QTableWidgetItem(f.risk_level or "Medium")
+                    risk_item.setFont(QFont("Inter", 9, QFont.Weight.Bold))
+                    self.table.setItem(r, 1, risk_item)
 
-            mat_status = "⚠️ Material Finding" if f.risk_level == "High" else "Pass (Below PM)"
-            mat_item = QTableWidgetItem(mat_status)
-            self.table.setItem(r, 3, mat_item)
+                    self.table.setItem(r, 2, QTableWidgetItem(amount_str))
 
-            self.table.setItem(r, 4, QTableWidgetItem(rec))
+                    mat_status = "⚠️ Material Finding" if f.risk_level == "High" else "Pass (Below PM)"
+                    mat_item = QTableWidgetItem(mat_status)
+                    self.table.setItem(r, 3, mat_item)
+
+                    self.table.setItem(r, 4, QTableWidgetItem(rec))
+        except (SQLAlchemyError, Exception):
+            self.table.setRowCount(0)
 
     def closeEvent(self, event):
-        self.session.close()
         event.accept()

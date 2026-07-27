@@ -127,6 +127,9 @@ QPushButton {
 QPushButton#primaryButton {
     background-color: #0ea5e9;
     color: #ffffff;
+    font-weight: bold;
+    border-radius: 6px;
+    padding: 8px 14px;
 }
 QPushButton#primaryButton:hover {
     background-color: #0284c7;
@@ -135,7 +138,77 @@ QPushButton#primaryButton:pressed {
     background-color: #0369a1;
 }
 
-/* Sidebar Navigation Buttons - FAIGN Dark Glassmorphism */
+QPushButton#secondaryButton {
+    background-color: #0284c7;
+    color: #ffffff;
+    font-weight: bold;
+    border-radius: 6px;
+    padding: 8px 14px;
+}
+QPushButton#secondaryButton:hover {
+    background-color: #0369a1;
+}
+
+QPushButton#outlineButton {
+    background-color: #ffffff;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 6px 12px;
+}
+QPushButton#outlineButton:hover {
+    background-color: #f1f5f9;
+}
+
+/* Header Bars & Titles */
+QFrame#headerBar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+}
+QLabel#headerTitle {
+    font-size: 18px;
+    font-weight: bold;
+    color: #0f172a;
+}
+QLabel#headerSubtitle {
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* Tab Widgets */
+QTabWidget#styledTabWidget::pane {
+    border: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 8px;
+}
+QTabWidget#styledTabWidget QTabBar::tab {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 8px 16px;
+    font-weight: bold;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+QTabWidget#styledTabWidget QTabBar::tab:selected {
+    background: #0ea5e9;
+    color: white;
+}
+
+/* Cards & Inputs */
+QFrame#cardFrame {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+QLineEdit#formInput, QComboBox#formCombo {
+    padding: 6px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #0f172a;
+}
+
+/* Sidebar Navigation Buttons - FAANG Dark Glassmorphism */
 QPushButton#navButton {
     background-color: transparent;
     color: #94a3b8;

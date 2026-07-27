@@ -50,6 +50,16 @@ class SecurityManager:
         self.audit_logger.log_action(email, role.value, "LOGIN_SUCCESS", f"Session token created: {session.token_str[:8]}...")
         return session
 
+    def enable_master_password_encryption(self, master_password: str) -> None:
+        """Opt-in to master-password derived AES-256 key mode for high-security isolation."""
+        self.crypto_engine = AESCryptoEngine(master_password=master_password)
+        self.audit_logger.log_action(
+            user_email=self.current_session.user_email if self.current_session else "System",
+            role=self.current_session.role if self.current_session else "System",
+            action="ENABLE_MASTER_KEY_ENCRYPTION",
+            details="AES-256 key engine upgraded to user master-password derived key"
+        )
+
     def check_permission(self, permission: Permission) -> bool:
         """Check if current active user role possesses permission."""
         if not self.current_session:

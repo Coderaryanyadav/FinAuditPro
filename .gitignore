@@ -1,16 +1,14 @@
-# Byte-compiled / optimized / DLL files
+# ─── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
+*.pyd
 
-# Distribution / packaging
-.Python
+# ─── Distribution & Build ──────────────────────────────────────────────────────
 build/
-develop-eggs/
 dist/
+develop-eggs/
 downloads/
 eggs/
 .eggs/
@@ -26,11 +24,22 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+# ─── PyInstaller ───────────────────────────────────────────────────────────────
+*.manifest
+*.spec
+# Keep FinAuditPro.spec since it's the configured release spec
+!FinAuditPro.spec
 
-# Unit test / coverage reports
+# ─── Virtual Environments ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.Python
+
+# ─── Testing & Coverage ────────────────────────────────────────────────────────
 htmlcov/
 .tox/
 .nox/
@@ -45,39 +54,47 @@ coverage.xml
 .pytest_cache/
 cover/
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# IDEs
+# ─── IDEs ──────────────────────────────────────────────────────────────────────
 .idea/
 .vscode/
 *.swp
 *.swo
+*.suo
+*.user
 .DS_Store
+Thumbs.db
 
-# PyInstaller
-*.manifest
-*.spec
-
-# Database
+# ─── Database & WAL ────────────────────────────────────────────────────────────
 *.db
 *.db-shm
 *.db-wal
 *.sqlite3
+src/data/
 
-# Data/Outputs
-logs/
-temp/
-*.xlsx
-*.csv
+# ─── Application Secrets ───────────────────────────────────────────────────────
 .crypto_key
 .crypto_salt
 *.crypto_key
 *.crypto_salt
+.env
+*.env
 
+# ─── Runtime Logs ──────────────────────────────────────────────────────────────
+logs/
+*.log
+
+# ─── Generated Report Output Files ────────────────────────────────────────────
+REP-*.xlsx
+REP-*.csv
+REP-*.pdf
+data/backups/
+data/documents/
+
+# ─── OS & Temp ─────────────────────────────────────────────────────────────────
+scratch/
+temp/
+tmp/
+~/
+
+# ─── Python version pin ────────────────────────────────────────────────────────
+# (keep .python-version for reproducible environments)

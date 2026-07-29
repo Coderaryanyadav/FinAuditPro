@@ -180,18 +180,19 @@ class AuditStatusDelegate(QStyledItemDelegate):
             
         painter.restore()
 
-# ==============================================================================
-# REUSABLE ENTERPRISE WIDGET COMPONENTS
-# ==============================================================================
+from .icons import get_app_icon, get_app_pixmap
 
 class SidebarButton(QPushButton):
-    """Modern Enterprise Sidebar Button with active indicator tab."""
-    def __init__(self, text, icon_str="", is_active=False, parent=None):
+    """Modern Enterprise Sidebar Button with active indicator tab & SVG QIcon."""
+    def __init__(self, text, icon_name="", is_active=False, parent=None):
         super().__init__(parent)
         self.setObjectName("navButton")
         self.setFixedHeight(42)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setText(f"  {icon_str}   {text}" if icon_str else f"  {text}")
+        self.setText(f"  {text}")
+        if icon_name:
+            self.setIcon(get_app_icon(icon_name, color="#94a3b8", size=18))
+            self.setIconSize(QSize(18, 18))
         self.set_active(is_active)
 
     def set_active(self, is_active: bool):
@@ -288,10 +289,15 @@ class MetricCard(QFrame):
         self.title_lbl = QLabel(title)
         self.title_lbl.setStyleSheet("color: #64748b; font-size: 12px; font-weight: 700; border: none;")
         
-        self.icon_lbl = QLabel(icon_str)
+        self.icon_lbl = QLabel()
         self.icon_lbl.setFixedSize(30, 30)
         self.icon_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.icon_lbl.setStyleSheet(f"background-color: {badge_bg}; color: {badge_fg}; border-radius: 8px; font-size: 13px; border: none;")
+        self.icon_lbl.setStyleSheet(f"background-color: {badge_bg}; border-radius: 8px; border: none;")
+        if icon_str and icon_str in ("clients", "documents", "risk", "shield", "dashboard", "ai", "reports", "check", "lock"):
+            self.icon_lbl.setPixmap(get_app_pixmap(icon_str, color=badge_fg, size=16))
+        else:
+            self.icon_lbl.setText(icon_str)
+            self.icon_lbl.setStyleSheet(f"background-color: {badge_bg}; color: {badge_fg}; border-radius: 8px; font-size: 13px; border: none;")
         
         h_layout.addWidget(self.title_lbl)
         h_layout.addStretch()
@@ -615,20 +621,20 @@ class DashboardWindow(QWidget):
             nav_layout.addWidget(lbl)
             
         add_section_label("MAIN MENU")
-        self.btn_dashboard = SidebarButton("Dashboard", "", True)
-        self.btn_clients = SidebarButton("Client Management", "")
-        self.btn_upload = SidebarButton("Upload Documents", "")
+        self.btn_dashboard = SidebarButton("Dashboard", "dashboard", True)
+        self.btn_clients = SidebarButton("Client Management", "clients")
+        self.btn_upload = SidebarButton("Upload Documents", "documents")
         nav_layout.addWidget(self.btn_dashboard)
         nav_layout.addWidget(self.btn_clients)
         nav_layout.addWidget(self.btn_upload)
         
         add_section_label("AUDIT WORKSPACE")
-        self.btn_ai = SidebarButton("AI Audit Analysis", "")
-        self.btn_statements = SidebarButton("Financial Statements", "")
-        self.btn_gst = SidebarButton("GST Verification", "")
-        self.btn_compliance = SidebarButton("Compliance Monitoring", "")
-        self.btn_risk = SidebarButton("Risk Analysis", "")
-        self.btn_working_papers = SidebarButton("Working Papers", "")
+        self.btn_ai = SidebarButton("AI Audit Analysis", "ai")
+        self.btn_statements = SidebarButton("Financial Statements", "statements")
+        self.btn_gst = SidebarButton("GST Verification", "check")
+        self.btn_compliance = SidebarButton("Compliance Monitoring", "compliance")
+        self.btn_risk = SidebarButton("Risk Analysis", "risk")
+        self.btn_working_papers = SidebarButton("Working Papers", "papers")
         nav_layout.addWidget(self.btn_ai)
         nav_layout.addWidget(self.btn_statements)
         nav_layout.addWidget(self.btn_gst)
@@ -637,9 +643,9 @@ class DashboardWindow(QWidget):
         nav_layout.addWidget(self.btn_working_papers)
 
         add_section_label("SETTINGS & LOGS")
-        self.btn_reports = SidebarButton("Reports", "")
-        self.btn_history = SidebarButton("Audit History", "")
-        self.btn_settings = SidebarButton("Settings", "")
+        self.btn_reports = SidebarButton("Reports", "reports")
+        self.btn_history = SidebarButton("Audit History", "history")
+        self.btn_settings = SidebarButton("Settings", "settings")
         nav_layout.addWidget(self.btn_reports)
         nav_layout.addWidget(self.btn_history)
         nav_layout.addWidget(self.btn_settings)

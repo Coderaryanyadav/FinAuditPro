@@ -101,3 +101,20 @@ def test_history_widget(qapp):
     from ui.history import AuditHistoryWidget
     history_widget = AuditHistoryWidget()
     assert history_widget is not None
+
+def test_window_responsive_resizing(qapp):
+    """Verifies runtime window resizing reflows without layout errors or clipping."""
+    from ui.login import LoginWindow
+    from ui.dashboard import DashboardWindow
+
+    login = LoginWindow()
+    login.resize(800, 600)
+    login.resize(1920, 1080)
+    assert login.width() == 1920
+    assert login.height() == 1080
+
+    dashboard = DashboardWindow()
+    dashboard.resize(1280, 720)
+    dashboard.resize(2560, 1440)
+    assert dashboard.width() == 2560
+    assert dashboard.height() == 1440

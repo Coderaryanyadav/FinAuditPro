@@ -13,6 +13,7 @@ from database.repositories.user_repo import UserRepository
 from services.auth_service import AuthenticationService
 from security.auth import PasswordHasher
 from .styles import apply_shadow
+from .icons import get_app_pixmap
 
 class LoginWindow(QWidget):
     """Enterprise Auditor Login Window."""
@@ -62,11 +63,12 @@ class LoginWindow(QWidget):
         subtitle.setStyleSheet("font-size: 16px; font-weight: 600; color: #38bdf8; border: none; margin-bottom: 24px;")
         left_layout.addWidget(subtitle)
         
-        def create_feature_bullet(icon, text):
+        def create_feature_bullet(icon_name, text):
             row = QHBoxLayout()
             row.setSpacing(12)
-            ic_lbl = QLabel(icon)
-            ic_lbl.setStyleSheet("font-size: 16px; border: none;")
+            ic_lbl = QLabel()
+            ic_lbl.setPixmap(get_app_pixmap(icon_name, color="#38bdf8", size=16))
+            ic_lbl.setStyleSheet("border: none;")
             tx_lbl = QLabel(text)
             tx_lbl.setStyleSheet("font-size: 13px; color: #94a3b8; font-weight: 500; border: none;")
             row.addWidget(ic_lbl)
@@ -74,11 +76,11 @@ class LoginWindow(QWidget):
             row.addStretch()
             return row
 
-        left_layout.addLayout(create_feature_bullet("", "100% Local RAG & LLM Analysis (Air-Gapped)"))
+        left_layout.addLayout(create_feature_bullet("lock", "100% Local RAG & LLM Analysis (Air-Gapped)"))
         left_layout.addSpacing(10)
-        left_layout.addLayout(create_feature_bullet("", "Automated Working Paper & Audit Trail Generation"))
+        left_layout.addLayout(create_feature_bullet("bolt", "Automated Working Paper & Audit Trail Generation"))
         left_layout.addSpacing(10)
-        left_layout.addLayout(create_feature_bullet("", "Statutory, GST & Tax Reconciliation Engine"))
+        left_layout.addLayout(create_feature_bullet("statements", "Statutory, GST & Tax Reconciliation Engine"))
         left_layout.addStretch()
         
         version_lbl = QLabel("FinAuditPro Enterprise v2.4.0 • Local Machine Deployment")

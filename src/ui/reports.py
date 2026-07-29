@@ -22,6 +22,7 @@ from reporting.digital_signature import DigitalSignatureManager
 from reporting.qr_verification import QRVerificationManager
 from security.security_manager import SecurityManager
 from security.rbac import Permission
+from .styles import apply_shadow, EmptyStateWidget, LoadingStateWidget, ErrorStateWidget
 from sqlalchemy.exc import SQLAlchemyError
 from core.config import config
 

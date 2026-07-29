@@ -18,6 +18,7 @@ from database.repositories.working_paper_repo import WorkingPaperRepository
 from services.document_service import DocumentService
 from services.finding_service import FindingService
 from services.working_paper_service import WorkingPaperService
+from .styles import apply_shadow, EmptyStateWidget, LoadingStateWidget, ErrorStateWidget
 
 PROMPT_LIBRARY = [
     (" CARO 2020 Clause (ii) Inventory", "Analyze uploaded inventory sheets and physical verification records under CARO 2020 Clause (ii). Highlight any discrepancies > 10%."),

@@ -18,6 +18,7 @@ from security.security_manager import SecurityManager
 from security.rbac import Permission
 from ai.workers import OllamaWorker
 from sqlalchemy.exc import SQLAlchemyError
+from .styles import apply_shadow, EmptyStateWidget, LoadingStateWidget, ErrorStateWidget
 
 class WorkingPaperWidget(QWidget):
     """SA 230 Compliant Audit Working Paper Index & Review Manager."""

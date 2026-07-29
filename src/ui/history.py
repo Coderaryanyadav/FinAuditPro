@@ -15,7 +15,7 @@ from database.models import AuditProject, Client, AuditLog
 from database.repositories.audit_log_repo import AuditLogRepository
 from services.audit_trail_service import AuditTrailService
 from security.audit_trail import ImmutableAuditLogger
-from .styles import apply_shadow
+from .styles import apply_shadow, EmptyStateWidget, LoadingStateWidget, ErrorStateWidget
 
 class AuditHistoryWidget(QWidget):
     """Immutable Cryptographic Audit Trail & Regulator Exporter Widget."""

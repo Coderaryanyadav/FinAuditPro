@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QColor
 import requests
-from .styles import apply_shadow
+from .styles import apply_shadow, EmptyStateWidget, LoadingStateWidget, ErrorStateWidget
 from core.config import config
 
 class SettingsWidget(QWidget):

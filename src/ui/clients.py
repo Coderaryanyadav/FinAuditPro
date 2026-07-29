@@ -13,7 +13,7 @@ from PySide6.QtGui import QFont, QColor
 import re
 from database.database import SessionLocal
 from database.models import Client, AuditProject, KeyManagementPersonnel, ClientIndustry
-from .styles import apply_shadow
+from .styles import apply_shadow, EmptyStateWidget, LoadingStateWidget, ErrorStateWidget
 from sqlalchemy.exc import SQLAlchemyError
 
 class AddClientDialog(QDialog):

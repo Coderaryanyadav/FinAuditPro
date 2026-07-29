@@ -11,7 +11,7 @@ from rule_engine.rule_engine import AuditRuleEngine
 from rule_engine.severity import RuleCategory, RuleSeverity
 from security.security_manager import SecurityManager
 from security.rbac import Permission
-from .styles import apply_shadow
+from .styles import apply_shadow, EmptyStateWidget, LoadingStateWidget, ErrorStateWidget
 
 class RuleManagementWidget(QWidget):
     def __init__(self):

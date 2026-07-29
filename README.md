@@ -252,15 +252,21 @@ flowchart TD
 
 ## 🛠️ Technology Stack
 
-- **GUI**: PySide6 6.7 (Qt for Python)
-- **ORM / DB**: SQLAlchemy 2.0, SQLite with WAL mode
-- **AI**: Ollama REST API, FAISS `faiss-cpu`, SentenceTransformers
-- **OCR**: PaddleOCR, EasyOCR, Tesseract (auto-detected at runtime)
-- **PDF**: `QPdfWriter` (Qt), ReportLab `SimpleDocTemplate`
-- **Excel**: OpenPyXL
-- **Crypto**: `hashlib` PBKDF2-HMAC-SHA256, PyCryptodome AES-256-GCM
-- **Config**: Pydantic `BaseSettings` (`src/core/config.py`)
-- **Packaging**: PyInstaller (`FinAuditPro.spec`)
+| Category | Technology | Usage & Specification |
+|---|---|---|
+| **GUI Framework** | [![PySide6](https://img.shields.io/badge/PySide6-6.7-41CD52?style=flat-square&logo=qt&logoColor=white)](https://www.qt.io/) | Qt6 cross-platform desktop UI framework with dark theme styling |
+| **Database & ORM** | [![SQLite](https://img.shields.io/badge/SQLite-WAL_Mode-003B57?style=flat-square&logo=sqlite&logoColor=white)](https://www.sqlite.org/) | SQLAlchemy 2.0 ORM with Write-Ahead Logging (WAL) concurrency |
+| **Local AI Engine** | [![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-000000?style=flat-square&logo=ollama&logoColor=white)](https://ollama.ai/) | Air-gapped RAG pipeline via `llama3` / `deepseek-r1` REST API |
+| **Vector Search** | [![FAISS](https://img.shields.io/badge/FAISS-CPU-FF6F00?style=flat-square)](https://github.com/facebookresearch/faiss) | `faiss-cpu` vector store with `SentenceTransformer` embeddings |
+| **OCR Engines** | Multi-Engine OCR | Auto-fallback cascade: PaddleOCR $\rightarrow$ Tesseract $\rightarrow$ EasyOCR |
+| **PDF & Reporting** | ReportLab & QPdfWriter | High-fidelity SA 700 / SA 705 audit report generation & PDF export |
+| **Cryptography** | AES-256 & SHA-256 | PBKDF2-HMAC password hashing, encrypted vault, immutable log ledger |
+
+---
+
+> [!IMPORTANT]
+> ### 🛡️ 100% Offline & Air-Gap Compliance Guarantee
+> **FinAuditPro** is built from the ground up for strict confidentiality. It makes **zero outbound network connections**. All LLM inferences, document embeddings, vector indexing, OCR processing, and database operations execute strictly on your local workstation host.
 
 ---
 
@@ -269,17 +275,18 @@ flowchart TD
 ### Prerequisites
 
 - Python 3.11+
-- [Ollama](https://ollama.ai/) installed and running locally
+- [Ollama](https://ollama.ai/) installed and running locally (`ollama serve`)
 
 ### Installation
 
 ```bash
-# 1. Clone
+# 1. Clone the repository
 git clone https://github.com/Coderaryanyadav/FinAuditPro.git
 cd FinAuditPro
 
-# 2. Virtual environment
+# 2. Set up virtual environment
 python -m venv .venv
+
 # Windows:
 .venv\Scripts\activate
 # macOS / Linux:
@@ -289,19 +296,19 @@ source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# 4. Pull a local LLM model
+# 4. Pull a local LLM model (Ollama)
 ollama pull llama3
 
-# 5. Launch
+# 5. Launch application
 python src/main.py
 ```
 
-**Windows one-click:**
+**Windows One-Click Installer:**
 ```cmd
 install.bat
 ```
 
-**macOS / Linux one-click:**
+**macOS / Linux One-Click Installer:**
 ```bash
 chmod +x install.sh && ./install.sh
 ```
@@ -324,26 +331,29 @@ pytest tests/ -v
 FinAuditPro/
 ├── src/
 │   ├── main.py                    # Application entry point
-│   ├── core/config.py             # Pydantic AppConfig
-│   ├── ui/                        # PySide6 widget screens
-│   ├── services/                  # Business logic layer
+│   ├── core/config.py             # Pydantic AppConfig settings
+│   ├── ui/                        # PySide6 desktop interface components
+│   ├── services/                  # Business logic & authentication layer
 │   ├── database/
 │   │   ├── models.py              # SQLAlchemy ORM models
 │   │   └── repositories/          # Repository pattern DAOs
-│   ├── security/                  # Auth, RBAC, crypto, audit trail
-│   ├── ai/                        # Ollama client, FAISS, workers
-│   ├── reporting/                 # PDF, Excel, digital signature, QR
-│   ├── rule_engine/               # Deterministic statutory rules
-│   ├── document_intelligence/     # OCR, chunking, embedding pipeline
-│   ├── analytics/                 # KPI, forecasting, charts
-│   └── workflow/                  # Audit lifecycle state machine
-├── tests/                         # Pytest test suite
-├── docs/                          # Technical documentation
-├── scripts/                       # Bootstrap, packaging, installers
-├── 05_Sample_Input_Files/         # Sample CSVs and XLSXs for testing
-├── requirements.txt
-├── pyproject.toml
-├── FinAuditPro.spec               # PyInstaller release spec
+│   ├── security/                  # RBAC, AES-256 crypto, audit ledger
+│   ├── ai/                        # Local Ollama client, FAISS RAG pipeline
+│   ├── reporting/                 # PDF generator, digital signatures, QR validation
+│   ├── rule_engine/               # Statutory compliance rules (GSTIN, Sec 40A(3), Benford)
+│   ├── document_intelligence/     # PyPDF & Multi-engine OCR pipeline
+│   ├── analytics/                 # KPI cards, forecasting, QtCharts
+│   └── workflow/                  # Audit lifecycle state machine & event bus
+├── tests/                         # Pytest integration & unit test suite
+│   └── sample_data/               # Sample bank statements & financial trial balances
+├── docs/                          # Architecture guides & documentation
+│   ├── assets/                    # Diagram assets & visual documentation
+│   └── dev-notes/                 # Developer notes & maintenance logs
+├── scripts/                       # Deployment, installer, & packaging scripts
+├── pyproject.toml                 # Build system & linting configuration
+├── requirements.txt               # Production Python dependencies
+├── requirements-dev.txt           # Development & testing dependencies
+├── FinAuditPro.spec               # PyInstaller executable build spec
 ├── install.bat                    # Windows one-click installer
 └── install.sh                     # macOS/Linux one-click installer
 ```
@@ -352,7 +362,7 @@ FinAuditPro/
 
 ## 📚 Documentation
 
-Full technical docs are in [`docs/`](docs/):
+Full technical docs are located in [`docs/`](docs/):
 
 - [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) — Clean architecture & layer specifications
 - [`ARCHITECTURE_GUIDE.md`](docs/architecture/ARCHITECTURE_GUIDE.md) — Architecture guide & security setup
@@ -373,3 +383,4 @@ MIT License — see [`LICENSE`](LICENSE).
 <div align="center">
   <sub>Built with ❤️ by <b>Aryan Yadav</b>, <b>Jeet Shah</b>, and <b>Hitansh Jasani</b> (<a href="https://github.com/Coderaryanyadav">@Coderaryanyadav</a>)</sub>
 </div>
+

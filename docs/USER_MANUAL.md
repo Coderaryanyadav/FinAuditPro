@@ -4,7 +4,7 @@ This manual provides operational instructions for Chartered Accountants and audi
 
 ---
 
-## 🖥️ Screen Overview
+## Screen Overview
 
 ### 1. Dashboard Overview Screen
 - **Executive KPIs**: Live SQL aggregations displaying active engagements, average risk score, compliance score, documents processed, and estimated manual audit hours saved.
@@ -38,7 +38,7 @@ This manual provides operational instructions for Chartered Accountants and audi
 
 ---
 
-## ❓ Frequently Asked Questions & Troubleshooting
+## Frequently Asked Questions & Troubleshooting
 
 **Q: Why does the AI workspace say "Ollama Offline"?**  
 A: Ensure the Ollama background daemon is running on your machine (`ollama serve`) and the model is downloaded (`ollama pull llama3.2`).

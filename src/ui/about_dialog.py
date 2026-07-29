@@ -33,7 +33,7 @@ class AboutDialog(QDialog):
         h_layout = QHBoxLayout(h_frame)
         h_layout.setContentsMargins(0, 0, 0, 0)
         
-        icon_lbl = QLabel("🛡️")
+        icon_lbl = QLabel("")
         icon_lbl.setStyleSheet("font-size: 36px; border: none;")
         
         info_box = QVBoxLayout()
@@ -59,9 +59,9 @@ class AboutDialog(QDialog):
         badges_frame.setStyleSheet("background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;")
         b_layout = QHBoxLayout(badges_frame)
         
-        b1 = QLabel("🔒 100% Offline AI")
+        b1 = QLabel(" 100% Offline AI")
         b1.setStyleSheet("color: #0369a1; font-weight: bold; font-size: 11px;")
-        b2 = QLabel("📜 ICAI Standard Compliant")
+        b2 = QLabel(" ICAI Standard Compliant")
         b2.setStyleSheet("color: #15803d; font-weight: bold; font-size: 11px;")
         
         b_layout.addWidget(b1)

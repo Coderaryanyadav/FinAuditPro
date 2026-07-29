@@ -47,7 +47,7 @@ class RiskAnalysisWidget(QWidget):
 
         h_layout.addStretch()
 
-        btn_calc = QPushButton("⚡ Recalculate SA 320 Materiality")
+        btn_calc = QPushButton(" Recalculate SA 320 Materiality")
         btn_calc.setStyleSheet("background-color: #0ea5e9; color: white; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 12px; border: none;")
         btn_calc.clicked.connect(self.calculate_materiality)
         h_layout.addWidget(btn_calc)
@@ -187,7 +187,7 @@ class RiskAnalysisWidget(QWidget):
 
                     self.table.setItem(r, 2, QTableWidgetItem(amount_str))
 
-                    mat_status = "⚠️ Material Finding" if f.risk_level == "High" else "Pass (Below PM)"
+                    mat_status = " Material Finding" if f.risk_level == "High" else "Pass (Below PM)"
                     mat_item = QTableWidgetItem(mat_status)
                     self.table.setItem(r, 3, mat_item)
 

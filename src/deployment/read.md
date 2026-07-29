@@ -26,11 +26,11 @@ The AI Audit Summary correctly states "0/100 (No Projects)".
 BUT THE RISK DISTRIBUTION CHART (PIE/DOUGHNUT) SHOWS 150 TOTAL AUDITS (95 Low, 45 Medium, 10 High)!
 AND THE TOP HEADER SHOWS "Stage: AI_ANALYSIS" WITH A 50% PROGRESS BAR ON AN EMPTY AUDIT SELECTOR!
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ 🔴 CRITICAL VISUAL CONTRADICTION ON DASHBOARD LANDING                                  │
+│  CRITICAL VISUAL CONTRADICTION ON DASHBOARD LANDING                                  │
 ├───────────────────────────────────────────┬────────────────────────────────────────────┤
 │ KPI CARDS (Real DB Query)                 │ RISK DISTRIBUTION CHART (Hardcoded Fallback│
 │ ┌───────────────────┐ ┌─────────────────┐ │ ┌────────────────────────────────────────┐ │
-│ │ Total Clients     │ │ Completed Audits│ │ │        🍩 150 Total Audits        │ │
+│ │ Total Clients     │ │ Completed Audits│ │ │         150 Total Audits        │ │
 │ │   0  (Live Count) │ │   0  (This Year)│ │ │   (95 Low | 45 Med | 10 High)    │ │
 │ └───────────────────┘ └─────────────────┘ │ └────────────────────────────────────────┘ │
 └───────────────────────────────────────────┴────────────────────────────────────────────┘
@@ -78,13 +78,13 @@ Part 2: Critical UX & Visual Disconnects Identified
 ├──────────────────────┬─────────────────────────────────────────────┬───────────────────┬───────────────┤
 │ Screen / Module      │ Visual / Functional Defect                  │ Impact on Trust   │ Priority      │
 ├──────────────────────┼─────────────────────────────────────────────┼───────────────────┼───────────────┤
-│ Executive Dashboard  │ Hardcoded fallback data in Charts (150 vs 0)│ Severe (Destroys) │ 🔴 CRITICAL   │
-│ Financial Statements │ 45-line placeholder; no Schedule III engine  │ Fatal (Non-funct) │ 🔴 CRITICAL   │
-│ Working Papers       │ Flat list; no SA 230 tree, index or sign-off│ High (Non-compl.) │ 🔴 CRITICAL   │
-│ Document Ingestion   │ Flat list; no inline preview or OCR status  │ High (Friction)   │ 🟠 HIGH       │
-│ AI Audit Analysis    │ No streaming LLM tokens, no prompt templates │ Moderate          │ 🟠 HIGH       │
-│ Compliance Matrix    │ Static table without DB sign-off states     │ High              │ 🟠 HIGH       │
-│ Audit Reports        │ Missing firm logo, UDIN & draft controls    │ Moderate          │ 🟡 MEDIUM     │
+│ Executive Dashboard  │ Hardcoded fallback data in Charts (150 vs 0)│ Severe (Destroys) │  CRITICAL   │
+│ Financial Statements │ 45-line placeholder; no Schedule III engine  │ Fatal (Non-funct) │  CRITICAL   │
+│ Working Papers       │ Flat list; no SA 230 tree, index or sign-off│ High (Non-compl.) │  CRITICAL   │
+│ Document Ingestion   │ Flat list; no inline preview or OCR status  │ High (Friction)   │  HIGH       │
+│ AI Audit Analysis    │ No streaming LLM tokens, no prompt templates │ Moderate          │  HIGH       │
+│ Compliance Matrix    │ Static table without DB sign-off states     │ High              │  HIGH       │
+│ Audit Reports        │ Missing firm logo, UDIN & draft controls    │ Moderate          │  MEDIUM     │
 └──────────────────────┴─────────────────────────────────────────────┴───────────────────┴───────────────┘
 Part 3: Comprehensive Section-by-Section Audit & Redesign Roadmap
 Workflow 1: Onboarding, Authentication & Workspace Setup
@@ -101,13 +101,13 @@ App Launch ──► System Pre-flight Check (Ollama, DB, FAISS) ──► Firm 
 4. UI/UX Improvements
 Pre-flight Splash Screen: Real-time status indicators ("Checking Ollama Service [OK]", "Loading FAISS Index [OK]", "Decrypting Local DB [OK]").
 Firm Branding Header: Display CA Firm Name and FRN in top navigation.
-Air-Gap Security Badge: Green shield icon in header reading: 🛡️ LOCAL STORAGE ONLY — AIR-GAPPED WORKSPACE.
+Air-Gap Security Badge: Green shield icon in header reading:  LOCAL STORAGE ONLY — AIR-GAPPED WORKSPACE.
 5. Features to Add
 CA Firm Configuration Settings (FRN, Member No, Address, Letterhead Logo upload).
 Role-based access control (Partner, Senior Auditor, Junior Articled Assistant) with UI permission masking.
 Master Key & Encryption Setup for SQLite database file (SQLCipher / AES-256).
 6. Priority
-🔴 CRITICAL
+ CRITICAL
 
 Workflow 2: Executive Dashboard & Engagement Command Center
 1. Current Flow
@@ -116,31 +116,31 @@ User logs in $\rightarrow$ Dashboard displays 4 KPI cards, AI summary box, Progr
 2. Problems
 Hardcoded fallback data in Charts: Displays 150 total audits when database has 0 clients.
 Header Bar Mismatch: Top header shows hardcoded "Stage: AI_ANALYSIS" and "50%" progress when no engagement is loaded.
-Quick Action Buttons: Emoji buttons (🌙, ❓, 🔔) look unstyled.
+Quick Action Buttons: Emoji buttons (, , ) look unstyled.
 Empty State: When 0 projects exist, dashboard looks broken rather than guiding the user to start their first audit.
 3. Recommended Flow
 Dashboard Load ──► Check Active Projects ──► If 0: Display "Welcome & Start First Audit" Guided Onboarding Sheet
                                           ──► If >0: Render Dynamic Charts & Real DB Metrics (Zero Hardcoding)
 4. UI/UX Improvements
-Dynamic Zero-State Handling: When total_audits == 0, render clean empty state illustrations with a prominent button: ⚡ Start New Audit Engagement.
+Dynamic Zero-State Handling: When total_audits == 0, render clean empty state illustrations with a prominent button:  Start New Audit Engagement.
 Professional Metric Cards: Micro-sparklines showing period-over-period changes.
 Executive Top Bar: Clean SVG icons for Theme, Help, Notifications, and System Status.
 Live Audit Stage Tracker: Reflects true workflow state from WorkflowManager (ENGAGEMENT_INIT, DOC_INGESTION, TRIAL_BALANCE_MAPPED, AI_ANALYSIS, WORKING_PAPERS_REVIEWED, REPORT_ISSUED).
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ REDESIGNED EXECUTIVE TOP COMMAND BAR                                                                             │
 ├──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ 🛡️ FinAuditPro │ Active Audit: [ M/s TechCorp Solutions (FY 2024-25) ▼ ] │ ⚡ + New Audit │ Stage: 🔷 SUBSTANTIVE TESTING │ Progress: [██████████░░] 75% │ 🔔 ⚙️ 👤 CA Partner │
+│  FinAuditPro │ Active Audit: [ M/s TechCorp Solutions (FY 2024-25) ▼ ] │  + New Audit │ Stage:  SUBSTANTIVE TESTING │ Progress: [██████████░░] 75% │    CA Partner │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 5. Features to Add
 Real-time metric binding (No fallback constants in charts).
 Audit Calendar & Deadline Alert Drawer (Tax Audit filing due dates, GST annual return deadlines).
 Quick Activity Feed showing recent working paper uploads and sign-offs.
 6. Priority
-🔴 CRITICAL
+ CRITICAL
 
 Workflow 3: Client & Engagement Management (CRM)
 1. Current Flow
-User opens Client Management $\rightarrow$ Left panel shows table of clients $\rightarrow$ Right panel shows client details $\rightarrow$ User clicks + Add Client or ⚡ Create New Audit.
+User opens Client Management $\rightarrow$ Left panel shows table of clients $\rightarrow$ Right panel shows client details $\rightarrow$ User clicks + Add Client or  Create New Audit.
 
 2. Problems
 Selecting a client doesn't automatically load their financial history or active audit engagements in a organized view.
@@ -161,7 +161,7 @@ Full MCA CIN Lookup / Tax Registration Validator.
 Multi-year engagement comparison view.
 Export Client Master Register to Excel/PDF.
 6. Priority
-🟠 HIGH
+ HIGH
 
 Workflow 4: Document Ingestion, OCR & Classifier Pipeline
 1. Current Flow
@@ -183,7 +183,7 @@ Auto-Categorization Engine (detects Bank Statement, Invoice, Trial Balance, GST 
 Hash Validation (SHA-256 calculation per file for audit evidence tampering protection).
 Page extract & rotate tools.
 6. Priority
-🔴 CRITICAL
+ CRITICAL
 
 Workflow 5: AI Audit Engine & RAG Copilot
 1. Current Flow
@@ -204,7 +204,7 @@ Pre-built CA Prompt Library (CARO 2020, Tax Audit 3CD, Section 185/186 Loans & I
 Export AI Audit Summary Report to Word/PDF.
 Model selector (Qwen2.5, Llama3.2, Mistral) with speed/accuracy indicators.
 6. Priority
-🟠 HIGH
+ HIGH
 
 Workflow 6: Financial Statement Engine & Schedule III Mapping
 1. Current Flow
@@ -227,7 +227,7 @@ Schedule III Division I (Non-Ind AS) & Division II (Ind AS) Taxonomy Rules.
 Automated Financial Ratio Engine (Current Ratio, Quick Ratio, Debt-Equity, Debt Service Coverage Ratio, Inventory Turnover) with YoY comparison.
 Export Mapped Balance Sheet & P&L to Excel/PDF.
 6. Priority
-🔴 CRITICAL
+ CRITICAL
 
 Workflow 7: GST & Tax Compliance Engine (GSTR-2B vs Purchase Register)
 1. Current Flow
@@ -250,7 +250,7 @@ Reconcile GSTR-3B vs GSTR-1 Liability.
 Supplier GSTIN Status Batch Validator.
 Export Reconciliation Summary Sheet for Client Communication.
 6. Priority
-🟠 HIGH
+ HIGH
 
 Workflow 8: ICAI Standards, CARO 2020 & Form 3CD Compliance Matrix
 1. Current Flow
@@ -269,7 +269,7 @@ Complete 21 Clauses of CARO 2020 pre-populated with audit procedures.
 Complete 44 Clauses of Tax Audit Form 3CD.
 Direct link to generate CARO / 3CD Annexure Report.
 6. Priority
-🟠 HIGH
+ HIGH
 
 Workflow 9: Risk Matrix & Materiality Calculator
 1. Current Flow
@@ -287,7 +287,7 @@ Interactive 3x3 Risk Matrix: Grid plotting Likelihood vs Impact with clickable r
 SA 320 Materiality Calculation Worksheet.
 Risk-based sampling size generator (Tolerable Misstatement calculation).
 6. Priority
-🟡 MEDIUM
+ MEDIUM
 
 Workflow 10: Working Paper Indexing, Review & Sign-Off Engine
 1. Current Flow
@@ -306,7 +306,7 @@ Sign-Off Bar: Visual progress pills showing [Prepared by: Junior (21-Jul)] $\rig
 Audit Query & Review Note Threading per working paper.
 One-click PDF compilation of complete Working Paper File.
 6. Priority
-🔴 CRITICAL
+ CRITICAL
 
 Workflow 11: Audit Report Generator, QR Verification & Digital Signatures
 1. Current Flow
@@ -326,7 +326,7 @@ Key Audit Matters (KAM) builder under SA 701.
 Standardized Audit Opinion templates (Unmodified, Qualified, Adverse, Disclaimer).
 Dynamic QR Code generation encoding audit report hash for tamper verification.
 6. Priority
-🟡 MEDIUM
+ MEDIUM
 
 Workflow 12: Firm Settings, Ollama Model Manager & Immutable Audit Trail
 1. Current Flow
@@ -349,7 +349,7 @@ One-click full database backup zip creation.
 Ollama Model pull/update interface from within GUI.
 Export Audit Trail report for NFRA / Peer Review inspections.
 6. Priority
-🟡 MEDIUM
+ MEDIUM
 
 Part 4: Implementation Prompt for Next Development Iteration
 To begin executing this redesign phase-by-phase, use the following execution prompt:
@@ -376,14 +376,14 @@ Fix the critical visual/data contradictions on the Dashboard and implement the S
 ## Phase 3: SA 230 Working Paper Tree & Sign-Off Engine (`src/ui/working_papers.py`)
 1. Replace flat table with a 2-pane layout:
    - Left Pane: Hierarchical `QTreeWidget` structured as per ICAI SA 230:
-     - 📁 Permanent Audit File (PAF)
-       - 📄 MOA & AOA (PAF-01)
-       - 📄 Statutory Registrations (PAF-02)
-     - 📁 Current Audit File (CAF - FY 2024-25)
-       - 📁 Section A: Audit Planning & Materiality (CAF-A)
-       - 📁 Section B: Trial Balance & Financial Statements (CAF-B)
-       - 📁 Section C: Assets & Liabilities Lead Schedules (CAF-C)
-       - 📁 Section D: Revenue & Expenditure Verification (CAF-D)
+     -  Permanent Audit File (PAF)
+       -  MOA & AOA (PAF-01)
+       -  Statutory Registrations (PAF-02)
+     -  Current Audit File (CAF - FY 2024-25)
+       -  Section A: Audit Planning & Materiality (CAF-A)
+       -  Section B: Trial Balance & Financial Statements (CAF-B)
+       -  Section C: Assets & Liabilities Lead Schedules (CAF-C)
+       -  Section D: Revenue & Expenditure Verification (CAF-D)
    - Right Pane: Working Paper Document Viewer, Audit Notes Thread, and 3-Tier Sign-Off Status Bar (`Prepared By` | `Reviewed By` | `Approved By`).
 ## Verification
 - Run `.venv/bin/pytest tests/ -v` to ensure 100% test passing.

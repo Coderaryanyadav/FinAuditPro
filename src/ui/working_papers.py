@@ -58,11 +58,11 @@ class WorkingPaperWidget(QWidget):
 
         h_layout.addStretch()
 
-        self.ai_btn = QPushButton("⚡ AI Draft Observation")
+        self.ai_btn = QPushButton(" AI Draft Observation")
         self.ai_btn.setStyleSheet("background-color: #0284c7; color: white; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 12px; border: none;")
         self.ai_btn.clicked.connect(self.generate_ai_draft)
 
-        self.save_btn = QPushButton("💾 Save Working Paper")
+        self.save_btn = QPushButton(" Save Working Paper")
         self.save_btn.setStyleSheet("background-color: #0ea5e9; color: white; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 12px; border: none;")
         self.save_btn.clicked.connect(self.save_working_paper)
 
@@ -178,40 +178,40 @@ class WorkingPaperWidget(QWidget):
         """Constructs ICAI SA 230 Permanent and Current Audit File hierarchy."""
         self.wp_tree.clear()
 
-        # 📁 Permanent Audit File (PAF)
-        paf_root = QTreeWidgetItem(["📁 Permanent Audit File (PAF)"])
+        #  Permanent Audit File (PAF)
+        paf_root = QTreeWidgetItem([" Permanent Audit File (PAF)"])
         paf_root.setFont(0, QFont("Inter", 10, QFont.Weight.Bold))
         
-        paf_1 = QTreeWidgetItem(["📄 MOA & AOA Memorandum (PAF-01)"])
-        paf_2 = QTreeWidgetItem(["📄 Statutory Licenses & CIN (PAF-02)"])
-        paf_3 = QTreeWidgetItem(["📄 Long-Term Leases & Contracts (PAF-03)"])
+        paf_1 = QTreeWidgetItem([" MOA & AOA Memorandum (PAF-01)"])
+        paf_2 = QTreeWidgetItem([" Statutory Licenses & CIN (PAF-02)"])
+        paf_3 = QTreeWidgetItem([" Long-Term Leases & Contracts (PAF-03)"])
         
         paf_root.addChild(paf_1)
         paf_root.addChild(paf_2)
         paf_root.addChild(paf_3)
         self.wp_tree.addTopLevelItem(paf_root)
 
-        # 📁 Current Audit File (CAF)
-        caf_root = QTreeWidgetItem(["📁 Current Audit File (CAF)"])
+        #  Current Audit File (CAF)
+        caf_root = QTreeWidgetItem([" Current Audit File (CAF)"])
         caf_root.setFont(0, QFont("Inter", 10, QFont.Weight.Bold))
 
-        sec_a = QTreeWidgetItem(["📁 Section A: Planning & Materiality"])
-        sec_a.addChild(QTreeWidgetItem(["📄 Engagement Letter & Scope (CAF-A1)"]))
-        sec_a.addChild(QTreeWidgetItem(["📄 Materiality Calculation SA 320 (CAF-A2)"]))
-        sec_a.addChild(QTreeWidgetItem(["📄 Audit Risk Assessment (CAF-A3)"]))
+        sec_a = QTreeWidgetItem([" Section A: Planning & Materiality"])
+        sec_a.addChild(QTreeWidgetItem([" Engagement Letter & Scope (CAF-A1)"]))
+        sec_a.addChild(QTreeWidgetItem([" Materiality Calculation SA 320 (CAF-A2)"]))
+        sec_a.addChild(QTreeWidgetItem([" Audit Risk Assessment (CAF-A3)"]))
 
-        sec_b = QTreeWidgetItem(["📁 Section B: Financial Statements"])
-        sec_b.addChild(QTreeWidgetItem(["📄 Schedule III Trial Balance Mapping (CAF-B1)"]))
-        sec_b.addChild(QTreeWidgetItem(["📄 Bank Reconciliation Summary (CAF-B2)"]))
+        sec_b = QTreeWidgetItem([" Section B: Financial Statements"])
+        sec_b.addChild(QTreeWidgetItem([" Schedule III Trial Balance Mapping (CAF-B1)"]))
+        sec_b.addChild(QTreeWidgetItem([" Bank Reconciliation Summary (CAF-B2)"]))
 
-        sec_c = QTreeWidgetItem(["📁 Section C: Asset & Liability Verification"])
-        sec_c.addChild(QTreeWidgetItem(["📄 Fixed Assets & Physical Verification (CAF-C1)"]))
-        sec_c.addChild(QTreeWidgetItem(["📄 Trade Debtors Direct Confirmation (CAF-C2)"]))
-        sec_c.addChild(QTreeWidgetItem(["📄 Trade Creditors & Liabilities (CAF-C3)"]))
+        sec_c = QTreeWidgetItem([" Section C: Asset & Liability Verification"])
+        sec_c.addChild(QTreeWidgetItem([" Fixed Assets & Physical Verification (CAF-C1)"]))
+        sec_c.addChild(QTreeWidgetItem([" Trade Debtors Direct Confirmation (CAF-C2)"]))
+        sec_c.addChild(QTreeWidgetItem([" Trade Creditors & Liabilities (CAF-C3)"]))
 
-        sec_d = QTreeWidgetItem(["📁 Section D: Statutory Reports"])
-        sec_d.addChild(QTreeWidgetItem(["📄 CARO 2020 21 Clauses Checklist (CAF-D1)"]))
-        sec_d.addChild(QTreeWidgetItem(["📄 Tax Audit Form 3CD Workings (CAF-D2)"]))
+        sec_d = QTreeWidgetItem([" Section D: Statutory Reports"])
+        sec_d.addChild(QTreeWidgetItem([" CARO 2020 21 Clauses Checklist (CAF-D1)"]))
+        sec_d.addChild(QTreeWidgetItem([" Tax Audit Form 3CD Workings (CAF-D2)"]))
 
         caf_root.addChild(sec_a)
         caf_root.addChild(sec_b)
@@ -343,7 +343,7 @@ class WorkingPaperWidget(QWidget):
 
     def on_ai_finished(self):
         self.ai_btn.setEnabled(True)
-        self.ai_btn.setText("⚡ AI Draft Observation")
+        self.ai_btn.setText(" AI Draft Observation")
         text = self.observation_field.toPlainText()
         paragraphs = text.split("\n\n")
         if len(paragraphs) > 1:

@@ -253,7 +253,7 @@ class EmptyStateWidget(QWidget):
         cl = QVBoxLayout(container)
         cl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        icon_lbl = QLabel("📂")
+        icon_lbl = QLabel("")
         icon_lbl.setStyleSheet("font-size: 32px; border: none;")
         icon_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
@@ -310,7 +310,7 @@ class ErrorStateWidget(QWidget):
         container.setStyleSheet("background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 24px;")
         cl = QVBoxLayout(container)
         
-        title_lbl = QLabel(f"⚠️ {title}")
+        title_lbl = QLabel(f" {title}")
         title_lbl.setStyleSheet("font-size: 16px; font-weight: 700; color: #dc2626; border: none;")
         title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         

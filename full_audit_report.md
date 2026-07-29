@@ -110,45 +110,45 @@ User → LoginWindow → AuthService → SecurityManager (session token)
 ## 2. Architecture Audit
 
 ### A-1 — Dual Data Model for Engagements (`Engagement` vs `AuditProject`)
-**Severity**: 🔴 Critical  
+**Severity**:  Critical  
 **Evidence**: `models.py` lines 104–126 (`Engagement`) and 128–139 (`AuditProject`)  
 `Engagement` has a proper FK to `FinancialYear`, client, audit team, documents, risks, compliance tasks. `AuditProject` is a stripped parallel model with a plain string `financial_year` field. The UI predominantly uses `AuditProject` while the ORM models target `Engagement`. This means the rich relational data (teams, documents linked to engagement, risks) is invisible from the primary UI workflow.  
 **Best Practice**: Consolidate into `Engagement`. Drop `AuditProject` or make it a view/alias.  
 **Recommended Fix**: Migrate all UI queries from `AuditProject` to `Engagement`. Run a data migration.
 
 ### A-2 — `SecurityManager.current_session` Not Propagated to UI
-**Severity**: 🔴 Critical  
+**Severity**:  Critical  
 **Evidence**: `main.py` line 47: `login.login_successful.connect(show_dashboard)`. The signal carries no arguments. `DashboardWindow.__init__` never receives the logged-in user.  
 `dashboard.py` line 610: Hardcoded `"CA User"` name and `"Audit Partner"` role in the sidebar profile card. The actual authenticated user is invisible to the entire UI layer.  
 **Best Practice**: Pass `SessionToken` or `User` to `DashboardWindow` constructor. Show real name and role.  
 **Recommended Fix**: Change signal to `login_successful = Signal(object)`, emit the user, pass it to `DashboardWindow`.
 
 ### A-3 — `on_active_engagement_changed()` Silently Creates Phantom Audit Projects
-**Severity**: 🔴 Critical  
+**Severity**:  Critical  
 **Evidence**: `dashboard.py` lines 921–928: When the selector shows a client without an existing project, selecting it creates a new `AuditProject` automatically with `status="Execution"` — without any user confirmation.  
 **Best Practice**: This should open a creation dialog, not silently INSERT into the DB.
 
 ### A-4 — `reports.py::export_pdf()` References Undefined `self.client_combo`
-**Severity**: 🔴 Critical  
+**Severity**:  Critical  
 **Evidence**: `reports.py` line 215: `self.client_combo.currentText()`. No `client_combo` widget is constructed anywhere in `ReportsWidget.__init__`. This will raise `AttributeError` on every PDF export.  
 **Recommended Fix**: Use the already-loaded `client_name` variable instead.
 
 ### A-5 — DB Queries in Widget Constructors (Main Thread)
-**Severity**: 🟠 High  
+**Severity**:  High  
 **Evidence**: `dashboard.py` lines 705–765: A full `with get_session()` block — including 7 SQL queries — executes inside `_build_overview_page()` which is called from `DashboardWindow.__init__`. This blocks the Qt event loop during startup.  
 `ai_analysis.py` line 145: `self.load_active_document_view()` called in `__init__`.  
 **Best Practice**: Defer all DB calls to `showEvent` or a `QTimer.singleShot(0, ...)` after `__init__`.
 
 ### A-6 — `AuditProjectsTableModel._load_client_cache()` Called Twice on Refresh
-**Severity**: 🟡 Medium  
+**Severity**:  Medium  
 **Evidence**: `dashboard.py` lines 61–64 and 124–128: `_load_client_cache` is called in `__init__` and again on every `update_projects()` call. Each refresh opens a session and queries all clients unnecessarily.
 
 ### A-7 — `PlaceholderWidget` Referenced But Never Defined
-**Severity**: 🟠 High  
+**Severity**:  High  
 **Evidence**: `dashboard.py` line 801: `return PlaceholderWidget(f"Unable to load {title}: {e}")`. `PlaceholderWidget` is not imported anywhere in `dashboard.py`. This would cause `NameError` at runtime if any page fails to load.
 
 ### A-8 — `src/data/` Directory in App Source Tree
-**Severity**: 🟡 Medium  
+**Severity**:  Medium  
 **Evidence**: `src/data/` directory exists under source tree. Database and user files should live in user-writable locations (`APPDATA`), not alongside source code. The `core/config.py` correctly resolves platform dirs, but the `src/data/` dir signals confused separation.
 
 ---
@@ -156,53 +156,53 @@ User → LoginWindow → AuthService → SecurityManager (session token)
 ## 3. Code Quality Audit
 
 ### Q-1 — Hardcoded CA Credentials in Production Templates
-**Severity**: 🔴 Critical  
+**Severity**:  Critical  
 **Evidence**: `reports.py` lines 160–162: `M/S SHARMA & ASSOCIATES`, `FRN: 109876W`, `CA Rajesh Sharma`, membership `012345`. These are placeholder credentials baked into every exported official report. Users cannot configure their firm details from the UI.  
 **Recommended Fix**: Add a Settings screen field for CA firm name, membership number, FRN. Load from `SecureStorage`.
 
 ### Q-2 — Hardcoded Default Credentials in Login Screen
-**Severity**: 🔴 Critical  
+**Severity**:  Critical  
 **Evidence**: `login.py` lines 119, 126: `self.email_input.setText("admin@finauditpro.com")` and `self.password_input.setText("admin123")`. Default credentials are displayed and pre-filled in the UI — and the same default is seeded into the DB (`login.py` lines 219–227).  
 **Best Practice**: Never pre-fill password fields. Seed admin accounts only via CLI/setup scripts.
 
 ### Q-3 — Bare `except Exception` Silently Swallows Errors in Reports
-**Severity**: 🟠 High  
+**Severity**:  High  
 **Evidence**: `reports.py` lines 143–146: `except Exception: client_name = "Sample Client Pvt Ltd"`. Any database failure silently substitutes demo data into official audit reports without alerting the user.
 
 ### Q-4 — `ai_analysis.py::on_ai_chunk()` Uses `findChild(QLabel)` Pattern
-**Severity**: 🟠 High  
+**Severity**:  High  
 **Evidence**: `ai_analysis.py` lines 279–282. Finding the label child via `findChild` is fragile — if the bubble layout changes, this breaks silently. The bubble frame should expose a `setText()` API directly.
 
 ### Q-5 — Chart in `AuditProgressChart` Uses Hardcoded Months/Data
-**Severity**: 🟠 High  
+**Severity**:  High  
 **Evidence**: `dashboard.py` lines 370–375: `months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]` and `data_points = [12, 18, 15, 25, 22, 28]`. The chart only partially replaces these from real data (first 6 projects). Months are always Jan–Jun regardless of the current year.
 
 ### Q-6 — `toggle_theme()` Shows Message Box Instead of Applying Theme
-**Severity**: 🟡 Medium  
+**Severity**:  Medium  
 **Evidence**: `dashboard.py` lines 955–959: The dark mode button toggles a bool and shows an `information()` dialog. No actual QSS dark theme is applied. This is a placeholder that misleads users.
 
 ### Q-7 — `show_notifications_popup()` Contains Hardcoded Demo Alerts
-**Severity**: 🟡 Medium  
+**Severity**:  Medium  
 **Evidence**: `dashboard.py` lines 978–986: "GSTR-3B Tax Filing Deadline: 5 days remaining" is a hardcoded string in a `QMessageBox`, not a real notification from the DB.
 
 ### Q-8 — Single-Letter Variable Names Throughout UI Code
-**Severity**: 🟡 Medium  
+**Severity**:  Medium  
 **Evidence**: `ai_analysis.py` lines 45–83: `v`, `h1`, `h2`, `b`, `t`, `d`, `ev`, `ev_l`, `ev_t`, `ev_d` — these are layout and widget variables with no descriptive names. Deeply nested, unreadable.
 
 ### Q-9 — `Document.ocr_confidence` Defaults to `98.5` (Fabricated Value)
-**Severity**: 🟠 High  
+**Severity**:  High  
 **Evidence**: `models.py` line 177: `ocr_confidence = Column(Float, default=98.5)`. Every document inserted shows 98.5% OCR confidence even if OCR was never run on it. This is fake data displayed as genuine metrics.
 
 ### Q-10 — `AuditProject` and `Engagement` Both FK to `Client` with No Constraint
-**Severity**: 🟡 Medium  
+**Severity**:  Medium  
 **Evidence**: `models.py` lines 131 and 107. Duplicate client references across two overlapping models with no referential integrity between them.
 
 ### Q-11 — `login.py::handle_login()` Still Uses Raw String Comparison for `is_active`
-**Severity**: 🟡 Medium  
+**Severity**:  Medium  
 **Evidence**: `auth_service.py` lines 56–57: The active check happens AFTER password verification and session creation have already been called — if a deactivated user knows their password, the session is already created before the guard runs.
 
 ### Q-12 — `refresh_realtime_data()` Called on Every Navigation Click
-**Severity**: 🟡 Medium  
+**Severity**:  Medium  
 **Evidence**: `dashboard.py` line 849: `self.refresh_realtime_data()` is called in `_on_nav_click()` for every tab switch. Navigating to Settings runs 4 database queries unnecessarily.
 
 ---
@@ -210,43 +210,43 @@ User → LoginWindow → AuthService → SecurityManager (session token)
 ## 4. Error / Runtime Audit
 
 ### E-1 — `self.client_combo` AttributeError on Every PDF Export
-**Severity**: 🔴 Critical | **Likelihood**: 100% | **Impact**: Complete export failure  
+**Severity**:  Critical | **Likelihood**: 100% | **Impact**: Complete export failure  
 **Evidence**: `reports.py` line 215 — `self.client_combo` is never defined.
 
 ### E-2 — `PlaceholderWidget` NameError
-**Severity**: 🔴 Critical | **Likelihood**: Whenever any page crashes during load | **Impact**: App crash  
+**Severity**:  Critical | **Likelihood**: Whenever any page crashes during load | **Impact**: App crash  
 **Evidence**: `dashboard.py` line 801.
 
 ### E-3 — `AuthenticationService.logout()` Does Not Revoke Session Token
-**Severity**: 🟠 High | **Likelihood**: Every logout | **Impact**: Session token remains valid on disk after logout  
+**Severity**:  High | **Likelihood**: Every logout | **Impact**: Session token remains valid on disk after logout  
 **Evidence**: `auth_service.py` lines 73–75: `logout()` sets `self.current_user = None` but never calls `auth_manager.revoke_session(token_str)`. The encrypted `.active_sessions.dat` file still contains the valid token.
 
 ### E-4 — Race Condition: `OllamaWorker` Not Stopped Before Navigation
-**Severity**: 🟠 High | **Likelihood**: Medium (user navigates away during LLM response) | **Impact**: Crashes, double-rendering  
+**Severity**:  High | **Likelihood**: Medium (user navigates away during LLM response) | **Impact**: Crashes, double-rendering  
 **Evidence**: `ai_analysis.py` line 256: `self.worker = None`. When the user navigates away and back, the old `OllamaWorker` thread is still running and emitting `chunk_received` into now-stale UI elements.
 
 ### E-5 — SQLite `mmap_size=30000000000` (30 GB)
-**Severity**: 🟠 High | **Likelihood**: On machines with <32GB RAM | **Impact**: OS mmap failure, SQLite errors  
+**Severity**:  High | **Likelihood**: On machines with <32GB RAM | **Impact**: OS mmap failure, SQLite errors  
 **Evidence**: `database.py` line 48. On typical 8–16GB RAM machines, this PRAGMA sets an absurdly large mmap size. SQLite will not actually allocate this, but it's a misconfigured value clearly copied from an M4 Pro test machine comment.
 
 ### E-6 — `findings` Accessed Outside Session in `load_report_draft()`
-**Severity**: 🟠 High | **Likelihood**: Medium | **Impact**: `DetachedInstanceError`  
+**Severity**:  High | **Likelihood**: Medium | **Impact**: `DetachedInstanceError`  
 **Evidence**: `reports.py` lines 136–142: `findings` list is used inside `with get_session()` but the ORM objects may be lazy-loaded. If `Finding.description` triggers a lazy load after the session closes, SQLAlchemy raises `DetachedInstanceError`.
 
 ### E-7 — `AuditProgressChart` Data Points Access `p.status` After Session Close
-**Severity**: 🟡 Medium | **Likelihood**: Low | **Impact**: `DetachedInstanceError`  
+**Severity**:  Medium | **Likelihood**: Low | **Impact**: `DetachedInstanceError`  
 **Evidence**: `dashboard.py` line 374: `data_points[idx] = 100 if p.status == "Completed"`. The `projects` list is passed from a closed session; accessing attributes on detached instances can fail without `expire_on_commit=False`.
 
 ### E-8 — No Input Validation on UDIN Field
-**Severity**: 🟡 Medium | **Likelihood**: High (user typos) | **Impact**: Invalid UDIN on official exported reports  
+**Severity**:  Medium | **Likelihood**: High (user typos) | **Impact**: Invalid UDIN on official exported reports  
 **Evidence**: `reports.py` line 87: `self.udin_input.setText("25012345AAAAAA1234")`. UDIN format: `YYMembershipNoAlphaNumeric`. No regex validation before export.
 
 ### E-9 — `populate_client_selector()` Called Every Time Dialog Closes
-**Severity**: 🟡 Medium | **Likelihood**: Every new audit creation | **Impact**: Unnecessary DB round-trips  
+**Severity**:  Medium | **Likelihood**: Every new audit creation | **Impact**: Unnecessary DB round-trips  
 **Evidence**: `dashboard.py` line 897.
 
 ### E-10 — Memory Leak: Chat Bubbles in `AIAuditWidget` Never Cleared
-**Severity**: 🟡 Medium | **Likelihood**: Long sessions | **Impact**: Unbounded widget accumulation in `self.chat_layout`  
+**Severity**:  Medium | **Likelihood**: Long sessions | **Impact**: Unbounded widget accumulation in `self.chat_layout`  
 **Evidence**: `ai_analysis.py` line 307: `self.chat_layout.addWidget(bubble_frame)`. There is no limit or cleanup on the number of chat bubbles.
 
 ---
@@ -256,61 +256,61 @@ User → LoginWindow → AuthService → SecurityManager (session token)
 ### Login Screen — Score: 7/10
 **Strengths**: Clean split-panel layout, gradient left panel, well-spaced form.  
 **Issues**:  
-- ❌ Password pre-filled (`"admin123"`) — major security UX problem  
-- ❌ Email pre-filled — reduces the illusion of security  
-- ❌ Role selector is redundant — users select their role at login? Roles should come from DB.  
-- ❌ "Forgot Password?" leads to a message box telling users to contact sysadmin — useless UX  
-- ❌ No keyboard focus order: Tab order is not set; pressing Tab after email field may not land on password  
-- ✅ Show/hide password toggle present  
-- ✅ "Signing In..." button disable feedback  
+-  Password pre-filled (`"admin123"`) — major security UX problem  
+-  Email pre-filled — reduces the illusion of security  
+-  Role selector is redundant — users select their role at login? Roles should come from DB.  
+-  "Forgot Password?" leads to a message box telling users to contact sysadmin — useless UX  
+-  No keyboard focus order: Tab order is not set; pressing Tab after email field may not land on password  
+-  Show/hide password toggle present  
+-  "Signing In..." button disable feedback  
 
 **Improvement**: Remove pre-filled credentials. Remove role selector (look up role from DB). Add proper focus chain.
 
 ### Dashboard Overview — Score: 6/10
 **Strengths**: KPI cards look polished. Spline chart and donut chart add visual richness. QTableView with custom delegate is properly engineered.  
 **Issues**:  
-- ❌ "Good Morning, Auditor" — static greeting never updates for time of day or actual username  
-- ❌ Chart uses hardcoded Jan–Jun months  
-- ❌ Notification popup contains hardcoded dummy alerts  
-- ❌ Dark mode button triggers a message box instead of changing theme  
-- ❌ Search bar is purely cosmetic — no search logic wired  
-- ❌ Profile card shows "CA User / Audit Partner" regardless of who is logged in  
+-  "Good Morning, Auditor" — static greeting never updates for time of day or actual username  
+-  Chart uses hardcoded Jan–Jun months  
+-  Notification popup contains hardcoded dummy alerts  
+-  Dark mode button triggers a message box instead of changing theme  
+-  Search bar is purely cosmetic — no search logic wired  
+-  Profile card shows "CA User / Audit Partner" regardless of who is logged in  
 
 ### AI Analysis — Score: 6/10
 **Strengths**: 3-column split view is well designed. Prompt library chips are a smart feature. Token streaming is properly off main-thread.  
 **Issues**:  
-- ❌ "🟢 Ollama Local RAG Engine Active" badge is always green regardless of Ollama connection status  
-- ❌ Chat history grows infinitely with no scroll-to-bottom or clear function  
-- ❌ No "thinking" indicator while LLM generates  
-- ❌ Document panel always shows last-uploaded document — no way to select a specific document  
+-  " Ollama Local RAG Engine Active" badge is always green regardless of Ollama connection status  
+-  Chat history grows infinitely with no scroll-to-bottom or clear function  
+-  No "thinking" indicator while LLM generates  
+-  Document panel always shows last-uploaded document — no way to select a specific document  
 
 ### Reports Screen — Score: 5/10
 **Strengths**: WYSIWYG preview with real SHA-256 hash is good.  
 **Issues**:  
-- ❌ Hardcoded CA firm name "M/S SHARMA & ASSOCIATES" in every exported report  
-- ❌ Export will crash due to `self.client_combo` AttributeError  
-- ❌ UDIN field has no validation  
-- ❌ No date stamp on the report (FY 2024-25 hardcoded)  
-- ❌ No print/preview button separate from export  
+-  Hardcoded CA firm name "M/S SHARMA & ASSOCIATES" in every exported report  
+-  Export will crash due to `self.client_combo` AttributeError  
+-  UDIN field has no validation  
+-  No date stamp on the report (FY 2024-25 hardcoded)  
+-  No print/preview button separate from export  
 
 ### Clients Screen — Score: 7/10
 **Strengths**: Table-based client list, create/edit dialog.  
 **Issues**:  
-- ❌ No search/filter on client list  
-- ❌ No bulk import from CSV/Excel  
-- ❌ Deleting a client with active engagements is not warned  
+-  No search/filter on client list  
+-  No bulk import from CSV/Excel  
+-  Deleting a client with active engagements is not warned  
 
 ### Working Papers — Score: 7/10
 **Strengths**: SA 230 reference, engagement-scoped.  
 **Issues**:  
-- ❌ No diff view between draft and reviewed versions  
-- ❌ No approval workflow signature  
+-  No diff view between draft and reviewed versions  
+-  No approval workflow signature  
 
 ### Settings — Score: 5/10
 **Issues**:  
-- ❌ No field for CA firm name / membership no. — these are needed for reports  
-- ❌ No Ollama model selector (hardcoded `llama3` assumption)  
-- ❌ No session timeout configuration in UI  
+-  No field for CA firm name / membership no. — these are needed for reports  
+-  No Ollama model selector (hardcoded `llama3` assumption)  
+-  No session timeout configuration in UI  
 
 ---
 
@@ -338,7 +338,7 @@ Deleting documents, clients, or findings shows no confirmation dialog in the cur
 Changing the active engagement combo instantly queries the DB and potentially creates new projects silently.
 
 ### UX-8 — AI Badge Always Shows Green "Active" Status
-`ai_analysis.py` line 110: "🟢 Ollama Local RAG Engine Active" — even when Ollama is offline. Should be dynamically checked (ping endpoint on widget show).
+`ai_analysis.py` line 110: " Ollama Local RAG Engine Active" — even when Ollama is offline. Should be dynamically checked (ping endpoint on widget show).
 
 ---
 
@@ -370,22 +370,22 @@ Runs 4 SQL queries + model reset on every sidebar click. This is unnecessary for
 ## 8. Security Audit
 
 ### S-1 — Hardcoded Default Credentials Seeded Into DB
-**Severity**: 🔴 Critical  
+**Severity**:  Critical  
 **Evidence**: `login.py` lines 219–227: `password_hash=PasswordHasher.hash_password("admin123")`. Default admin account with password `admin123` is auto-created on first run. Any user who knows this can log in.  
 **Mitigation**: Force password change on first login. Remove pre-filled credentials from UI.
 
 ### S-2 — `AuthenticationService.logout()` Does Not Revoke Disk Session
-**Severity**: 🟠 High  
+**Severity**:  High  
 **Evidence**: `auth_service.py` lines 73–75. Session token remains in `.active_sessions.dat`.  
 **Mitigation**: Call `self.security_manager.auth_manager.revoke_session(token_str)` in `logout()`.
 
 ### S-3 — `SecurityManager.current_session` Allows UI Bypass
-**Severity**: 🟠 High  
+**Severity**:  High  
 **Evidence**: `dashboard.py` lines 878–880: `if sm.current_session and not sm.check_permission(...)`. If `sm.current_session` is `None` (e.g., after session expiry), the RBAC check is SKIPPED entirely. Correct logic: if no session, deny access.  
 **Mitigation**: Change to `if not sm.current_session or not sm.check_permission(...)`.
 
 ### S-4 — UDIN Field Accepts Arbitrary Input on Official Reports
-**Severity**: 🟡 Medium  
+**Severity**:  Medium  
 UDIN is a mandatory ICAI regulatory identifier. Exporting a report with an invalid/fake UDIN is a regulatory compliance violation.  
 **Mitigation**: Validate format: `^[0-9]{8}[A-Z]{6}[A-Z0-9]{4}$`.
 
@@ -393,16 +393,16 @@ UDIN is a mandatory ICAI regulatory identifier. Exporting a report with an inval
 PBKDF2 at 600k iterations far exceeds OWASP 2023 minimum (210,000). This is correctly implemented.
 
 ### S-6 — `SessionToken.user_email` Field Used as Role/Auth Reference
-**Severity**: 🟡 Medium  
+**Severity**:  Medium  
 `SessionToken.to_dict()` serializes the full email. If the session file is somehow read (even though AES encrypted), the email is exposed. Consider hashing or omitting from serialized form.
 
 ### S-7 — No Rate Limiting on Login Attempts
-**Severity**: 🟠 High  
+**Severity**:  High  
 `login.py::handle_login()` has no attempt counter, lockout, or delay. Brute force against local DB is trivially possible. Offline app mitigates risk slightly, but insider threat remains.  
 **Mitigation**: Add exponential backoff (1s, 2s, 4s) after 3 failed attempts. Lock after 10.
 
 ### S-8 — Audit Log `ip_address` Column Always Null
-**Severity**: 🟡 Medium  
+**Severity**:  Medium  
 **Evidence**: `models.py` line 342. No IP logging is done in `ImmutableAuditLogger`. For a desktop app this is acceptable, but the column implies it's tracked.
 
 ### S-9 — `AESCryptoEngine` Key Derivation Not Verified
@@ -419,7 +419,7 @@ No `setTabOrder()` is called in any widget. Login form Tab key behavior is undef
 `setAccessibleName()` and `setAccessibleDescription()` are not used on any interactive element. Screen readers (NVDA, JAWS) will describe all buttons as "button" with no context.
 
 ### ACC-3 — Emoji Used as Primary Icons
-Sidebar uses emoji icons (`📊`, `🏢`, `📁`). Emoji rendering varies across platforms and is not accessible to screen readers as meaningful content.
+Sidebar uses emoji icons (``, ``, ``). Emoji rendering varies across platforms and is not accessible to screen readers as meaningful content.
 
 ### ACC-4 — Color Used as Sole Differentiator (Risk Levels)
 Risk dots in the table delegate use color only (`#10b981` green / `#f59e0b` yellow / `#ef4444` red). No shape, pattern, or text supplement. WCAG 2.1 § 1.4.1 violation.
@@ -512,56 +512,56 @@ class Colors:
 
 | # | Feature | ROI |
 |---|---|---|
-| 1 | CA firm settings (name, FRN, membership no.) | 🔴 Blocker |
-| 2 | Real PDF export fix (remove `self.client_combo` bug) | 🔴 Blocker |
-| 3 | Password reset via CLI with OTP-style hash | 🔴 High |
-| 4 | Real notification system from DB (deadlines) | 🔴 High |
-| 5 | Global search (clients, documents, findings) | 🟠 High |
-| 6 | Dark mode implementation | 🟠 High |
-| 7 | UDIN validation with regex before export | 🟠 High |
-| 8 | Ollama status check on AI panel open | 🟠 High |
-| 9 | Show actual logged-in user name/role in sidebar | 🟠 High |
-| 10 | Lazy loading of dashboard pages | 🟠 High |
-| 11 | Materiality calculator wizard (SA 320) | 🟠 High |
-| 12 | Audit engagement workflow status tracker | 🟠 High |
-| 13 | Bulk client import from CSV/Excel | 🟡 Medium |
-| 14 | Document multi-select and batch upload | 🟡 Medium |
-| 15 | Report version history (draft v1, v2, final) | 🟡 Medium |
-| 16 | Engagement timeline / Gantt view | 🟡 Medium |
-| 17 | PDF digital signature with actual DSC (pkcs12) | 🟡 Medium |
-| 18 | Export working papers to Word (.docx) | 🟡 Medium |
-| 19 | Chat history persistence across sessions | 🟡 Medium |
-| 20 | AI model selector (llama3, mistral, gemma) | 🟡 Medium |
-| 21 | Trial balance auto-mapping to Schedule III | 🟡 Medium |
-| 22 | Benford's Law visualization chart | 🟡 Medium |
-| 23 | Client portal (read-only web view of report) | 🟡 Medium |
-| 24 | Backup encryption with master password | 🟡 Medium |
-| 25 | GST 2B reconciliation import | 🟡 Medium |
-| 26 | Income tax 26AS fetch and reconcile | 🟡 Medium |
-| 27 | Form 3CD clause-by-clause checklist | 🟡 Medium |
-| 28 | SA 315 risk identification matrix | 🟡 Medium |
-| 29 | Confirmation dialogs on all destructive actions | 🟡 Medium |
-| 30 | Keyboard focus ring styles | 🟡 Medium |
-| 31 | In-app changelog/update notes | 🟢 Low |
-| 32 | Multi-language support (Hindi, Gujarati) | 🟢 Low |
-| 33 | Custom rule creation UI | 🟢 Low |
-| 34 | Audit file export to ZIP | 🟢 Low |
-| 35 | Engagement letter template generator | 🟢 Low |
-| 36 | Peer review assignment workflow | 🟢 Low |
-| 37 | Physical inventory count sheet | 🟢 Low |
-| 38 | KMP (directors) auto-population from MCA | 🟢 Low |
-| 39 | Debtors/Creditors age analysis | 🟢 Low |
-| 40 | Statutory due date calendar | 🟢 Low |
-| 41 | Bank reconciliation worksheet | 🟢 Low |
-| 42 | Related party transaction flagging | 🟢 Low |
-| 43 | Fixed asset register import | 🟢 Low |
-| 44 | Net worth certificate generator | 🟢 Low |
-| 45 | Audit opinion tracker (unmodified/qualified/adverse) | 🟢 Low |
-| 46 | Biometric login via Windows Hello | 🟢 Low |
-| 47 | Scheduled auto-backup to network drive | 🟢 Low |
-| 48 | Print preview for working papers | 🟢 Low |
-| 49 | Offline GSTIN format + checksum validation | 🟢 Low |
-| 50 | E-mail encrypted PDF to client | 🟢 Low |
+| 1 | CA firm settings (name, FRN, membership no.) |  Blocker |
+| 2 | Real PDF export fix (remove `self.client_combo` bug) |  Blocker |
+| 3 | Password reset via CLI with OTP-style hash |  High |
+| 4 | Real notification system from DB (deadlines) |  High |
+| 5 | Global search (clients, documents, findings) |  High |
+| 6 | Dark mode implementation |  High |
+| 7 | UDIN validation with regex before export |  High |
+| 8 | Ollama status check on AI panel open |  High |
+| 9 | Show actual logged-in user name/role in sidebar |  High |
+| 10 | Lazy loading of dashboard pages |  High |
+| 11 | Materiality calculator wizard (SA 320) |  High |
+| 12 | Audit engagement workflow status tracker |  High |
+| 13 | Bulk client import from CSV/Excel |  Medium |
+| 14 | Document multi-select and batch upload |  Medium |
+| 15 | Report version history (draft v1, v2, final) |  Medium |
+| 16 | Engagement timeline / Gantt view |  Medium |
+| 17 | PDF digital signature with actual DSC (pkcs12) |  Medium |
+| 18 | Export working papers to Word (.docx) |  Medium |
+| 19 | Chat history persistence across sessions |  Medium |
+| 20 | AI model selector (llama3, mistral, gemma) |  Medium |
+| 21 | Trial balance auto-mapping to Schedule III |  Medium |
+| 22 | Benford's Law visualization chart |  Medium |
+| 23 | Client portal (read-only web view of report) |  Medium |
+| 24 | Backup encryption with master password |  Medium |
+| 25 | GST 2B reconciliation import |  Medium |
+| 26 | Income tax 26AS fetch and reconcile |  Medium |
+| 27 | Form 3CD clause-by-clause checklist |  Medium |
+| 28 | SA 315 risk identification matrix |  Medium |
+| 29 | Confirmation dialogs on all destructive actions |  Medium |
+| 30 | Keyboard focus ring styles |  Medium |
+| 31 | In-app changelog/update notes |  Low |
+| 32 | Multi-language support (Hindi, Gujarati) |  Low |
+| 33 | Custom rule creation UI |  Low |
+| 34 | Audit file export to ZIP |  Low |
+| 35 | Engagement letter template generator |  Low |
+| 36 | Peer review assignment workflow |  Low |
+| 37 | Physical inventory count sheet |  Low |
+| 38 | KMP (directors) auto-population from MCA |  Low |
+| 39 | Debtors/Creditors age analysis |  Low |
+| 40 | Statutory due date calendar |  Low |
+| 41 | Bank reconciliation worksheet |  Low |
+| 42 | Related party transaction flagging |  Low |
+| 43 | Fixed asset register import |  Low |
+| 44 | Net worth certificate generator |  Low |
+| 45 | Audit opinion tracker (unmodified/qualified/adverse) |  Low |
+| 46 | Biometric login via Windows Hello |  Low |
+| 47 | Scheduled auto-backup to network drive |  Low |
+| 48 | Print preview for working papers |  Low |
+| 49 | Offline GSTIN format + checksum validation |  Low |
+| 50 | E-mail encrypted PDF to client |  Low |
 
 ### 25 UX Improvements
 1. Remove pre-filled credentials from login screen
@@ -702,7 +702,7 @@ class Colors:
 
 ## 13. Refactoring Roadmap
 
-### 🔴 Critical (Do Immediately)
+### Critical (Do Immediately)
 
 | Item | Effort | Risk | Benefit |
 |---|---|---|---|
@@ -713,7 +713,7 @@ class Colors:
 | Fix RBAC bypass: `if sm.current_session and not sm.check_permission()` | 1h | Low | Closes auth bypass on session expiry |
 | Fix `logout()` to revoke session token | 1h | Low | Prevents session reuse after logout |
 
-### 🟠 High Priority
+### High Priority
 
 | Item | Effort | Risk | Benefit |
 |---|---|---|---|
@@ -727,7 +727,7 @@ class Colors:
 | Pass authenticated user to `DashboardWindow` | 1h | Low | Show real user info |
 | Implement dark mode QSS theme | 1 day | Low | UI feature users expect |
 
-### 🟡 Medium Priority
+### Medium Priority
 
 | Item | Effort | Risk | Benefit |
 |---|---|---|---|
@@ -743,7 +743,7 @@ class Colors:
 | Limit chat history to 50 messages | 2h | Low | Memory |
 | Fix audit progress chart months | 2h | Low | Data accuracy |
 
-### 🟢 Nice to Have
+### Nice to Have
 
 | Item | Effort | Risk | Benefit |
 |---|---|---|---|
@@ -760,29 +760,29 @@ class Colors:
 
 | Issue | Severity | File(s) | Impact | Est. Effort | Fix |
 |---|---|---|---|---|---|
-| `self.client_combo` undefined in `export_pdf()` | 🔴 BLOCKER | `reports.py:215` | 100% export failure | 30 min | Replace with `client_name` variable |
-| `PlaceholderWidget` NameError | 🔴 BLOCKER | `dashboard.py:801` | App crash on page failure | 30 min | Import or define `PlaceholderWidget` |
-| Hardcoded CA firm credentials in reports | 🔴 Critical | `reports.py:160-162` | Unusable for any real CA | 2h | Load from Settings |
-| Pre-filled `admin123` password in UI | 🔴 Critical | `login.py:119,126` | Security liability | 30 min | Remove `setText()` calls |
-| RBAC bypass on null session | 🔴 Critical | `dashboard.py:879` | Auth bypass | 1h | Fix condition logic |
-| `logout()` doesn't revoke session | 🟠 High | `auth_service.py:73-75` | Session persistence after logout | 1h | Call `revoke_session()` |
-| DB queries in widget `__init__` | 🟠 High | `dashboard.py:705-765`, `ai_analysis.py:145` | UI blocking on startup | 1 day | Defer to `showEvent()` |
-| `AuditProject` vs `Engagement` duality | 🟠 High | `models.py:104-139` | Data inconsistency | 3 days | Schema consolidation |
-| N+1 in `populate_client_selector()` | 🟠 High | `dashboard.py:903-914` | Scales poorly | 2h | JOIN query |
-| `mmap_size=30_000_000_000` SQLite pragma | 🟠 High | `database.py:48` | OOM risk on low-RAM machines | 15 min | Set to 268435456 |
-| `refresh_realtime_data()` on every nav | 🟡 Medium | `dashboard.py:849` | Unnecessary DB load | 1h | Only refresh on Dashboard tab |
-| Chat bubble memory leak | 🟡 Medium | `ai_analysis.py:307` | Memory growth in long sessions | 2h | Cap at 50 messages |
-| Hardcoded months in chart | 🟡 Medium | `dashboard.py:370` | Wrong data display | 2h | Use real calendar months |
-| Hardcoded notification alerts | 🟡 Medium | `dashboard.py:978-986` | Misleads users | 2h | Query DB for real alerts |
-| OCR confidence default `98.5` | 🟡 Medium | `models.py:177` | Fabricated metric | 2h | Default to `null`, set only after OCR |
-| No `setTabOrder()` anywhere | 🟡 Medium | All UI files | Accessibility | 1 day | Define tab chains per dialog |
-| No accessible names on widgets | 🟡 Medium | All UI files | Screen reader incompatible | 1 day | `setAccessibleName()` per widget |
-| Bare `except Exception` swallowing errors | 🟡 Medium | `reports.py:143`, others | Silent failures | 2h | Log + show user feedback |
-| UDIN no validation | 🟡 Medium | `reports.py:87` | Invalid UDIN on official docs | 2h | Add regex validator |
-| `datetime.utcnow()` deprecated (Python 3.12+) | 🟡 Medium | `models.py`, `auth.py`, multiple | DeprecationWarning | 1h | Use `datetime.now(UTC)` |
-| Role selector on login screen misleads | 🟡 Medium | `login.py:133-134` | UX confusion + fake RBAC | 30 min | Remove combo, use DB role |
-| `c.name`, `l` single-letter variables | 🟢 Low | `ai_analysis.py`, `dashboard.py` | Readability | 0.5 day | Rename variables |
-| No `__all__` in `__init__.py` | 🟢 Low | All packages | Import pollution | 0.5 day | Define explicit exports |
+| `self.client_combo` undefined in `export_pdf()` |  BLOCKER | `reports.py:215` | 100% export failure | 30 min | Replace with `client_name` variable |
+| `PlaceholderWidget` NameError |  BLOCKER | `dashboard.py:801` | App crash on page failure | 30 min | Import or define `PlaceholderWidget` |
+| Hardcoded CA firm credentials in reports |  Critical | `reports.py:160-162` | Unusable for any real CA | 2h | Load from Settings |
+| Pre-filled `admin123` password in UI |  Critical | `login.py:119,126` | Security liability | 30 min | Remove `setText()` calls |
+| RBAC bypass on null session |  Critical | `dashboard.py:879` | Auth bypass | 1h | Fix condition logic |
+| `logout()` doesn't revoke session |  High | `auth_service.py:73-75` | Session persistence after logout | 1h | Call `revoke_session()` |
+| DB queries in widget `__init__` |  High | `dashboard.py:705-765`, `ai_analysis.py:145` | UI blocking on startup | 1 day | Defer to `showEvent()` |
+| `AuditProject` vs `Engagement` duality |  High | `models.py:104-139` | Data inconsistency | 3 days | Schema consolidation |
+| N+1 in `populate_client_selector()` |  High | `dashboard.py:903-914` | Scales poorly | 2h | JOIN query |
+| `mmap_size=30_000_000_000` SQLite pragma |  High | `database.py:48` | OOM risk on low-RAM machines | 15 min | Set to 268435456 |
+| `refresh_realtime_data()` on every nav |  Medium | `dashboard.py:849` | Unnecessary DB load | 1h | Only refresh on Dashboard tab |
+| Chat bubble memory leak |  Medium | `ai_analysis.py:307` | Memory growth in long sessions | 2h | Cap at 50 messages |
+| Hardcoded months in chart |  Medium | `dashboard.py:370` | Wrong data display | 2h | Use real calendar months |
+| Hardcoded notification alerts |  Medium | `dashboard.py:978-986` | Misleads users | 2h | Query DB for real alerts |
+| OCR confidence default `98.5` |  Medium | `models.py:177` | Fabricated metric | 2h | Default to `null`, set only after OCR |
+| No `setTabOrder()` anywhere |  Medium | All UI files | Accessibility | 1 day | Define tab chains per dialog |
+| No accessible names on widgets |  Medium | All UI files | Screen reader incompatible | 1 day | `setAccessibleName()` per widget |
+| Bare `except Exception` swallowing errors |  Medium | `reports.py:143`, others | Silent failures | 2h | Log + show user feedback |
+| UDIN no validation |  Medium | `reports.py:87` | Invalid UDIN on official docs | 2h | Add regex validator |
+| `datetime.utcnow()` deprecated (Python 3.12+) |  Medium | `models.py`, `auth.py`, multiple | DeprecationWarning | 1h | Use `datetime.now(UTC)` |
+| Role selector on login screen misleads |  Medium | `login.py:133-134` | UX confusion + fake RBAC | 30 min | Remove combo, use DB role |
+| `c.name`, `l` single-letter variables |  Low | `ai_analysis.py`, `dashboard.py` | Readability | 0.5 day | Rename variables |
+| No `__all__` in `__init__.py` |  Low | All packages | Import pollution | 0.5 day | Define explicit exports |
 
 ---
 

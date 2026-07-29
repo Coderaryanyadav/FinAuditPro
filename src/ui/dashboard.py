@@ -106,7 +106,7 @@ class AuditProjectsTableModel(QAbstractTableModel):
         if role == Qt.ItemDataRole.DisplayRole:
             if col == 0:
                 client_name = self._client_cache.get(proj.get('client_id'), f"Client #{proj.get('client_id')}")
-                return f"🏢 {client_name}"
+                return f" {client_name}"
             elif col == 1:
                 return f"Statutory Audit (FY {proj.get('financial_year') or '2025-26'})"
             elif col == 2:
@@ -200,7 +200,7 @@ class SidebarButton(QPushButton):
         self.style().polish(self)
 
 class GlobalSearchWidget(QFrame):
-    """Global Desktop Search Bar with ⌘K hotkey badge & real-time popup results."""
+    """Global Desktop Search Bar with K hotkey badge & real-time popup results."""
     result_selected = Signal(int)
 
     def __init__(self, parent=None):
@@ -214,7 +214,7 @@ class GlobalSearchWidget(QFrame):
         layout.setContentsMargins(10, 0, 10, 0)
         layout.setSpacing(6)
         
-        search_icon = QLabel("🔍")
+        search_icon = QLabel("")
         search_icon.setStyleSheet("border: none; font-size: 13px; color: #64748b; background: transparent;")
         
         self.input_field = QLineEdit()
@@ -222,7 +222,7 @@ class GlobalSearchWidget(QFrame):
         self.input_field.setStyleSheet("border: none; background: transparent; font-size: 12px; color: #0f172a;")
         self.input_field.textChanged.connect(self._on_search_text_changed)
         
-        shortcut_lbl = QLabel("⌘K")
+        shortcut_lbl = QLabel("K")
         shortcut_lbl.setStyleSheet("border: 1px solid #cbd5e1; background-color: #ffffff; color: #64748b; font-size: 10px; font-weight: bold; border-radius: 4px; padding: 1px 5px;")
         
         layout.addWidget(search_icon)
@@ -249,14 +249,14 @@ class GlobalSearchWidget(QFrame):
                 findings = session.query(Finding).filter(Finding.description.ilike(f"%{text}%")).limit(3).all()
 
                 if clients:
-                    header = self.menu.addAction("🏢 CLIENTS")
+                    header = self.menu.addAction(" CLIENTS")
                     header.setEnabled(False)
                     for c in clients:
                         action = self.menu.addAction(f"   {c.name}")
                         action.triggered.connect(lambda checked=False, page=1: self.result_selected.emit(page))
 
                 if findings:
-                    header2 = self.menu.addAction("📄 FINDINGS & REPORTS")
+                    header2 = self.menu.addAction(" FINDINGS & REPORTS")
                     header2.setEnabled(False)
                     for f in findings:
                         desc = f.description[:40] + "..." if len(f.description) > 40 else f.description
@@ -330,7 +330,7 @@ class AIAuditSummaryCard(QFrame):
         
         h_layout = QHBoxLayout()
         h_layout.setContentsMargins(0, 0, 0, 0)
-        title_lbl = QLabel("⚡ AI Audit Summary")
+        title_lbl = QLabel(" AI Audit Summary")
         title_lbl.setStyleSheet("font-weight: 800; font-size: 15px; color: #0f172a; border: none;")
         h_layout.addWidget(title_lbl)
         h_layout.addStretch()
@@ -586,7 +586,7 @@ class DashboardWindow(QWidget):
         logo_layout = QHBoxLayout(logo_container)
         logo_layout.setContentsMargins(20, 0, 20, 0)
         
-        logo_badge = QLabel("⚡")
+        logo_badge = QLabel("")
         logo_badge.setFixedSize(30, 30)
         logo_badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
         logo_badge.setStyleSheet("background-color: #0ea5e9; color: #ffffff; border-radius: 8px; font-size: 15px; font-weight: bold;")
@@ -615,20 +615,20 @@ class DashboardWindow(QWidget):
             nav_layout.addWidget(lbl)
             
         add_section_label("MAIN MENU")
-        self.btn_dashboard = SidebarButton("Dashboard", "📊", True)
-        self.btn_clients = SidebarButton("Client Management", "🏢")
-        self.btn_upload = SidebarButton("Upload Documents", "📁")
+        self.btn_dashboard = SidebarButton("Dashboard", "", True)
+        self.btn_clients = SidebarButton("Client Management", "")
+        self.btn_upload = SidebarButton("Upload Documents", "")
         nav_layout.addWidget(self.btn_dashboard)
         nav_layout.addWidget(self.btn_clients)
         nav_layout.addWidget(self.btn_upload)
         
         add_section_label("AUDIT WORKSPACE")
-        self.btn_ai = SidebarButton("AI Audit Analysis", "🤖")
-        self.btn_statements = SidebarButton("Financial Statements", "📈")
-        self.btn_gst = SidebarButton("GST Verification", "⚖️")
-        self.btn_compliance = SidebarButton("Compliance Monitoring", "📋")
-        self.btn_risk = SidebarButton("Risk Analysis", "🎯")
-        self.btn_working_papers = SidebarButton("Working Papers", "📄")
+        self.btn_ai = SidebarButton("AI Audit Analysis", "")
+        self.btn_statements = SidebarButton("Financial Statements", "")
+        self.btn_gst = SidebarButton("GST Verification", "")
+        self.btn_compliance = SidebarButton("Compliance Monitoring", "")
+        self.btn_risk = SidebarButton("Risk Analysis", "")
+        self.btn_working_papers = SidebarButton("Working Papers", "")
         nav_layout.addWidget(self.btn_ai)
         nav_layout.addWidget(self.btn_statements)
         nav_layout.addWidget(self.btn_gst)
@@ -637,9 +637,9 @@ class DashboardWindow(QWidget):
         nav_layout.addWidget(self.btn_working_papers)
 
         add_section_label("SETTINGS & LOGS")
-        self.btn_reports = SidebarButton("Reports", "🖨️")
-        self.btn_history = SidebarButton("Audit History", "📜")
-        self.btn_settings = SidebarButton("Settings", "⚙️")
+        self.btn_reports = SidebarButton("Reports", "")
+        self.btn_history = SidebarButton("Audit History", "")
+        self.btn_settings = SidebarButton("Settings", "")
         nav_layout.addWidget(self.btn_reports)
         nav_layout.addWidget(self.btn_history)
         nav_layout.addWidget(self.btn_settings)
@@ -707,7 +707,7 @@ class DashboardWindow(QWidget):
         self.client_selector.currentIndexChanged.connect(self.on_active_engagement_changed)
         header_layout.addWidget(self.client_selector)
         
-        btn_new_audit = QPushButton("⚡ + New Audit")
+        btn_new_audit = QPushButton(" + New Audit")
         btn_new_audit.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_new_audit.setStyleSheet("padding: 6px 12px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none; font-size: 12px;")
         btn_new_audit.clicked.connect(self.open_create_audit_dialog)
@@ -715,19 +715,19 @@ class DashboardWindow(QWidget):
         
         header_layout.addStretch()
         
-        self.btn_theme = QPushButton("🌙")
+        self.btn_theme = QPushButton("")
         self.btn_theme.setFixedSize(34, 34)
         self.btn_theme.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_theme.setStyleSheet("background-color: #f1f5f9; color: #475569; border-radius: 17px; font-size: 13px; border: none;")
         self.btn_theme.clicked.connect(self.toggle_theme)
         
-        self.btn_help = QPushButton("❓")
+        self.btn_help = QPushButton("")
         self.btn_help.setFixedSize(34, 34)
         self.btn_help.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_help.setStyleSheet("background-color: #f1f5f9; color: #475569; border-radius: 17px; font-size: 13px; border: none;")
         self.btn_help.clicked.connect(self.show_keyboard_shortcuts_dialog)
 
-        self.btn_notif = QPushButton("🔔")
+        self.btn_notif = QPushButton("")
         self.btn_notif.setFixedSize(34, 34)
         self.btn_notif.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_notif.setStyleSheet("background-color: #f1f5f9; color: #475569; border-radius: 17px; font-size: 13px; border: none;")
@@ -769,10 +769,10 @@ class DashboardWindow(QWidget):
         stats_layout = QHBoxLayout()
         stats_layout.setSpacing(16)
         
-        self.card_clients = MetricCard("Total Clients", "0", "+12%", "#e0f2fe", "#0284c7", "👥")
-        self.card_completed = MetricCard("Completed Audits", "0", "This Year", "#dcfce7", "#16a34a", "✅")
-        self.card_pending = MetricCard("Pending Reviews", "0", "Action Req.", "#fef3c7", "#d97706", "🕒")
-        self.card_high_risk = MetricCard("High Risk Cases", "0", "Flagged by AI", "#fee2e2", "#dc2626", "⚠️")
+        self.card_clients = MetricCard("Total Clients", "0", "+12%", "#e0f2fe", "#0284c7", "")
+        self.card_completed = MetricCard("Completed Audits", "0", "This Year", "#dcfce7", "#16a34a", "")
+        self.card_pending = MetricCard("Pending Reviews", "0", "Action Req.", "#fef3c7", "#d97706", "")
+        self.card_high_risk = MetricCard("High Risk Cases", "0", "Flagged by AI", "#fee2e2", "#dc2626", "")
 
         stats_layout.addWidget(self.card_clients)
         stats_layout.addWidget(self.card_completed)
@@ -1023,7 +1023,7 @@ class DashboardWindow(QWidget):
     def toggle_theme(self):
         is_dark = getattr(self, '_dark_mode', False)
         self._dark_mode = not is_dark
-        self.btn_theme.setText("☀️" if self._dark_mode else "🌙")
+        self.btn_theme.setText("" if self._dark_mode else "")
         QMessageBox.information(self, "Theme Preferences", f"Switched to {'Dark' if self._dark_mode else 'Standard Enterprise Slate'} palette.")
 
     def show_keyboard_shortcuts_dialog(self):

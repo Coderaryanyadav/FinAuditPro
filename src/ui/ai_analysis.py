@@ -20,11 +20,11 @@ from services.finding_service import FindingService
 from services.working_paper_service import WorkingPaperService
 
 PROMPT_LIBRARY = [
-    ("📋 CARO 2020 Clause (ii) Inventory", "Analyze uploaded inventory sheets and physical verification records under CARO 2020 Clause (ii). Highlight any discrepancies > 10%."),
-    ("⚖️ Sec 188 Related Party Transactions", "Check for related party transactions under Section 188 of Companies Act 2013 and verify if arm's length pricing evidence is present."),
-    ("💰 Sec 185/186 Loans & Investments", "Review loan agreements, inter-corporate deposits, and guarantees for Section 185/186 statutory ceiling compliance."),
-    ("📈 Revenue Recognition SA 240", "Scan sales registers and invoices for SA 240 fraud risk indicators, revenue cut-off anomalies, or round-tripping."),
-    ("🔍 Tax Audit Form 3CD Clause 44", "Break down expenditure split between GST registered and non-registered entities under Clause 44 of Form 3CD.")
+    (" CARO 2020 Clause (ii) Inventory", "Analyze uploaded inventory sheets and physical verification records under CARO 2020 Clause (ii). Highlight any discrepancies > 10%."),
+    (" Sec 188 Related Party Transactions", "Check for related party transactions under Section 188 of Companies Act 2013 and verify if arm's length pricing evidence is present."),
+    (" Sec 185/186 Loans & Investments", "Review loan agreements, inter-corporate deposits, and guarantees for Section 185/186 statutory ceiling compliance."),
+    (" Revenue Recognition SA 240", "Scan sales registers and invoices for SA 240 fraud risk indicators, revenue cut-off anomalies, or round-tripping."),
+    (" Tax Audit Form 3CD Clause 44", "Break down expenditure split between GST registered and non-registered entities under Clause 44 of Form 3CD.")
 ]
 
 def create_finding_card(title, severity, desc, evidence, border_color, top_border_color, badge_bg, badge_text_color, on_add_wp_cb=None):
@@ -74,7 +74,7 @@ def create_finding_card(title, severity, desc, evidence, border_color, top_borde
     
     h2 = QHBoxLayout()
     h2.addStretch()
-    btn_add = QPushButton("➕ Add to SA 230 Working Papers")
+    btn_add = QPushButton(" Add to SA 230 Working Papers")
     btn_add.setStyleSheet(f"background-color: #0ea5e9; color: white; border: none; font-size: 10px; font-weight: bold; border-radius: 4px; padding: 4px 8px;")
     if on_add_wp_cb:
         btn_add.clicked.connect(lambda: on_add_wp_cb(title, desc, evidence))
@@ -107,7 +107,7 @@ class AIAuditWidget(QWidget):
         header_layout.addWidget(title)
         header_layout.addStretch()
         
-        active_badge = QLabel("🟢 Ollama Local RAG Engine Active")
+        active_badge = QLabel(" Ollama Local RAG Engine Active")
         active_badge.setStyleSheet("background-color: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: bold;")
         header_layout.addWidget(active_badge)
         
@@ -156,7 +156,7 @@ class AIAuditWidget(QWidget):
         c2_header.setFixedHeight(50)
         c2_header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #f1f5f9;")
         c2_h_layout = QHBoxLayout(c2_header)
-        bot_icon = QLabel("🤖")
+        bot_icon = QLabel("")
         bot_icon.setFixedSize(28, 28)
         bot_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         bot_icon.setStyleSheet("background-color: #e0f2fe; border-radius: 14px; font-size: 14px; border: none;")

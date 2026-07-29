@@ -31,14 +31,14 @@ pytest --cov=src --cov-report=term-missing
 
 | Test Module | Component / Scope Covered | Test Count | Status |
 |---|---|---|---|
-| `tests/test_analytics.py` | SQL KPI Engine, Trend Engine, Risk Heatmap Engine | 3 | ✅ Pass |
-| `tests/test_deployment.py` | App logging setup, System Diagnostics, Schema Migrations | 4 | ✅ Pass |
-| `tests/test_document_intelligence.py` | Multi-engine OCR fallback, PyPDF parser, Chunking, Embedding | 7 | ✅ Pass |
-| `tests/test_fatal_fixes.py` | Database session leak prevention, Exception handlers, Failure paths | 5 | ✅ Pass |
-| `tests/test_reporting.py` | ReportLab PDF generator, OpenPyXL Excel export, Working Paper Engine | 4 | ✅ Pass |
-| `tests/test_rule_engine.py` | GST rules, Income Tax rules, Fraud rules, Accounting rules | 4 | ✅ Pass |
-| `tests/test_security.py` | PBKDF2 Password Hashing, AES-256 Backups, Audit Ledger Hash Chain | 6 | ✅ Pass |
-| `tests/test_ui_components.py` | PySide6 Windows, Dialogs, Navigation signals, Table widgets | 12 | ✅ Pass |
+| `tests/test_analytics.py` | SQL KPI Engine, Trend Engine, Risk Heatmap Engine | 3 |  Pass |
+| `tests/test_deployment.py` | App logging setup, System Diagnostics, Schema Migrations | 4 |  Pass |
+| `tests/test_document_intelligence.py` | Multi-engine OCR fallback, PyPDF parser, Chunking, Embedding | 7 |  Pass |
+| `tests/test_fatal_fixes.py` | Database session leak prevention, Exception handlers, Failure paths | 5 |  Pass |
+| `tests/test_reporting.py` | ReportLab PDF generator, OpenPyXL Excel export, Working Paper Engine | 4 |  Pass |
+| `tests/test_rule_engine.py` | GST rules, Income Tax rules, Fraud rules, Accounting rules | 4 |  Pass |
+| `tests/test_security.py` | PBKDF2 Password Hashing, AES-256 Backups, Audit Ledger Hash Chain | 6 |  Pass |
+| `tests/test_ui_components.py` | PySide6 Windows, Dialogs, Navigation signals, Table widgets | 12 |  Pass |
 
 ---
 

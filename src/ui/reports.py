@@ -54,7 +54,7 @@ class ReportsWidget(QWidget):
 
         h_layout.addStretch()
 
-        export_btn = QPushButton("📥 Export Official PDF Audit Report")
+        export_btn = QPushButton(" Export Official PDF Audit Report")
         export_btn.setStyleSheet("background-color: #0ea5e9; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; border: none;")
         export_btn.clicked.connect(self.export_pdf)
         h_layout.addWidget(export_btn)
@@ -90,7 +90,7 @@ class ReportsWidget(QWidget):
         self.udin_input.setStyleSheet("padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: monospace; font-weight: bold;")
         o_layout.addWidget(self.udin_input)
 
-        btn_regen = QPushButton("⚡ Refresh Draft")
+        btn_regen = QPushButton(" Refresh Draft")
         btn_regen.setStyleSheet("background-color: #f1f5f9; color: #0284c7; font-weight: bold; border: 1px solid #bae6fd; padding: 6px 12px; border-radius: 6px;")
         btn_regen.clicked.connect(self.load_report_draft)
         o_layout.addWidget(btn_regen)

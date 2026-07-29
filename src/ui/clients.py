@@ -188,11 +188,11 @@ class ClientManagementWidget(QWidget):
 
         h_layout.addStretch()
         
-        btn_add = QPushButton("👥 + Add New Client")
+        btn_add = QPushButton(" + Add New Client")
         btn_add.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
         btn_add.clicked.connect(self.open_add_client_dialog)
         
-        btn_new_audit = QPushButton("⚡ + New Audit Project")
+        btn_new_audit = QPushButton(" + New Audit Project")
         btn_new_audit.setStyleSheet("padding: 8px 14px; background-color: #0284c7; color: white; font-weight: bold; border-radius: 6px; border: none;")
         btn_new_audit.clicked.connect(self.open_create_audit_dialog)
         
@@ -283,7 +283,7 @@ class ClientManagementWidget(QWidget):
 
         w_layout.addWidget(form_frame)
 
-        btn_save = QPushButton("💾 Update Client Statutory Info")
+        btn_save = QPushButton(" Update Client Statutory Info")
         btn_save.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
         btn_save.clicked.connect(self.save_client_changes)
         w_layout.addWidget(btn_save)

@@ -54,7 +54,7 @@ class AuditHistoryWidget(QWidget):
         self.search_box.textChanged.connect(self.load_history)
         h_layout.addWidget(self.search_box)
 
-        btn_export = QPushButton("📥 Export Log for Peer Review")
+        btn_export = QPushButton(" Export Log for Peer Review")
         btn_export.setStyleSheet("background-color: #0ea5e9; color: white; font-weight: bold; padding: 8px 14px; border-radius: 6px; border: none;")
         btn_export.clicked.connect(self.export_peer_review_log)
         h_layout.addWidget(btn_export)
@@ -69,7 +69,7 @@ class AuditHistoryWidget(QWidget):
         ib_layout.setContentsMargins(24, 0, 24, 0)
 
         chain_ok = self.logger.verify_ledger_integrity()
-        status_text = "🔒 SHA-256 Hash Chain Integrity: VERIFIED & IMMUTABLE (Zero Tampering Detected)" if chain_ok else "⚠️ Hash Chain Warning: Modification Detected"
+        status_text = " SHA-256 Hash Chain Integrity: VERIFIED & IMMUTABLE (Zero Tampering Detected)" if chain_ok else " Hash Chain Warning: Modification Detected"
         status_color = "#065f46" if chain_ok else "#991b1b"
         
         lbl_status = QLabel(status_text)

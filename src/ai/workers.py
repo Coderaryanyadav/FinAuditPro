@@ -74,10 +74,10 @@ class OllamaWorker(QThread):
         except Exception as e:
             logger.warning(f"Ollama execution error: {e}")
             err_msg = (
-                f"⚠️ [AI COPILOT LOCAL SERVICE NOTICE]\n\n"
+                f" [AI COPILOT LOCAL SERVICE NOTICE]\n\n"
                 f"The local Ollama LLM service is currently offline or unreachable at http://localhost:11434.\n\n"
                 f"Details: {e}\n\n"
-                f"💡 Quick Fix: Ensure Ollama is installed and running on your machine by executing `ollama serve` or opening the Ollama application. "
+                f" Quick Fix: Ensure Ollama is installed and running on your machine by executing `ollama serve` or opening the Ollama application. "
                 f"FinAuditPro offline audit rules, compliance checksheets, and financial statement auto-mapping remain 100% active."
             )
             self.chunk_received.emit(err_msg)

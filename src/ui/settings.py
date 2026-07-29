@@ -44,7 +44,7 @@ class SettingsWidget(QWidget):
 
         h_layout.addStretch()
         
-        btn_save = QPushButton("💾 Save Configuration")
+        btn_save = QPushButton(" Save Configuration")
         btn_save.setStyleSheet("padding: 8px 16px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
         btn_save.clicked.connect(self.save_settings)
         h_layout.addWidget(btn_save)
@@ -114,7 +114,7 @@ class SettingsWidget(QWidget):
 
         f_layout.addRow("Local Model Target:", self.model_combo)
 
-        btn_test_ollama = QPushButton("⚡ Test Ollama Connection")
+        btn_test_ollama = QPushButton(" Test Ollama Connection")
         btn_test_ollama.setStyleSheet("padding: 6px 12px; background-color: #f1f5f9; color: #0284c7; border: 1px solid #bae6fd; font-weight: bold; border-radius: 6px;")
         btn_test_ollama.clicked.connect(self.test_ollama)
         f_layout.addRow("Diagnostics:", btn_test_ollama)
@@ -133,7 +133,7 @@ class SettingsWidget(QWidget):
         f_layout = QFormLayout(card)
         f_layout.setSpacing(12)
 
-        sec_badge = QLabel("🛡️ AIR-GAPPED ENVIRONMENT: 100% Offline Local Storage Mode Active")
+        sec_badge = QLabel(" AIR-GAPPED ENVIRONMENT: 100% Offline Local Storage Mode Active")
         sec_badge.setStyleSheet("background-color: #ecfdf5; color: #047857; font-weight: bold; padding: 8px; border-radius: 6px; font-size: 12px;")
         f_layout.addRow(sec_badge)
 
@@ -142,7 +142,7 @@ class SettingsWidget(QWidget):
         self.db_path.setStyleSheet("padding: 8px; border: 1px solid #e2e8f0; background-color: #f8fafc; border-radius: 6px;")
         f_layout.addRow("SQLite Database Location:", self.db_path)
 
-        btn_backup = QPushButton("📦 Export Database Backup Zip")
+        btn_backup = QPushButton(" Export Database Backup Zip")
         btn_backup.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; border-radius: 6px; font-weight: bold; border: none;")
         btn_backup.clicked.connect(self.backup_database)
         f_layout.addRow("Database Backup:", btn_backup)

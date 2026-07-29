@@ -1759,7 +1759,7 @@ Tests still running — waiting for the full suite to complete before pushing to
 
 ### Planner Response
 
-✅ **Pushed to GitHub successfully.**
+ **Pushed to GitHub successfully.**
 
 ```
 8223dbe..3cc7548  main -> main
@@ -1894,7 +1894,7 @@ Added:
 
 ### Planner Response
 
-✅ **Pushed to GitHub — repo is clean.**
+ **Pushed to GitHub — repo is clean.**
 
 ---
 
@@ -2336,7 +2336,7 @@ The audit is complete. Here's the full 15-section breakdown:
 
 ---
 
-### 🔴 Six Launch Blockers (Fix Before Any Demo)
+### Six Launch Blockers (Fix Before Any Demo)
 
 | # | Issue | Location | Fix |
 |---|---|---|---|

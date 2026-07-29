@@ -78,7 +78,7 @@ class ComplianceWidget(QWidget):
 
         h_layout.addStretch()
 
-        btn_save = QPushButton("💾 Save Compliance Sign-Offs")
+        btn_save = QPushButton(" Save Compliance Sign-Offs")
         btn_save.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
         btn_save.clicked.connect(self.save_compliance_signoffs)
         h_layout.addWidget(btn_save)

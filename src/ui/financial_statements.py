@@ -71,15 +71,15 @@ class FinancialStatementsWidget(QWidget):
         h_layout.addLayout(title_v)
         h_layout.addStretch()
 
-        btn_import = QPushButton("📁 Import Trial Balance (CSV/Excel)")
+        btn_import = QPushButton(" Import Trial Balance (CSV/Excel)")
         btn_import.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
         btn_import.clicked.connect(self.import_trial_balance)
 
-        btn_auto_map = QPushButton("⚡ Auto-Map Schedule III")
+        btn_auto_map = QPushButton(" Auto-Map Schedule III")
         btn_auto_map.setStyleSheet("padding: 8px 14px; background-color: #f1f5f9; color: #0ea5e9; font-weight: bold; border: 1px solid #bae6fd; border-radius: 6px;")
         btn_auto_map.clicked.connect(self.run_auto_mapping)
 
-        btn_export = QPushButton("📥 Export Statements")
+        btn_export = QPushButton(" Export Statements")
         btn_export.setStyleSheet("padding: 8px 14px; background-color: #f1f5f9; color: #334155; font-weight: bold; border: 1px solid #cbd5e1; border-radius: 6px;")
         btn_export.clicked.connect(self.export_statements)
 
@@ -104,7 +104,7 @@ class FinancialStatementsWidget(QWidget):
         self.lbl_credit_total = QLabel("Total Credits: ₹0.00")
         self.lbl_credit_total.setStyleSheet("font-weight: bold; color: #047857; font-size: 13px;")
 
-        self.lbl_balance_status = QLabel("✅ Trial Balance Balanced (Debits = Credits)")
+        self.lbl_balance_status = QLabel(" Trial Balance Balanced (Debits = Credits)")
         self.lbl_balance_status.setStyleSheet("font-weight: bold; color: #065f46; background-color: #d1fae5; padding: 4px 10px; border-radius: 4px;")
 
         val_layout.addWidget(self.lbl_debit_total)
@@ -236,11 +236,11 @@ class FinancialStatementsWidget(QWidget):
 
         diff = abs(total_debit - total_credit)
         if diff < 0.01:
-            self.lbl_balance_status.setText("✅ Trial Balance Balanced (Debits = Credits)")
+            self.lbl_balance_status.setText(" Trial Balance Balanced (Debits = Credits)")
             self.lbl_balance_status.setStyleSheet("font-weight: bold; color: #065f46; background-color: #d1fae5; padding: 4px 10px; border-radius: 4px;")
             self.validation_frame.setStyleSheet("background-color: #ecfdf5; border-bottom: 1px solid #a7f3d0;")
         else:
-            self.lbl_balance_status.setText(f"⚠️ Trial Balance Imbalanced (Diff: ₹{diff:,.2f})")
+            self.lbl_balance_status.setText(f" Trial Balance Imbalanced (Diff: ₹{diff:,.2f})")
             self.lbl_balance_status.setStyleSheet("font-weight: bold; color: #991b1b; background-color: #fef2f2; padding: 4px 10px; border-radius: 4px;")
             self.validation_frame.setStyleSheet("background-color: #fff5f5; border-bottom: 1px solid #fecaca;")
 

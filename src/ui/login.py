@@ -40,7 +40,7 @@ class LoginWindow(QWidget):
         left_layout.setContentsMargins(40, 50, 40, 50)
         left_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         
-        badge = QLabel("🛡️ ICAI COMPLIANT & AIR-GAPPED")
+        badge = QLabel(" ICAI COMPLIANT & AIR-GAPPED")
         badge.setStyleSheet("""
             background-color: rgba(14, 165, 233, 0.15);
             color: #38bdf8;
@@ -74,11 +74,11 @@ class LoginWindow(QWidget):
             row.addStretch()
             return row
 
-        left_layout.addLayout(create_feature_bullet("🔒", "100% Local RAG & LLM Analysis (Air-Gapped)"))
+        left_layout.addLayout(create_feature_bullet("", "100% Local RAG & LLM Analysis (Air-Gapped)"))
         left_layout.addSpacing(10)
-        left_layout.addLayout(create_feature_bullet("⚡", "Automated Working Paper & Audit Trail Generation"))
+        left_layout.addLayout(create_feature_bullet("", "Automated Working Paper & Audit Trail Generation"))
         left_layout.addSpacing(10)
-        left_layout.addLayout(create_feature_bullet("📊", "Statutory, GST & Tax Reconciliation Engine"))
+        left_layout.addLayout(create_feature_bullet("", "Statutory, GST & Tax Reconciliation Engine"))
         left_layout.addStretch()
         
         version_lbl = QLabel("FinAuditPro Enterprise v2.4.0 • Local Machine Deployment")
@@ -157,7 +157,7 @@ class LoginWindow(QWidget):
         """)
         self.login_btn.clicked.connect(self.handle_login)
         
-        offline_lbl = QLabel("<a href='#' style='color: #64748b; text-decoration: none; font-size: 12px;'>🔒 Air-Gapped Local Mode</a>")
+        offline_lbl = QLabel("<a href='#' style='color: #64748b; text-decoration: none; font-size: 12px;'> Air-Gapped Local Mode</a>")
         offline_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         offline_lbl.setStyleSheet("border: none; margin-top: 4px; background: transparent;")
         offline_lbl.linkActivated.connect(self.handle_offline_mode)

@@ -17,47 +17,47 @@
 ---
 
 <details>
-<summary><b>📖 Table of Contents</b></summary>
+<summary><b>Table of Contents</b></summary>
 <br>
 
-- [📖 Overview](#-overview)
-- [✨ Features](#-features)
-- [📸 See it in action](#-see-it-in-action)
-- [🏛️ Architecture](#️-architecture)
-- [🛠️ Technology Stack](#️-technology-stack)
-- [🚀 Quickstart](#-quickstart)
-- [🧪 Tests](#-tests)
-- [📁 Project Structure](#-project-structure)
-- [📚 Documentation](#-documentation)
-- [📄 License](#-license)
+- [Overview](#overview)
+- [Features](#features)
+- [See it in action](#see-it-in-action)
+- [Architecture](#architecture)
+- [Technology Stack](#technology-stack)
+- [Quickstart](#quickstart)
+- [Tests](#tests)
+- [Project Structure](#project-structure)
+- [Documentation](#documentation)
+- [License](#license)
 
 </details>
 
 ---
 
-## 📖 Overview
+## Overview
 
 **FinAuditPro** is an air-gapped desktop application built for statutory auditors and CA firms. It combines local LLM inference, multi-engine OCR, offline FAISS vector search, deterministic rule checking, and cryptographic report verification — all without transmitting sensitive client data to any external server.
 
 ---
 
-## ✨ Features
+## Features
 
 | Module | Description |
 |--------|-------------|
-| 🔒 **Security & Auth** | PBKDF2-HMAC-SHA256 password hashing (100k iterations), RBAC with role-based permission gates, AES-256 encrypted backups, SHA-256 immutable audit ledger |
-| 📄 **Document Intelligence** | PyPDF text extraction + OCR fallback (PaddleOCR / Tesseract / EasyOCR), table extraction, multi-format ingestion |
-| 🧠 **AI Audit Engine** | FAISS `IndexFlatIP` vector store, SentenceTransformer embeddings, RAG context retrieval via Ollama (llama3 / deepseek-r1) |
-| 📋 **Rule Engine** | GSTIN / PAN format validation, Section 40A(3) cash limit detection, Benford's Law distribution analysis, CARO 2020 checklist |
-| 📊 **Financial Statements** | Trial balance CSV import, Schedule III auto-mapping, Balance Sheet and P&L generation |
-| 📑 **Audit Reports** | SA 700 / SA 705 WYSIWYG editor, real SHA-256 tamper hash, `DigitalSignatureManager`, `QRVerificationManager`, PDF export via `QPdfWriter` |
-| 🗂️ **Working Papers** | Engagement-scoped audit file management, indexed document registry |
-| 📈 **Analytics** | KPI cards, QtCharts spline/pie charts, real-time dashboard from live DB queries |
-| 🔄 **Workflow Engine** | Audit lifecycle state machine with event bus and progress tracking |
+| **Security & Auth** | PBKDF2-HMAC-SHA256 password hashing (100k iterations), RBAC with role-based permission gates, AES-256 encrypted backups, SHA-256 immutable audit ledger |
+| **Document Intelligence** | PyPDF text extraction + OCR fallback (PaddleOCR / Tesseract / EasyOCR), table extraction, multi-format ingestion |
+| **AI Audit Engine** | FAISS `IndexFlatIP` vector store, SentenceTransformer embeddings, RAG context retrieval via Ollama (llama3 / deepseek-r1) |
+| **Rule Engine** | GSTIN / PAN format validation, Section 40A(3) cash limit detection, Benford's Law distribution analysis, CARO 2020 checklist |
+| **Financial Statements** | Trial balance CSV import, Schedule III auto-mapping, Balance Sheet and P&L generation |
+| **Audit Reports** | SA 700 / SA 705 WYSIWYG editor, real SHA-256 tamper hash, `DigitalSignatureManager`, `QRVerificationManager`, PDF export via `QPdfWriter` |
+| **Working Papers** | Engagement-scoped audit file management, indexed document registry |
+| **Analytics** | KPI cards, QtCharts spline/pie charts, real-time dashboard from live DB queries |
+| **Workflow Engine** | Audit lifecycle state machine with event bus and progress tracking |
 
 ---
 
-## 📸 See it in action
+## See it in action
 
 <p align="center">
   <!-- TODO: Drop in a GIF demo here. Recommended: 8–15 sec, <5MB via ScreenToGif or Kap showing importing a trial balance and generating a report -->
@@ -90,7 +90,7 @@
 
 ---
 
-## 🏛️ Architecture
+## Architecture
 
 ```mermaid
 %%{init: {
@@ -144,7 +144,7 @@ graph TD
 
 ---
 
-### 🌐 System Deployment Topology
+### System Deployment Topology
 
 ```mermaid
 %%{init: {
@@ -161,18 +161,18 @@ graph TD
   }
 }}%%
 flowchart LR
-    subgraph ClientHost["💻 Air-Gapped Workstation / Client Host"]
+    subgraph ClientHost[" Air-Gapped Workstation / Client Host"]
         subgraph AppProcess["FinAuditPro App Process (PySide6 / Qt6)"]
             UI_Layer["GUI Layer\n(Dashboard, Editor, Viewer)"]
             Core_Engine["Audit Engine & Rule Processors"]
         end
 
-        subgraph LocalAI["🤖 Local AI & Ingestion Services"]
+        subgraph LocalAI[" Local AI & Ingestion Services"]
             OllamaDaemon["Ollama Service\n(localhost:11434)\nllama3 / deepseek-r1"]
             OCREngines["OCR Engines\n(PaddleOCR / Tesseract / EasyOCR)"]
         end
 
-        subgraph Storage["💾 Encrypted Local Storage"]
+        subgraph Storage[" Encrypted Local Storage"]
             DB[(SQLite DB\nWAL Mode)]
             FAISS_Store[(FAISS Vector Index)]
             AuditVault["Encrypted Working Papers\n(AES-256 Vault)"]
@@ -189,7 +189,7 @@ flowchart LR
 
 ---
 
-### 🔄 Data Flow Diagram (DFD)
+### Data Flow Diagram (DFD)
 
 ```mermaid
 %%{init: {
@@ -206,7 +206,7 @@ flowchart LR
   }
 }}%%
 flowchart TD
-    Auditor([👤 Statutory Auditor])
+    Auditor([ Statutory Auditor])
 
     subgraph P1["1. Ingestion & Extraction"]
         DocIngest["Import Client Docs & Trial Balances"]
@@ -250,7 +250,7 @@ flowchart TD
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Category | Technology | Usage & Specification |
 |---|---|---|
@@ -265,12 +265,12 @@ flowchart TD
 ---
 
 > [!IMPORTANT]
-> ### 🛡️ 100% Offline & Air-Gap Compliance Guarantee
+> ###  100% Offline & Air-Gap Compliance Guarantee
 > **FinAuditPro** is built from the ground up for strict confidentiality. It makes **zero outbound network connections**. All LLM inferences, document embeddings, vector indexing, OCR processing, and database operations execute strictly on your local workstation host.
 
 ---
 
-## 🚀 Quickstart
+## Quickstart
 
 ### Prerequisites
 
@@ -315,7 +315,7 @@ chmod +x install.sh && ./install.sh
 
 ---
 
-## 🧪 Tests
+## Tests
 
 ```bash
 pytest tests/ -v
@@ -325,7 +325,7 @@ pytest tests/ -v
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 FinAuditPro/
@@ -360,7 +360,7 @@ FinAuditPro/
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 Full technical docs are located in [`docs/`](docs/):
 
@@ -372,7 +372,7 @@ Full technical docs are located in [`docs/`](docs/):
 
 ---
 
-## 📄 License
+## License
 
 MIT License — see [`LICENSE`](LICENSE).
 
@@ -381,6 +381,6 @@ MIT License — see [`LICENSE`](LICENSE).
 ---
 
 <div align="center">
-  <sub>Built with ❤️ by <b>Aryan Yadav</b>, <b>Jeet Shah</b>, and <b>Hitansh Jasani</b> (<a href="https://github.com/Coderaryanyadav">@Coderaryanyadav</a>)</sub>
+  <sub>Built with  by <b>Aryan Yadav</b>, <b>Jeet Shah</b>, and <b>Hitansh Jasani</b> (<a href="https://github.com/Coderaryanyadav">@Coderaryanyadav</a>)</sub>
 </div>
 

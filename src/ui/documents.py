@@ -161,11 +161,11 @@ class DocumentUploadWidget(QWidget):
         
         action_layout.addStretch()
         
-        btn_upload = QPushButton("📁 Select Files to Upload")
+        btn_upload = QPushButton(" Select Files to Upload")
         btn_upload.setObjectName("primaryButton")
         btn_upload.clicked.connect(self.browse_files)
 
-        btn_process = QPushButton("⚡ Process with AI OCR")
+        btn_process = QPushButton(" Process with AI OCR")
         btn_process.setObjectName("secondaryButton")
         btn_process.clicked.connect(self.start_ai_processing)
         self.btn_process = btn_process
@@ -184,7 +184,7 @@ class DocumentUploadWidget(QWidget):
                 ocr_banner.setStyleSheet("background-color: #fef3c7; border-bottom: 1px solid #f59e0b;")
                 b_layout = QHBoxLayout(ocr_banner)
                 b_layout.setContentsMargins(24, 0, 24, 0)
-                warn_lbl = QLabel(f"ℹ️ {ocr_msg}")
+                warn_lbl = QLabel(f"ℹ {ocr_msg}")
                 warn_lbl.setStyleSheet("color: #92400e; font-size: 11px; font-weight: 600; border: none; background: transparent;")
                 b_layout.addWidget(warn_lbl)
                 main_layout.addWidget(ocr_banner)
@@ -209,7 +209,7 @@ class DocumentUploadWidget(QWidget):
         upload_l = QVBoxLayout(self.upload_area)
         upload_l.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        drop_lbl = QLabel("📄 Drag & drop financial documents here or click 'Select Files'")
+        drop_lbl = QLabel(" Drag & drop financial documents here or click 'Select Files'")
         drop_lbl.setStyleSheet("color: #0369a1; font-weight: bold; font-size: 13px; border: none;")
         drop_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         upload_l.addWidget(drop_lbl)
@@ -336,7 +336,7 @@ class DocumentUploadWidget(QWidget):
                 self.doc_table.setItem(r, 2, hash_item)
 
                 st = doc.doc_type or "Uploaded"
-                st_text = "🟢 Ingested" if st == "Ingested" else "🔵 Digital Parsed" if st == "Uploaded" else "⏳ Pending"
+                st_text = " Ingested" if st == "Ingested" else " Digital Parsed" if st == "Uploaded" else " Pending"
                 st_item = QTableWidgetItem(st_text)
                 self.doc_table.setItem(r, 3, st_item)
 

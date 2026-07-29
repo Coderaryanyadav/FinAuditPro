@@ -1,17 +1,37 @@
 <div align="center">
 
-# 🏛️ FinAuditPro
+  <img src="docs/assets/banner.svg" alt="FinAuditPro Banner" width="100%" />
 
-**Offline-First AI-Powered Audit Intelligence Platform for Chartered Accountants.**
+  ### Offline-First AI-Powered Audit Intelligence Platform for Chartered Accountants.
 
-[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![PySide6](https://img.shields.io/badge/PySide6-6.7-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://www.qt.io/)
-[![SQLite WAL](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-[![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-000000?style=for-the-badge)](https://ollama.ai/)
-[![Tests](https://img.shields.io/badge/Tests-51%2F51%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+  [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+  [![PySide6](https://img.shields.io/badge/PySide6-6.7-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://www.qt.io/)
+  [![SQLite WAL](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+  <br>
+  [![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-000000?style=for-the-badge&logo=ollama&logoColor=white)](https://ollama.ai/)
+  [![Tests](https://img.shields.io/badge/Tests-51%2F51%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 </div>
+
+---
+
+<details>
+<summary><b>📖 Table of Contents</b></summary>
+<br>
+
+- [📖 Overview](#-overview)
+- [✨ Features](#-features)
+- [📸 See it in action](#-see-it-in-action)
+- [🏛️ Architecture](#️-architecture)
+- [🛠️ Technology Stack](#️-technology-stack)
+- [🚀 Quickstart](#-quickstart)
+- [🧪 Tests](#-tests)
+- [📁 Project Structure](#-project-structure)
+- [📚 Documentation](#-documentation)
+- [📄 License](#-license)
+
+</details>
 
 ---
 
@@ -37,9 +57,55 @@
 
 ---
 
+## 📸 See it in action
+
+<p align="center">
+  <!-- TODO: Drop in a GIF demo here. Recommended: 8–15 sec, <5MB via ScreenToGif or Kap showing importing a trial balance and generating a report -->
+  <img src="docs/assets/demo-placeholder.gif" alt="FinAuditPro Demo Workflow" width="800" />
+</p>
+
+<br>
+
+<table align="center">
+  <tr>
+    <td align="center" width="50%">
+      <b>Dashboard</b><br/>
+      <!-- TODO: Capture a 1280x800 dark theme screenshot with sample data loaded -->
+      <img src="docs/assets/screenshot-dashboard.png" alt="Dashboard View" width="100%"/>
+    </td>
+    <td align="center" width="50%">
+      <b>Audit Report View</b><br/>
+      <!-- TODO: Capture a 1280x800 dark theme screenshot showing WYSIWYG editor -->
+      <img src="docs/assets/screenshot-report.png" alt="Audit Report View" width="100%"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
+      <b>Rule Engine & Analytics</b><br/>
+      <!-- TODO: Capture a 1280x800 dark theme screenshot showing statutory rules or charts -->
+      <img src="docs/assets/screenshot-analytics.png" alt="Analytics View" width="100%"/>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## 🏛️ Architecture
 
 ```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#0f172a',
+    'primaryTextColor': '#f8fafc',
+    'primaryBorderColor': '#38bdf8',
+    'lineColor': '#94a3b8',
+    'secondaryColor': '#1e293b',
+    'tertiaryColor': '#334155',
+    'clusterBkg': '#020617',
+    'clusterBorder': '#334155'
+  }
+}}%%
 graph TD
     subgraph UI["Presentation Layer (PySide6 / Qt6)"]
         DASH[Dashboard] --- CLIENTS[Clients]
@@ -148,7 +214,7 @@ pytest tests/ -v
 
 ## 📁 Project Structure
 
-```
+```text
 FinAuditPro/
 ├── src/
 │   ├── main.py                    # Application entry point
@@ -194,4 +260,10 @@ Full technical docs are in [`docs/`](docs/):
 
 MIT License — see [`LICENSE`](LICENSE).
 
-Developed by **Aryan Yadav**, **Jeet Shah**, and **Hitansh Jasani** ([@Coderaryanyadav](https://github.com/Coderaryanyadav)).
+<br>
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ by <b>Aryan Yadav</b>, <b>Jeet Shah</b>, and <b>Hitansh Jasani</b> (<a href="https://github.com/Coderaryanyadav">@Coderaryanyadav</a>)</sub>
+</div>

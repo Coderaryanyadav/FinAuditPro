@@ -207,35 +207,28 @@ class GlobalSearchWidget(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedSize(360, 36)
-        self.setStyleSheet("""
-            QFrame { background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; }
-            QFrame:focus-within { background-color: #ffffff; border: 2px solid #0ea5e9; }
-        """)
+        self.setObjectName("globalSearchFrame")
         layout = QHBoxLayout(self)
         layout.setContentsMargins(10, 0, 10, 0)
         layout.setSpacing(6)
         
         search_icon = QLabel("")
-        search_icon.setStyleSheet("border: none; font-size: 13px; color: #64748b; background: transparent;")
+        search_icon.setObjectName("globalSearchIcon")
         
         self.input_field = QLineEdit()
         self.input_field.setPlaceholderText("Search clients, reports, documents... (Ctrl+K)")
-        self.input_field.setStyleSheet("border: none; background: transparent; font-size: 12px; color: #0f172a;")
+        self.input_field.setObjectName("globalSearchInput")
         self.input_field.textChanged.connect(self._on_search_text_changed)
         
         shortcut_lbl = QLabel("K")
-        shortcut_lbl.setStyleSheet("border: 1px solid #cbd5e1; background-color: #ffffff; color: #64748b; font-size: 10px; font-weight: bold; border-radius: 4px; padding: 1px 5px;")
+        shortcut_lbl.setObjectName("globalShortcutBadge")
         
         layout.addWidget(search_icon)
         layout.addWidget(self.input_field)
         layout.addWidget(shortcut_lbl)
 
         self.menu = QMenu(self)
-        self.menu.setStyleSheet("""
-            QMenu { background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; padding: 4px; }
-            QMenu::item { padding: 8px 16px; border-radius: 4px; }
-            QMenu::item:selected { background-color: #0ea5e9; color: #ffffff; }
-        """)
+        self.menu.setObjectName("globalSearchMenu")
 
     def _on_search_text_changed(self, text: str):
         text = text.strip()
@@ -287,7 +280,7 @@ class MetricCard(QFrame):
         h_layout.setContentsMargins(0, 0, 0, 0)
         
         self.title_lbl = QLabel(title)
-        self.title_lbl.setStyleSheet("color: #64748b; font-size: 12px; font-weight: 700; border: none;")
+        self.title_lbl.setObjectName("metricTitle")
         
         self.icon_lbl = QLabel()
         self.icon_lbl.setFixedSize(30, 30)
@@ -308,7 +301,7 @@ class MetricCard(QFrame):
         val_layout.setSpacing(10)
         
         self.val_lbl = QLabel(str(value))
-        self.val_lbl.setStyleSheet("color: #0f172a; font-size: 28px; font-weight: 800; border: none;")
+        self.val_lbl.setObjectName("metricValue")
         
         self.badge_lbl = QLabel(subtitle)
         self.badge_lbl.setStyleSheet(f"color: {badge_fg}; font-size: 10px; font-weight: 700; background-color: {badge_bg}; padding: 3px 8px; border-radius: 6px; border: none;")
@@ -328,7 +321,7 @@ class AIAuditSummaryCard(QFrame):
     """RAG AI Audit Executive Summary Card."""
     def __init__(self, risk_score: int, comp_score: int, findings: list, parent=None):
         super().__init__(parent)
-        self.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;")
+        self.setObjectName("aiSummaryCard")
         
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(20, 18, 20, 18)
@@ -337,7 +330,7 @@ class AIAuditSummaryCard(QFrame):
         h_layout = QHBoxLayout()
         h_layout.setContentsMargins(0, 0, 0, 0)
         title_lbl = QLabel(" AI Audit Summary")
-        title_lbl.setStyleSheet("font-weight: 800; font-size: 15px; color: #0f172a; border: none;")
+        title_lbl.setObjectName("aiSummaryTitle")
         h_layout.addWidget(title_lbl)
         h_layout.addStretch()
         self.layout.addLayout(h_layout)
@@ -348,24 +341,24 @@ class AIAuditSummaryCard(QFrame):
         self.layout.addWidget(self.comp_bar_widget)
         
         self.f_box = QFrame()
-        self.f_box.setStyleSheet("background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 10px;")
+        self.f_box.setObjectName("aiFindingsBox")
         self.f_layout = QVBoxLayout(self.f_box)
         self.f_layout.setContentsMargins(8, 8, 8, 8)
         self.f_layout.setSpacing(6)
         
         f_lbl = QLabel("RECENT AI FINDINGS & ANOMALIES")
-        f_lbl.setStyleSheet("font-size: 10px; font-weight: bold; color: #64748b; letter-spacing: 0.5px; border: none;")
+        f_lbl.setObjectName("aiFindingsHeader")
         self.f_layout.addWidget(f_lbl)
         
         if findings:
             for item in findings[:2]:
                 item_lbl = QLabel(f"• {item}")
                 item_lbl.setWordWrap(True)
-                item_lbl.setStyleSheet("font-size: 11px; color: #334155; border: none;")
+                item_lbl.setObjectName("aiFindingItem")
                 self.f_layout.addWidget(item_lbl)
         else:
             no_findings = QLabel("No AI findings recorded. Ingest documents to run live RAG analysis.")
-            no_findings.setStyleSheet("font-size: 11px; color: #94a3b8; border: none;")
+            no_findings.setObjectName("aiNoFindings")
             self.f_layout.addWidget(no_findings)
             
         self.layout.addWidget(self.f_box)
@@ -399,7 +392,7 @@ class AuditProgressChart(QFrame):
     """Spline Area Fill QtChart for Audit Completion Trends."""
     def __init__(self, projects: list, parent=None):
         super().__init__(parent)
-        self.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;")
+        self.setObjectName("auditProgressCard")
         
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 14, 16, 14)
@@ -408,12 +401,12 @@ class AuditProgressChart(QFrame):
         h_layout = QHBoxLayout()
         h_layout.setContentsMargins(0, 0, 0, 0)
         title_lbl = QLabel("Audit Progress Trend")
-        title_lbl.setStyleSheet("font-weight: 800; font-size: 15px; color: #0f172a; border: none;")
+        title_lbl.setObjectName("aiSummaryTitle")
         
         period_combo = QComboBox()
         period_combo.addItems(["Last 6 Months", "FY 2025-26", "All Time"])
         period_combo.setFixedWidth(130)
-        period_combo.setStyleSheet("font-size: 11px; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px;")
+        period_combo.setObjectName("periodCombo")
         
         h_layout.addWidget(title_lbl)
         h_layout.addStretch()
@@ -453,7 +446,7 @@ class AuditProgressChart(QFrame):
         
         chart_view = QChartView(chart)
         chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
-        chart_view.setStyleSheet("border: none; background: transparent;")
+        chart_view.setObjectName("transparentChartView")
         
         layout.addWidget(chart_view)
         apply_shadow(self, blur=15, dy=3, alpha=15)
@@ -462,14 +455,14 @@ class RiskDistributionChart(QFrame):
     """Enterprise Multi-Segment Donut Chart for Risk Level Classification."""
     def __init__(self, low: int, med: int, high: int, parent=None):
         super().__init__(parent)
-        self.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;")
+        self.setObjectName("riskDistributionCard")
         
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 14, 16, 14)
         layout.setSpacing(8)
         
         title_lbl = QLabel("Risk Distribution")
-        title_lbl.setStyleSheet("font-weight: 800; font-size: 15px; color: #0f172a; border: none;")
+        title_lbl.setObjectName("aiSummaryTitle")
         layout.addWidget(title_lbl)
         
         chart = QChart()
@@ -490,12 +483,12 @@ class RiskDistributionChart(QFrame):
         
         chart_view = QChartView(chart)
         chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
-        chart_view.setStyleSheet("border: none; background: transparent;")
+        chart_view.setObjectName("transparentChartView")
         
         total_val = low + med + high
         center_lbl = QLabel(f"<b>{total_val}</b><br/><span style='color:#64748b; font-size:10px; font-weight:normal;'>Total Audits</span>", chart_view)
         center_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        center_lbl.setStyleSheet("border: none; background: transparent; font-size: 16px; color: #0f172a;")
+        center_lbl.setObjectName("donutCenterLabel")
         
         overlay = QVBoxLayout(chart_view)
         overlay.addWidget(center_lbl, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -588,17 +581,17 @@ class DashboardWindow(QWidget):
         
         logo_container = QFrame()
         logo_container.setFixedHeight(70)
-        logo_container.setStyleSheet("background-color: #0b0f19; border-bottom: 1px solid #1e293b;")
+        logo_container.setObjectName("sidebarLogoContainer")
         logo_layout = QHBoxLayout(logo_container)
         logo_layout.setContentsMargins(20, 0, 20, 0)
         
         logo_badge = QLabel("")
         logo_badge.setFixedSize(30, 30)
         logo_badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        logo_badge.setStyleSheet("background-color: #0ea5e9; color: #ffffff; border-radius: 8px; font-size: 15px; font-weight: bold;")
+        logo_badge.setObjectName("sidebarLogoBadge")
         
         app_title = QLabel("FinAuditPro")
-        app_title.setStyleSheet("font-size: 18px; font-weight: 800; color: #ffffff; border: none;")
+        app_title.setObjectName("sidebarAppTitle")
         logo_layout.addWidget(logo_badge)
         logo_layout.addSpacing(10)
         logo_layout.addWidget(app_title)
@@ -608,16 +601,16 @@ class DashboardWindow(QWidget):
         nav_scroll = QScrollArea()
         nav_scroll.setWidgetResizable(True)
         nav_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        nav_scroll.setStyleSheet("background-color: #0b0f19; border: none;")
+        nav_scroll.setObjectName("sidebarNavScroll")
         nav_widget = QWidget()
-        nav_widget.setStyleSheet("background-color: #0b0f19;")
+        nav_widget.setObjectName("sidebarNavWidget")
         nav_layout = QVBoxLayout(nav_widget)
         nav_layout.setContentsMargins(12, 16, 12, 16)
         nav_layout.setSpacing(4)
         
         def add_section_label(text):
             lbl = QLabel(text)
-            lbl.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748b; padding-left: 12px; margin-top: 10px; margin-bottom: 4px; border: none; letter-spacing: 0.8px;")
+            lbl.setObjectName("sidebarSectionLabel")
             nav_layout.addWidget(lbl)
             
         add_section_label("MAIN MENU")
@@ -663,7 +656,7 @@ class DashboardWindow(QWidget):
         
         profile_frame = QFrame()
         profile_frame.setFixedHeight(68)
-        profile_frame.setStyleSheet("border-top: 1px solid #1e293b; background-color: #0b0f19;")
+        profile_frame.setObjectName("sidebarProfileFrame")
         profile_layout = QHBoxLayout(profile_frame)
         profile_layout.setContentsMargins(16, 0, 16, 0)
         
@@ -674,15 +667,15 @@ class DashboardWindow(QWidget):
         avatar_lbl = QLabel(avatar_text)
         avatar_lbl.setFixedSize(34, 34)
         avatar_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        avatar_lbl.setStyleSheet("background-color: #0ea5e9; color: #ffffff; border-radius: 17px; font-weight: bold; font-size: 12px;")
+        avatar_lbl.setObjectName("userAvatar")
         
         profile_info = QVBoxLayout()
         profile_info.setSpacing(2)
         profile_info.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         name_lbl = QLabel(display_name)
-        name_lbl.setStyleSheet("font-size: 12px; font-weight: 700; color: #ffffff; border: none;")
+        name_lbl.setObjectName("userName")
         role_lbl = QLabel(display_role)
-        role_lbl.setStyleSheet("font-size: 10px; color: #64748b; border: none;")
+        role_lbl.setObjectName("userRole")
         profile_info.addWidget(name_lbl)
         profile_info.addWidget(role_lbl)
         
@@ -696,7 +689,7 @@ class DashboardWindow(QWidget):
     def _build_header(self) -> QFrame:
         header = QFrame()
         header.setFixedHeight(64)
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
+        header.setObjectName("dashboardHeader")
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(24, 0, 24, 0)
         
@@ -708,14 +701,14 @@ class DashboardWindow(QWidget):
         header_layout.addWidget(QLabel("<b style='color:#0f172a;'>Active Audit:</b>"))
         self.client_selector = QComboBox()
         self.client_selector.setFixedWidth(200)
-        self.client_selector.setStyleSheet("padding: 5px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #f8fafc; font-size: 12px;")
+        self.client_selector.setObjectName("clientSelectorCombo")
         self.populate_client_selector()
         self.client_selector.currentIndexChanged.connect(self.on_active_engagement_changed)
         header_layout.addWidget(self.client_selector)
         
         btn_new_audit = QPushButton(" + New Audit")
         btn_new_audit.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_new_audit.setStyleSheet("padding: 6px 12px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none; font-size: 12px;")
+        btn_new_audit.setObjectName("primaryBtn")
         btn_new_audit.clicked.connect(self.open_create_audit_dialog)
         header_layout.addWidget(btn_new_audit)
         
@@ -724,19 +717,19 @@ class DashboardWindow(QWidget):
         self.btn_theme = QPushButton("")
         self.btn_theme.setFixedSize(34, 34)
         self.btn_theme.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_theme.setStyleSheet("background-color: #f1f5f9; color: #475569; border-radius: 17px; font-size: 13px; border: none;")
+        self.btn_theme.setObjectName("iconToolBtn")
         self.btn_theme.clicked.connect(self.toggle_theme)
         
         self.btn_help = QPushButton("")
         self.btn_help.setFixedSize(34, 34)
         self.btn_help.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_help.setStyleSheet("background-color: #f1f5f9; color: #475569; border-radius: 17px; font-size: 13px; border: none;")
+        self.btn_help.setObjectName("iconToolBtn")
         self.btn_help.clicked.connect(self.show_keyboard_shortcuts_dialog)
 
         self.btn_notif = QPushButton("")
         self.btn_notif.setFixedSize(34, 34)
         self.btn_notif.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_notif.setStyleSheet("background-color: #f1f5f9; color: #475569; border-radius: 17px; font-size: 13px; border: none;")
+        self.btn_notif.setObjectName("iconToolBtn")
         self.btn_notif.clicked.connect(self.show_notifications_popup)
 
         header_layout.addWidget(self.btn_theme)
@@ -763,9 +756,9 @@ class DashboardWindow(QWidget):
         hero_v.setSpacing(4)
         
         hero_title = QLabel("Good Morning, Auditor")
-        hero_title.setStyleSheet("font-size: 24px; font-weight: 800; color: #0f172a; border: none;")
+        hero_title.setObjectName("heroTitle")
         hero_sub = QLabel("Here is your audit overview for today.")
-        hero_sub.setStyleSheet("font-size: 13px; color: #64748b; font-weight: normal; border: none;")
+        hero_sub.setObjectName("heroSub")
         
         hero_v.addWidget(hero_title)
         hero_v.addWidget(hero_sub)
@@ -803,14 +796,14 @@ class DashboardWindow(QWidget):
         
         # QTableView Model-View Section
         table_frame = QFrame()
-        table_frame.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;")
+        table_frame.setObjectName("recentProjectsTableFrame")
         t_layout = QVBoxLayout(table_frame)
         t_layout.setContentsMargins(16, 14, 16, 14)
         t_layout.setSpacing(10)
         
         t_header = QHBoxLayout()
         t_title = QLabel("Recent Audit Projects")
-        t_title.setStyleSheet("font-weight: 800; font-size: 15px; color: #0f172a; border: none;")
+        t_title.setObjectName("aiSummaryTitle")
         t_header.addWidget(t_title)
         t_header.addStretch()
         t_layout.addLayout(t_header)
@@ -828,11 +821,7 @@ class DashboardWindow(QWidget):
         self.table_view.verticalHeader().setVisible(False)
         self.table_view.setShowGrid(False)
         self.table_view.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
-        self.table_view.setStyleSheet("""
-            QTableView { border: none; background: white; }
-            QHeaderView::section { background-color: #f8fafc; color: #475569; padding: 10px; border: none; border-bottom: 1px solid #e2e8f0; font-weight: 700; font-size: 10px; letter-spacing: 0.5px; }
-            QTableView::item { padding: 10px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-size: 12px; }
-        """)
+        self.table_view.setObjectName("recentProjectsTableView")
         self.table_view.doubleClicked.connect(self.on_table_double_clicked)
         
         t_layout.addWidget(self.table_view)

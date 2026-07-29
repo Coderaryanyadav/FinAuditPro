@@ -381,6 +381,6 @@ MIT License — see [`LICENSE`](LICENSE).
 ---
 
 <div align="center">
-  <sub>Built with  by <b>Aryan Yadav</b>, <b>Jeet Shah</b>, and <b>Hitansh Jasani</b> (<a href="https://github.com/Coderaryanyadav">@Coderaryanyadav</a>)</sub>
+  <sub>Built with  by <b>Aryan Yadav</b>, <b>Jeet Shah</b>, and <b>Hitansh Jasani</b>)</sub>
 </div>
 

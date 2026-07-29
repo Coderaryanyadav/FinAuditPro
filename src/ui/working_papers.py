@@ -267,7 +267,7 @@ class WorkingPaperWidget(QWidget):
 
     def save_working_paper(self):
         sm = SecurityManager()
-        if sm.current_session and not sm.check_permission(Permission.EDIT_WORKING_PAPERS):
+        if not sm.current_session or not sm.check_permission(Permission.EDIT_WORKING_PAPERS):
             QMessageBox.warning(self, "Access Denied", "Your role does not have permission to edit working papers.")
             return
 

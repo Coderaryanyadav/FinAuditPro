@@ -369,7 +369,7 @@ class DocumentUploadWidget(QWidget):
 
     def browse_files(self, file_paths=None):
         sm = SecurityManager()
-        if sm.current_session and not sm.check_permission(Permission.UPLOAD_DOCUMENTS):
+        if not sm.current_session or not sm.check_permission(Permission.UPLOAD_DOCUMENTS):
             QMessageBox.warning(self, "Access Denied", "Your role does not have permission to upload documents.")
             return
 

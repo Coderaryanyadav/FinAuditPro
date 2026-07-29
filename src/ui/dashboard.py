@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                                QTableView, QHeaderView, QStackedWidget, QLineEdit, 
                                QComboBox, QProgressBar, QMenu, QStyledItemDelegate,
                                QStyleOptionViewItem, QMessageBox, QDialog)
-from PySide6.QtCore import Qt, QSize, Slot, QAbstractTableModel, QModelIndex, QRect, Signal, QMargins
+from PySide6.QtCore import Qt, QSize, Slot, QAbstractTableModel, QModelIndex, QRect, Signal, QMargins, QTimer
 from PySide6.QtGui import QPainter, QColor, QFont, QIcon, QBrush, QPen, QKeySequence, QShortcut
 from PySide6.QtCharts import QChart, QChartView, QSplineSeries, QPieSeries, QValueAxis, QCategoryAxis
 
@@ -42,6 +42,16 @@ from .history import AuditHistoryWidget
 from .financial_statements import FinancialStatementsWidget
 
 logger = logging.getLogger(__name__)
+
+class PlaceholderWidget(QWidget):
+    """Fallback widget displayed when a stacked page fails to load."""
+    def __init__(self, message, parent=None):
+        super().__init__(parent)
+        layout = QVBoxLayout(self)
+        lbl = QLabel(message)
+        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lbl.setStyleSheet("color: #dc2626; font-size: 14px;")
+        layout.addWidget(lbl)
 
 # ==============================================================================
 # MODEL-VIEW ARCHITECTURE (QAbstractTableModel + QStyledItemDelegate)
@@ -190,7 +200,9 @@ class SidebarButton(QPushButton):
         self.style().polish(self)
 
 class GlobalSearchWidget(QFrame):
-    """Global Desktop Search Bar with ⌘K hotkey badge."""
+    """Global Desktop Search Bar with ⌘K hotkey badge & real-time popup results."""
+    result_selected = Signal(int)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedSize(360, 36)
@@ -206,8 +218,9 @@ class GlobalSearchWidget(QFrame):
         search_icon.setStyleSheet("border: none; font-size: 13px; color: #64748b; background: transparent;")
         
         self.input_field = QLineEdit()
-        self.input_field.setPlaceholderText("Search clients, reports, documents...")
+        self.input_field.setPlaceholderText("Search clients, reports, documents... (Ctrl+K)")
         self.input_field.setStyleSheet("border: none; background: transparent; font-size: 12px; color: #0f172a;")
+        self.input_field.textChanged.connect(self._on_search_text_changed)
         
         shortcut_lbl = QLabel("⌘K")
         shortcut_lbl.setStyleSheet("border: 1px solid #cbd5e1; background-color: #ffffff; color: #64748b; font-size: 10px; font-weight: bold; border-radius: 4px; padding: 1px 5px;")
@@ -215,6 +228,48 @@ class GlobalSearchWidget(QFrame):
         layout.addWidget(search_icon)
         layout.addWidget(self.input_field)
         layout.addWidget(shortcut_lbl)
+
+        self.menu = QMenu(self)
+        self.menu.setStyleSheet("""
+            QMenu { background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; padding: 4px; }
+            QMenu::item { padding: 8px 16px; border-radius: 4px; }
+            QMenu::item:selected { background-color: #0ea5e9; color: #ffffff; }
+        """)
+
+    def _on_search_text_changed(self, text: str):
+        text = text.strip()
+        self.menu.clear()
+        if len(text) < 2:
+            self.menu.hide()
+            return
+
+        try:
+            with get_session() as session:
+                clients = session.query(Client).filter(Client.name.ilike(f"%{text}%")).limit(3).all()
+                findings = session.query(Finding).filter(Finding.description.ilike(f"%{text}%")).limit(3).all()
+
+                if clients:
+                    header = self.menu.addAction("🏢 CLIENTS")
+                    header.setEnabled(False)
+                    for c in clients:
+                        action = self.menu.addAction(f"   {c.name}")
+                        action.triggered.connect(lambda checked=False, page=1: self.result_selected.emit(page))
+
+                if findings:
+                    header2 = self.menu.addAction("📄 FINDINGS & REPORTS")
+                    header2.setEnabled(False)
+                    for f in findings:
+                        desc = f.description[:40] + "..." if len(f.description) > 40 else f.description
+                        action = self.menu.addAction(f"   {desc}")
+                        action.triggered.connect(lambda checked=False, page=8: self.result_selected.emit(page))
+
+                if not clients and not findings:
+                    no_res = self.menu.addAction("No matching records found")
+                    no_res.setEnabled(False)
+
+            self.menu.popup(self.mapToGlobal(self.rect().bottomLeft()))
+        except Exception:
+            pass
 
 class MetricCard(QFrame):
     """Enterprise Metric KPI Card."""
@@ -473,8 +528,9 @@ class DashboardWindow(QWidget):
 
     data_changed = Signal()
 
-    def __init__(self):
+    def __init__(self, user=None):
         super().__init__()
+        self.current_user = user
         self.workflow_manager = WorkflowManager()
         self.event_manager = WorkflowEventManager()
         
@@ -509,6 +565,12 @@ class DashboardWindow(QWidget):
         self._wire_navigation()
         self.setup_keyboard_shortcuts()
         self.data_changed.connect(self.refresh_realtime_data)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        if not getattr(self, '_initial_data_loaded', False):
+            self._initial_data_loaded = True
+            QTimer.singleShot(0, self.refresh_realtime_data)
 
     def _build_sidebar(self) -> QFrame:
         sidebar = QFrame()
@@ -599,7 +661,11 @@ class DashboardWindow(QWidget):
         profile_layout = QHBoxLayout(profile_frame)
         profile_layout.setContentsMargins(16, 0, 16, 0)
         
-        avatar_lbl = QLabel("CA")
+        display_name = self.current_user.username if self.current_user and getattr(self.current_user, 'username', None) else "CA User"
+        display_role = self.current_user.role if self.current_user and getattr(self.current_user, 'role', None) else "Audit Partner"
+        avatar_text = display_name[:2].upper() if display_name else "CA"
+
+        avatar_lbl = QLabel(avatar_text)
         avatar_lbl.setFixedSize(34, 34)
         avatar_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         avatar_lbl.setStyleSheet("background-color: #0ea5e9; color: #ffffff; border-radius: 17px; font-weight: bold; font-size: 12px;")
@@ -607,9 +673,9 @@ class DashboardWindow(QWidget):
         profile_info = QVBoxLayout()
         profile_info.setSpacing(2)
         profile_info.setAlignment(Qt.AlignmentFlag.AlignVCenter)
-        name_lbl = QLabel("CA User")
+        name_lbl = QLabel(display_name)
         name_lbl.setStyleSheet("font-size: 12px; font-weight: 700; color: #ffffff; border: none;")
-        role_lbl = QLabel("Audit Partner")
+        role_lbl = QLabel(display_role)
         role_lbl.setStyleSheet("font-size: 10px; color: #64748b; border: none;")
         profile_info.addWidget(name_lbl)
         profile_info.addWidget(role_lbl)
@@ -629,6 +695,7 @@ class DashboardWindow(QWidget):
         header_layout.setContentsMargins(24, 0, 24, 0)
         
         self.search_bar = GlobalSearchWidget()
+        self.search_bar.result_selected.connect(self._on_search_result_selected)
         header_layout.addWidget(self.search_bar)
         
         header_layout.addSpacing(20)
@@ -702,67 +769,47 @@ class DashboardWindow(QWidget):
         stats_layout = QHBoxLayout()
         stats_layout.setSpacing(16)
         
-        with get_session() as session:
-            total_clients = session.query(Client).count()
-            completed_audits = session.query(AuditProject).filter_by(status='Completed').count()
-            pending_reviews = session.query(AuditProject).filter_by(status='Pending Review').count()
-            high_risk_cases = session.query(AuditProject).filter_by(risk_level='High').count()
+        self.card_clients = MetricCard("Total Clients", "0", "+12%", "#e0f2fe", "#0284c7", "👥")
+        self.card_completed = MetricCard("Completed Audits", "0", "This Year", "#dcfce7", "#16a34a", "✅")
+        self.card_pending = MetricCard("Pending Reviews", "0", "Action Req.", "#fef3c7", "#d97706", "🕒")
+        self.card_high_risk = MetricCard("High Risk Cases", "0", "Flagged by AI", "#fee2e2", "#dc2626", "⚠️")
 
-            self.card_clients = MetricCard("Total Clients", str(total_clients), "+12%", "#e0f2fe", "#0284c7", "👥")
-            self.card_completed = MetricCard("Completed Audits", str(completed_audits), "This Year", "#dcfce7", "#16a34a", "✅")
-            self.card_pending = MetricCard("Pending Reviews", str(pending_reviews), "Action Req.", "#fef3c7", "#d97706", "🕒")
-            self.card_high_risk = MetricCard("High Risk Cases", str(high_risk_cases), "Flagged by AI", "#fee2e2", "#dc2626", "⚠️")
-
-            stats_layout.addWidget(self.card_clients)
-            stats_layout.addWidget(self.card_completed)
-            stats_layout.addWidget(self.card_pending)
-            stats_layout.addWidget(self.card_high_risk)
-            
-            body_layout.addLayout(stats_layout)
-            
-            # Middle Analytics Row
-            mid_layout = QHBoxLayout()
-            mid_layout.setSpacing(16)
-            
-            projects = session.query(AuditProject).all()
-            avg_risk = int(sum([p.risk_score or 0.0 for p in projects]) / len(projects)) if projects else 0
-            comp_score = max(0, 100 - avg_risk) if projects else 100
-            
-            findings_query = session.query(Finding).order_by(Finding.id.desc()).limit(2).all()
-            findings_list = [f.description for f in findings_query] if findings_query else []
-            
-            ai_card = AIAuditSummaryCard(avg_risk, comp_score, findings_list)
-            progress_chart = AuditProgressChart(projects)
-            
-            low_count = session.query(AuditProject).filter_by(risk_level='Low').count()
-            med_count = session.query(AuditProject).filter_by(risk_level='Medium').count()
-            high_count = session.query(AuditProject).filter_by(risk_level='High').count()
-            if low_count == 0 and med_count == 0 and high_count == 0: low_count = max(1, len(projects))
-            
-            risk_chart = RiskDistributionChart(low_count, med_count, high_count)
-            
-            mid_layout.addWidget(ai_card, 3)
-            mid_layout.addWidget(progress_chart, 4)
-            mid_layout.addWidget(risk_chart, 3)
-            
-            body_layout.addLayout(mid_layout)
-            
-            # QTableView Model-View Section
-            table_frame = QFrame()
-            table_frame.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;")
-            t_layout = QVBoxLayout(table_frame)
-            t_layout.setContentsMargins(16, 14, 16, 14)
-            t_layout.setSpacing(10)
-            
-            t_header = QHBoxLayout()
-            t_title = QLabel("Recent Audit Projects")
-            t_title.setStyleSheet("font-weight: 800; font-size: 15px; color: #0f172a; border: none;")
-            t_header.addWidget(t_title)
-            t_header.addStretch()
-            t_layout.addLayout(t_header)
-            
-            recent_projs = session.query(AuditProject).order_by(AuditProject.id.desc()).limit(10).all()
-            self.table_model = AuditProjectsTableModel(recent_projs)
+        stats_layout.addWidget(self.card_clients)
+        stats_layout.addWidget(self.card_completed)
+        stats_layout.addWidget(self.card_pending)
+        stats_layout.addWidget(self.card_high_risk)
+        
+        body_layout.addLayout(stats_layout)
+        
+        # Middle Analytics Row
+        mid_layout = QHBoxLayout()
+        mid_layout.setSpacing(16)
+        
+        ai_card = AIAuditSummaryCard(0, 100, [])
+        progress_chart = AuditProgressChart([])
+        risk_chart = RiskDistributionChart(1, 0, 0)
+        
+        mid_layout.addWidget(ai_card, 3)
+        mid_layout.addWidget(progress_chart, 4)
+        mid_layout.addWidget(risk_chart, 3)
+        
+        body_layout.addLayout(mid_layout)
+        
+        # QTableView Model-View Section
+        table_frame = QFrame()
+        table_frame.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;")
+        t_layout = QVBoxLayout(table_frame)
+        t_layout.setContentsMargins(16, 14, 16, 14)
+        t_layout.setSpacing(10)
+        
+        t_header = QHBoxLayout()
+        t_title = QLabel("Recent Audit Projects")
+        t_title.setStyleSheet("font-weight: 800; font-size: 15px; color: #0f172a; border: none;")
+        t_header.addWidget(t_title)
+        t_header.addStretch()
+        t_layout.addLayout(t_header)
+        
+        self.table_model = AuditProjectsTableModel([])
         
         self.table_view = QTableView()
         self.table_view.setModel(self.table_model)
@@ -791,65 +838,77 @@ class DashboardWindow(QWidget):
         return scroll
 
     def _build_stacked_pages(self, overview_widget: QWidget) -> QStackedWidget:
+        self._page_classes = {
+            1: (ClientManagementWidget, "Client Management"),
+            2: (DocumentUploadWidget, "Document Upload"),
+            3: (AIAuditWidget, "AI Audit Analysis"),
+            4: (FinancialStatementsWidget, "Financial Statements"),
+            5: (GSTVerificationWidget, "GST Verification"),
+            6: (ComplianceWidget, "Compliance Monitoring"),
+            7: (RiskAnalysisWidget, "Risk Analysis"),
+            8: (ReportsWidget, "Report Generator"),
+            9: (AuditHistoryWidget, "Audit History"),
+            10: (SettingsWidget, "System Settings"),
+            11: (WorkingPaperWidget, "Working Papers"),
+        }
+        self._loaded_pages = {0: True}
         stacked_widget = QStackedWidget()
-        
-        def safe_load(widget_cls, title):
-            try:
-                return widget_cls()
-            except (SQLAlchemyError, ValueError, RuntimeError) as e:
-                logger.error(f"{title} failed to load: {e}", exc_info=True)
-                return PlaceholderWidget(f"Unable to load {title}: {e}")
-
-        # Index 0: Master Dashboard
         stacked_widget.addWidget(overview_widget)
-        # Index 1: Client Management
-        self.clients_page = safe_load(ClientManagementWidget, "Client Management")
-        stacked_widget.addWidget(self.clients_page)
-        # Index 2: Upload Documents
-        self.docs_page = safe_load(DocumentUploadWidget, "Document Upload")
-        stacked_widget.addWidget(self.docs_page)
-        # Index 3: AI Audit Analysis
-        self.ai_page = safe_load(AIAuditWidget, "AI Audit Analysis")
-        stacked_widget.addWidget(self.ai_page)
-        # Index 4: Financial Statements
-        self.statements_page = safe_load(FinancialStatementsWidget, "Financial Statements")
-        stacked_widget.addWidget(self.statements_page)
-        # Index 5: GST Verification
-        self.gst_page = safe_load(GSTVerificationWidget, "GST Verification")
-        stacked_widget.addWidget(self.gst_page)
-        # Index 6: Compliance Monitoring
-        self.compliance_page = safe_load(ComplianceWidget, "Compliance Monitoring")
-        stacked_widget.addWidget(self.compliance_page)
-        # Index 7: Risk Analysis
-        self.risk_page = safe_load(RiskAnalysisWidget, "Risk Analysis")
-        stacked_widget.addWidget(self.risk_page)
-        # Index 8: Reports
-        self.reports_page = safe_load(ReportsWidget, "Report Generator")
-        stacked_widget.addWidget(self.reports_page)
-        # Index 9: Audit History
-        self.history_page = safe_load(AuditHistoryWidget, "Audit History")
-        stacked_widget.addWidget(self.history_page)
-        # Index 10: Settings
-        self.settings_page = safe_load(SettingsWidget, "System Settings")
-        stacked_widget.addWidget(self.settings_page)
-        # Index 11: Working Papers
-        self.working_papers_page = safe_load(WorkingPaperWidget, "Working Papers")
-        stacked_widget.addWidget(self.working_papers_page)
+
+        for i in range(1, 12):
+            dummy = QWidget()
+            stacked_widget.addWidget(dummy)
+
         return stacked_widget
 
     def _wire_navigation(self):
         for i, btn in enumerate(self.nav_buttons):
             btn.clicked.connect(lambda checked=False, idx=i, b=btn: self._on_nav_click(idx, b))
 
+    def _ensure_page_loaded(self, index: int):
+        if index in self._page_classes and not self._loaded_pages.get(index, False):
+            widget_cls, title = self._page_classes[index]
+            try:
+                widget = widget_cls()
+            except (SQLAlchemyError, ValueError, RuntimeError) as e:
+                logger.error(f"{title} failed to load: {e}", exc_info=True)
+                widget = PlaceholderWidget(f"Unable to load {title}: {e}")
+            
+            old_w = self.stacked_widget.widget(index)
+            self.stacked_widget.removeWidget(old_w)
+            old_w.deleteLater()
+            self.stacked_widget.insertWidget(index, widget)
+            self._loaded_pages[index] = True
+            
+            attr_map = {
+                1: 'clients_page', 2: 'docs_page', 3: 'ai_page', 4: 'statements_page',
+                5: 'gst_page', 6: 'compliance_page', 7: 'risk_page', 8: 'reports_page',
+                9: 'history_page', 10: 'settings_page', 11: 'working_papers_page'
+            }
+            if index in attr_map:
+                setattr(self, attr_map[index], widget)
+
+    def setup_keyboard_shortcuts(self):
+        shortcut = QShortcut(QKeySequence("Ctrl+K"), self)
+        shortcut.activated.connect(lambda: self.search_bar.input_field.setFocus())
+
     def _on_nav_click(self, index: int, btn: SidebarButton):
+        self._ensure_page_loaded(index)
         self.stacked_widget.setCurrentIndex(index)
         for b in self.nav_buttons:
             b.set_active(False)
         btn.set_active(True)
         self.refresh_realtime_data()
 
+    def _on_search_result_selected(self, page_index: int):
+        self._ensure_page_loaded(page_index)
+        self.stacked_widget.setCurrentIndex(page_index)
+        for i, btn in enumerate(self.nav_buttons):
+            btn.set_active(i == page_index)
+
     def on_table_double_clicked(self, index: QModelIndex):
-        self.stacked_widget.setCurrentIndex(11) # Working Papers
+        self._ensure_page_loaded(11) # Working Papers
+        self.stacked_widget.setCurrentIndex(11)
         for btn in self.nav_buttons: btn.set_active(False)
         self.btn_working_papers.set_active(True)
 
@@ -876,7 +935,7 @@ class DashboardWindow(QWidget):
 
     def open_create_audit_dialog(self):
         sm = SecurityManager()
-        if sm.current_session and not sm.check_permission(Permission.MANAGE_CLIENTS):
+        if not sm.current_session or not sm.check_permission(Permission.MANAGE_CLIENTS):
             QMessageBox.warning(self, "Access Denied", "Your role does not have permission to create audit projects.")
             return
 
@@ -903,9 +962,18 @@ class DashboardWindow(QWidget):
     def populate_client_selector(self):
         self.client_selector.clear()
         with get_session() as session:
-            clients = session.query(Client).all()
-            for c in clients:
-                projs = session.query(AuditProject).filter_by(client_id=c.id).all()
+            results = session.query(Client, AuditProject).outerjoin(
+                AuditProject, Client.id == AuditProject.client_id
+            ).all()
+            
+            client_projects = {}
+            for client, proj in results:
+                if client.id not in client_projects:
+                    client_projects[client.id] = (client, [])
+                if proj:
+                    client_projects[client.id][1].append(proj)
+                    
+            for client_id, (c, projs) in client_projects.items():
                 if projs:
                     for proj in projs:
                         fy = proj.financial_year or "2025-26"

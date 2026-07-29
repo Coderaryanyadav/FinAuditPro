@@ -36,8 +36,8 @@ def main():
     splash = SplashScreen()
     splash.show()
     
-    def show_dashboard():
-        dashboard = DashboardWindow()
+    def show_dashboard(user=None):
+        dashboard = DashboardWindow(user=user)
         dashboard.show()
         app.active_window = dashboard
 

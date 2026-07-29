@@ -26,3 +26,12 @@ $$\text{SQLite} \rightarrow \text{SQLAlchemy} \rightarrow \text{Repositories} \r
 ### Layer 4: Presentation & Analytics
 - **UI Framework**: PySide6 (Qt for Python) desktop widgets.
 - **Analytics Engine**: Real-time SQL aggregations for KPIs, trends, and risk heatmaps.
+
+---
+
+## 3. Data Flow Diagram (DFD)
+
+The high-level data flow and boundary specifications of FinAuditPro are documented in:
+- [DFD Level 0 — Context Diagram](file:///c:/Users/Jeet%20Shah/OneDrive/Desktop/FinAuditPro/docs/architecture/DFD_LEVEL_0.md)
+
+This details the interaction between the system, the Auditor (EE-01), the Local Ollama Daemon (EE-02), and the Report Verifier (EE-03).

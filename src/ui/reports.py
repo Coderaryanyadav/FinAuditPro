@@ -23,6 +23,7 @@ from reporting.qr_verification import QRVerificationManager
 from security.security_manager import SecurityManager
 from security.rbac import Permission
 from sqlalchemy.exc import SQLAlchemyError
+from core.config import config
 
 class ReportsWidget(QWidget):
     """Audit Report Generator & UDIN Signature Manager Widget."""
@@ -136,12 +137,14 @@ class ReportsWidget(QWidget):
                 findings = session.query(Finding).filter_by(audit_id=active_id).all() if active_id else session.query(Finding).all()
                 # Detach objects before session closes
                 client_name = client.name if client else "Sample Client Pvt Ltd"
+                self.current_client_name = client_name
                 cin = getattr(client, 'cin_number', 'U72200MH2021PTC123456') or 'U72200MH2021PTC123456'
                 matters_html = ""
                 for f in findings:
                     matters_html += f"<li><b>{f.description[:80]}</b> - Flagged Severity: <span style='color:#dc2626;'>{f.severity or 'MEDIUM'}</span></li>"
         except Exception:
             client_name = "Sample Client Pvt Ltd"
+            self.current_client_name = client_name
             cin = "U72200MH2021PTC123456"
             matters_html = ""
 
@@ -157,8 +160,8 @@ class ReportsWidget(QWidget):
         report_html = f"""
         <div style="font-family: 'Inter', sans-serif; color: #0f172a;">
             <div style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 20px;">
-                <h2 style="margin: 0; color: #0f172a;">M/S SHARMA & ASSOCIATES</h2>
-                <p style="margin: 4px 0; color: #64748b; font-size: 12px;">CHARTERED ACCOUNTANTS | FIRM REGISTRATION NO: 109876W</p>
+                <h2 style="margin: 0; color: #0f172a;">{config.ca_firm_name}</h2>
+                <p style="margin: 4px 0; color: #64748b; font-size: 12px;">CHARTERED ACCOUNTANTS | FIRM REGISTRATION NO: {config.ca_frn}</p>
                 <p style="margin: 0; color: #64748b; font-size: 11px;">Suite 401, Corporate Heights, BKC, Mumbai - 400051</p>
             </div>
 
@@ -176,8 +179,8 @@ class ReportsWidget(QWidget):
 
             <br/><br/>
             <div style="border-top: 1px solid #cbd5e1; padding-top: 12px; font-size: 11px;">
-                <p style="margin:2px 0;"><b>For Sharma & Associates</b><br/>Chartered Accountants (FRN: 109876W)</p>
-                <p style="margin:2px 0; color: #0284c7;"><b>CA Rajesh Sharma, FCA</b> (Partner | Membership No: 012345)</p>
+                <p style="margin:2px 0;"><b>For {config.ca_firm_name}</b><br/>Chartered Accountants (FRN: {config.ca_frn})</p>
+                <p style="margin:2px 0; color: #0284c7;"><b>{config.ca_name}</b> (Partner | Membership No: {config.ca_membership_no})</p>
                 <p style="margin:2px 0;"><b>UDIN:</b> <span style="font-family: monospace; background:#f1f5f9; padding:2px 6px; border-radius:4px;">{udin}</span></p>
                 <p style="margin:2px 0; color: #64748b;">SHA-256 Tamper Verification Hash: <i title="{real_hash}">{hash_display}</i></p>
             </div>
@@ -187,7 +190,7 @@ class ReportsWidget(QWidget):
 
     def export_pdf(self):
         sm = SecurityManager()
-        if sm.current_session and not sm.check_permission(Permission.GENERATE_REPORTS):
+        if not sm.current_session or not sm.check_permission(Permission.GENERATE_REPORTS):
             QMessageBox.warning(self, "Access Denied", "Your role does not have permission to generate audit reports.")
             return
 
@@ -201,10 +204,10 @@ class ReportsWidget(QWidget):
 
             try:
                 sig_block = DigitalSignatureManager.create_signature_block(
-                    ca_name="CA Rajesh Sharma",
-                    membership_number="012345",
-                    firm_name="Sharma & Associates",
-                    firm_registration_number="109876W",
+                    ca_name=config.ca_name,
+                    membership_number=config.ca_membership_no,
+                    firm_name=config.ca_firm_name,
+                    firm_registration_number=config.ca_frn,
                     udin=udin_val
                 )
             except Exception:
@@ -212,7 +215,7 @@ class ReportsWidget(QWidget):
 
             qr_payload = QRVerificationManager.generate_verification_payload(
                 report_id=f"REP-{content_hash[:8]}",
-                client_name=self.client_combo.currentText(),
+                client_name=getattr(self, 'current_client_name', 'Unknown Client'),
                 gstin="N/A",
                 document_hash=content_hash,
                 udin=udin_val

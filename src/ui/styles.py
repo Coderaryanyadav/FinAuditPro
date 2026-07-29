@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QGraphicsDropShadowEffect, QWidget, QVBoxLayout, QLabel, QFrame, QProgressBar
 from PySide6.QtGui import QColor
 from PySide6.QtCore import Qt
+from .theme import Colors, Fonts, Spacing
 
 GLOBAL_QSS = """
 * {

@@ -182,12 +182,11 @@ FinAuditPro/
 
 Full technical docs are in [`docs/`](docs/):
 
-- [`ARCHITECTURE_OVERVIEW.md`](docs/architecture/ARCHITECTURE_OVERVIEW.md) — System topology
-- [`DATABASE_ARCHITECTURE.md`](docs/architecture/DATABASE_ARCHITECTURE.md) — SQLite WAL, session management
-- [`SECURITY_ARCHITECTURE.md`](docs/architecture/SECURITY_ARCHITECTURE.md) — Crypto, RBAC, audit ledger
-- [`AI_ARCHITECTURE.md`](docs/architecture/AI_ARCHITECTURE.md) — RAG pipeline, FAISS, Ollama
-- [`DEVELOPER_GUIDE.md`](docs/developer/DEVELOPER_GUIDE.md) — Contributor onboarding
-- [`USER_MANUAL.md`](docs/user/USER_MANUAL.md) — End-user operational guide
+- [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) — Clean architecture & layer specifications
+- [`ARCHITECTURE_GUIDE.md`](docs/architecture/ARCHITECTURE_GUIDE.md) — Architecture guide & security setup
+- [`DFD_LEVEL_0.md`](docs/architecture/DFD_LEVEL_0.md) — Level 0 Data Flow Context Diagram
+- [`DEVELOPER_GUIDE.md`](docs/DEVELOPER_GUIDE.md) — Contributor onboarding
+- [`USER_MANUAL.md`](docs/USER_MANUAL.md) — End-user operational guide
 
 ---
 

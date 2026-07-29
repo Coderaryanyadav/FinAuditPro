@@ -44,6 +44,22 @@ class AppConfig(BaseModel):
         default_factory=lambda: int(os.environ.get("FINAUDIT_PBKDF2_ITERATIONS") or os.environ.get("PBKDF2_ITERATION_COUNT") or "600000"),
         description="PBKDF2 HMAC-SHA256 key derivation iteration count"
     )
+    ca_firm_name: str = Field(
+        default_factory=lambda: os.environ.get("FINAUDIT_CA_FIRM_NAME") or "Default CA Firm",
+        description="Name of the CA Firm"
+    )
+    ca_frn: str = Field(
+        default_factory=lambda: os.environ.get("FINAUDIT_CA_FRN") or "000000W",
+        description="Firm Registration Number"
+    )
+    ca_name: str = Field(
+        default_factory=lambda: os.environ.get("FINAUDIT_CA_NAME") or "Default CA Name",
+        description="Name of the signing CA"
+    )
+    ca_membership_no: str = Field(
+        default_factory=lambda: os.environ.get("FINAUDIT_CA_MEMBERSHIP_NO") or "000000",
+        description="CA Membership Number"
+    )
 
     @classmethod
     def load(cls) -> "AppConfig":

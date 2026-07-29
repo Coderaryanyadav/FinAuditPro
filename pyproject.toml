@@ -7,7 +7,7 @@ name = "finauditpro"
 version = "1.0.0"
 description = "Enterprise AI-Powered Executive Intelligence Platform for Financial Auditing"
 readme = "README.md"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10,<3.14"
 authors = [{ name = "Aryan Yadav", email = "contact@finauditpro.com" }]
 license = { text = "MIT" }
 classifiers = [

@@ -75,11 +75,11 @@ class SettingsWidget(QWidget):
         f_layout = QFormLayout(card)
         f_layout.setSpacing(12)
 
-        self.firm_name = QLineEdit("M/s Sharma & Associates")
-        self.frn_number = QLineEdit("109876W")
-        self.member_no = QLineEdit("012345")
-        self.partner_name = QLineEdit("CA Rajesh Sharma, FCA")
-        self.firm_address = QLineEdit("Suite 401, Corporate Heights, BKC, Mumbai - 400051")
+        self.firm_name = QLineEdit(config.ca_firm_name)
+        self.frn_number = QLineEdit(config.ca_frn)
+        self.member_no = QLineEdit(config.ca_membership_no)
+        self.partner_name = QLineEdit(config.ca_name)
+        self.firm_address = QLineEdit(getattr(config, 'ca_address', 'Suite 401, Corporate Heights, BKC, Mumbai - 400051'))
 
         for input_field in [self.firm_name, self.frn_number, self.member_no, self.partner_name, self.firm_address]:
             input_field.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #f8fafc;")
@@ -110,19 +110,7 @@ class SettingsWidget(QWidget):
 
         self.model_combo = QComboBox()
         self.model_combo.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;")
-        
-        try:
-            res = requests.get(f"{config.ollama_host}/api/tags", timeout=2)
-            if res.status_code == 200:
-                models = [m.get("name", "") for m in res.json().get("models", [])]
-                if models:
-                    self.model_combo.addItems(models)
-                else:
-                    self.model_combo.addItem("llama3.2:latest")
-            else:
-                self.model_combo.addItem("llama3.2:latest")
-        except Exception:
-            self.model_combo.addItem("llama3.2:latest (Ollama Active)")
+        self.model_combo.addItems(["llama3.2:latest", "mistral:latest", "qwen2.5:latest", "deepseek-r1:latest"])
 
         f_layout.addRow("Local Model Target:", self.model_combo)
 
@@ -175,6 +163,16 @@ class SettingsWidget(QWidget):
             QMessageBox.warning(self, "Ollama Offline", f"Could not reach Ollama at {self.ollama_url.text()}: {e}")
 
     def save_settings(self):
+        config.ca_firm_name = self.firm_name.text().strip() or "Default CA Firm"
+        config.ca_frn = self.frn_number.text().strip() or "000000W"
+        config.ca_membership_no = self.member_no.text().strip() or "000000"
+        config.ca_name = self.partner_name.text().strip() or "Default CA Name"
+        
+        os.environ["FINAUDIT_CA_FIRM_NAME"] = config.ca_firm_name
+        os.environ["FINAUDIT_CA_FRN"] = config.ca_frn
+        os.environ["FINAUDIT_CA_MEMBERSHIP_NO"] = config.ca_membership_no
+        os.environ["FINAUDIT_CA_NAME"] = config.ca_name
+
         QMessageBox.information(self, "Settings Saved", "CA Firm Profile and System Settings saved successfully!")
 
     def backup_database(self):

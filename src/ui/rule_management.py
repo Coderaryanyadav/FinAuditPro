@@ -144,7 +144,7 @@ class RuleManagementWidget(QWidget):
 
     def toggle_rule(self, rule_id, enabled):
         sm = SecurityManager()
-        if sm.current_session and not sm.check_permission(Permission.MANAGE_RULES):
+        if not sm.current_session or not sm.check_permission(Permission.MANAGE_RULES):
             QMessageBox.warning(self, "Access Denied", "Your role does not have permission to manage audit rules.")
             self.load_table_data()
             return

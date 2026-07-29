@@ -1,12 +1,13 @@
-import hashlib
-import re
-from typing import Optional
+import time
+from typing import Optional, Dict, Any
 from core.exceptions import AuthenticationError, ValidationError
 from database.repositories.user_repo import UserRepository
 from database.models import User
 
 from security.auth import PasswordHasher
 from security.security_manager import SecurityManager
+
+_failed_login_attempts: Dict[str, Dict[str, Any]] = {}
 
 class AuthenticationService:
     """
@@ -31,18 +32,27 @@ class AuthenticationService:
         if not username or not password:
             raise ValidationError("Username and password are required.")
 
+        now = time.time()
+        attempt_record = _failed_login_attempts.get(username, {'count': 0, 'lockout_until': 0.0})
+        if attempt_record['lockout_until'] > now:
+            wait_sec = int(attempt_record['lockout_until'] - now) + 1
+            raise AuthenticationError(f"Too many failed login attempts. Account temporarily locked for {wait_sec} seconds.")
+
         user = self.user_repo.get_by_username(username)
         if not user:
             # Fallback check by email
             user = self.user_repo.session.query(User).filter_by(email=username).first()
 
-        if not user:
+        if not user or not PasswordHasher.verify_password(password, user.password_hash):
+            count = attempt_record['count'] + 1
+            lockout_time = 0.0
+            if count >= 5:
+                lockout_time = now + 60.0
+            _failed_login_attempts[username] = {'count': count, 'lockout_until': lockout_time}
             raise AuthenticationError("Invalid username or password.")
 
-        # Verify password hash securely (PBKDF2-HMAC-SHA256)
-        is_valid = PasswordHasher.verify_password(password, user.password_hash)
-        if not is_valid:
-            raise AuthenticationError("Invalid username or password.")
+        if username in _failed_login_attempts:
+            del _failed_login_attempts[username]
 
         # Transparently upgrade legacy or low-iteration password hashes
         if PasswordHasher.needs_rehash(user.password_hash):
@@ -71,7 +81,10 @@ class AuthenticationService:
         return user
 
     def logout(self) -> None:
-        """Clear the current session."""
+        """Clear the current session and revoke token."""
+        if self.security_manager.current_session:
+            self.security_manager.auth_manager.revoke_session(self.security_manager.current_session.token_str)
+            self.security_manager.current_session = None
         self.current_user = None
 
     def require_role(self, required_roles: list[str]) -> bool:

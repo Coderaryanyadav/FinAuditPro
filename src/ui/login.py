@@ -16,7 +16,7 @@ from .styles import apply_shadow
 
 class LoginWindow(QWidget):
     """Enterprise Auditor Login Window."""
-    login_successful = Signal()
+    login_successful = Signal(object)
 
     def __init__(self):
         super().__init__()
@@ -116,14 +116,12 @@ class LoginWindow(QWidget):
         email_lbl = QLabel("Email Address")
         email_lbl.setStyleSheet("font-size: 12px; font-weight: 700; color: #334155; border: none;")
         self.email_input = QLineEdit()
-        self.email_input.setText("admin@finauditpro.com")
         self.email_input.setPlaceholderText("admin@finauditpro.com")
         self.email_input.setStyleSheet("border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 12px; background-color: #ffffff; font-size: 13px; color: #0f172a;")
         
         pass_lbl = QLabel("Password")
         pass_lbl.setStyleSheet("font-size: 12px; font-weight: 700; color: #334155; border: none;")
         self.password_input = QLineEdit()
-        self.password_input.setText("admin123")
         self.password_input.setPlaceholderText("Enter your password")
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.password_input.setStyleSheet("border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 12px; background-color: #ffffff; font-size: 13px; color: #0f172a;")
@@ -226,14 +224,15 @@ class LoginWindow(QWidget):
                     session.add(admin_user)
                     session.commit()
 
+                user_repo = UserRepository(session)
                 auth_service = AuthenticationService(user_repo)
-                auth_service.login(email, password)
-            self.auth_success()
+                user = auth_service.login(email, password)
+            self.auth_success(user)
         except (SQLAlchemyError, ValueError) as e:
             self.login_btn.setText("Sign In to Workspace")
             self.login_btn.setEnabled(True)
             QMessageBox.warning(self, "Authentication Failed", str(e))
 
-    def auth_success(self):
-        self.login_successful.emit()
+    def auth_success(self, user=None):
+        self.login_successful.emit(user)
         self.close()

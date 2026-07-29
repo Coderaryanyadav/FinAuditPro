@@ -48,6 +48,11 @@ class AuthenticationService:
             lockout_time = 0.0
             if count >= 5:
                 lockout_time = now + 60.0
+                try:
+                    from security.audit_trail import audit_logger
+                    audit_logger.log_action("LOGIN_LOCKOUT", user_id=user.id if user else 0, user_email=username, details=f"Account locked due to {count} consecutive failed login attempts.")
+                except Exception:
+                    pass
             _failed_login_attempts[username] = {'count': count, 'lockout_until': lockout_time}
             raise AuthenticationError("Invalid username or password.")
 

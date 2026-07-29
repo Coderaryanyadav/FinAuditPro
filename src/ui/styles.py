@@ -14,6 +14,31 @@ QMainWindow, QDialog, QWidget#appBg {
     background-color: #f8fafc;
 }
 
+/* AI Copilot & Anomaly Inspector Styles */
+QFrame#aiHeader {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+}
+QFrame#aiCardFrame {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+QPushButton#aiPromptBtn {
+    background-color: #f1f5f9;
+    color: #0284c7;
+    font-weight: bold;
+    font-size: 11px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 6px 10px;
+    text-align: left;
+}
+QPushButton#aiPromptBtn:hover {
+    background-color: #e0f2fe;
+    border-color: #38bdf8;
+}
+
 /* Custom Sleek Scrollbars */
 QScrollBar:vertical {
     border: none;

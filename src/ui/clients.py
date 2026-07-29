@@ -157,13 +157,17 @@ class CreateAuditProjectDialog(QDialog):
         for c in clients:
             self.client_combo.addItem(f"{c.name} ({c.industry or 'General'})", c.id)
 
+from database.database import get_session
+from database.repositories.client_repo import ClientRepository
+from services.client_service import ClientService
+from core.exceptions import ValidationError, DuplicateRecordError
+
 class ClientManagementWidget(QWidget):
     """Master-Detail Client Management CRM & Statutory Vault."""
 
     def __init__(self):
         super().__init__()
         self.setStyleSheet("background-color: #f8fafc;")
-        self.session = SessionLocal()
         self.selected_client_id = None
         
         main_layout = QVBoxLayout(self)
@@ -321,14 +325,15 @@ class ClientManagementWidget(QWidget):
 
     def load_clients(self):
         self.table.setRowCount(0)
-        clients = self.session.query(Client).all()
-        self.table.setRowCount(len(clients))
-        for r, c in enumerate(clients):
-            name_item = QTableWidgetItem(c.name)
-            name_item.setData(Qt.ItemDataRole.UserRole, c.id)
-            self.table.setItem(r, 0, name_item)
-            self.table.setItem(r, 1, QTableWidgetItem(f"{c.gst_number or '-'} / {c.pan_number or '-'}"))
-            self.table.setItem(r, 2, QTableWidgetItem(c.industry or "General"))
+        with get_session() as session:
+            clients = session.query(Client).all()
+            self.table.setRowCount(len(clients))
+            for r, c in enumerate(clients):
+                name_item = QTableWidgetItem(c.name)
+                name_item.setData(Qt.ItemDataRole.UserRole, c.id)
+                self.table.setItem(r, 0, name_item)
+                self.table.setItem(r, 1, QTableWidgetItem(f"{c.gst_number or '-'} / {c.pan_number or '-'}"))
+                self.table.setItem(r, 2, QTableWidgetItem(c.industry or "General"))
 
     def filter_clients(self, query):
         query = query.lower().strip()
@@ -343,33 +348,35 @@ class ClientManagementWidget(QWidget):
         if not rows: return
         r = self.table.currentRow()
         client_id = self.table.item(r, 0).data(Qt.ItemDataRole.UserRole)
-        c = self.session.query(Client).filter_by(id=client_id).first()
-        if not c: return
+        with get_session() as session:
+            c = session.query(Client).filter_by(id=client_id).first()
+            if not c: return
 
-        self.selected_client_id = c.id
-        self.lbl_client_name.setText(c.name)
-        self.edit_gst.setText(c.gst_number or "")
-        self.edit_pan.setText(c.pan_number or "")
-        self.edit_industry.setText(c.industry or "")
+            self.selected_client_id = c.id
+            self.lbl_client_name.setText(c.name)
+            self.edit_gst.setText(c.gst_number or "")
+            self.edit_pan.setText(c.pan_number or "")
+            self.edit_industry.setText(c.industry or "")
 
-        # Load Engagement History
-        projs = self.session.query(AuditProject).filter_by(client_id=c.id).all()
-        self.history_table.setRowCount(len(projs))
-        for idx, p in enumerate(projs):
-            self.history_table.setItem(idx, 0, QTableWidgetItem(f"FY {p.financial_year or '2025-26'}"))
-            self.history_table.setItem(idx, 1, QTableWidgetItem(p.status or "Statutory Audit"))
-            self.history_table.setItem(idx, 2, QTableWidgetItem(p.status or "Active"))
+            # Load Engagement History
+            projs = session.query(AuditProject).filter_by(client_id=c.id).all()
+            self.history_table.setRowCount(len(projs))
+            for idx, p in enumerate(projs):
+                self.history_table.setItem(idx, 0, QTableWidgetItem(f"FY {p.financial_year or '2025-26'}"))
+                self.history_table.setItem(idx, 1, QTableWidgetItem(p.status or "Statutory Audit"))
+                self.history_table.setItem(idx, 2, QTableWidgetItem(p.status or "Active"))
 
     def save_client_changes(self):
         if not self.selected_client_id: return
-        c = self.session.query(Client).filter_by(id=self.selected_client_id).first()
-        if c:
-            c.gst_number = self.edit_gst.text().strip()
-            c.pan_number = self.edit_pan.text().strip()
-            c.industry = self.edit_industry.text().strip()
-            self.session.commit()
-            self.load_clients()
-            QMessageBox.information(self, "Saved", "Client statutory info updated successfully!")
+        with get_session() as session:
+            c = session.query(Client).filter_by(id=self.selected_client_id).first()
+            if c:
+                c.gst_number = self.edit_gst.text().strip() or None
+                c.pan_number = self.edit_pan.text().strip() or None
+                c.industry = self.edit_industry.text().strip() or None
+                session.commit()
+                self.load_clients()
+                QMessageBox.information(self, "Saved", "Client statutory info updated successfully!")
 
     def open_add_client_dialog(self):
         dialog = AddClientDialog(self)
@@ -381,59 +388,53 @@ class ClientManagementWidget(QWidget):
                 cin = dialog.cin_input.text().strip() or None
                 kmp_name = dialog.kmp_input.text().strip() or None
                 industry_name = dialog.industry_input.text().strip() or "General"
-                
-                # Check for existing ClientIndustry or create new
-                ind = self.session.query(ClientIndustry).filter_by(industry_name=industry_name).first()
-                if not ind:
-                    ind = ClientIndustry(industry_name=industry_name)
-                    self.session.add(ind)
-                    self.session.flush()
 
-                c = Client(
-                    name=name,
-                    gst_number=gst,
-                    pan_number=pan,
-                    cin=cin,
-                    industry_rel=ind
-                )
-                self.session.add(c)
-                self.session.flush()
-
-                if kmp_name:
-                    kmp = KeyManagementPersonnel(
-                        client_id=c.id,
-                        name=kmp_name,
-                        designation="Managing Director"
+                with get_session() as session:
+                    repo = ClientRepository(session)
+                    service = ClientService(repo)
+                    c = service.create_client(
+                        name=name,
+                        gst_number=gst,
+                        pan_number=pan,
+                        cin=cin,
+                        industry_name=industry_name
                     )
-                    self.session.add(kmp)
+                    if kmp_name:
+                        kmp = KeyManagementPersonnel(
+                            client_id=c.id,
+                            name=kmp_name,
+                            designation="Managing Director"
+                        )
+                        session.add(kmp)
+                    session.commit()
 
-                self.session.commit()
                 self.load_clients()
-                QMessageBox.information(self, "Client Added", f"Successfully registered client '{c.name}'.")
+                QMessageBox.information(self, "Client Added", f"Successfully registered client '{name}'.")
+            except (ValidationError, DuplicateRecordError) as e:
+                QMessageBox.warning(self, "Validation Error", str(e))
             except Exception as e:
-                self.session.rollback()
                 QMessageBox.critical(self, "Error Creating Client", f"Failed to register client: {e}")
 
     def open_create_audit_dialog(self):
-        dialog = CreateAuditProjectDialog(self.session, self)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            try:
-                client_id = dialog.client_combo.currentData()
-                if not client_id:
-                    QMessageBox.warning(self, "Validation Error", "Please select a valid client.")
-                    return
-                fy = dialog.fy_combo.currentText()
-                audit_type = dialog.audit_type_combo.currentText()
-                
-                proj = AuditProject(client_id=client_id, financial_year=fy, status="Planning", risk_level="Medium")
-                self.session.add(proj)
-                self.session.commit()
-                self.load_clients()
-                QMessageBox.information(self, "Audit Created", f"Successfully created new {audit_type} for FY {fy}.")
-            except Exception as e:
-                self.session.rollback()
-                QMessageBox.critical(self, "Error Creating Audit Project", f"Failed to create audit project: {e}")
+        with get_session() as session:
+            dialog = CreateAuditProjectDialog(session, self)
+            if dialog.exec() == QDialog.DialogCode.Accepted:
+                try:
+                    client_id = dialog.client_combo.currentData()
+                    if not client_id:
+                        QMessageBox.warning(self, "Validation Error", "Please select a valid client.")
+                        return
+                    fy = dialog.fy_combo.currentText()
+                    audit_type = dialog.audit_type_combo.currentText()
+                    
+                    proj = AuditProject(client_id=client_id, financial_year=fy, status="Planning", risk_level="Medium")
+                    session.add(proj)
+                    session.commit()
+                    self.load_clients()
+                    QMessageBox.information(self, "Audit Created", f"Successfully created new {audit_type} for FY {fy}.")
+                except Exception as e:
+                    session.rollback()
+                    QMessageBox.critical(self, "Error Creating Audit Project", f"Failed to create audit project: {e}")
 
     def closeEvent(self, event):
-        self.session.close()
         event.accept()

@@ -169,7 +169,13 @@ class RiskAnalysisWidget(QWidget):
                 
                 if not findings:
                     self.table.setRowCount(0)
+                    if hasattr(self, 'state_container'):
+                        self.state_container.setWidget(EmptyStateWidget("No Risk Findings", "No high or medium audit risk anomalies flagged for the active engagement."))
+                        self.state_container.show()
                     return
+
+                if hasattr(self, 'state_container'):
+                    self.state_container.hide()
 
                 self.table.setRowCount(len(findings))
 
@@ -192,8 +198,11 @@ class RiskAnalysisWidget(QWidget):
                     self.table.setItem(r, 3, mat_item)
 
                     self.table.setItem(r, 4, QTableWidgetItem(rec))
-        except (SQLAlchemyError, Exception):
+        except Exception as e:
             self.table.setRowCount(0)
+            if hasattr(self, 'state_container'):
+                self.state_container.setWidget(ErrorStateWidget("Failed to Load Risk Findings", str(e)))
+                self.state_container.show()
 
     def closeEvent(self, event):
         event.accept()

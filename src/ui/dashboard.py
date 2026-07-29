@@ -65,12 +65,13 @@ class AuditProjectsTableModel(QAbstractTableModel):
     def __init__(self, projects: List[Any] = None, parent=None):
         super().__init__(parent)
         self._client_cache = {}
-        self._load_client_cache()
         self._projects = self._normalize(projects or [])
+        self._load_client_cache()
 
     def _load_client_cache(self):
+        client_ids = {p.get('client_id') for p in getattr(self, '_projects', []) if p.get('client_id')}
         with get_session() as session:
-            clients = session.query(Client).all()
+            clients = session.query(Client).filter(Client.id.in_(client_ids)).all() if client_ids else []
             self._client_cache = {c.id: c.name for c in clients}
 
     def _normalize(self, projects: List[Any]) -> List[dict]:
@@ -894,9 +895,9 @@ class DashboardWindow(QWidget):
             if index in attr_map:
                 setattr(self, attr_map[index], widget)
 
-    def setup_keyboard_shortcuts(self):
-        shortcut = QShortcut(QKeySequence("Ctrl+K"), self)
-        shortcut.activated.connect(lambda: self.search_bar.input_field.setFocus())
+    def _setup_search_shortcut(self):
+        self.search_shortcut = QShortcut(QKeySequence("Ctrl+K"), self)
+        self.search_shortcut.activated.connect(lambda: self.search_bar.input_field.setFocus())
 
     def _on_nav_click(self, index: int, btn: SidebarButton):
         self._ensure_page_loaded(index)
@@ -1013,7 +1014,7 @@ class DashboardWindow(QWidget):
         except (SQLAlchemyError, ValueError, RuntimeError) as e:
             logger.warning(f"Engagement change warning: {e}")
 
-    def setup_keyboard_shortcuts(self):
+    def _setup_nav_shortcuts(self):
         for i in range(min(9, len(self.nav_buttons))):
             btn = self.nav_buttons[i]
             shortcut = QShortcut(QKeySequence(f"Alt+{i+1}"), self)
@@ -1025,6 +1026,11 @@ class DashboardWindow(QWidget):
         
         self.settings_shortcut = QShortcut(QKeySequence("Ctrl+,"), self)
         self.settings_shortcut.activated.connect(self.btn_settings.click)
+
+    def setup_keyboard_shortcuts(self):
+        """Initializes both global search and navigation keyboard shortcuts."""
+        self._setup_search_shortcut()
+        self._setup_nav_shortcuts()
 
     def toggle_theme(self):
         is_dark = getattr(self, '_dark_mode', False)

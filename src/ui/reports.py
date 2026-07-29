@@ -79,19 +79,25 @@ class ReportsWidget(QWidget):
             "Management Representation Letter (MRL)"
         ])
         self.report_type_combo.setFixedWidth(300)
-        self.report_type_combo.setStyleSheet("padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff;")
+        self.report_type_combo.setToolTip("Select ICAI Report Template (e.g. CARO 2020, Tax Audit 3CD, Independent Auditor's Report)")
+        self.report_type_combo.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.report_type_combo.currentIndexChanged.connect(self.load_report_draft)
         o_layout.addWidget(self.report_type_combo)
 
         o_layout.addSpacing(16)
         o_layout.addWidget(QLabel("<b style='color:#334155;'>UDIN Number:</b>"))
         self.udin_input = QLineEdit()
-        self.udin_input.setText("25012345AAAAAA1234")
+        self.udin_input.setPlaceholderText("Enter 18-digit ICAI UDIN...")
+        self.udin_input.setToolTip("Enter 18-digit Unique Document Identification Number (UDIN) issued by ICAI")
+        self.udin_input.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.udin_input.setFixedWidth(180)
         self.udin_input.setStyleSheet("padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: monospace; font-weight: bold;")
+        self.udin_input.textChanged.connect(self.load_report_draft)
         o_layout.addWidget(self.udin_input)
 
         btn_regen = QPushButton(" Refresh Draft")
+        btn_regen.setToolTip("Regenerate live audit report draft text with current client details and findings (Hotkey: F5)")
+        btn_regen.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_regen.setStyleSheet("background-color: #f1f5f9; color: #0284c7; font-weight: bold; border: 1px solid #bae6fd; padding: 6px 12px; border-radius: 6px;")
         btn_regen.clicked.connect(self.load_report_draft)
         o_layout.addWidget(btn_regen)
@@ -152,7 +158,7 @@ class ReportsWidget(QWidget):
         if not matters_html:
             matters_html = "<li>No critical audit qualifications or adverse matters detected during substantive testing.</li>"
 
-        udin = self.udin_input.text().strip() or "25012345AAAAAA1234"
+        udin = self.udin_input.text().strip() or "PENDING_UDIN_ENTRY"
         report_title = self.report_type_combo.currentText()
         report_payload = f"{report_title}:{client_name}:{cin}:{udin}:{matters_html}"
         real_hash = hashlib.sha256(report_payload.encode('utf-8')).hexdigest()
@@ -195,13 +201,18 @@ class ReportsWidget(QWidget):
             QMessageBox.warning(self, "Access Denied", "Your role does not have permission to generate audit reports.")
             return
 
+        udin_val = self.udin_input.text().strip()
+        if not udin_val:
+            QMessageBox.warning(self, "UDIN Required", "Please enter a valid 18-character ICAI UDIN before exporting the official audit report.")
+            self.udin_input.setFocus()
+            return
+
         file_path, _ = QFileDialog.getSaveFileName(self, "Export Audit Report as PDF", "Official_Audit_Report.pdf", "PDF Files (*.pdf)")
         if not file_path: return
 
         try:
             html_content = self.editor_content.toHtml()
             content_hash = hashlib.sha256(html_content.encode("utf-8")).hexdigest()
-            udin_val = self.udin_input.text().strip() or "25012345AAAAAA1234"
 
             try:
                 sig_block = DigitalSignatureManager.create_signature_block(

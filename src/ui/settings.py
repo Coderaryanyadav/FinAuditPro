@@ -147,6 +147,11 @@ class SettingsWidget(QWidget):
         btn_backup.clicked.connect(self.backup_database)
         f_layout.addRow("Database Backup:", btn_backup)
 
+        btn_enable_master_pass = QPushButton(" Enable Master Password Encryption")
+        btn_enable_master_pass.setStyleSheet("padding: 8px 14px; background-color: #0284c7; color: white; border-radius: 6px; font-weight: bold; border: none;")
+        btn_enable_master_pass.clicked.connect(self.enable_master_password)
+        f_layout.addRow("AES Master Encryption:", btn_enable_master_pass)
+
         w_layout.addWidget(card)
         w_layout.addStretch()
         return widget
@@ -161,6 +166,32 @@ class SettingsWidget(QWidget):
                 QMessageBox.warning(self, "Connection Error", f"Ollama returned HTTP status {res.status_code}")
         except Exception as e:
             QMessageBox.warning(self, "Ollama Offline", f"Could not reach Ollama at {self.ollama_url.text()}: {e}")
+
+    def enable_master_password(self):
+        from PySide6.QtWidgets import QInputDialog
+        from security.security_manager import SecurityManager
+
+        reply = QMessageBox.warning(
+            self,
+            "Security Warning — Master Password Encryption",
+            "Enabling Master Password Encryption will protect all stored client statutory data with AES-256-GCM envelope encryption.\n\n"
+            "CRITICAL: If you lose or forget this master password, encrypted client data CANNOT be recovered by any means.\n\n"
+            "Do you wish to proceed?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+
+        pass_key, ok = QInputDialog.getText(self, "Set Master Encryption Key", "Enter Master Password:", QLineEdit.EchoMode.Password)
+        if ok and pass_key.strip():
+            try:
+                sm = SecurityManager()
+                sm.enable_master_password_encryption(pass_key.strip())
+                QMessageBox.information(self, "Encryption Activated", "Master password envelope encryption has been successfully enabled for this installation.")
+            except Exception as e:
+                QMessageBox.critical(self, "Encryption Failure", f"Failed to enable master password encryption: {e}")
+        elif ok:
+            QMessageBox.warning(self, "Invalid Password", "Master password cannot be blank.")
 
     def save_settings(self):
         config.ca_firm_name = self.firm_name.text().strip() or "Default CA Firm"

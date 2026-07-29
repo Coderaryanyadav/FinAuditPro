@@ -233,12 +233,24 @@ class ReportsWidget(QWidget):
                 udin=udin_val
             )
 
-            doc = QTextDocument()
-            doc.setHtml(html_content)
-            writer = QPdfWriter(file_path)
-            writer.setPageSize(QPageSize(QPageSize.PageSizeId.A4))
-            writer.setPageMargins(QMarginsF(15, 15, 15, 15))
-            doc.print_(writer)
+            try:
+                from reporting.pdf_generator import PDFReportGenerator
+                PDFReportGenerator.generate_pdf_report(
+                    client_name=getattr(self, 'current_client_name', 'Client Pvt Ltd'),
+                    financial_year="2025-26",
+                    report_title=self.report_type_combo.currentText(),
+                    summary_text=self.editor_content.toPlainText(),
+                    findings=[],
+                    signature_block=sig_block,
+                    output_path=file_path
+                )
+            except Exception:
+                doc = QTextDocument()
+                doc.setHtml(html_content)
+                writer = QPdfWriter(file_path)
+                writer.setPageSize(QPageSize(QPageSize.PageSizeId.A4))
+                writer.setPageMargins(QMarginsF(15, 15, 15, 15))
+                doc.print_(writer)
             QMessageBox.information(
                 self,
                 "Export Successful",

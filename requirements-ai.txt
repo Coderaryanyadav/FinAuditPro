@@ -1,0 +1,15 @@
+# FinAuditPro Heavy AI & OCR Extension Dependencies
+-r requirements-core.txt
+
+# Advanced OCR Engines
+paddleocr>=2.7.3
+paddlepaddle>=2.6.2
+pytesseract>=0.3.10
+easyocr>=1.7.1
+
+# Deep Learning & AI Core (Local Vector RAG & LLM)
+torch>=2.5.1
+transformers>=4.48.0
+ollama==0.3.3
+faiss-cpu>=1.8.0.post1
+sentence-transformers==3.1.1

@@ -582,7 +582,7 @@ class DashboardWindow(QWidget):
     def _build_sidebar(self) -> QFrame:
         sidebar = QFrame()
         sidebar.setFixedWidth(250)
-        sidebar.setStyleSheet("background-color: #0b0f19; border-right: 1px solid #1e293b;")
+        sidebar.setObjectName("dashboardSidebar")
         sidebar_layout = QVBoxLayout(sidebar)
         sidebar_layout.setContentsMargins(0, 0, 0, 0)
         sidebar_layout.setSpacing(0)

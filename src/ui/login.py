@@ -119,12 +119,16 @@ class LoginWindow(QWidget):
         email_lbl.setStyleSheet("font-size: 12px; font-weight: 700; color: #334155; border: none;")
         self.email_input = QLineEdit()
         self.email_input.setPlaceholderText("admin@finauditpro.com")
+        self.email_input.setToolTip("Enter registered auditor email address (e.g. admin@finauditpro.com)")
+        self.email_input.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.email_input.setStyleSheet("border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 12px; background-color: #ffffff; font-size: 13px; color: #0f172a;")
         
         pass_lbl = QLabel("Password")
         pass_lbl.setStyleSheet("font-size: 12px; font-weight: 700; color: #334155; border: none;")
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("Enter your password")
+        self.password_input.setToolTip("Enter your account password")
+        self.password_input.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.password_input.setStyleSheet("border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 12px; background-color: #ffffff; font-size: 13px; color: #0f172a;")
         
@@ -132,6 +136,8 @@ class LoginWindow(QWidget):
         role_lbl.setStyleSheet("font-size: 12px; font-weight: 700; color: #334155; border: none;")
         self.role_combo = QComboBox()
         self.role_combo.addItems(["Audit Partner (Full Access)", "Senior Auditor (Reviewer)", "Junior Assistant (Preparer)"])
+        self.role_combo.setToolTip("Select your assigned statutory audit role for RBAC permissions")
+        self.role_combo.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.role_combo.setStyleSheet("border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 12px; background-color: #ffffff; font-size: 12px; color: #0f172a;")
 
         options_layout = QHBoxLayout()

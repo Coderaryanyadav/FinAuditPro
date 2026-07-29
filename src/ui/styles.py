@@ -39,6 +39,57 @@ QPushButton#aiPromptBtn:hover {
     border-color: #38bdf8;
 }
 
+/* Dashboard & Navigation QSS Rules */
+QFrame#dashboardSidebar {
+    background-color: #0f172a;
+    border-right: 1px solid #1e293b;
+}
+QFrame#dashboardHeader {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+}
+QFrame#metricCard {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+QFrame#metricCard:hover {
+    border-color: #38bdf8;
+}
+
+/* Clients CRM QSS Rules */
+QFrame#clientsHeader {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+}
+QFrame#clientsLeftPane {
+    background-color: #ffffff;
+    border-right: 1px solid #e2e8f0;
+}
+
+/* Documents & Evidence QSS Rules */
+QFrame#docsHeader {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+}
+QFrame#docsDropZone {
+    background-color: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+}
+
+/* Login Hero & Form Container QSS Rules */
+QFrame#loginHeroPanel {
+    background-color: #0f172a;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+QFrame#loginFormContainer {
+    background-color: #ffffff;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
 /* Custom Sleek Scrollbars */
 QScrollBar:vertical {
     border: none;

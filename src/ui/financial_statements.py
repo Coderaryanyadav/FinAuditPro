@@ -396,12 +396,20 @@ class FinancialStatementsWidget(QWidget):
                     except ValueError:
                         continue
             if parsed_rows:
+                if hasattr(self, 'state_container'):
+                    self.state_container.hide()
                 self.populate_tb_table(parsed_rows)
                 self.run_auto_mapping()
                 QMessageBox.information(self, "Import Successful", f"Imported {len(parsed_rows)} ledger heads from {path}.")
             else:
+                if hasattr(self, 'state_container'):
+                    self.state_container.setWidget(EmptyStateWidget("Empty Trial Balance", "No valid ledger accounts found in the selected CSV file."))
+                    self.state_container.show()
                 QMessageBox.warning(self, "Import Error", "No valid Trial Balance rows found in CSV file.")
         except Exception as e:
+            if hasattr(self, 'state_container'):
+                self.state_container.setWidget(ErrorStateWidget("Failed to Ingest Trial Balance", str(e)))
+                self.state_container.show()
             QMessageBox.critical(self, "Import Exception", f"Failed to read CSV file: {e}")
 
     def export_statements(self):

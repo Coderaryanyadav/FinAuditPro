@@ -316,6 +316,16 @@ class DocumentUploadWidget(QWidget):
             repo = DocumentRepository(session)
             service = DocumentService(repo)
             docs = service.get_audit_documents(proj_id)
+            if not docs:
+                self.doc_table.setRowCount(0)
+                if hasattr(self, 'state_container'):
+                    self.state_container.setWidget(EmptyStateWidget("No Ingested Documents", "No audit evidence documents uploaded for this engagement."))
+                    self.state_container.show()
+                return
+
+            if hasattr(self, 'state_container'):
+                self.state_container.hide()
+
             self.doc_table.setRowCount(len(docs))
 
             for r, doc in enumerate(docs):

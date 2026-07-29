@@ -35,7 +35,7 @@ class WorkingPaperWidget(QWidget):
         # 1. Action Bar Header
         header = QFrame()
         header.setFixedHeight(64)
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
+        header.setObjectName("actionHeader")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
 
@@ -53,6 +53,8 @@ class WorkingPaperWidget(QWidget):
         
         self.project_combo = QComboBox()
         self.project_combo.setFixedWidth(240)
+        self.project_combo.setToolTip("Select active audit engagement for working paper documentation")
+        self.project_combo.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.project_combo.setStyleSheet("QComboBox { padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff; color: #0f172a; }")
         self.project_combo.currentIndexChanged.connect(self.on_project_changed)
         h_layout.addWidget(self.project_combo)
@@ -60,11 +62,15 @@ class WorkingPaperWidget(QWidget):
         h_layout.addStretch()
 
         self.ai_btn = QPushButton(" AI Draft Observation")
-        self.ai_btn.setStyleSheet("background-color: #0284c7; color: white; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 12px; border: none;")
+        self.ai_btn.setObjectName("secondaryBtn")
+        self.ai_btn.setToolTip("Generate automated AI audit observation draft under SA 230")
+        self.ai_btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.ai_btn.clicked.connect(self.generate_ai_draft)
 
         self.save_btn = QPushButton(" Save Working Paper")
-        self.save_btn.setStyleSheet("background-color: #0ea5e9; color: white; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 12px; border: none;")
+        self.save_btn.setObjectName("primaryBtn")
+        self.save_btn.setToolTip("Save and index working paper documentation to SA 230 audit file")
+        self.save_btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.save_btn.clicked.connect(self.save_working_paper)
 
         h_layout.addWidget(self.ai_btn)
@@ -87,6 +93,8 @@ class WorkingPaperWidget(QWidget):
         left_layout.addWidget(tree_header)
 
         self.wp_tree = QTreeWidget()
+        self.wp_tree.setToolTip("SA 230 Permanent & Current Audit File Tree Index")
+        self.wp_tree.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.wp_tree.setHeaderHidden(True)
         self.wp_tree.setStyleSheet("""
             QTreeWidget { border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; outline: none; }

@@ -95,13 +95,7 @@ class LoginWindow(QWidget):
         
         form_container = QFrame()
         form_container.setFixedWidth(400)
-        form_container.setStyleSheet("""
-            QFrame {
-                background-color: #ffffff;
-                border-radius: 16px;
-                border: 1px solid #e2e8f0;
-            }
-        """)
+        form_container.setObjectName("loginFormContainer")
         apply_shadow(form_container, blur=24, dy=4, alpha=15)
         
         form_layout = QVBoxLayout(form_container)
@@ -158,11 +152,7 @@ class LoginWindow(QWidget):
         self.login_btn = QPushButton("Sign In to Workspace")
         self.login_btn.setFixedHeight(42)
         self.login_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.login_btn.setStyleSheet("""
-            QPushButton { background-color: #0ea5e9; color: #ffffff; font-size: 14px; font-weight: 700; border-radius: 8px; border: none; }
-            QPushButton:hover { background-color: #0284c7; }
-            QPushButton:pressed { background-color: #0369a1; }
-        """)
+        self.login_btn.setObjectName("loginSubmitBtn")
         self.login_btn.clicked.connect(self.handle_login)
         
         offline_lbl = QLabel("<a href='#' style='color: #64748b; text-decoration: none; font-size: 12px;'> Air-Gapped Local Mode</a>")

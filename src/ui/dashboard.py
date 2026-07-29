@@ -48,10 +48,9 @@ class PlaceholderWidget(QWidget):
     def __init__(self, message, parent=None):
         super().__init__(parent)
         layout = QVBoxLayout(self)
-        lbl = QLabel(message)
-        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl.setStyleSheet("color: #dc2626; font-size: 14px;")
-        layout.addWidget(lbl)
+        layout.setContentsMargins(16, 16, 16, 16)
+        error_widget = ErrorStateWidget("Page Load Error", message)
+        layout.addWidget(error_widget)
 
 # ==============================================================================
 # MODEL-VIEW ARCHITECTURE (QAbstractTableModel + QStyledItemDelegate)
@@ -278,7 +277,7 @@ class MetricCard(QFrame):
     def __init__(self, title, value, subtitle, badge_bg, badge_fg, icon_str, parent=None):
         super().__init__(parent)
         self.setFixedHeight(115)
-        self.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;")
+        self.setObjectName("metricCard")
         
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 14, 16, 14)

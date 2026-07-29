@@ -72,14 +72,20 @@ class FinancialStatementsWidget(QWidget):
         h_layout.addStretch()
 
         btn_import = QPushButton(" Import Trial Balance (CSV/Excel)")
+        btn_import.setToolTip("Import client Trial Balance CSV or Excel file for Schedule III mapping")
+        btn_import.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_import.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
         btn_import.clicked.connect(self.import_trial_balance)
 
         btn_auto_map = QPushButton(" Auto-Map Schedule III")
+        btn_auto_map.setToolTip("Run ICAI Schedule III auto-mapping classification engine")
+        btn_auto_map.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_auto_map.setStyleSheet("padding: 8px 14px; background-color: #f1f5f9; color: #0ea5e9; font-weight: bold; border: 1px solid #bae6fd; border-radius: 6px;")
         btn_auto_map.clicked.connect(self.run_auto_mapping)
 
         btn_export = QPushButton(" Export Statements")
+        btn_export.setToolTip("Export Schedule III Balance Sheet & Profit & Loss statements")
+        btn_export.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_export.setStyleSheet("padding: 8px 14px; background-color: #f1f5f9; color: #334155; font-weight: bold; border: 1px solid #cbd5e1; border-radius: 6px;")
         btn_export.clicked.connect(self.export_statements)
 

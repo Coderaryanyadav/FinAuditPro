@@ -79,6 +79,8 @@ class ComplianceWidget(QWidget):
         h_layout.addStretch()
 
         btn_save = QPushButton(" Save Compliance Sign-Offs")
+        btn_save.setToolTip("Save CARO 2020 & Form 3CD statutory verification sign-offs")
+        btn_save.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_save.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
         btn_save.clicked.connect(self.save_compliance_signoffs)
         h_layout.addWidget(btn_save)
@@ -87,6 +89,8 @@ class ComplianceWidget(QWidget):
 
         # 2. Main Tabs
         self.tabs = QTabWidget()
+        self.tabs.setToolTip("Statutory Audit Compliance Matrix Checksheets")
+        self.tabs.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.tabs.setStyleSheet("""
             QTabWidget::pane { border: 1px solid #e2e8f0; background: white; border-radius: 8px; margin: 16px; }
             QTabBar::tab { background: #f1f5f9; color: #475569; padding: 10px 20px; font-weight: bold; border-top-left-radius: 6px; border-top-right-radius: 6px; }

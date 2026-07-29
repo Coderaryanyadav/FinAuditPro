@@ -4,6 +4,7 @@ Provides SA 700 / SA 705 Independent Auditor's Report, CARO 2020 Annexure,
 Management Representation Letter (MRL), Unique Document Identification Number (UDIN) Generation, and SHA-256 QR Verification.
 """
 
+import logging
 import hashlib
 import os
 import shutil
@@ -12,7 +13,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
 from PySide6.QtCore import Qt, QMarginsF
 from PySide6.QtGui import QPdfWriter, QTextDocument, QPageLayout, QPageSize, QFont
 from database.database import get_session
-from database.models import Client, Finding, WorkingPaper, AuditProject
+from database.models import Client, Finding, WorkingPaper, AuditProject, Risk
 from database.repositories.client_repo import ClientRepository
 from database.repositories.working_paper_repo import WorkingPaperRepository
 from services.client_service import ClientService
@@ -25,6 +26,8 @@ from security.rbac import Permission
 from .styles import apply_shadow, EmptyStateWidget, LoadingStateWidget, ErrorStateWidget
 from sqlalchemy.exc import SQLAlchemyError
 from core.config import config
+
+logger = logging.getLogger(__name__)
 
 class ReportsWidget(QWidget):
     """Audit Report Generator & UDIN Signature Manager Widget."""
@@ -233,6 +236,38 @@ class ReportsWidget(QWidget):
                 udin=udin_val
             )
 
+            findings_data = []
+            active_id = getattr(self, 'active_engagement_id', None)
+            try:
+                with get_session() as session:
+                    findings_query = session.query(Finding)
+                    if active_id:
+                        findings_query = findings_query.filter_by(audit_id=active_id)
+                    db_findings = findings_query.all()
+                    for f in db_findings:
+                        findings_data.append({
+                            "rule_id": f"FIND-{f.id:03d}",
+                            "rule_name": f.description[:40] if f.description else "Audit Finding",
+                            "category": f.risk_level or "Audit",
+                            "severity": (f.severity or "LOW").upper(),
+                            "risk_score": float(f.ai_confidence_score or 50)
+                        })
+                    if not findings_data:
+                        from database.repositories.risk_repo import RiskRepository
+                        risk_repo = RiskRepository(session)
+                        db_risks = risk_repo.get_risks_by_engagement(active_id) if active_id else session.query(Risk).all()
+                        for r in db_risks:
+                            findings_data.append({
+                                "rule_id": f"RISK-{r.id:03d}",
+                                "rule_name": r.description[:40] if r.description else "Risk Finding",
+                                "category": "Risk",
+                                "severity": (r.likelihood or "LOW").upper(),
+                                "risk_score": 75.0 if r.is_significant else 40.0
+                            })
+            except Exception as e:
+                logger.error("Error querying findings for PDF report: %s", e, exc_info=True)
+                findings_data = []
+
             try:
                 from reporting.pdf_generator import PDFReportGenerator
                 PDFReportGenerator.generate_pdf_report(
@@ -240,11 +275,12 @@ class ReportsWidget(QWidget):
                     financial_year="2025-26",
                     report_title=self.report_type_combo.currentText(),
                     summary_text=self.editor_content.toPlainText(),
-                    findings=[],
+                    findings=findings_data,
                     signature_block=sig_block,
                     output_path=file_path
                 )
             except Exception:
+                logger.error("PDFReportGenerator failed, falling back to QTextDocument", exc_info=True)
                 doc = QTextDocument()
                 doc.setHtml(html_content)
                 writer = QPdfWriter(file_path)

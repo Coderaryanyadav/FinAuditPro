@@ -48,6 +48,8 @@ class RiskAnalysisWidget(QWidget):
         h_layout.addStretch()
 
         btn_calc = QPushButton(" Recalculate SA 320 Materiality")
+        btn_calc.setToolTip("Recalculate audit materiality benchmarks under ICAI SA 320")
+        btn_calc.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_calc.setStyleSheet("background-color: #0ea5e9; color: white; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 12px; border: none;")
         btn_calc.clicked.connect(self.calculate_materiality)
         h_layout.addWidget(btn_calc)
@@ -83,9 +85,13 @@ class RiskAnalysisWidget(QWidget):
 
         self.benchmark_combo = QComboBox()
         self.benchmark_combo.addItems(["Revenue from Operations (1.0%)", "Profit Before Tax (5.0%)", "Total Assets (0.5%)", "Equity Shareholders' Funds (1.0%)"])
+        self.benchmark_combo.setToolTip("Select SA 320 financial benchmark basis")
+        self.benchmark_combo.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.benchmark_combo.setStyleSheet("padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; background: white;")
 
         self.base_amt_input = QLineEdit("32000000.00")
+        self.base_amt_input.setToolTip("Enter base financial figure in INR for materiality computation")
+        self.base_amt_input.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.base_amt_input.setStyleSheet("padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; font-weight: bold;")
         self.base_amt_input.textChanged.connect(self.calculate_materiality)
 

@@ -45,6 +45,8 @@ class SettingsWidget(QWidget):
         h_layout.addStretch()
         
         btn_save = QPushButton(" Save Configuration")
+        btn_save.setToolTip("Save system settings and CA firm configuration")
+        btn_save.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_save.setStyleSheet("padding: 8px 16px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
         btn_save.clicked.connect(self.save_settings)
         h_layout.addWidget(btn_save)
@@ -53,6 +55,8 @@ class SettingsWidget(QWidget):
 
         # 2. Main Tabbed Container
         tabs = QTabWidget()
+        tabs.setToolTip("System settings and configuration tabs")
+        tabs.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         tabs.setStyleSheet("""
             QTabWidget::pane { border: 1px solid #e2e8f0; background: white; border-radius: 8px; margin: 16px; }
             QTabBar::tab { background: #f1f5f9; color: #475569; padding: 10px 20px; font-weight: bold; border-top-left-radius: 6px; border-top-right-radius: 6px; }

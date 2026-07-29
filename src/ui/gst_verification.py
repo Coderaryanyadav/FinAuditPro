@@ -30,6 +30,8 @@ class GSTVerificationWidget(QWidget):
         action_layout.addStretch()
         
         btn_verify = QPushButton(" Run Re-verification")
+        btn_verify.setToolTip("Run live GSTR-2B vs Purchase Register re-verification and reconciliation")
+        btn_verify.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_verify.setStyleSheet("padding: 8px 16px; border: none; border-radius: 6px; background-color: #0ea5e9; color: white; font-weight: bold;")
         btn_verify.clicked.connect(self.run_reverification)
         action_layout.addWidget(btn_verify)

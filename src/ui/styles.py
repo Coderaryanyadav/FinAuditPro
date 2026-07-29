@@ -86,8 +86,67 @@ QFrame#loginHeroPanel {
 }
 QFrame#loginFormContainer {
     background-color: #ffffff;
-    border-top-right-radius: 12px;
-    border-bottom-right-radius: 12px;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+}
+QPushButton#loginSubmitBtn {
+    background-color: #0ea5e9;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 8px;
+    border: none;
+}
+QPushButton#loginSubmitBtn:hover {
+    background-color: #0284c7;
+}
+QPushButton#loginSubmitBtn:pressed {
+    background-color: #0369a1;
+}
+
+/* Common App Widget QSS Rules */
+QFrame#actionHeader {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+}
+QPushButton#primaryBtn {
+    background-color: #0ea5e9;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 13px;
+    border: none;
+}
+QPushButton#primaryBtn:hover {
+    background-color: #0284c7;
+}
+QPushButton#secondaryBtn {
+    background-color: #f1f5f9;
+    color: #0284c7;
+    font-weight: bold;
+    border: 1px solid #bae6fd;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+QPushButton#secondaryBtn:hover {
+    background-color: #e0f2fe;
+}
+QLineEdit#searchField {
+    padding: 6px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background-color: #ffffff;
+    font-size: 13px;
+    color: #0f172a;
+}
+QLineEdit#searchField:focus {
+    border-color: #0ea5e9;
+}
+QFrame#contentCard {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
 }
 
 /* Custom Sleek Scrollbars */

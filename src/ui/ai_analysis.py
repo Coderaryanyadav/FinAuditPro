@@ -201,6 +201,8 @@ class AIAuditWidget(QWidget):
 
         for chip_title, chip_prompt in PROMPT_LIBRARY:
             btn = QPushButton(chip_title)
+            btn.setToolTip(f"Execute AI audit prompt: {chip_title}")
+            btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
             btn.setStyleSheet("background-color: #f1f5f9; color: #0ea5e9; font-weight: bold; border: 1px solid #bae6fd; border-radius: 4px; padding: 4px 8px; font-size: 10px;")
             btn.clicked.connect(lambda _, p=chip_prompt: self.execute_prompt(p))
             chips_l.addWidget(btn)
@@ -210,6 +212,8 @@ class AIAuditWidget(QWidget):
 
         self.chat_input = QLineEdit()
         self.chat_input.setPlaceholderText("Ask AI Copilot about revenue, inventory, tax, or legal compliance...")
+        self.chat_input.setToolTip("Type audit prompt or question for local RAG AI Copilot")
+        self.chat_input.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.chat_input.setFixedHeight(36)
         self.chat_input.setStyleSheet("background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 12px; color: #0f172a; font-size: 12px;")
         self.chat_input.returnPressed.connect(self.handle_input)
@@ -330,15 +334,8 @@ class AIAuditWidget(QWidget):
                 findings = finding_service.get_findings_by_audit_id(active_id) if active_id else finding_service.get_all_findings()
 
             if not findings:
-                empty_card = QFrame()
-                empty_card.setStyleSheet("background-color: #ffffff; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 16px;")
-                e_layout = QVBoxLayout(empty_card)
-                e_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                lbl2 = QLabel("<b>No Anomalies Flagged</b><br/><span style='color: #64748b; font-size: 11px;'>Ingest documents or execute prompts to trigger AI analysis.</span>")
-                lbl2.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                lbl2.setStyleSheet("color: #0f172a; font-size: 12px; border: none;")
-                e_layout.addWidget(lbl2)
-                self.f_layout.addWidget(empty_card)
+                empty_widget = EmptyStateWidget("No Anomalies Flagged", "Ingest documents or execute prompts to trigger AI analysis.")
+                self.f_layout.addWidget(empty_widget)
                 return
 
             for f in findings:
@@ -355,9 +352,8 @@ class AIAuditWidget(QWidget):
                 )
                 self.f_layout.addWidget(card)
         except Exception as e:
-            lbl = QLabel(f"Findings load status: {e}")
-            lbl.setStyleSheet("color: #64748b; font-size: 11px;")
-            self.f_layout.addWidget(lbl)
+            error_widget = ErrorStateWidget("Findings Load Failed", str(e))
+            self.f_layout.addWidget(error_widget)
 
     def add_finding_to_working_paper(self, title, desc, evidence):
         try:

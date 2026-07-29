@@ -177,7 +177,7 @@ class ClientManagementWidget(QWidget):
         # 1. Header Bar
         header = QFrame()
         header.setFixedHeight(64)
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
+        header.setObjectName("clientsHeader")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
         
@@ -193,11 +193,15 @@ class ClientManagementWidget(QWidget):
         h_layout.addStretch()
         
         btn_add = QPushButton(" + Add New Client")
-        btn_add.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
+        btn_add.setObjectName("primaryBtn")
+        btn_add.setToolTip("Register a new client entity into statutory master vault")
+        btn_add.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_add.clicked.connect(self.open_add_client_dialog)
         
         btn_new_audit = QPushButton(" + New Audit Project")
-        btn_new_audit.setStyleSheet("padding: 8px 14px; background-color: #0284c7; color: white; font-weight: bold; border-radius: 6px; border: none;")
+        btn_new_audit.setObjectName("secondaryBtn")
+        btn_new_audit.setToolTip("Initialize a new statutory audit engagement for client")
+        btn_new_audit.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_new_audit.clicked.connect(self.open_create_audit_dialog)
         
         h_layout.addWidget(btn_add)
@@ -211,19 +215,23 @@ class ClientManagementWidget(QWidget):
         
         # Left Pane: Client Table
         left_container = QFrame()
-        left_container.setStyleSheet("background-color: #ffffff; border-right: 1px solid #e2e8f0;")
+        left_container.setObjectName("clientsLeftPane")
         left_layout = QVBoxLayout(left_container)
         left_layout.setContentsMargins(16, 16, 16, 16)
         
         search_layout = QHBoxLayout()
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Search by Client Name, PAN, or GSTIN...")
+        self.search_input.setToolTip("Search client master records by legal name, GSTIN, or PAN")
+        self.search_input.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.search_input.setStyleSheet("padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px;")
         self.search_input.textChanged.connect(self.filter_clients)
         search_layout.addWidget(self.search_input)
         left_layout.addLayout(search_layout)
 
         self.table = QTableWidget(0, 3)
+        self.table.setToolTip("Client Master Register Table")
+        self.table.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.table.setHorizontalHeaderLabels(["Client Legal Name", "GSTIN / PAN", "Industry"])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.table.setStyleSheet("""
@@ -274,8 +282,19 @@ class ClientManagementWidget(QWidget):
         self.lbl_client_name.setStyleSheet("font-size: 16px; font-weight: bold; color: #0f172a;")
 
         self.edit_gst = QLineEdit()
+        self.edit_gst.setPlaceholderText("e.g. 27AAAAA0000A1Z5")
+        self.edit_gst.setToolTip("Enter client 15-digit GSTIN registration number")
+        self.edit_gst.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
         self.edit_pan = QLineEdit()
+        self.edit_pan.setPlaceholderText("e.g. AAAAA0000A")
+        self.edit_pan.setToolTip("Enter client 10-digit Permanent Account Number (PAN)")
+        self.edit_pan.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
         self.edit_industry = QLineEdit()
+        self.edit_industry.setPlaceholderText("e.g. Manufacturing, IT, Healthcare")
+        self.edit_industry.setToolTip("Specify industry sector classification")
+        self.edit_industry.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         for f in [self.edit_gst, self.edit_pan, self.edit_industry]:
             f.setStyleSheet("padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; background: white;")
@@ -288,6 +307,8 @@ class ClientManagementWidget(QWidget):
         w_layout.addWidget(form_frame)
 
         btn_save = QPushButton(" Update Client Statutory Info")
+        btn_save.setToolTip("Save updated client statutory profile to local vault")
+        btn_save.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_save.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
         btn_save.clicked.connect(self.save_client_changes)
         w_layout.addWidget(btn_save)

@@ -111,48 +111,54 @@ class AuditHistoryWidget(QWidget):
 
     def load_history(self):
         query_text = self.search_box.text().lower().strip()
-        with get_session() as session:
-            log_repo = AuditLogRepository(session)
-            audit_service = AuditTrailService(log_repo)
-            logs = audit_service.get_all_logs()
-            
-            if not logs:
-                projects = session.query(AuditProject).order_by(AuditProject.id.desc()).all()
-                self.table.setRowCount(len(projects))
-                for r, p in enumerate(projects):
-                    client = session.query(Client).filter_by(id=p.client_id).first()
-                    name = client.name if client else f"Client #{p.client_id}"
-                    dt_str = p.created_at.strftime("%d-%b-%Y %H:%M") if p.created_at else "--"
-                    self.table.setItem(r, 0, QTableWidgetItem(dt_str))
-                    self.table.setItem(r, 1, QTableWidgetItem("admin@finauditpro.com"))
-                    self.table.setItem(r, 2, QTableWidgetItem(f"CREATE_AUDIT ({p.status})"))
-                    self.table.setItem(r, 3, QTableWidgetItem(name))
-                    self.table.setItem(r, 4, QTableWidgetItem("54008ddfa262c2c3..."))
-                return
-
-            filtered = []
-            for log in logs:
-                action_str = str(log.action or "").lower()
-                target_str = str(log.target_entity or "").lower()
-                user_str = str(getattr(log, 'user_email', '') or "admin@finauditpro.com").lower()
-                if not query_text or (query_text in action_str or query_text in target_str or query_text in user_str):
-                    filtered.append(log)
-
-            self.table.setRowCount(len(filtered))
-            for r, log in enumerate(filtered):
-                dt_str = log.created_at.strftime("%d-%b-%Y %H:%M") if log.created_at else "--"
-                user_text = getattr(log, 'user_email', None) or "admin@finauditpro.com"
-                curr_hash = getattr(log, 'current_hash', None) or getattr(log, 'hash', None) or "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-
-                self.table.setItem(r, 0, QTableWidgetItem(dt_str))
-                self.table.setItem(r, 1, QTableWidgetItem(user_text))
-                self.table.setItem(r, 2, QTableWidgetItem(log.action or "AUDIT_ACTION"))
-                self.table.setItem(r, 3, QTableWidgetItem(str(log.target_entity or "Engagement Record")))
+        try:
+            with get_session() as session:
+                log_repo = AuditLogRepository(session)
+                audit_service = AuditTrailService(log_repo)
+                logs = audit_service.get_all_logs()
                 
-                hash_item = QTableWidgetItem(f"{curr_hash[:16]}...")
-                hash_item.setToolTip(curr_hash)
-                hash_item.setFont(QFont("monospace", 9))
-                self.table.setItem(r, 4, hash_item)
+                if not logs:
+                    projects = session.query(AuditProject).order_by(AuditProject.id.desc()).all()
+                    if not projects:
+                        self.table.setRowCount(0)
+                        return
+                    self.table.setRowCount(len(projects))
+                    for r, p in enumerate(projects):
+                        client = session.query(Client).filter_by(id=p.client_id).first()
+                        name = client.name if client else f"Client #{p.client_id}"
+                        dt_str = p.created_at.strftime("%d-%b-%Y %H:%M") if p.created_at else "--"
+                        self.table.setItem(r, 0, QTableWidgetItem(dt_str))
+                        self.table.setItem(r, 1, QTableWidgetItem("admin@finauditpro.com"))
+                        self.table.setItem(r, 2, QTableWidgetItem(f"CREATE_AUDIT ({p.status})"))
+                        self.table.setItem(r, 3, QTableWidgetItem(name))
+                        self.table.setItem(r, 4, QTableWidgetItem("54008ddfa262c2c3..."))
+                    return
+
+                filtered = []
+                for log in logs:
+                    action_str = str(log.action or "").lower()
+                    target_str = str(log.target_entity or "").lower()
+                    user_str = str(getattr(log, 'user_email', '') or "admin@finauditpro.com").lower()
+                    if not query_text or (query_text in action_str or query_text in target_str or query_text in user_str):
+                        filtered.append(log)
+
+                self.table.setRowCount(len(filtered))
+                for r, log in enumerate(filtered):
+                    dt_str = log.created_at.strftime("%d-%b-%Y %H:%M") if log.created_at else "--"
+                    user_text = getattr(log, 'user_email', None) or "admin@finauditpro.com"
+                    curr_hash = getattr(log, 'current_hash', None) or getattr(log, 'hash', None) or "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+                    self.table.setItem(r, 0, QTableWidgetItem(dt_str))
+                    self.table.setItem(r, 1, QTableWidgetItem(user_text))
+                    self.table.setItem(r, 2, QTableWidgetItem(log.action or "AUDIT_ACTION"))
+                    self.table.setItem(r, 3, QTableWidgetItem(str(log.target_entity or "Engagement Record")))
+                    
+                    hash_item = QTableWidgetItem(f"{curr_hash[:16]}...")
+                    hash_item.setToolTip(curr_hash)
+                    hash_item.setFont(QFont("monospace", 9))
+                    self.table.setItem(r, 4, hash_item)
+        except Exception as e:
+            self.table.setRowCount(0)
 
     def export_peer_review_log(self):
         file_path, _ = QFileDialog.getSaveFileName(self, "Export Audit Trail for Peer Review", "Audit_Trail_Ledger.csv", "CSV Files (*.csv)")

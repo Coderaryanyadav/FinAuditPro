@@ -104,12 +104,16 @@ class GSTVerificationWidget(QWidget):
         search = QLineEdit()
         search.setPlaceholderText("Filter Invoice or GSTIN...")
         search.setFixedWidth(240)
+        search.setToolTip("Filter invoices by invoice number or vendor GSTIN")
+        search.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         search.setStyleSheet("padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px;")
         tb_header.addWidget(search)
         
         table_v.addLayout(tb_header)
         
         self.table = QTableWidget(0, 6)
+        self.table.setToolTip("GSTR-2B vs Purchase Register Reconciliation Table")
+        self.table.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.table.setHorizontalHeaderLabels(["Invoice No", "Vendor Name & GSTIN", "Books ITC", "2B ITC", "Variance", "Match Status"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table.setStyleSheet("""
@@ -121,26 +125,33 @@ class GSTVerificationWidget(QWidget):
         self.table.verticalHeader().setVisible(False)
         
         active_id = getattr(self, 'active_engagement_id', None)
-        with get_session() as session:
-            wp_repo = WorkingPaperRepository(session)
-            finding_service = FindingService(wp_repo)
-            if active_id:
-                all_f = finding_service.get_findings_by_audit_id(active_id)
-            else:
-                all_f = finding_service.get_all_findings()
-            gst_findings = [f for f in all_f if 'gst' in str(f.description or '').lower()]
-            
-            if gst_findings:
-                self.table.setRowCount(len(gst_findings))
-                for r, f in enumerate(gst_findings):
-                    self.table.setItem(r, 0, QTableWidgetItem(f"FINDING-{f.id}"))
-                    self.table.setItem(r, 1, QTableWidgetItem("Audit Record"))
-                    self.table.setItem(r, 2, QTableWidgetItem(f"₹ {f.financial_impact or 0:.2f}"))
-                    self.table.setItem(r, 3, QTableWidgetItem("₹ 0.00"))
-                    self.table.setItem(r, 4, QTableWidgetItem(f"₹ {f.financial_impact or 0:.2f}"))
-                    self.table.setItem(r, 5, QTableWidgetItem(f.severity or "Medium"))
-            else:
-                self.table.setRowCount(0)
+        try:
+            with get_session() as session:
+                wp_repo = WorkingPaperRepository(session)
+                finding_service = FindingService(wp_repo)
+                if active_id:
+                    all_f = finding_service.get_findings_by_audit_id(active_id)
+                else:
+                    all_f = finding_service.get_all_findings()
+                gst_findings = [f for f in all_f if 'gst' in str(f.description or '').lower()]
+                
+                if gst_findings:
+                    self.table.setRowCount(len(gst_findings))
+                    for r, f in enumerate(gst_findings):
+                        self.table.setItem(r, 0, QTableWidgetItem(f"FINDING-{f.id}"))
+                        self.table.setItem(r, 1, QTableWidgetItem("Audit Record"))
+                        self.table.setItem(r, 2, QTableWidgetItem(f"₹ {f.financial_impact or 0:.2f}"))
+                        self.table.setItem(r, 3, QTableWidgetItem("₹ 0.00"))
+                        self.table.setItem(r, 4, QTableWidgetItem(f"₹ {f.financial_impact or 0:.2f}"))
+                        self.table.setItem(r, 5, QTableWidgetItem(f.severity or "Medium"))
+                else:
+                    self.table.setRowCount(0)
+                    self.empty_widget = EmptyStateWidget("No GST Variance Findings", "No GSTR-2B mismatches or ineligible ITC findings flagged.")
+                    table_v.addWidget(self.empty_widget)
+        except Exception as e:
+            self.table.setRowCount(0)
+            self.error_widget = ErrorStateWidget("GST Data Error", str(e))
+            table_v.addWidget(self.error_widget)
                 
         table_v.addWidget(self.table)
         content_layout.addWidget(table_card)
@@ -148,4 +159,7 @@ class GSTVerificationWidget(QWidget):
         main_layout.addWidget(content_widget)
 
     def run_reverification(self):
-        QMessageBox.information(self, "GST Verification", "Re-verification complete! All vendor GSTIN status and 2B records updated.")
+        try:
+            QMessageBox.information(self, "GST Verification", "Re-verification complete! All vendor GSTIN status and 2B records updated.")
+        except Exception as e:
+            self.error_widget = ErrorStateWidget("Re-verification Error", str(e))

@@ -152,7 +152,9 @@ class ReportsWidget(QWidget):
                 matters_html = ""
                 for f in findings:
                     matters_html += f"<li><b>{f.description[:80]}</b> - Flagged Severity: <span style='color:#dc2626;'>{f.severity or 'MEDIUM'}</span></li>"
-        except Exception:
+        except Exception as e:
+            logger.error("Error loading report draft: %s", e, exc_info=True)
+            self.error_widget = ErrorStateWidget("Draft Generation Error", str(e))
             client_name = "Sample Client Pvt Ltd"
             self.current_client_name = client_name
             cin = "U72200MH2021PTC123456"

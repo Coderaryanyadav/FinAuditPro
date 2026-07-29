@@ -232,12 +232,18 @@ class WorkingPaperWidget(QWidget):
 
     def load_audit_projects(self):
         self.project_combo.clear()
-        with get_session() as session:
-            projects = session.query(AuditProject).all()
-            for proj in projects:
-                client = session.query(Client).filter_by(id=proj.client_id).first()
-                name = client.name if client else "Unknown Client"
-                self.project_combo.addItem(f"{name} (FY {proj.financial_year})", proj.id)
+        try:
+            with get_session() as session:
+                projects = session.query(AuditProject).all()
+                if not projects:
+                    self.empty_widget = EmptyStateWidget("No Audit Projects", "Create a new audit project to manage working papers.")
+                    return
+                for proj in projects:
+                    client = session.query(Client).filter_by(id=proj.client_id).first()
+                    name = client.name if client else "Unknown Client"
+                    self.project_combo.addItem(f"{name} (FY {proj.financial_year})", proj.id)
+        except Exception as e:
+            self.error_widget = ErrorStateWidget("Project Load Error", str(e))
 
     def on_project_changed(self):
         self.load_working_paper()

@@ -121,6 +121,7 @@ class AuditHistoryWidget(QWidget):
                     projects = session.query(AuditProject).order_by(AuditProject.id.desc()).all()
                     if not projects:
                         self.table.setRowCount(0)
+                        self.empty_widget = EmptyStateWidget("No Audit History Logs", "No activity logs or engagement records registered in the system.")
                         return
                     self.table.setRowCount(len(projects))
                     for r, p in enumerate(projects):
@@ -159,6 +160,7 @@ class AuditHistoryWidget(QWidget):
                     self.table.setItem(r, 4, hash_item)
         except Exception as e:
             self.table.setRowCount(0)
+            self.error_widget = ErrorStateWidget("Audit Trail Query Error", str(e))
 
     def export_peer_review_log(self):
         file_path, _ = QFileDialog.getSaveFileName(self, "Export Audit Trail for Peer Review", "Audit_Trail_Ledger.csv", "CSV Files (*.csv)")

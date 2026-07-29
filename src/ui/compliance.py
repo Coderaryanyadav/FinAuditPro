@@ -108,6 +108,8 @@ class ComplianceWidget(QWidget):
         w_layout.setContentsMargins(16, 16, 16, 16)
 
         self.caro_table = QTableWidget(len(CARO_2020_CLAUSES), 4)
+        self.caro_table.setToolTip("CARO 2020 Statutory Clause Verification Table")
+        self.caro_table.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.caro_table.setHorizontalHeaderLabels(["CARO 2020 Clause Code", "Clause Particulars", "Audit Verification Scope", "Compliance Status"])
         self.caro_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Interactive)
         self.caro_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
@@ -128,6 +130,8 @@ class ComplianceWidget(QWidget):
             combo = QComboBox()
             combo.addItems(["Complied / Clean", "Qualified / Remark", "Adverse Remark", "Not Applicable"])
             combo.setCurrentIndex(0)
+            combo.setToolTip(f"Select CARO 2020 verification status for {code}")
+            combo.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
             self.caro_table.setCellWidget(r, 3, combo)
 
         w_layout.addWidget(self.caro_table)
@@ -139,6 +143,8 @@ class ComplianceWidget(QWidget):
         w_layout.setContentsMargins(16, 16, 16, 16)
 
         self.f3cd_table = QTableWidget(len(FORM_3CD_CLAUSES), 4)
+        self.f3cd_table.setToolTip("Tax Audit Form 3CD Statutory Clause Verification Table")
+        self.f3cd_table.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.f3cd_table.setHorizontalHeaderLabels(["Form 3CD Clause", "Clause Name", "Scope & Particulars", "Verification Status"])
         self.f3cd_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Interactive)
         self.f3cd_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
@@ -159,17 +165,26 @@ class ComplianceWidget(QWidget):
             combo = QComboBox()
             combo.addItems(["Verified & Complied", "Observation Noted", "Disallowance Applicable", "Not Applicable"])
             combo.setCurrentIndex(0)
+            combo.setToolTip(f"Select Form 3CD verification status for {code}")
+            combo.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
             self.f3cd_table.setCellWidget(r, 3, combo)
 
         w_layout.addWidget(self.f3cd_table)
         return widget
 
     def save_compliance_signoffs(self):
-        QMessageBox.information(self, "Compliance Saved", "CARO 2020 & Form 3CD statutory verification sign-offs saved successfully!")
+        try:
+            QMessageBox.information(self, "Compliance Saved", "CARO 2020 & Form 3CD statutory verification sign-offs saved successfully!")
+        except Exception as e:
+            self.error_widget = ErrorStateWidget("Save Error", str(e))
 
     def load_compliance_data(self):
         """Compatibility method for compliance data reloading."""
-        pass
+        try:
+            if not CARO_2020_CLAUSES:
+                self.empty_widget = EmptyStateWidget("No Compliance Checksheets", "No CARO 2020 or Form 3CD clauses registered.")
+        except Exception as e:
+            self.error_widget = ErrorStateWidget("Compliance Data Error", str(e))
 
     def closeEvent(self, event):
         event.accept()

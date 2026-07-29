@@ -346,15 +346,21 @@ class ClientManagementWidget(QWidget):
 
     def load_clients(self):
         self.table.setRowCount(0)
-        with get_session() as session:
-            clients = session.query(Client).all()
-            self.table.setRowCount(len(clients))
-            for r, c in enumerate(clients):
-                name_item = QTableWidgetItem(c.name)
-                name_item.setData(Qt.ItemDataRole.UserRole, c.id)
-                self.table.setItem(r, 0, name_item)
-                self.table.setItem(r, 1, QTableWidgetItem(f"{c.gst_number or '-'} / {c.pan_number or '-'}"))
-                self.table.setItem(r, 2, QTableWidgetItem(c.industry or "General"))
+        try:
+            with get_session() as session:
+                clients = session.query(Client).all()
+                if not clients:
+                    self.empty_widget = EmptyStateWidget("No Clients Registered", "Click + Add New Client to register client master profiles.")
+                    return
+                self.table.setRowCount(len(clients))
+                for r, c in enumerate(clients):
+                    name_item = QTableWidgetItem(c.name)
+                    name_item.setData(Qt.ItemDataRole.UserRole, c.id)
+                    self.table.setItem(r, 0, name_item)
+                    self.table.setItem(r, 1, QTableWidgetItem(f"{c.gst_number or '-'} / {c.pan_number or '-'}"))
+                    self.table.setItem(r, 2, QTableWidgetItem(c.industry or "General"))
+        except Exception as e:
+            self.error_widget = ErrorStateWidget("Client Master Load Error", str(e))
 
     def filter_clients(self, query):
         query = query.lower().strip()

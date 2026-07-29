@@ -149,6 +149,233 @@ QFrame#contentCard {
     border-radius: 12px;
 }
 
+/* Dashboard Components QSS Rules */
+QFrame#globalSearchFrame {
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+QFrame#globalSearchFrame:focus-within {
+    background-color: #ffffff;
+    border: 2px solid #0ea5e9;
+}
+QLabel#globalSearchIcon {
+    border: none;
+    font-size: 13px;
+    color: #64748b;
+    background: transparent;
+}
+QLineEdit#globalSearchInput {
+    border: none;
+    background: transparent;
+    font-size: 12px;
+    color: #0f172a;
+}
+QLabel#globalShortcutBadge {
+    border: 1px solid #cbd5e1;
+    background-color: #ffffff;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 1px 5px;
+}
+QMenu#globalSearchMenu {
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 12px;
+    padding: 4px;
+}
+QMenu#globalSearchMenu::item {
+    padding: 8px 16px;
+    border-radius: 4px;
+}
+QMenu#globalSearchMenu::item:selected {
+    background-color: #0ea5e9;
+    color: #ffffff;
+}
+
+QLabel#metricTitle {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 700;
+    border: none;
+}
+QLabel#metricValue {
+    color: #0f172a;
+    font-size: 28px;
+    font-weight: 800;
+    border: none;
+}
+
+QFrame#aiSummaryCard {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+QLabel#aiSummaryTitle {
+    font-weight: 800;
+    font-size: 15px;
+    color: #0f172a;
+    border: none;
+}
+QFrame#aiFindingsBox {
+    background-color: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+    padding: 10px;
+}
+QLabel#aiFindingsHeader {
+    font-size: 10px;
+    font-weight: bold;
+    color: #64748b;
+    letter-spacing: 0.5px;
+    border: none;
+}
+QLabel#aiFindingItem {
+    font-size: 11px;
+    color: #334155;
+    border: none;
+}
+QLabel#aiNoFindings {
+    font-size: 11px;
+    color: #94a3b8;
+    border: none;
+}
+QLabel#barTitle {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    border: none;
+}
+
+QFrame#auditProgressCard {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+QComboBox#periodCombo {
+    font-size: 11px;
+    padding: 4px 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+}
+
+QFrame#riskDistributionCard {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+QLabel#donutCenterLabel {
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    color: #0f172a;
+}
+QLabel#legendText {
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 600;
+    border: none;
+}
+
+QFrame#sidebarLogoContainer {
+    background-color: #0b0f19;
+    border-bottom: 1px solid #1e293b;
+}
+QLabel#sidebarLogoBadge {
+    background-color: #0ea5e9;
+    color: #ffffff;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+}
+QLabel#sidebarAppTitle {
+    font-size: 18px;
+    font-weight: 800;
+    color: #ffffff;
+    border: none;
+}
+QScrollArea#sidebarNavScroll {
+    background-color: #0b0f19;
+    border: none;
+}
+QWidget#sidebarNavWidget {
+    background-color: #0b0f19;
+}
+QLabel#sidebarSectionLabel {
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b;
+    padding-left: 12px;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    border: none;
+    letter-spacing: 0.8px;
+}
+QFrame#sidebarProfileFrame {
+    border-top: 1px solid #1e293b;
+    background-color: #0b0f19;
+}
+QLabel#userAvatar {
+    background-color: #0ea5e9;
+    color: #ffffff;
+    border-radius: 17px;
+    font-weight: bold;
+    font-size: 12px;
+}
+QLabel#userName {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    border: none;
+}
+QLabel#userRole {
+    font-size: 10px;
+    color: #64748b;
+    border: none;
+}
+
+QFrame#dashboardHeader {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+}
+QComboBox#clientSelectorCombo {
+    padding: 5px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background-color: #f8fafc;
+    font-size: 12px;
+}
+QPushButton#iconToolBtn {
+    background-color: #f1f5f9;
+    color: #475569;
+    border-radius: 17px;
+    font-size: 13px;
+    border: none;
+}
+QPushButton#iconToolBtn:hover {
+    background-color: #e2e8f0;
+}
+QLabel#heroTitle {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    border: none;
+}
+QLabel#heroSub {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: normal;
+    border: none;
+}
+QFrame#recentProjectsTableFrame {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
 /* Custom Sleek Scrollbars */
 QScrollBar:vertical {
     border: none;

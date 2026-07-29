@@ -198,17 +198,20 @@ class SettingsWidget(QWidget):
             QMessageBox.warning(self, "Invalid Password", "Master password cannot be blank.")
 
     def save_settings(self):
-        config.ca_firm_name = self.firm_name.text().strip() or "Default CA Firm"
-        config.ca_frn = self.frn_number.text().strip() or "000000W"
-        config.ca_membership_no = self.member_no.text().strip() or "000000"
-        config.ca_name = self.partner_name.text().strip() or "Default CA Name"
-        
-        os.environ["FINAUDIT_CA_FIRM_NAME"] = config.ca_firm_name
-        os.environ["FINAUDIT_CA_FRN"] = config.ca_frn
-        os.environ["FINAUDIT_CA_MEMBERSHIP_NO"] = config.ca_membership_no
-        os.environ["FINAUDIT_CA_NAME"] = config.ca_name
+        try:
+            config.ca_firm_name = self.firm_name.text().strip() or "Default CA Firm"
+            config.ca_frn = self.frn_number.text().strip() or "000000W"
+            config.ca_membership_no = self.member_no.text().strip() or "000000"
+            config.ca_name = self.partner_name.text().strip() or "Default CA Name"
+            
+            os.environ["FINAUDIT_CA_FIRM_NAME"] = config.ca_firm_name
+            os.environ["FINAUDIT_CA_FRN"] = config.ca_frn
+            os.environ["FINAUDIT_CA_MEMBERSHIP_NO"] = config.ca_membership_no
+            os.environ["FINAUDIT_CA_NAME"] = config.ca_name
 
-        QMessageBox.information(self, "Settings Saved", "CA Firm Profile and System Settings saved successfully!")
+            QMessageBox.information(self, "Settings Saved", "CA Firm Profile and System Settings saved successfully!")
+        except Exception as e:
+            self.error_widget = ErrorStateWidget("Save Settings Error", str(e))
 
     def backup_database(self):
         file_path, _ = QFileDialog.getSaveFileName(self, "Export Database Backup", "finauditpro_backup.db", "Database Files (*.db)")
@@ -221,6 +224,7 @@ class SettingsWidget(QWidget):
             else:
                 QMessageBox.warning(self, "Backup Warning", "Main database file data/finauditpro.db not found.")
         except Exception as e:
+            self.error_widget = ErrorStateWidget("Database Backup Error", str(e))
             QMessageBox.critical(self, "Backup Error", f"Failed to export backup: {e}")
 
     def closeEvent(self, event):

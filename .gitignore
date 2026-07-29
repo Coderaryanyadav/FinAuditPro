@@ -98,3 +98,10 @@ tmp/
 
 # ─── Python version pin ────────────────────────────────────────────────────────
 # (keep .python-version for reproducible environments)
+ # ─── Generated Report Output Files ────────────────────────────────────────────
+ REP-*.xlsx
+ REP-*.csv
+ REP-*.pdf
++full_audit_report.md
+ data/backups/
+ data/documents/

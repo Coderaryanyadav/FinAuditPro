@@ -144,6 +144,112 @@ graph TD
 
 ---
 
+### 🌐 System Deployment Topology
+
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#0f172a',
+    'primaryTextColor': '#f8fafc',
+    'primaryBorderColor': '#38bdf8',
+    'lineColor': '#94a3b8',
+    'secondaryColor': '#1e293b',
+    'tertiaryColor': '#334155',
+    'clusterBkg': '#020617',
+    'clusterBorder': '#334155'
+  }
+}}%%
+flowchart LR
+    subgraph ClientHost["💻 Air-Gapped Workstation / Client Host"]
+        subgraph AppProcess["FinAuditPro App Process (PySide6 / Qt6)"]
+            UI_Layer["GUI Layer\n(Dashboard, Editor, Viewer)"]
+            Core_Engine["Audit Engine & Rule Processors"]
+        end
+
+        subgraph LocalAI["🤖 Local AI & Ingestion Services"]
+            OllamaDaemon["Ollama Service\n(localhost:11434)\nllama3 / deepseek-r1"]
+            OCREngines["OCR Engines\n(PaddleOCR / Tesseract / EasyOCR)"]
+        end
+
+        subgraph Storage["💾 Encrypted Local Storage"]
+            DB[(SQLite DB\nWAL Mode)]
+            FAISS_Store[(FAISS Vector Index)]
+            AuditVault["Encrypted Working Papers\n(AES-256 Vault)"]
+        end
+    end
+
+    UI_Layer <--> Core_Engine
+    Core_Engine <--> OCREngines
+    Core_Engine <--> OllamaDaemon
+    Core_Engine <--> DB
+    Core_Engine <--> FAISS_Store
+    Core_Engine <--> AuditVault
+```
+
+---
+
+### 🔄 Data Flow Diagram (DFD)
+
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#0f172a',
+    'primaryTextColor': '#f8fafc',
+    'primaryBorderColor': '#38bdf8',
+    'lineColor': '#94a3b8',
+    'secondaryColor': '#1e293b',
+    'tertiaryColor': '#334155',
+    'clusterBkg': '#020617',
+    'clusterBorder': '#334155'
+  }
+}}%%
+flowchart TD
+    Auditor([👤 Statutory Auditor])
+
+    subgraph P1["1. Ingestion & Extraction"]
+        DocIngest["Import Client Docs & Trial Balances"]
+        OCR_Parse["PyPDF / Multi-Engine OCR Ingestion"]
+    end
+
+    subgraph P2["2. Analytics & Compliance Verification"]
+        RuleEngine["Statutory Rule Engine\n(GSTIN, Section 40A(3), Benford's)"]
+        Sch3Engine["Schedule III Auto-Mapper\n& Trial Balance Balancing"]
+    end
+
+    subgraph P3["3. AI Context Retrieval (RAG)"]
+        Embedder["SentenceTransformer Embeddings"]
+        FAISSIndex["FAISS Vector Retrieval"]
+        OllamaRAG["Local LLM Reasoning\n(Ollama / RAG Context)"]
+    end
+
+    subgraph P4["4. Audit Working Papers & Reporting"]
+        ReportGen["SA 700 / SA 705 WYSIWYG Report Builder"]
+        CryptoSign["SHA-256 Tamper Hash & Digital Signature"]
+        ExportEngine["Export Signed Audit Reports\n(PDF / Excel / Working Papers)"]
+    end
+
+    Auditor -->|1. Upload Raw Files| DocIngest
+    DocIngest --> OCR_Parse
+    OCR_Parse --> RuleEngine
+    OCR_Parse --> Sch3Engine
+
+    OCR_Parse --> Embedder
+    Embedder --> FAISSIndex
+    FAISSIndex --> OllamaRAG
+    OllamaRAG --> ReportGen
+
+    RuleEngine --> ReportGen
+    Sch3Engine --> ReportGen
+
+    ReportGen --> CryptoSign
+    CryptoSign --> ExportEngine
+    ExportEngine -->|2. Deliver Signed Audit Package| Auditor
+```
+
+---
+
 ## 🛠️ Technology Stack
 
 - **GUI**: PySide6 6.7 (Qt for Python)

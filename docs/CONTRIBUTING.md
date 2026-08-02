@@ -3,7 +3,7 @@
 ## Setup Development Environment
 ```bash
 git clone https://github.com/Coderaryanyadav/FinAuditPro.git
-cd Audit
+cd FinAuditPro
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -12,7 +12,7 @@ pip install -r requirements.txt
 ## Running Tests
 All code modifications must be verified against the test suite prior to submitting pull requests:
 ```bash
-.venv/bin/pytest tests/test_fatal_fixes.py
+pytest tests/ -v
 ```
 
 ## Coding Rules

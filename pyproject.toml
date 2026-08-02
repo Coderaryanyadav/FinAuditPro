@@ -47,10 +47,15 @@ ignore = [
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra -q --cov=src"
+addopts = "-ra -q"
 testpaths = [
     "tests",
 ]
 pythonpath = [
-    "src"
+    "src",
+    "."
 ]
+filterwarnings = [
+    "ignore",
+]
+

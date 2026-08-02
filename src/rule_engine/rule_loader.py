@@ -64,11 +64,11 @@ class GSTMismatchRule(BaseRule):
 
         if taxable_amt > 0 and tax_amt > 0:
             tax_rate = (tax_amt / taxable_amt) * 100.0
-            valid_rates = [0.0, 5.0, 12.0, 18.0, 28.0]
+            valid_rates = [0.0, 0.1, 0.25, 1.5, 3.0, 5.0, 12.0, 18.0, 28.0]
             nearest_diff = min([abs(tax_rate - r) for r in valid_rates])
             if nearest_diff > 2.0:
                 passed = False
-                evidence.append(f"Effective tax rate {tax_rate:.2f}% calculated against taxable value {taxable_amt:.2f} does not match standard GST slabs (5%, 12%, 18%, 28%).")
+                evidence.append(f"Effective tax rate {tax_rate:.2f}% calculated against taxable value {taxable_amt:.2f} does not match standard GST slabs (0.1%, 0.25%, 1.5%, 3%, 5%, 12%, 18%, 28%).")
 
         return RuleResult(
             rule_id=self.rule_id,

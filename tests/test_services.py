@@ -40,6 +40,11 @@ class TestServices(unittest.TestCase):
         self.session.add(self.dummy_engagement)
         self.session.commit()
 
+        from security.security_manager import SecurityManager
+        from security.rbac import UserRole
+        self.sm = SecurityManager()
+        self.sm.create_session(user_id=1, username="test_admin", email="admin@test.com", role=UserRole.PARTNER)
+
         self.user_repo = UserRepository(self.session)
         self.client_repo = ClientRepository(self.session)
         self.doc_repo = DocumentRepository(self.session)
@@ -51,6 +56,7 @@ class TestServices(unittest.TestCase):
         self.wp_service = WorkingPaperService(self.wp_repo)
 
     def tearDown(self):
+        self.sm.logout()
         self.session.close()
 
     def test_client_service_validation(self):

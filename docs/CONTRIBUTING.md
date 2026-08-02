@@ -1,6 +1,7 @@
 # Developer Contribution Guidelines
 
 ## Setup Development Environment
+
 ```bash
 git clone https://github.com/Coderaryanyadav/FinAuditPro.git
 cd FinAuditPro
@@ -10,11 +11,17 @@ pip install -r requirements.txt
 ```
 
 ## Running Tests
-All code modifications must be verified against the test suite prior to submitting pull requests:
+
+All code modifications must be verified against the test suite prior to
+submitting pull requests:
+
 ```bash
 pytest tests/ -v
 ```
 
 ## Coding Rules
-1. **Zero Hardcoded Data**: Never write hardcoded sample arrays or metrics in UI or service code.
-2. **Database First**: All metrics must be computed via live SQL queries against SQLAlchemy models.
+
+1. **Zero Hardcoded Data**: Never write hardcoded sample arrays or metrics in UI
+   or service code.
+2. **Database First**: All metrics must be computed via live SQL queries against
+   SQLAlchemy models.

@@ -6,6 +6,8 @@ Provides PBKDF2/Argon2 password hashing, cryptographic session tokens, auto-logo
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 import hashlib
+import hmac
+import base64
 import os
 import secrets
 import json
@@ -55,41 +57,67 @@ from core.config import config
 
 
 class PasswordHasher:
-    """Provides secure password hashing using PBKDF2-HMAC-SHA256 with salt and versioning."""
+    """Provides secure password hashing using PBKDF2-HMAC-SHA256 with salt, versioning, and enforced 100k iteration floor."""
 
-    ITERATIONS = config.pbkdf2_iterations
+    MINIMUM_ITERATIONS = 100_000
+
+    @classmethod
+    def get_iterations(cls) -> int:
+        try:
+            val = int(config.pbkdf2_iterations or 100_000)
+            return max(cls.MINIMUM_ITERATIONS, val)
+        except Exception:
+            return cls.MINIMUM_ITERATIONS
 
     @classmethod
     def hash_password(cls, password: str) -> str:
         """Hash plain text password with randomly generated 16-byte salt and version prefix."""
         salt = os.urandom(16)
-        hash_bytes = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, cls.ITERATIONS)
-        return f"pbkdf2${cls.ITERATIONS}${salt.hex()}${hash_bytes.hex()}"
+        iterations = cls.get_iterations()
+        key = hashlib.pbkdf2_hmac(
+            "sha256",
+            password.encode("utf-8"),
+            salt,
+            iterations
+        )
+        return f"pbkdf2${iterations}${salt.hex()}${key.hex()}"
 
     @classmethod
     def verify_password(cls, password: str, stored_hash: str) -> bool:
-        """Verify plain text password against stored hash string (supports legacy salt$hash and pbkdf2$iter$salt$hash)."""
+        """Verify plain text password against stored PBKDF2 hash (supports versioned and legacy formats)."""
+        if not stored_hash:
+            return False
+
         try:
             parts = stored_hash.split("$")
-            if len(parts) == 4 and parts[0] == "pbkdf2":
-                _, iter_str, salt_hex, hash_hex = parts
-                iterations = int(iter_str)
+            if len(parts) == 4 and parts[0] in ("pbkdf2", "pbkdf2_sha256"):
+                iterations = int(parts[1])
+                salt = bytes.fromhex(parts[2])
+                expected_key = bytes.fromhex(parts[3])
+                computed_key = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, iterations)
+                return hmac.compare_digest(computed_key, expected_key)
             elif len(parts) == 2:
-                # Legacy unversioned hash format (100,000 iterations)
-                salt_hex, hash_hex = parts
-                iterations = 100000
-            else:
-                return False
-
-            salt = bytes.fromhex(salt_hex)
-            computed_hash = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, iterations)
-            return secrets.compare_digest(computed_hash.hex(), hash_hex)
-        except (ValueError, RuntimeError, AttributeError):
+                salt = bytes.fromhex(parts[0])
+                expected_key = bytes.fromhex(parts[1])
+                computed_key = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 100000)
+                return hmac.compare_digest(computed_key, expected_key)
+            return False
+        except Exception:
             return False
 
     @classmethod
     def needs_rehash(cls, stored_hash: str) -> bool:
         """Check if stored hash needs upgrading to current iteration count or version format."""
+        if not stored_hash or not stored_hash.startswith("pbkdf2$"):
+            return True
+        try:
+            parts = stored_hash.split("$")
+            if len(parts) == 4:
+                iterations = int(parts[1])
+                return iterations < cls.get_iterations()
+            return True
+        except Exception:
+            return True
         try:
             parts = stored_hash.split("$")
             if len(parts) == 4 and parts[0] == "pbkdf2":

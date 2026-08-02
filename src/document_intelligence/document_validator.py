@@ -21,10 +21,19 @@ class DocumentValidator:
 
     MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024  # 100 MB max file size
 
+    MAGIC_BYTES = {
+        ".pdf": b"%PDF",
+        ".png": b"\x89PNG\r\n\x1a\n",
+        ".jpg": b"\xff\xd8\xff",
+        ".jpeg": b"\xff\xd8\xff",
+        ".xlsx": b"PK\x03\x04",
+        ".docx": b"PK\x03\x04",
+    }
+
     @classmethod
     def validate_file(cls, file_path: str) -> bool:
         """
-        Validates file existence, size, extension, and integrity.
+        Validates file existence, size, extension, magic header signature, and integrity.
         Raises DocumentValidationError if invalid.
         """
         if not os.path.exists(file_path):
@@ -47,6 +56,19 @@ class DocumentValidator:
             raise DocumentValidationError(
                 f"File size ({file_size / (1024*1024):.2f}MB) exceeds maximum limit of 100MB."
             )
+
+        # Magic Header Content Sniffing Check
+        if ext in cls.MAGIC_BYTES:
+            expected_prefix = cls.MAGIC_BYTES[ext]
+            try:
+                with open(file_path, "rb") as f:
+                    header = f.read(len(expected_prefix))
+                    if header != expected_prefix:
+                        raise DocumentValidationError(
+                            f"File signature mismatch for '{ext}'. File header does not match expected format."
+                        )
+            except (OSError, IOError) as e:
+                raise DocumentValidationError(f"Unable to read file headers: {e}")
 
         # PDF Password & Corruption Check
         if ext == ".pdf":

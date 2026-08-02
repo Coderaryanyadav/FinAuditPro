@@ -149,10 +149,18 @@ class SettingsWidget(QWidget):
         btn_backup = QPushButton(" Export Database Backup Zip")
         btn_backup.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; border-radius: 6px; font-weight: bold; border: none;")
         btn_backup.clicked.connect(self.backup_database)
-        f_layout.addRow("Database Backup:", btn_backup)
+        
+        btn_restore = QPushButton(" Restore Database Backup")
+        btn_restore.setStyleSheet("padding: 8px 14px; background-color: #0284c7; color: white; border-radius: 6px; font-weight: bold; border: none;")
+        btn_restore.clicked.connect(self.restore_database_backup)
+
+        btn_box = QHBoxLayout()
+        btn_box.addWidget(btn_backup)
+        btn_box.addWidget(btn_restore)
+        f_layout.addRow("Disaster Recovery:", btn_box)
 
         btn_enable_master_pass = QPushButton(" Enable Master Password Encryption")
-        btn_enable_master_pass.setStyleSheet("padding: 8px 14px; background-color: #0284c7; color: white; border-radius: 6px; font-weight: bold; border: none;")
+        btn_enable_master_pass.setStyleSheet("padding: 8px 14px; background-color: #0f766e; color: white; border-radius: 6px; font-weight: bold; border: none;")
         btn_enable_master_pass.clicked.connect(self.enable_master_password)
         f_layout.addRow("AES Master Encryption:", btn_enable_master_pass)
 
@@ -226,6 +234,35 @@ class SettingsWidget(QWidget):
         except Exception as e:
             self.error_widget = ErrorStateWidget("Database Backup Error", str(e))
             QMessageBox.critical(self, "Backup Error", f"Failed to export backup: {e}")
+
+    def restore_database_backup(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select Backup Archive to Restore", "", "Backup Files (*.enc *.zip *.db)")
+        if not file_path:
+            return
+
+        reply = QMessageBox.warning(
+            self,
+            "Confirm Database Restoration",
+            "Restoring a database backup will overwrite existing database records with the contents of the backup archive.\n\nAre you sure you want to proceed?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+
+        try:
+            from security.backup import BackupEngine
+            be = BackupEngine()
+            success = be.restore_backup(file_path)
+            if success:
+                QMessageBox.information(
+                    self,
+                    "Restoration Complete",
+                    f"Database backup successfully restored from:\n{file_path}\n\nPlease restart FinAuditPro to apply all restored database changes."
+                )
+            else:
+                QMessageBox.warning(self, "Restoration Warning", "Backup restoration could not complete successfully.")
+        except Exception as e:
+            QMessageBox.critical(self, "Restoration Error", f"Failed to restore backup: {e}")
 
     def closeEvent(self, event):
         event.accept()

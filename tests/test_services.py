@@ -32,7 +32,9 @@ class TestServices(unittest.TestCase):
         self.session.add(self.dummy_client)
         self.session.flush()
 
-        self.dummy_fy = FinancialYear(client_id=self.dummy_client.id, year_label="FY 2025-26")
+        from datetime import datetime
+        import uuid
+        self.dummy_fy = FinancialYear(label=f"2025-{uuid.uuid4().hex[:4]}", start_date=datetime.utcnow(), end_date=datetime.utcnow())
         self.session.add(self.dummy_fy)
         self.session.flush()
 
@@ -41,9 +43,10 @@ class TestServices(unittest.TestCase):
         self.session.commit()
 
         from security.security_manager import SecurityManager
+        from security.auth import SessionToken
         from security.rbac import UserRole
         self.sm = SecurityManager()
-        self.sm.create_session(user_id=1, username="test_admin", email="admin@test.com", role=UserRole.PARTNER)
+        self.sm.current_session = SessionToken(token_str="test_token", user_id=1, user_email="admin@test.com", role=UserRole.ADMINISTRATOR.value)
 
         self.user_repo = UserRepository(self.session)
         self.client_repo = ClientRepository(self.session)
@@ -56,7 +59,7 @@ class TestServices(unittest.TestCase):
         self.wp_service = WorkingPaperService(self.wp_repo)
 
     def tearDown(self):
-        self.sm.logout()
+        self.sm.current_session = None
         self.session.close()
 
     def test_client_service_validation(self):

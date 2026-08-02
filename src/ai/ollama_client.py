@@ -39,6 +39,17 @@ class OllamaClient:
             logger.warning(f"Failed to query Ollama models: {e}")
         return "llama3.2"
 
+    @staticmethod
+    def is_available(base_url: Optional[str] = None) -> bool:
+        """Quick check whether the local Ollama daemon is reachable."""
+        try:
+            from core.config import config as _cfg
+            url = base_url or _cfg.ollama_host
+            res = requests.get(f"{url}/api/tags", timeout=3)
+            return res.status_code == 200
+        except Exception:
+            return False
+
     def generate(self, prompt: str, system_prompt: Optional[str] = None, json_mode: bool = False, retries: int = 3) -> str:
         """Synchronous generation with retries."""
         url = f"{self.base_url}/api/generate"

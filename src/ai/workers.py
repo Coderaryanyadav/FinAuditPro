@@ -49,6 +49,7 @@ class OllamaWorker(QThread):
     chunk_received = Signal(str)
     finished = Signal()
     error = Signal(str)
+    ollama_offline = Signal(str)  # Emitted with the original query when Ollama is unreachable
 
     def __init__(self, raw_query: str, system_prompt: str = ""):
         super().__init__()
@@ -82,4 +83,6 @@ class OllamaWorker(QThread):
             )
             self.chunk_received.emit(err_msg)
             self.error.emit(err_msg)
+            self.ollama_offline.emit(self.raw_query)  # Trigger rule-engine fallback in UI layer
             self.finished.emit()
+

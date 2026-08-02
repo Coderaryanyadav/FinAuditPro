@@ -87,5 +87,88 @@ class TestServices(unittest.TestCase):
         self.assertIsNotNone(index.id)
         self.assertEqual(index.section_code, "REV-01")
 
+    # --- RBAC Null-Session Enforcement Tests ---
+
+    def test_rbac_null_session_blocks_create_client(self):
+        """Calling create_client without a session must raise AuthError, never silently skip."""
+        self.sm.current_session = None  # Revoke session
+        with self.assertRaises(AuthError):
+            self.client_service.create_client(name="Unauthenticated Corp")
+
+    def test_rbac_null_session_blocks_upload_document(self):
+        """Calling upload_document without a session must raise AuthError."""
+        self.sm.current_session = None
+        with self.assertRaises(AuthError):
+            self.doc_service.upload_document(engagement_id=999, file_path="/nonexistent.pdf", document_type="Invoice")
+
+    def test_rbac_null_session_blocks_create_index(self):
+        """Calling create_index without a session must raise AuthError."""
+        self.sm.current_session = None
+        with self.assertRaises(AuthError):
+            self.wp_service.create_index(engagement_id=self.dummy_engagement.id, section_code="TEST-01", section_name="Test")
+
+    def test_rbac_null_session_blocks_create_paper(self):
+        """Calling create_paper without a session must raise AuthError."""
+        self.sm.current_session = None
+        with self.assertRaises(AuthError):
+            self.wp_service.create_paper(index_id=999, title="Unauthenticated Paper", prepared_by_id=1)
+
+    def test_rbac_null_session_blocks_update_status(self):
+        """Calling update_status without a session must raise AuthError."""
+        from database.models import WorkingPaper
+        self.sm.current_session = None
+        dummy_wp = WorkingPaper()
+        with self.assertRaises(AuthError):
+            self.wp_service.update_status(dummy_wp, "Review")
+
+    def test_rbac_restores_after_login(self):
+        """After session is restored, service calls must succeed again."""
+        import uuid
+        from security.auth import SessionToken
+        from security.rbac import UserRole
+        self.sm.current_session = None
+        # Must fail without session
+        with self.assertRaises(AuthError):
+            self.client_service.create_client(name="Should Fail Corp")
+        # Restore session
+        self.sm.current_session = SessionToken(
+            token_str="new_token", user_id=1,
+            user_email="admin@test.com", role=UserRole.ADMINISTRATOR.value
+        )
+        # Must succeed with session — use unique name to avoid duplicate error
+        unique_name = f"Restored Corp {uuid.uuid4().hex[:8]}"
+        client = self.client_service.create_client(name=unique_name)
+        self.assertIsNotNone(client.id)
+
+    # --- DashboardService Unit Tests ---
+
+    def test_dashboard_service_realtime_metrics(self):
+        """DashboardService.get_realtime_metrics returns the expected keys."""
+        from services.dashboard_service import DashboardService
+        ds = DashboardService(self.session)
+        metrics = ds.get_realtime_metrics()
+        self.assertIn("total_clients", metrics)
+        self.assertIn("completed_audits", metrics)
+        self.assertIn("pending_reviews", metrics)
+        self.assertIn("high_risk_cases", metrics)
+        self.assertIn("recent_projects", metrics)
+        self.assertIsInstance(metrics["total_clients"], int)
+
+    def test_dashboard_service_client_cache(self):
+        """load_client_name_cache returns name dict keyed by client ID."""
+        from services.dashboard_service import DashboardService
+        ds = DashboardService(self.session)
+        cache = ds.load_client_name_cache({self.dummy_client.id})
+        self.assertIn(self.dummy_client.id, cache)
+        self.assertEqual(cache[self.dummy_client.id], "Test Client Corp")
+
+    def test_dashboard_service_search(self):
+        """search_clients_and_findings returns matching clients."""
+        from services.dashboard_service import DashboardService
+        ds = DashboardService(self.session)
+        clients, findings = ds.search_clients_and_findings("Test Client")
+        client_names = [c.name for c in clients]
+        self.assertIn("Test Client Corp", client_names)
+
 if __name__ == "__main__":
     unittest.main()

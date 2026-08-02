@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QFont, QColor
 from ai.workers import OllamaWorker
+from ai.ollama_client import OllamaClient
 from sqlalchemy.exc import SQLAlchemyError
 from database.database import get_session
 from database.models import AuditProject, Document
@@ -108,9 +109,21 @@ class AIAuditWidget(QWidget):
         header_layout.addWidget(title)
         header_layout.addStretch()
         
-        active_badge = QLabel(" Ollama Local RAG Engine Active")
-        active_badge.setStyleSheet("background-color: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: bold;")
-        header_layout.addWidget(active_badge)
+        # --- Ollama Status Badge (dynamic) ---
+        self._ollama_online = OllamaClient.is_available()
+        if self._ollama_online:
+            self._status_badge = QLabel(" Ollama Local RAG Engine Active")
+            self._status_badge.setStyleSheet(
+                "background-color: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; "
+                "border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: bold;"
+            )
+        else:
+            self._status_badge = QLabel(" Ollama Offline — Rule Engine Fallback Active")
+            self._status_badge.setStyleSheet(
+                "background-color: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; "
+                "border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: bold;"
+            )
+        header_layout.addWidget(self._status_badge)
         
         main_layout.addWidget(header)
         
@@ -278,6 +291,7 @@ class AIAuditWidget(QWidget):
         self.worker = OllamaWorker(raw_query=text, system_prompt=system_prompt)
         self.worker.chunk_received.connect(self.on_ai_chunk)
         self.worker.finished.connect(self.on_ai_finished)
+        self.worker.ollama_offline.connect(self.run_rule_engine_fallback)
         self.worker.start()
 
     def on_ai_chunk(self, text):
@@ -288,6 +302,56 @@ class AIAuditWidget(QWidget):
 
     def on_ai_finished(self):
         self.current_ai_bubble = None
+
+    def run_rule_engine_fallback(self, original_query: str):
+        """Auto-fallback: run all active audit rules against current document context."""
+        self._status_badge.setText(" Ollama Offline — Rule Engine Fallback Active")
+        self._status_badge.setStyleSheet(
+            "background-color: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; "
+            "border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: bold;"
+        )
+        try:
+            from rule_engine.rule_registry import RuleRegistry
+            registry = RuleRegistry()
+            active_rules = registry.get_active_rules()
+
+            # Build a minimal data dict from document context available in the widget
+            doc_text = self.doc_content.text()
+            data = {"cleaned_text": doc_text, "total_amount": 0.0, "tax_amount": 0.0}
+
+            results = []
+            for rule in active_rules:
+                try:
+                    result = rule.evaluate(data)
+                    if not result.passed:
+                        results.append(result)
+                except Exception:
+                    continue
+
+            if results:
+                summary_lines = [f"**Rule Engine Fallback Analysis** — {len(results)} issue(s) detected:\n"]
+                for r in results[:10]:  # Cap display at 10 findings
+                    summary_lines.append(
+                        f"• [{r.severity.value if hasattr(r.severity, 'value') else r.severity}] "
+                        f"{r.rule_name}: {r.description}"
+                    )
+                if len(results) > 10:
+                    summary_lines.append(f"... and {len(results) - 10} more rules flagged issues.")
+                fallback_msg = "\n".join(summary_lines)
+            else:
+                fallback_msg = (
+                    "**Rule Engine Fallback Analysis** — No statutory violations detected in current document context. "
+                    "Upload client financial statements for deeper rule-based analysis."
+                )
+
+            if self.current_ai_bubble:
+                lbl = self.current_ai_bubble.findChild(QLabel)
+                if lbl:
+                    lbl.setText(fallback_msg)
+            else:
+                self.add_message("Rule Engine (Fallback)", fallback_msg, False)
+        except Exception as e:
+            self.add_message("Rule Engine (Fallback)", f"Rule engine analysis error: {e}", False)
 
     def add_message(self, sender, message, is_user=False):
         bubble_frame = QFrame()

@@ -12,20 +12,45 @@ import os
 
 LOCKOUT_FILE = os.path.join("data", ".login_lockouts.json")
 
+
+def _get_crypto():
+    """Return an AESCryptoEngine instance for lockout file encryption."""
+    try:
+        from security.crypto import AESCryptoEngine
+        return AESCryptoEngine()
+    except Exception:
+        return None
+
+
 def _load_lockout_records() -> Dict[str, Dict[str, Any]]:
     if not os.path.exists(LOCKOUT_FILE):
         return {}
     try:
+        with open(LOCKOUT_FILE, "rb") as f:
+            encrypted = f.read()
+        crypto = _get_crypto()
+        if crypto and encrypted:
+            decrypted = crypto.decrypt_bytes(encrypted)
+            return json.loads(decrypted.decode("utf-8"))
+        # Fallback: legacy plain-text file (migrate on next save)
         with open(LOCKOUT_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception:
         return {}
 
+
 def _save_lockout_records(records: Dict[str, Dict[str, Any]]) -> None:
     try:
         os.makedirs(os.path.dirname(LOCKOUT_FILE), exist_ok=True)
-        with open(LOCKOUT_FILE, "w", encoding="utf-8") as f:
-            json.dump(records, f)
+        raw = json.dumps(records).encode("utf-8")
+        crypto = _get_crypto()
+        if crypto:
+            encrypted = crypto.encrypt_bytes(raw)
+            with open(LOCKOUT_FILE, "wb") as f:
+                f.write(encrypted)
+        else:
+            with open(LOCKOUT_FILE, "w", encoding="utf-8") as f:
+                f.write(raw.decode("utf-8"))
     except Exception:
         pass
 

@@ -17,7 +17,9 @@ class DocumentService:
     def upload_document(self, engagement_id: int, file_path: str, document_type: str) -> Document:
         """Register a new document upload in the system."""
         sm = SecurityManager()
-        if sm.current_session and not sm.check_permission(Permission.UPLOAD_DOCUMENTS):
+        if not sm.current_session:
+            raise AuthError("Authentication required: No active session. Please log in to upload documents.")
+        if not sm.check_permission(Permission.UPLOAD_DOCUMENTS):
             raise AuthError("User role lacks permission UPLOAD_DOCUMENTS to ingest document.")
 
         if not os.path.exists(file_path):

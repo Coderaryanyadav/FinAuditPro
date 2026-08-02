@@ -27,7 +27,9 @@ class ClientService:
     def create_client(self, name: str, gst_number: str = None, pan_number: str = None, cin: str = None, industry_id: int = None, registered_address: str = None, industry_name: str = None) -> Client:
         """Create a new client with strict validation and RBAC enforcement."""
         sm = SecurityManager()
-        if sm.current_session and not sm.check_permission(Permission.MANAGE_CLIENTS):
+        if not sm.current_session:
+            raise AuthError("Authentication required: No active session. Please log in to create a client.")
+        if not sm.check_permission(Permission.MANAGE_CLIENTS):
             raise AuthError("User role lacks permission MANAGE_CLIENTS to create a client.")
 
         if not name:

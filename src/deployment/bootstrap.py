@@ -82,6 +82,19 @@ class EngineBootstrap:
             if valid:
                 logger.info(f"Background Audit Ledger Bootstrap: {msg}")
             else:
-                logger.error(f"SECURITY WARNING: Audit Ledger integrity check failed: {msg}")
+                # Non-silent: log as CRITICAL and record a security event to the ledger itself
+                logger.critical(
+                    f"CRITICAL SECURITY ALERT: Audit Ledger integrity check FAILED: {msg}. "
+                    "The audit trail may have been tampered with. Immediate investigation required."
+                )
+                try:
+                    logger_inst.log_action(
+                        user_email="SYSTEM",
+                        role="SYSTEM",
+                        action="AUDIT_LEDGER_TAMPER_DETECTED",
+                        details=f"Startup ledger hash-chain verification failed: {msg}"
+                    )
+                except Exception:
+                    pass
         except Exception as e:
             logger.warning(f"Background Audit Ledger Verification warning: {e}")

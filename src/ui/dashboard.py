@@ -70,8 +70,8 @@ class AuditProjectsTableModel(QAbstractTableModel):
     def _load_client_cache(self):
         client_ids = {p.get('client_id') for p in getattr(self, '_projects', []) if p.get('client_id')}
         with get_session() as session:
-            clients = session.query(Client).filter(Client.id.in_(client_ids)).all() if client_ids else []
-            self._client_cache = {c.id: c.name for c in clients}
+            ds = DashboardService(session)
+            self._client_cache = ds.load_client_name_cache(client_ids)
 
     def _normalize(self, projects: List[Any]) -> List[dict]:
         res = []
@@ -239,8 +239,8 @@ class GlobalSearchWidget(QFrame):
 
         try:
             with get_session() as session:
-                clients = session.query(Client).filter(Client.name.ilike(f"%{text}%")).limit(3).all()
-                findings = session.query(Finding).filter(Finding.description.ilike(f"%{text}%")).limit(3).all()
+                ds = DashboardService(session)
+                clients, findings = ds.search_clients_and_findings(text)
 
                 if clients:
                     header = self.menu.addAction(" CLIENTS")
@@ -908,21 +908,17 @@ class DashboardWindow(QWidget):
         self.btn_working_papers.set_active(True)
 
     def refresh_realtime_data(self):
-        """Refreshes metrics and QTableView Model from database."""
+        """Refreshes metrics and QTableView Model from database via DashboardService."""
         try:
             with get_session() as session:
-                total_clients = session.query(Client).count()
-                completed_audits = session.query(AuditProject).filter_by(status='Completed').count()
-                pending_reviews = session.query(AuditProject).filter_by(status='Pending Review').count()
-                high_risk_cases = session.query(AuditProject).filter_by(risk_level='High').count()
+                ds = DashboardService(session)
+                metrics = ds.get_realtime_metrics()
 
-                self.card_clients.update_value(total_clients)
-                self.card_completed.update_value(completed_audits)
-                self.card_pending.update_value(pending_reviews)
-                self.card_high_risk.update_value(high_risk_cases)
-
-                recent_projs = session.query(AuditProject).order_by(AuditProject.id.desc()).limit(10).all()
-                self.table_model.update_projects(recent_projs)
+                self.card_clients.update_value(metrics["total_clients"])
+                self.card_completed.update_value(metrics["completed_audits"])
+                self.card_pending.update_value(metrics["pending_reviews"])
+                self.card_high_risk.update_value(metrics["high_risk_cases"])
+                self.table_model.update_projects(metrics["recent_projects"])
         except SQLAlchemyError as e:
             logger.warning(f"Database warning during realtime refresh: {e}")
         except Exception as e:
@@ -943,9 +939,10 @@ class DashboardWindow(QWidget):
             risk = dialog.risk_combo.currentText().strip() if hasattr(dialog, 'risk_combo') else "Medium"
 
             with get_session() as session:
-                proj = AuditProject(client_id=client_id, financial_year=fy, status=status, risk_level=risk)
-                session.add(proj)
-                session.commit()
+                ds = DashboardService(session)
+                proj = ds.create_audit_project(
+                    client_id=client_id, financial_year=fy, status=status, risk_level=risk
+                )
                 proj_id = proj.id
 
             self.populate_client_selector()
@@ -957,17 +954,16 @@ class DashboardWindow(QWidget):
     def populate_client_selector(self):
         self.client_selector.clear()
         with get_session() as session:
-            results = session.query(Client, AuditProject).outerjoin(
-                AuditProject, Client.id == AuditProject.client_id
-            ).all()
-            
+            ds = DashboardService(session)
+            results = ds.get_clients_with_projects()
+
             client_projects = {}
             for client, proj in results:
                 if client.id not in client_projects:
                     client_projects[client.id] = (client, [])
                 if proj:
                     client_projects[client.id][1].append(proj)
-                    
+
             for client_id, (c, projs) in client_projects.items():
                 if projs:
                     for proj in projs:
@@ -981,26 +977,25 @@ class DashboardWindow(QWidget):
         if not data: return
         try:
             with get_session() as session:
+                ds = DashboardService(session)
                 if isinstance(data, str) and data.startswith("client_"):
                     client_id = int(data.split("_")[1])
-                    proj = AuditProject(client_id=client_id, financial_year="2025-26", status="Execution")
-                    session.add(proj)
-                    session.commit()
-                    proj_id = proj.id
-                    c_id = proj.client_id
-                    fy = proj.financial_year or "2025-26"
+                    proj = ds.get_or_create_client_project(client_id)
                 else:
                     proj_id = int(data)
-                    proj = session.query(AuditProject).filter_by(id=proj_id).first()
-                    c_id = proj.client_id if proj else None
-                    fy = proj.financial_year if proj else "2025-26"
+                    proj = ds.get_audit_project(proj_id)
 
-            if proj_id and c_id:
-                self.workflow_manager.initialize_engagement(engagement_id=proj_id, client_id=c_id, financial_year=fy)
-                if hasattr(self, 'ai_page') and self.ai_page is not None:
-                    self.ai_page.active_engagement_id = proj_id
+                if proj:
+                    self.workflow_manager.initialize_engagement(
+                        engagement_id=proj.id,
+                        client_id=proj.client_id,
+                        financial_year=proj.financial_year or "2025-26"
+                    )
+                    if hasattr(self, 'ai_page') and self.ai_page is not None:
+                        self.ai_page.active_engagement_id = proj.id
         except (SQLAlchemyError, ValueError, RuntimeError) as e:
             logger.warning(f"Engagement change warning: {e}")
+
 
     def _setup_nav_shortcuts(self):
         for i in range(min(9, len(self.nav_buttons))):

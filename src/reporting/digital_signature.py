@@ -1,6 +1,14 @@
 """
-Digital Signature & Cryptographic Verification Manager for FinAuditPro.
-Provides ICAI practitioner digital signing blocks, Ed25519 asymmetric signing, and document SHA-256 tamper verification.
+Internal Audit Hash-Chain Integrity Verification Manager for FinAuditPro.
+
+PROVIDES: Ed25519 asymmetric signing for internal audit ledger hash-chain integrity
+verification. This signs report payload hashes to detect post-export tampering.
+
+STATUTORY NOTICE: This module does NOT produce a legally valid Indian IT Act 2000
+Class 3 PKI Digital Signature Certificate (DSC). Statutory audit signatures on
+Form 3CA/3CB/3CD require a Class 3 X.509 Certificate from a licensed Certifying
+Authority (eMudhra, nCode, Capricorn) stored on a hardware PKCS#11 USB token.
+For live ICAI UDIN generation, auditors must visit https://udin.icai.org/.
 """
 
 from dataclasses import dataclass, field
@@ -45,6 +53,8 @@ class SignatureBlock:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
+            "integrity_method": "Ed25519 Internal Audit Hash-Chain Integrity Verification",
+            "statutory_notice": "NOT a statutory IT Act 2000 Class 3 PKI DSC. For legal ICAI signatures, use a CA-issued USB token.",
             "ca_name": self.ca_name,
             "membership_number": self.membership_number,
             "firm_name": self.firm_name,
@@ -53,7 +63,7 @@ class SignatureBlock:
             "digital_signature_hash": self.digital_signature_hash,
             "asymmetric_signature": self.asymmetric_signature,
             "public_key_b64": self.public_key_b64,
-            "udin": self.udin or "UDIN PENDING",
+            "udin": self.udin or "UDIN PENDING – Generate at https://udin.icai.org/",
         }
 
 

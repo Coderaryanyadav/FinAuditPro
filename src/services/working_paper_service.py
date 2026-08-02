@@ -22,7 +22,9 @@ class WorkingPaperService:
     def create_index(self, engagement_id: int, section_code: str, section_name: str) -> WorkingPaperIndex:
         """Create a new index section."""
         sm = SecurityManager()
-        if sm.current_session and not sm.check_permission(Permission.EDIT_WORKING_PAPERS):
+        if not sm.current_session:
+            raise AuthError("Authentication required: No active session. Please log in to create a working paper index.")
+        if not sm.check_permission(Permission.EDIT_WORKING_PAPERS):
             raise AuthError("User role lacks permission EDIT_WORKING_PAPERS to create index.")
         if not section_code or not section_name:
             raise ValidationError("Section code and name are required.")
@@ -31,7 +33,9 @@ class WorkingPaperService:
     def create_paper(self, index_id: int, title: str, prepared_by_id: int) -> WorkingPaper:
         """Create a new working paper."""
         sm = SecurityManager()
-        if sm.current_session and not sm.check_permission(Permission.EDIT_WORKING_PAPERS):
+        if not sm.current_session:
+            raise AuthError("Authentication required: No active session. Please log in to create a working paper.")
+        if not sm.check_permission(Permission.EDIT_WORKING_PAPERS):
             raise AuthError("User role lacks permission EDIT_WORKING_PAPERS to create working paper.")
         if not title:
             raise ValidationError("Working paper title is required.")
@@ -44,7 +48,9 @@ class WorkingPaperService:
     def update_status(self, paper: WorkingPaper, status: str) -> WorkingPaper:
         """Update working paper status."""
         sm = SecurityManager()
-        if sm.current_session and not sm.check_permission(Permission.REVIEW_WORKING_PAPERS):
+        if not sm.current_session:
+            raise AuthError("Authentication required: No active session. Please log in to change paper status.")
+        if not sm.check_permission(Permission.REVIEW_WORKING_PAPERS):
             raise AuthError("User role lacks permission REVIEW_WORKING_PAPERS to change paper status.")
         if status not in self.VALID_STATUSES:
             raise ValidationError(f"Invalid status: {status}")

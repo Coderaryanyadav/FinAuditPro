@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: finauditpro_postgres
+    environment:
+      POSTGRES_DB: finauditpro
+      POSTGRES_USER: finaudit
+      POSTGRES_PASSWORD: finaudit_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ..
+      dockerfile: api/Dockerfile
+    container_name: finauditpro_api
+    ports:
+      - "8000:8000"
+    environment:
+      FINAUDITPRO_DATABASE_URL: postgresql://finaudit:finaudit_secret@db:5432/finauditpro
+      FINAUDITPRO_JWT_SECRET: change-this-in-production-secret-key-2026
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

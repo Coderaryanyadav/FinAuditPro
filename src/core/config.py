@@ -60,6 +60,14 @@ class AppConfig(BaseModel):
         default_factory=lambda: os.environ.get("FINAUDIT_CA_MEMBERSHIP_NO") or "000000",
         description="CA Membership Number"
     )
+    database_url: str = Field(
+        default_factory=lambda: os.environ.get("FINAUDITPRO_DATABASE_URL") or os.environ.get("FINAUDIT_DATABASE_URL") or os.environ.get("DATABASE_URL") or "",
+        description="Optional custom database URL override (e.g. PostgreSQL)"
+    )
+    jwt_secret: str = Field(
+        default_factory=lambda: os.environ.get("FINAUDITPRO_JWT_SECRET") or os.environ.get("FINAUDIT_JWT_SECRET") or os.environ.get("JWT_SECRET") or "finauditpro_production_jwt_secret_key_change_in_prod_2026",
+        description="JWT secret key for FastAPI authentication"
+    )
 
     @classmethod
     def load(cls) -> "AppConfig":

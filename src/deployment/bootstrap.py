@@ -30,6 +30,14 @@ class EngineBootstrap:
     @classmethod
     def _bootstrap_services(cls):
         """Background initialization routine."""
+        # 0. Transparent SQLCipher Live DB Encryption Check
+        try:
+            from database.db_encryptor import EncryptExistingDatabase
+            from database.database import DB_PATH, DATA_DIR
+            EncryptExistingDatabase.run(DB_PATH, DATA_DIR)
+        except Exception as e:
+            logger.warning(f"Database encryption check warning: {e}")
+
         # 1. Pre-warm OCR engine status cache
         try:
             from document_intelligence.ocr_engine import OCREngine

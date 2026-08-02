@@ -12,7 +12,7 @@ For live ICAI UDIN generation, auditors must visit https://udin.icai.org/.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 import hashlib
 import base64
 from typing import Dict, Any, Optional
@@ -24,7 +24,7 @@ class SignatureBlock:
     membership_number: str
     firm_name: str
     firm_registration_number: str
-    signature_date: datetime = field(default_factory=datetime.utcnow)
+    signature_date: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     digital_signature_hash: str = ""
     asymmetric_signature: str = ""
     public_key_b64: str = ""

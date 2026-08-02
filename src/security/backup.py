@@ -4,7 +4,7 @@ Creates compressed encrypted backup archives (.zip) of database and documents, a
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 import zipfile
 import hashlib
@@ -25,7 +25,7 @@ class BackupArchive:
     file_path: str
     file_size_bytes: int
     sha256_hash: str
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     version: str = "1.0"
 
 
@@ -39,7 +39,8 @@ class BackupEngine:
 
     def create_backup(self, db_path: str = "src/data/finauditpro.db", docs_dir: str = "data/documents") -> BackupArchive:
         """Create an AES-256 encrypted .enc archive containing the database and audit documents."""
-        timestamp_str = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        now = datetime.now(timezone.utc)
+        timestamp_str = now.strftime("%Y%m%d_%H%M%S")
         backup_id = f"BACKUP_{timestamp_str}"
         archive_name = f"{backup_id}.enc"
         archive_path = os.path.join(self.backup_dir, archive_name)
@@ -64,7 +65,7 @@ class BackupEngine:
                 # 3. Add manifest
                 manifest = {
                     "backup_id": backup_id,
-                    "created_at": datetime.utcnow().isoformat(),
+                    "created_at": now.isoformat(),
                     "db_included": os.path.exists(db_path),
                     "docs_included": os.path.exists(docs_dir),
                 }

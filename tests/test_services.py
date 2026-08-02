@@ -23,24 +23,30 @@ class TestServices(unittest.TestCase):
 
     def setUp(self):
         init_db()
-        from database.database import SessionLocal
+        from database.database import engine, SessionLocal
         from database.models import Client, FinancialYear, Engagement
-        self.session = SessionLocal()
-        
+        from sqlalchemy.orm import Session
+
+        # Begin a connection-level transaction so we can roll back after each test
+        self._connection = engine.connect()
+        self._transaction = self._connection.begin()
+        self.session = Session(bind=self._connection)
+
         # Create dummy client, FY, and engagement to satisfy FK constraints
         self.dummy_client = Client(name="Test Client Corp", gst_number="27AAACB1234F1Z0")
         self.session.add(self.dummy_client)
         self.session.flush()
 
-        from datetime import datetime
+        from datetime import datetime, timezone
         import uuid
-        self.dummy_fy = FinancialYear(label=f"2025-{uuid.uuid4().hex[:4]}", start_date=datetime.utcnow(), end_date=datetime.utcnow())
+        now_dt = datetime.now(timezone.utc)
+        self.dummy_fy = FinancialYear(label=f"2025-{uuid.uuid4().hex[:4]}", start_date=now_dt, end_date=now_dt)
         self.session.add(self.dummy_fy)
         self.session.flush()
 
         self.dummy_engagement = Engagement(client_id=self.dummy_client.id, financial_year_id=self.dummy_fy.id, audit_type="Statutory", status="Planning")
         self.session.add(self.dummy_engagement)
-        self.session.commit()
+        self.session.flush()
 
         from security.security_manager import SecurityManager
         from security.auth import SessionToken
@@ -61,6 +67,9 @@ class TestServices(unittest.TestCase):
     def tearDown(self):
         self.sm.current_session = None
         self.session.close()
+        # Roll back the outer transaction — leaves the DB pristine for the next test
+        self._transaction.rollback()
+        self._connection.close()
 
     def test_client_service_validation(self):
         # Invalid GSTIN format test

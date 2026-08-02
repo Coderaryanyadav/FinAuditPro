@@ -1,4 +1,8 @@
-import datetime
+from datetime import datetime
+
+def utc_now():
+    return datetime.utcnow()
+
 from sqlalchemy import (
     Column, Integer, String, DateTime, ForeignKey, 
     Text, Float, Boolean, Index
@@ -15,8 +19,8 @@ class User(Base):
     password_hash = Column(String(128), nullable=False)
     role = Column(String(50), default='Articled Assistant') # Partner, Manager, Articled Assistant
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     teams = relationship("AuditTeam", back_populates="user", cascade="all, delete-orphan")
     prepared_papers = relationship("WorkingPaper", foreign_keys='WorkingPaper.prepared_by_id', back_populates="prepared_by")
@@ -27,8 +31,8 @@ class ClientIndustry(Base):
     id = Column(Integer, primary_key=True)
     industry_name = Column(String(100), nullable=False, unique=True)
     default_risk_profile = Column(String(50), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     
     clients = relationship("Client", back_populates="industry_rel")
 
@@ -44,8 +48,8 @@ class Client(Base):
     cin = Column(String(21), nullable=True)
     registered_address = Column(Text, nullable=True)
     industry_id = Column(Integer, ForeignKey('client_industries.id'), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     
     industry_rel = relationship("ClientIndustry", back_populates="clients")
     engagements = relationship("Engagement", back_populates="client", cascade="all, delete-orphan")
@@ -85,8 +89,8 @@ class KeyManagementPersonnel(Base):
     name = Column(String(100), nullable=False)
     din = Column(String(20), nullable=True)
     designation = Column(String(100), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     client = relationship("Client", back_populates="kmps")
 
@@ -96,8 +100,8 @@ class FinancialYear(Base):
     label = Column(String(20), nullable=False, unique=True) # e.g., '2024-25'
     start_date = Column(DateTime, nullable=False)
     end_date = Column(DateTime, nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     
     engagements = relationship("Engagement", back_populates="financial_year")
 
@@ -109,8 +113,8 @@ class Engagement(Base):
     audit_type = Column(String(50), nullable=False) # Statutory, Tax, Internal
     status = Column(String(50), default='Planning') # Planning, Execution, Reporting, Completed
     engagement_letter_path = Column(String(255), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     
     __table_args__ = (
         Index('idx_client_fy', 'client_id', 'financial_year_id', unique=True),
@@ -133,8 +137,8 @@ class AuditProject(Base):
     status = Column(String(50), default='In Progress')
     risk_score = Column(Float, default=0.0)
     risk_level = Column(String(50), default='Low')
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     client = relationship("Client")
 
@@ -144,8 +148,8 @@ class AuditTeam(Base):
     engagement_id = Column(Integer, ForeignKey('engagements.id'), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     role_in_engagement = Column(String(50), nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     engagement = relationship("Engagement", back_populates="teams")
     user = relationship("User", back_populates="teams")
@@ -159,8 +163,8 @@ class MaterialityCalculation(Base):
     overall_materiality = Column(Float, nullable=True)
     performance_materiality = Column(Float, nullable=True)
     sum_threshold = Column(Float, nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     
     engagement = relationship("Engagement", back_populates="materiality")
 
@@ -176,8 +180,8 @@ class Document(Base):
     upload_status = Column(String(50), default='Uploaded')
     ocr_confidence = Column(Float, default=98.5)
     is_vectorized = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     
     engagement = relationship("Engagement", back_populates="documents")
     evidence_links = relationship("EvidenceLink", back_populates="document", cascade="all, delete-orphan")
@@ -190,8 +194,8 @@ class Risk(Base):
     likelihood = Column(String(50), nullable=True) # High, Medium, Low
     impact = Column(String(50), nullable=True)
     is_significant = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     
     engagement = relationship("Engagement", back_populates="risks")
 
@@ -203,8 +207,8 @@ class ComplianceTask(Base):
     description = Column(Text, nullable=True)
     due_date = Column(DateTime, nullable=True)
     is_completed = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     
     engagement = relationship("Engagement", back_populates="compliance_tasks")
 
@@ -214,8 +218,8 @@ class WorkingPaperIndex(Base):
     engagement_id = Column(Integer, ForeignKey('engagements.id'), nullable=False)
     section_code = Column(String(10), nullable=False) # e.g. 'A'
     section_name = Column(String(100), nullable=False) # e.g. 'Fixed Assets'
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     
     engagement = relationship("Engagement", back_populates="wp_indices")
     working_papers = relationship("WorkingPaper", back_populates="index", cascade="all, delete-orphan")
@@ -231,8 +235,8 @@ class WorkingPaper(Base):
     status = Column(String(50), default='Draft')
     prepared_by_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     reviewed_by_id = Column(Integer, ForeignKey('users.id'), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     
     audit_project = relationship("AuditProject", backref="working_papers")
     index = relationship("WorkingPaperIndex", back_populates="working_papers")
@@ -250,8 +254,8 @@ class AuditProcedure(Base):
     assertion_covered = Column(String(100), nullable=True)
     is_completed = Column(Boolean, default=False)
     completed_by_id = Column(Integer, ForeignKey('users.id'), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     
     working_paper = relationship("WorkingPaper", back_populates="procedures")
     completed_by = relationship("User", foreign_keys=[completed_by_id])
@@ -264,8 +268,8 @@ class EvidenceLink(Base):
     document_id = Column(Integer, ForeignKey('documents.id'), nullable=False)
     page_reference = Column(Integer, nullable=True)
     bounding_box_data = Column(Text, nullable=True) # JSON string
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     
     procedure = relationship("AuditProcedure", back_populates="evidence_links")
     document = relationship("Document", back_populates="evidence_links")
@@ -281,8 +285,8 @@ class Finding(Base):
     risk_level = Column(String(50), default='Low')
     ai_confidence_score = Column(Integer, nullable=True)
     is_resolved = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     
     audit_project = relationship("AuditProject", backref="findings")
     working_paper = relationship("WorkingPaper", back_populates="findings")
@@ -295,8 +299,8 @@ class ReviewNote(Base):
     raised_by_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     assigned_to_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     status = Column(String(50), default='Open') # Open, Cleared, Closed
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     
     working_paper = relationship("WorkingPaper", back_populates="review_notes")
     raised_by = relationship("User", foreign_keys=[raised_by_id])
@@ -309,15 +313,15 @@ class DocumentPage(Base):
     page_number = Column(Integer, nullable=False)
     ocr_text = Column(Text, nullable=True)
     layout_metadata = Column(Text, nullable=True) # JSON
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
 class RiskProcedureLink(Base):
     __tablename__ = 'risk_procedure_links'
     id = Column(Integer, primary_key=True)
     risk_id = Column(Integer, ForeignKey('risks.id'), nullable=False)
     procedure_id = Column(Integer, ForeignKey('audit_procedures.id'), nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
 class AuditReport(Base):
     __tablename__ = 'audit_reports'
@@ -327,7 +331,7 @@ class AuditReport(Base):
     report_text = Column(Text, nullable=True)
     pdf_hash = Column(String(64), nullable=True)
     generated_by_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
     
     engagement = relationship("Engagement")
     generated_by = relationship("User", foreign_keys=[generated_by_id])
@@ -342,5 +346,5 @@ class AuditLog(Base):
     ip_address = Column(String(50), nullable=True)
     previous_hash = Column(String(64), nullable=True)
     entry_hash = Column(String(64), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 

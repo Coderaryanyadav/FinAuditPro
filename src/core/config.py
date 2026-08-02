@@ -5,7 +5,7 @@ Defines AppConfig model using Pydantic, handling environment variable overrides 
 
 import os
 import platform
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 def get_default_data_dir() -> str:
@@ -42,7 +42,7 @@ class AppConfig(BaseModel):
     )
     pbkdf2_iterations: int = Field(
         default_factory=lambda: int(os.environ.get("FINAUDIT_PBKDF2_ITERATIONS") or os.environ.get("PBKDF2_ITERATION_COUNT") or "600000"),
-        description="PBKDF2 HMAC-SHA256 key derivation iteration count"
+        description="PBKDF2 HMAC-SHA256 key derivation iteration count (minimum 100,000 enforced)"
     )
     ca_firm_name: str = Field(
         default_factory=lambda: os.environ.get("FINAUDIT_CA_FIRM_NAME") or "Default CA Firm",
@@ -68,6 +68,17 @@ class AppConfig(BaseModel):
         default_factory=lambda: os.environ.get("FINAUDITPRO_JWT_SECRET") or os.environ.get("FINAUDIT_JWT_SECRET") or os.environ.get("JWT_SECRET") or "finauditpro_production_jwt_secret_key_change_in_prod_2026",
         description="JWT secret key for FastAPI authentication"
     )
+
+    @field_validator("pbkdf2_iterations", mode="before")
+    @classmethod
+    def clamp_pbkdf2_iterations(cls, v: int) -> int:
+        """Enforce a minimum of 100,000 PBKDF2 iterations regardless of env var setting."""
+        _MINIMUM = 100_000
+        try:
+            v = int(v)
+        except (TypeError, ValueError):
+            return _MINIMUM
+        return max(v, _MINIMUM)
 
     @classmethod
     def load(cls) -> "AppConfig":

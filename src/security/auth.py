@@ -4,7 +4,7 @@ Provides PBKDF2/Argon2 password hashing, cryptographic session tokens, auto-logo
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import hashlib
 import hmac
 import base64
@@ -16,18 +16,23 @@ from typing import Dict, Optional, Any
 
 logger = logging.getLogger(__name__)
 
+def _utc_now():
+    return datetime.now(timezone.utc)
+
 @dataclass
 class SessionToken:
     token_str: str
     user_id: int
     user_email: str
     role: str
-    created_at: datetime = field(default_factory=datetime.utcnow)
-    expires_at: datetime = field(default_factory=lambda: datetime.utcnow() + timedelta(hours=8))
+    created_at: datetime = field(default_factory=_utc_now)
+    expires_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc) + timedelta(hours=8))
     is_remember_me: bool = False
 
     def is_expired(self) -> bool:
-        return datetime.utcnow() > self.expires_at
+        now = datetime.now(timezone.utc)
+        target = self.expires_at if self.expires_at.tzinfo else self.expires_at.replace(tzinfo=timezone.utc)
+        return now > target
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -187,7 +192,7 @@ class AuthManager:
         """Generates a secure 32-byte cryptographic session token."""
         token_str = secrets.token_hex(32)
         expiry_hours = 720 if is_remember_me else (self.session_timeout_minutes / 60.0)
-        expires_at = datetime.utcnow() + timedelta(hours=expiry_hours)
+        expires_at = datetime.now(timezone.utc) + timedelta(hours=expiry_hours)
 
         token = SessionToken(
             token_str=token_str,
@@ -214,7 +219,7 @@ class AuthManager:
 
         # Extend session expiry if active and not remember-me
         if not token.is_remember_me:
-            token.expires_at = datetime.utcnow() + timedelta(minutes=self.session_timeout_minutes)
+            token.expires_at = datetime.now(timezone.utc) + timedelta(minutes=self.session_timeout_minutes)
             self._save_sessions()
 
         return token

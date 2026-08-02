@@ -10,6 +10,9 @@ class AuthenticationError(FinAuditError):
     """Raised when login fails or permissions are insufficient."""
     pass
 
+AuthError = AuthenticationError
+PermissionDeniedError = AuthenticationError
+
 class EntityNotFoundError(FinAuditError):
     """Raised when a requested database record does not exist."""
     pass

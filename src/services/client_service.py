@@ -1,20 +1,14 @@
 import re
 from typing import List, Optional
-from core.exceptions import ValidationError, DuplicateRecordError, EntityNotFoundError
+from core.exceptions import ValidationError, DuplicateRecordError, EntityNotFoundError, AuthError
 from database.repositories.client_repo import ClientRepository
 from database.models import Client
+from security.security_manager import SecurityManager
+from security.rbac import Permission
 
 class ClientService:
     """
-    Service responsible for managing Client entities.
-    
-    Repositories used:
-    - ClientRepository
-    
-    Business Rules:
-    - GSTIN must match standard format if provided.
-    - PAN must match standard format if provided.
-    - Duplicate names are not allowed (checked via search/get).
+    Service responsible for managing Client entities with RBAC permission gates.
     """
 
     def __init__(self, client_repo: ClientRepository):
@@ -31,7 +25,11 @@ class ClientService:
         return bool(re.match(pattern, gstin))
 
     def create_client(self, name: str, gst_number: str = None, pan_number: str = None, cin: str = None, industry_id: int = None, registered_address: str = None, industry_name: str = None) -> Client:
-        """Create a new client with strict validation."""
+        """Create a new client with strict validation and RBAC enforcement."""
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.MANAGE_CLIENTS):
+            raise AuthError("User role lacks permission MANAGE_CLIENTS to create a client.")
+
         if not name:
             raise ValidationError("Client name is required.")
 

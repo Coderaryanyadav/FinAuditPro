@@ -118,6 +118,13 @@ class BackupEngine:
                 if computed_hash != expected_hash:
                     raise ValueError(f"Backup integrity check failed: hash mismatch ({computed_hash} != {expected_hash})")
 
+            def _safe_extract(zipf, member, path):
+                target_path = os.path.abspath(os.path.join(path, member))
+                base_path = os.path.abspath(path)
+                if not target_path.startswith(base_path):
+                    raise ValueError(f"Zip-slip path traversal attempt detected in member: {member}")
+                zipf.extract(member, path=path)
+
             with zipfile.ZipFile(active_zip, "r") as zipf:
                 namelist = zipf.namelist()
                 if "manifest.json" not in namelist:
@@ -125,7 +132,7 @@ class BackupEngine:
 
                 # Restore Database
                 if "database/finauditpro.db" in namelist:
-                    zipf.extract("database/finauditpro.db", path=temp_dir)
+                    _safe_extract(zipf, "database/finauditpro.db", path=temp_dir)
                     extracted_db = os.path.join(temp_dir, "database", "finauditpro.db")
                     os.makedirs(os.path.dirname(target_db_path), exist_ok=True)
                     shutil.copy(extracted_db, target_db_path)
@@ -136,7 +143,7 @@ class BackupEngine:
                 if doc_entries:
                     os.makedirs(target_docs_dir, exist_ok=True)
                     for entry in doc_entries:
-                        zipf.extract(entry, path=temp_dir)
+                        _safe_extract(zipf, entry, path=temp_dir)
                         rel_doc_path = os.path.relpath(os.path.join(temp_dir, entry), os.path.join(temp_dir, "documents"))
                         dest_doc_path = os.path.join(target_docs_dir, rel_doc_path)
                         os.makedirs(os.path.dirname(dest_doc_path), exist_ok=True)

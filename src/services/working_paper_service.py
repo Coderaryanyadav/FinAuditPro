@@ -1,18 +1,13 @@
 from typing import List, Optional
-from core.exceptions import ValidationError, EntityNotFoundError
+from core.exceptions import ValidationError, EntityNotFoundError, AuthError
 from database.repositories.working_paper_repo import WorkingPaperRepository
 from database.models import WorkingPaper, WorkingPaperIndex
+from security.security_manager import SecurityManager
+from security.rbac import Permission
 
 class WorkingPaperService:
     """
-    Service responsible for managing Working Papers.
-    
-    Repositories used:
-    - WorkingPaperRepository
-    
-    Business Rules:
-    - Papers must belong to an Index.
-    - Status transitions (Draft -> Review -> Completed).
+    Service responsible for managing Working Papers with RBAC security gates.
     """
 
     VALID_STATUSES = ['Draft', 'Review', 'Completed']
@@ -26,12 +21,18 @@ class WorkingPaperService:
 
     def create_index(self, engagement_id: int, section_code: str, section_name: str) -> WorkingPaperIndex:
         """Create a new index section."""
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.EDIT_WORKING_PAPERS):
+            raise AuthError("User role lacks permission EDIT_WORKING_PAPERS to create index.")
         if not section_code or not section_name:
             raise ValidationError("Section code and name are required.")
         return self.wp_repo.create_index(engagement_id, section_code, section_name)
 
     def create_paper(self, index_id: int, title: str, prepared_by_id: int) -> WorkingPaper:
         """Create a new working paper."""
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.EDIT_WORKING_PAPERS):
+            raise AuthError("User role lacks permission EDIT_WORKING_PAPERS to create working paper.")
         if not title:
             raise ValidationError("Working paper title is required.")
         return self.wp_repo.create_paper(index_id, title, prepared_by_id)
@@ -42,6 +43,9 @@ class WorkingPaperService:
 
     def update_status(self, paper: WorkingPaper, status: str) -> WorkingPaper:
         """Update working paper status."""
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.REVIEW_WORKING_PAPERS):
+            raise AuthError("User role lacks permission REVIEW_WORKING_PAPERS to change paper status.")
         if status not in self.VALID_STATUSES:
             raise ValidationError(f"Invalid status: {status}")
         

@@ -47,7 +47,16 @@ class TestReportingEngine(unittest.TestCase):
         )
         self.assertEqual(sig.ca_name, "CA Test User")
         self.assertTrue(len(sig.digital_signature_hash) == 64)
-        self.assertIn("UDIN PENDING", sig.udin)
+        self.assertTrue(len(sig.asymmetric_signature) > 0)
+        self.assertTrue(len(sig.public_key_b64) > 0)
+        payload = f"{sig.ca_name}:{sig.membership_number}:{sig.firm_registration_number}:{sig.signature_date.isoformat()}"
+        is_valid = DigitalSignatureManager.verify_asymmetric_signature(payload, sig.asymmetric_signature, sig.public_key_b64)
+        self.assertTrue(is_valid)
+
+    def test_excel_formula_injection_defense(self):
+        malicious_input = "=cmd|'/c calc'!A1"
+        sanitized = ExcelReportExporter.sanitize_value(malicious_input)
+        self.assertEqual(sanitized, "'=cmd|'/c calc'!A1")
 
     def test_qr_verification(self):
         payload = QRVerificationManager.generate_verification_payload(

@@ -1,19 +1,14 @@
 import os
 from typing import List, Optional
-from core.exceptions import ValidationError, EntityNotFoundError
+from core.exceptions import ValidationError, EntityNotFoundError, AuthError
 from database.repositories.document_repo import DocumentRepository
 from database.models import Document, DocumentPage
+from security.security_manager import SecurityManager
+from security.rbac import Permission
 
 class DocumentService:
     """
-    Service responsible for managing uploaded documents.
-    
-    Repositories used:
-    - DocumentRepository
-    
-    Business Rules:
-    - Verifies file exists physically before creating DB record.
-    - Tracks vectorization status for AI RAG pipeline.
+    Service responsible for managing uploaded documents with RBAC security gates.
     """
 
     def __init__(self, document_repo: DocumentRepository):
@@ -21,6 +16,10 @@ class DocumentService:
 
     def upload_document(self, engagement_id: int, file_path: str, document_type: str) -> Document:
         """Register a new document upload in the system."""
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.UPLOAD_DOCUMENTS):
+            raise AuthError("User role lacks permission UPLOAD_DOCUMENTS to ingest document.")
+
         if not os.path.exists(file_path):
             raise ValidationError(f"File does not exist at path: {file_path}")
             

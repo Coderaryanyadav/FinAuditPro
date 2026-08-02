@@ -73,3 +73,15 @@ class EngineBootstrap:
             logger.info(f"Background Rule Engine Bootstrap: Loaded {len(rr.list_rules())} audit rules.")
         except Exception as e:
             logger.warning(f"Background Rule Engine Pre-warm warning: {e}")
+
+        # 5. Verify Immutable Audit Ledger Integrity on Startup
+        try:
+            from security.audit_trail import ImmutableAuditLogger
+            logger_inst = ImmutableAuditLogger()
+            valid, msg = logger_inst.verify_ledger_integrity()
+            if valid:
+                logger.info(f"Background Audit Ledger Bootstrap: {msg}")
+            else:
+                logger.error(f"SECURITY WARNING: Audit Ledger integrity check failed: {msg}")
+        except Exception as e:
+            logger.warning(f"Background Audit Ledger Verification warning: {e}")

@@ -9,7 +9,7 @@
   [![SQLite WAL](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
   <br>
   [![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-000000?style=for-the-badge&logo=ollama&logoColor=white)](https://ollama.ai/)
-  [![Tests](https://img.shields.io/badge/Tests-51%2F51%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+  [![Tests](https://img.shields.io/badge/Tests-52%2F52%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 </div>
@@ -321,7 +321,7 @@ chmod +x install.sh && ./install.sh
 pytest tests/ -v
 ```
 
-**Current status: 51/51 passing** across security, analytics, reporting, rule engine, document intelligence, deployment, config, and UI component integration tests.
+**Current status: 52/52 passing** across security, analytics, reporting, rule engine, document intelligence, deployment, config, and UI component integration tests.
 
 ---
 
@@ -347,8 +347,7 @@ FinAuditPro/
 ├── tests/                         # Pytest integration & unit test suite
 │   └── sample_data/               # Sample bank statements & financial trial balances
 ├── docs/                          # Architecture guides & documentation
-│   ├── assets/                    # Diagram assets & visual documentation
-│   └── dev-notes/                 # Developer notes & maintenance logs
+│   └── assets/                    # Diagram assets & visual documentation
 ├── scripts/                       # Deployment, installer, & packaging scripts
 ├── pyproject.toml                 # Build system & linting configuration
 ├── requirements.txt               # Production Python dependencies
@@ -365,8 +364,8 @@ FinAuditPro/
 Full technical docs are located in [`docs/`](docs/):
 
 - [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) — Clean architecture & layer specifications
-- [`ARCHITECTURE_GUIDE.md`](docs/architecture/ARCHITECTURE_GUIDE.md) — Architecture guide & security setup
-- [`DFD_LEVEL_0.md`](docs/architecture/DFD_LEVEL_0.md) — Level 0 Data Flow Context Diagram
+- [`ARCHITECTURE_GUIDE.md`](docs/ARCHITECTURE_GUIDE.md) — Architecture guide & security setup
+- [`AUDIT_REPORT.md`](docs/AUDIT_REPORT.md) — Full technical project audit report
 - [`DEVELOPER_GUIDE.md`](docs/DEVELOPER_GUIDE.md) — Contributor onboarding
 - [`USER_MANUAL.md`](docs/USER_MANUAL.md) — End-user operational guide
 

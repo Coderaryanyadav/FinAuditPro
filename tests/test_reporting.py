@@ -71,15 +71,17 @@ class TestReportingEngine(unittest.TestCase):
         self.assertIn("Completeness", wp.assertions)
 
     def test_full_report_pack_generation(self):
-        result = self.engine.generate_full_audit_pack(
-            client_name="TechCorp Solutions",
-            financial_year="2025-26",
-            findings=self.sample_findings,
-            working_papers=self.sample_wp
-        )
-        self.assertTrue(result.report_id.startswith("REP-"))
-        self.assertEqual(result.client_name, "TechCorp Solutions")
-        self.assertTrue(os.path.exists(result.pdf_path))
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            result = self.engine.generate_full_audit_pack(
+                client_name="TechCorp Solutions",
+                financial_year="2025-26",
+                findings=self.sample_findings,
+                working_papers=self.sample_wp,
+                output_dir=tmp_dir
+            )
+            self.assertTrue(result.report_id.startswith("REP-"))
+            self.assertEqual(result.client_name, "TechCorp Solutions")
+            self.assertTrue(os.path.exists(result.pdf_path))
 
 
 if __name__ == "__main__":

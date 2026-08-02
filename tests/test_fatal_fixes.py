@@ -1,5 +1,6 @@
 import unittest
 import os
+import tempfile
 from reporting.digital_signature import SignatureBlock, DigitalSignatureManager
 from reporting.report_engine import ReportEngine
 from document_intelligence.embedding_service import EmbeddingService
@@ -20,16 +21,16 @@ class TestFatalAndCriticalFixes(unittest.TestCase):
 
     def test_fix2_dynamic_audit_opinion(self):
         engine = ReportEngine()
-        
-        clean_findings = [{"severity": "Low", "description": "Minor formatting issue"}]
-        res_clean = engine.generate_full_audit_pack("Clean Co", "2025-26", clean_findings, [])
-        self.assertIsNotNone(res_clean.report_id)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            clean_findings = [{"severity": "Low", "description": "Minor formatting issue"}]
+            res_clean = engine.generate_full_audit_pack("Clean Co", "2025-26", clean_findings, [], output_dir=tmp_dir)
+            self.assertIsNotNone(res_clean.report_id)
 
-        # Test 2: Critical findings -> Qualified Opinion
-        high_findings = [{"severity": "Critical", "description": "Material revenue inflation detected"}]
-        res_high = engine.generate_full_audit_pack("Fraud Co", "2025-26", high_findings, [])
-        # Verification of qualified opinion logic execution
-        self.assertIsNotNone(res_high.report_id)
+            # Test 2: Critical findings -> Qualified Opinion
+            high_findings = [{"severity": "Critical", "description": "Material revenue inflation detected"}]
+            res_high = engine.generate_full_audit_pack("Fraud Co", "2025-26", high_findings, [], output_dir=tmp_dir)
+            # Verification of qualified opinion logic execution
+            self.assertIsNotNone(res_high.report_id)
 
     def test_fix4_embedding_service_raises_runtime_error_when_missing_model(self):
         service = EmbeddingService()

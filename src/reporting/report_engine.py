@@ -59,6 +59,10 @@ class ReportEngine:
         start_time = time.time()
         report_id = f"REP-{int(time.time())}"
 
+        # 0. Ensure target output directory exists
+        target_dir = output_dir if output_dir else os.path.join("data", "reports")
+        os.makedirs(target_dir, exist_ok=True)
+
         # 1. Digital Signature
         sig = DigitalSignatureManager.create_signature_block(
             ca_name=ca_name,
@@ -83,14 +87,14 @@ class ReportEngine:
             summary_text=summary_text,
             findings=findings,
             signature_block=sig,
-            output_path=os.path.join(output_dir or "", f"{report_id}_Audit_Report.pdf") if output_dir else None
+            output_path=os.path.join(target_dir, f"{report_id}_Audit_Report.pdf")
         )
 
         # 4. Excel & CSV Export
         excel_path = ExcelReportExporter.export_audit_summary_to_excel(
             findings=findings,
             working_papers=working_papers,
-            output_path=os.path.join(output_dir or "", f"{report_id}_Audit_Pack.xlsx") if output_dir else f"{report_id}_Audit_Pack.xlsx"
+            output_path=os.path.join(target_dir, f"{report_id}_Audit_Pack.xlsx")
         )
 
         # 5. Calculate Document SHA-256 Hash

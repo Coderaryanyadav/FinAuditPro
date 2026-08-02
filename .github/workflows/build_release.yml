@@ -44,7 +44,7 @@ jobs:
           hdiutil create -volname FinAuditPro -srcfolder dist/dmg -ov -format UDZO dist/FinAuditPro-macOS.dmg
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v7
         with:
           name: FinAuditPro-${{ matrix.os }}
           path: dist/

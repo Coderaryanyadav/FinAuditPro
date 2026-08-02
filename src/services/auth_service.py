@@ -7,12 +7,32 @@ from database.models import User
 from security.auth import PasswordHasher
 from security.security_manager import SecurityManager
 
-_failed_login_attempts: Dict[str, Dict[str, Any]] = {}
+import json
+import os
+
+LOCKOUT_FILE = os.path.join("data", ".login_lockouts.json")
+
+def _load_lockout_records() -> Dict[str, Dict[str, Any]]:
+    if not os.path.exists(LOCKOUT_FILE):
+        return {}
+    try:
+        with open(LOCKOUT_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+def _save_lockout_records(records: Dict[str, Dict[str, Any]]) -> None:
+    try:
+        os.makedirs(os.path.dirname(LOCKOUT_FILE), exist_ok=True)
+        with open(LOCKOUT_FILE, "w", encoding="utf-8") as f:
+            json.dump(records, f)
+    except Exception:
+        pass
 
 class AuthenticationService:
     """
     Service responsible for handling user authentication, 
-    session validation, and role checking via SecurityManager.
+    session validation, persistent lockout handling, and role checking via SecurityManager.
     """
     
     def __init__(self, user_repo: UserRepository):
@@ -33,7 +53,8 @@ class AuthenticationService:
             raise ValidationError("Username and password are required.")
 
         now = time.time()
-        attempt_record = _failed_login_attempts.get(username, {'count': 0, 'lockout_until': 0.0})
+        records = _load_lockout_records()
+        attempt_record = records.get(username, {'count': 0, 'lockout_until': 0.0})
         if attempt_record['lockout_until'] > now:
             wait_sec = int(attempt_record['lockout_until'] - now) + 1
             raise AuthenticationError(f"Too many failed login attempts. Account temporarily locked for {wait_sec} seconds.")
@@ -53,11 +74,13 @@ class AuthenticationService:
                     audit_logger.log_action("LOGIN_LOCKOUT", user_id=user.id if user else 0, user_email=username, details=f"Account locked due to {count} consecutive failed login attempts.")
                 except Exception:
                     pass
-            _failed_login_attempts[username] = {'count': count, 'lockout_until': lockout_time}
+            records[username] = {'count': count, 'lockout_until': lockout_time}
+            _save_lockout_records(records)
             raise AuthenticationError("Invalid username or password.")
 
-        if username in _failed_login_attempts:
-            del _failed_login_attempts[username]
+        if username in records:
+            del records[username]
+            _save_lockout_records(records)
 
         # Transparently upgrade legacy or low-iteration password hashes
         if PasswordHasher.needs_rehash(user.password_hash):

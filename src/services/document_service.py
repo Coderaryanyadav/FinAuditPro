@@ -24,10 +24,17 @@ class DocumentService:
             raise ValidationError(f"File does not exist at path: {file_path}")
             
         file_name = os.path.basename(file_path)
+        managed_dir = os.path.join("data", "documents", f"eng_{engagement_id}")
+        os.makedirs(managed_dir, exist_ok=True)
+        dest_path = os.path.join(managed_dir, file_name)
+        if os.path.abspath(file_path) != os.path.abspath(dest_path):
+            import shutil
+            shutil.copy2(file_path, dest_path)
+
         return self.document_repo.create(
             engagement_id=engagement_id,
             file_name=file_name,
-            file_path=file_path,
+            file_path=dest_path,
             document_type=document_type
         )
 

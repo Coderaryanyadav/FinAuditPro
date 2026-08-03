@@ -147,6 +147,7 @@ class ReportsWidget(QWidget):
     def load_report_draft(self):
         active_id = getattr(self, 'active_engagement_id', None)
         client = None
+        proj = None
         findings = []
         try:
             with get_session() as session:
@@ -162,6 +163,7 @@ class ReportsWidget(QWidget):
                 client_name = client.name if client else "[Client Not Selected]"
                 self.current_client_name = client_name
                 cin = getattr(client, 'cin_number', 'N/A') or 'N/A'
+                financial_year = getattr(proj, 'financial_year', None) or "FY 2024-25"
                 matters_html = ""
                 for f in findings:
                     matters_html += f"<li><b>{f.description[:80]}</b> - Flagged Severity: <span style='color:#dc2626;'>{f.severity or 'MEDIUM'}</span></li>"
@@ -171,11 +173,13 @@ class ReportsWidget(QWidget):
             client_name = "[Client Not Selected]"
             self.current_client_name = client_name
             cin = "N/A"
+            financial_year = "FY 2024-25"
             matters_html = ""
 
         if not matters_html:
             matters_html = "<li>No critical audit qualifications or adverse matters detected during substantive testing.</li>"
 
+        ca_address = getattr(config, 'ca_address', 'Suite 401, Corporate Heights, BKC, Mumbai - 400051')
         udin = self.udin_input.text().strip() or "PENDING_UDIN_ENTRY"
         report_title = self.report_type_combo.currentText()
         report_payload = f"{report_title}:{client_name}:{cin}:{udin}:{matters_html}"
@@ -187,12 +191,13 @@ class ReportsWidget(QWidget):
             <div style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 20px;">
                 <h2 style="margin: 0; color: #0f172a;">{config.ca_firm_name}</h2>
                 <p style="margin: 4px 0; color: #64748b; font-size: 12px;">CHARTERED ACCOUNTANTS | FIRM REGISTRATION NO: {config.ca_frn}</p>
-                <p style="margin: 0; color: #64748b; font-size: 11px;">Suite 401, Corporate Heights, BKC, Mumbai - 400051</p>
+                <p style="margin: 0; color: #64748b; font-size: 11px;">{ca_address}</p>
             </div>
 
             <h3 style="text-align: center; color: #0ea5e9; text-transform: uppercase;">{report_title}</h3>
             <p><b>To the Members of:</b> {client_name} (CIN: {cin})</p>
-            <p><b>Report on the Audit of the Financial Statements for FY 2024-25</b></p>
+            <p><b>Report on the Audit of the Financial Statements for {financial_year}</b></p>
+
             
             <p><b>Opinion</b><br/>
             In our opinion and to the best of our information and according to the explanations given to us, the aforesaid financial statements give the information required by the Companies Act, 2013 in the manner so required and give a true and fair view in conformity with the accounting principles generally accepted in India.</p>

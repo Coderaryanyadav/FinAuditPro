@@ -225,11 +225,13 @@ class SettingsWidget(QWidget):
             config.ca_frn = self.frn_number.text().strip() or "000000W"
             config.ca_membership_no = self.member_no.text().strip() or "000000"
             config.ca_name = self.partner_name.text().strip() or "Default CA Name"
+            config.ca_address = self.firm_address.text().strip() or "Suite 401, Corporate Heights, BKC, Mumbai - 400051"
             
             os.environ["FINAUDIT_CA_FIRM_NAME"] = config.ca_firm_name
             os.environ["FINAUDIT_CA_FRN"] = config.ca_frn
             os.environ["FINAUDIT_CA_MEMBERSHIP_NO"] = config.ca_membership_no
             os.environ["FINAUDIT_CA_NAME"] = config.ca_name
+            os.environ["FINAUDIT_CA_ADDRESS"] = config.ca_address
 
             # Persist settings to JSON
             settings_path = os.path.join(get_default_data_dir(), "settings.json")
@@ -237,7 +239,8 @@ class SettingsWidget(QWidget):
                 "ca_firm_name": config.ca_firm_name,
                 "ca_frn": config.ca_frn,
                 "ca_membership_no": config.ca_membership_no,
-                "ca_name": config.ca_name
+                "ca_name": config.ca_name,
+                "ca_address": config.ca_address
             }
             with open(settings_path, "w", encoding="utf-8") as f:
                 json.dump(user_settings, f, indent=4)
@@ -245,6 +248,7 @@ class SettingsWidget(QWidget):
             QMessageBox.information(self, "Settings Saved", "CA Firm Profile and System Settings saved successfully!")
         except Exception as e:
             self.error_widget = ErrorStateWidget("Save Settings Error", str(e))
+
 
     def backup_database(self):
         file_path, _ = QFileDialog.getSaveFileName(self, "Export Database Backup", "finauditpro_backup.db", "Database Files (*.db)")

@@ -199,19 +199,6 @@ class LoginWindow(QWidget):
         fl.addWidget(self.password_input)
         fl.addSpacing(14)
 
-        # role
-        self._label(fl, "Role")
-        self.role_combo = QComboBox()
-        self.role_combo.addItems([
-            "Audit Partner — Full access",
-            "Senior Auditor — Reviewer",
-            "Junior Assistant — Preparer",
-        ])
-        self.role_combo.setFixedHeight(42)
-        self.role_combo.setStyleSheet(_COMBO)
-        fl.addWidget(self.role_combo)
-        fl.addSpacing(12)
-
         # options row
         opts = QHBoxLayout()
         self.chk = QCheckBox("Show password")
@@ -279,15 +266,16 @@ class LoginWindow(QWidget):
         note.setStyleSheet("border:none; background:transparent;")
         fl.addWidget(note)
 
-        # Default credential hint (shown on fresh install)
-        cred_hint = QLabel(
+        # Default credential hint (shown only when initial default password is active)
+        self.cred_hint = QLabel(
             "<span style='color:#94a3b8; font-size:10px;'>"
             "Default login: <b>admin@finauditpro.com</b> / <b>Admin@123</b>"
             "</span>"
         )
-        cred_hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        cred_hint.setStyleSheet("border:none; background:transparent;")
-        fl.addWidget(cred_hint)
+        self.cred_hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.cred_hint.setStyleSheet("border:none; background:transparent;")
+        fl.addWidget(self.cred_hint)
+        self._update_cred_hint_visibility()
 
         rl.addWidget(form)
         root.addWidget(left, stretch=4)
@@ -308,10 +296,26 @@ class LoginWindow(QWidget):
 
     def _forgot(self, _=None):
         QMessageBox.information(
-            self, "Password Reset",
-            "FinAuditPro is fully air-gapped.\n"
-            "Contact your administrator to reset passwords via the admin CLI."
+            self, "Password Recovery Instructions",
+            "FinAuditPro is an air-gapped offline platform.\n\n"
+            "To reset your administrator password via terminal, run:\n\n"
+            "    python scripts/fix_admin.py --password <YourNewPassword>\n\n"
+            "This administrative tool will update your account credentials securely."
         )
+
+    def _update_cred_hint_visibility(self):
+        """Show default credential hint only if default admin account uses Admin@123."""
+        try:
+            from security.auth import PasswordHasher
+            from database.models import User
+            with get_session() as session:
+                user = session.query(User).filter_by(email="admin@finauditpro.com").first()
+                if user and PasswordHasher.verify_password("Admin@123", user.password_hash):
+                    self.cred_hint.show()
+                    return
+        except Exception:
+            pass
+        self.cred_hint.hide()
 
     # ── login logic ────────────────────────────────────────────────────────────
 
@@ -329,9 +333,34 @@ class LoginWindow(QWidget):
         try:
             with get_session() as session:
                 user_repo = UserRepository(session)
-                # Pass 'username' argument to login() which handles username or email
                 user = AuthenticationService(user_repo).login(username=email, password=pwd)
                 if user:
+                    # Enforce password change if using default password
+                    if pwd == "Admin@123":
+                        from PySide6.QtWidgets import QInputDialog
+                        new_pass, ok = QInputDialog.getText(
+                            self,
+                            "First-Time Login — Change Password",
+                            "For security, please enter a new custom password for your administrator account:",
+                            QLineEdit.EchoMode.Password
+                        )
+                        if ok and new_pass.strip():
+                            if len(new_pass.strip()) < 8 or new_pass.strip() == "Admin@123":
+                                self._error("Please choose a custom password with at least 8 characters.")
+                                return
+                            from security.auth import PasswordHasher
+                            from database.models import User as UserModel
+                            with get_session() as s2:
+                                u = s2.query(UserModel).filter_by(id=user.id).first()
+                                if u:
+                                    u.password_hash = PasswordHasher.hash_password(new_pass.strip())
+                                    s2.commit()
+                            QMessageBox.information(self, "Password Updated", "Your password has been updated successfully!")
+                            self._update_cred_hint_visibility()
+                        else:
+                            self._error("Password change is required on initial login.")
+                            return
+
                     self.login_successful.emit(user)
                     return
                 self._error("Incorrect email or password.")
@@ -340,6 +369,7 @@ class LoginWindow(QWidget):
         finally:
             self.btn.setEnabled(True)
             self.btn.setText("Continue")
+
 
     def _error(self, msg: str):
         self.err.setText(msg)

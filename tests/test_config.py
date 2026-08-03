@@ -64,3 +64,14 @@ def test_app_config_fallback_env_keys():
         assert cfg.session_timeout_minutes == 15
         assert cfg.pbkdf2_iterations == 500000
 
+
+def test_app_config_ca_address():
+    """Verify ca_address attribute default and environment variable override."""
+    custom_env = {
+        "FINAUDIT_CA_ADDRESS": "123 Audit Street, Connaught Place, New Delhi - 110001"
+    }
+    with patch.dict(os.environ, custom_env, clear=True):
+        cfg = AppConfig.load()
+        assert cfg.ca_address == "123 Audit Street, Connaught Place, New Delhi - 110001"
+
+

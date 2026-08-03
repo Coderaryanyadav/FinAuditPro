@@ -124,6 +124,10 @@ class AppConfig(BaseModel):
         default_factory=lambda: os.environ.get("FINAUDIT_CA_MEMBERSHIP_NO") or "000000",
         description="CA Membership Number"
     )
+    ca_address: str = Field(
+        default_factory=lambda: os.environ.get("FINAUDIT_CA_ADDRESS") or "Suite 401, Corporate Heights, BKC, Mumbai - 400051",
+        description="Registered Office Address of the CA Firm"
+    )
     database_url: str = Field(
         default_factory=lambda: os.environ.get("FINAUDITPRO_DATABASE_URL") or os.environ.get("FINAUDIT_DATABASE_URL") or os.environ.get("DATABASE_URL") or "",
         description="Optional custom database URL override (e.g. PostgreSQL)"
@@ -159,11 +163,13 @@ class AppConfig(BaseModel):
                 if "ca_frn" in user_settings: kwargs["ca_frn"] = user_settings["ca_frn"]
                 if "ca_name" in user_settings: kwargs["ca_name"] = user_settings["ca_name"]
                 if "ca_membership_no" in user_settings: kwargs["ca_membership_no"] = user_settings["ca_membership_no"]
+                if "ca_address" in user_settings: kwargs["ca_address"] = user_settings["ca_address"]
             except Exception as e:
                 import logging
                 logging.getLogger(__name__).warning(f"Failed to load settings.json: {e}")
                 
         return cls(**kwargs)
+
 
 
 # Singleton config instance

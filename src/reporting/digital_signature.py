@@ -18,6 +18,33 @@ import base64
 from typing import Dict, Any, Optional
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
+def _get_or_create_persistent_ed25519_key() -> ed25519.Ed25519PrivateKey:
+    """Return persistent installation Ed25519 private key, or create if absent."""
+    import os
+    from core.config import config
+    key_file = os.path.join(config.data_dir, ".ed25519_key")
+    if os.path.exists(key_file):
+        try:
+            with open(key_file, "rb") as f:
+                raw_bytes = f.read()
+                if len(raw_bytes) == 32:
+                    return ed25519.Ed25519PrivateKey.from_private_bytes(raw_bytes)
+        except Exception:
+            pass
+
+    key = ed25519.Ed25519PrivateKey.generate()
+    try:
+        os.makedirs(os.path.dirname(key_file), exist_ok=True)
+        raw_bytes = key.private_bytes_raw()
+        with open(key_file, "wb") as f:
+            f.write(raw_bytes)
+        if hasattr(os, "chmod"):
+            os.chmod(key_file, 0o600)
+    except Exception:
+        pass
+    return key
+
+
 @dataclass
 class SignatureBlock:
     ca_name: str
@@ -36,7 +63,7 @@ class SignatureBlock:
             self.digital_signature_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
         
         if not self.asymmetric_signature:
-            priv_key = ed25519.Ed25519PrivateKey.generate()
+            priv_key = _get_or_create_persistent_ed25519_key()
             sig_bytes = priv_key.sign(payload.encode("utf-8"))
             self.asymmetric_signature = base64.b64encode(sig_bytes).decode("utf-8")
             pub_bytes = priv_key.public_key().public_bytes_raw()

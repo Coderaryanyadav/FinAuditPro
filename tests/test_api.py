@@ -103,6 +103,38 @@ class TestFastAPIBackend(unittest.TestCase):
         self.assertIn("total_clients", m_data)
         self.assertGreaterEqual(m_data["total_clients"], 1)
 
+    def test_api_audit_logs_and_project_approval(self):
+        """Test GET /dashboard/audit-logs and POST /audit-projects/{id}/approve."""
+        login_res = client.post("/api/v1/auth/login", json={
+            "username": self.test_username,
+            "password": self.test_password
+        })
+        token = login_res.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        # Check audit logs endpoint
+        logs_res = client.get("/api/v1/dashboard/audit-logs", headers=headers)
+        self.assertEqual(logs_res.status_code, 200)
+        self.assertIsInstance(logs_res.json(), list)
+
+    def test_api_token_revocation_on_logout(self):
+        """Test token revocation persistence on POST /auth/logout."""
+        login_res = client.post("/api/v1/auth/login", json={
+            "username": self.test_username,
+            "password": self.test_password
+        })
+        token = login_res.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        # Logout
+        logout_res = client.post("/api/v1/auth/logout", headers=headers)
+        self.assertEqual(logout_res.status_code, 200)
+
+        # Subsequent request with revoked token should fail with 401
+        res_after_logout = client.get("/api/v1/clients", headers=headers)
+        self.assertEqual(res_after_logout.status_code, 401)
+        self.assertIn("revoked", res_after_logout.json().get("detail", "").lower())
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -179,6 +179,54 @@ flowchart LR
         end
     end
 
+---
+
+### Dual Deployment Modes
+
+FinAuditPro supports two deployment models depending on firm security requirements:
+
+#### 1. Air-Gapped Single-User Desktop Mode
+Individual CAs or air-gapped auditor laptops running PySide6 GUI + embedded SQLite/SQLCipher + local Ollama LLM. No external network connectivity required.
+
+#### 2. Multi-User Client-Server API Mode (FastAPI + PostgreSQL)
+Enterprise CA firms collaborating across multiple auditor workstations. Uses a centralized FastAPI REST backend, JWT bearer authentication, role-based access control, PostgreSQL database, and Docker containerization.
+
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#0f172a',
+    'primaryTextColor': '#f8fafc',
+    'primaryBorderColor': '#38bdf8',
+    'lineColor': '#94a3b8',
+    'secondaryColor': '#1e293b',
+    'tertiaryColor': '#334155',
+    'clusterBkg': '#020617',
+    'clusterBorder': '#334155'
+  }
+}}%%
+flowchart LR
+    subgraph Workstations[" Multi-Auditor Workstations"]
+        W1["Desktop App / Web Client 1"]
+        W2["Desktop App / Web Client 2"]
+        W3["Desktop App / Web Client 3"]
+    end
+
+    subgraph Server[" Enterprise Backend Server (Docker Containerized)"]
+        API["FastAPI REST Service\n(/api/v1 - JWT Auth)"]
+        RBAC_Gate["Service RBAC & Permission Enforcer"]
+        Postgres[(PostgreSQL Database)]
+        Redis_Store[("Encrypted Token & Lockout Store")]
+        Ollama_Server["Local Ollama RAG Cluster"]
+    end
+
+    Workstations -->|HTTPS / Bearer JWT| API
+    API --> RBAC_Gate
+    RBAC_Gate --> Postgres
+    RBAC_Gate --> Redis_Store
+    API --> Ollama_Server
+```
+
     UI_Layer <--> Core_Engine
     Core_Engine <--> OCREngines
     Core_Engine <--> OllamaDaemon

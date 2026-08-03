@@ -88,11 +88,13 @@ logs/
 *.log
 
 # ─── Generated Report Output Files ────────────────────────────────────────────
+*.pdf
 REP-*.xlsx
 REP-*.csv
 REP-*.pdf
 data/backups/
 data/documents/
+
 
 # ─── OS & Temp ─────────────────────────────────────────────────────────────────
 scratch/

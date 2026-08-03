@@ -24,7 +24,8 @@ class AppVersionInfo:
         "Phase 5: ICAI-Standard Professional Reporting Engine (PDF/Excel/UDIN).",
         "Phase 6: Enterprise RBAC, Password Hashing, & AES-256 Encryption.",
         "Phase 7: Executive BI Analytics & 4 Role-Based Dashboards.",
-        "Phase 8: Cross-Platform Packaging & Production Diagnostics."
+        "Phase 8: Cross-Platform Packaging & Production Diagnostics.",
+        "Phase 9: CA Statutory Policy Updates (Sec 43B(h), 194R, CARO 2020)."
     ])
 
     def to_dict(self) -> Dict[str, Any]:

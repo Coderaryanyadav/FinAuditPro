@@ -22,7 +22,7 @@ class AuditHistoryWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f8fafc;")
+        self.setStyleSheet("background-color: #f5f5f7;")
         self.logger = ImmutableAuditLogger()
 
         main_layout = QVBoxLayout(self)
@@ -31,16 +31,17 @@ class AuditHistoryWidget(QWidget):
         
         # 1. Action Bar Header
         header = QFrame()
-        header.setFixedHeight(64)
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
+        header.setFixedHeight(68)
+        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
+        title_v.setSpacing(2)
         title = QLabel("Immutable Audit Log & Blockchain Activity Trail")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0f172a;")
+        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
         subtitle = QLabel("ICAI Peer Review & NFRA Cryptographic Ledger Audit Trail")
-        subtitle.setStyleSheet("font-size: 12px; color: #64748b;")
+        subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         h_layout.addLayout(title_v)
@@ -50,12 +51,23 @@ class AuditHistoryWidget(QWidget):
         self.search_box = QLineEdit()
         self.search_box.setPlaceholderText("Filter by User, Action, or Entity...")
         self.search_box.setFixedWidth(240)
-        self.search_box.setStyleSheet("padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff;")
+        self.search_box.setStyleSheet("padding: 6px 12px; border: 1px solid #e5e5ea; border-radius: 6px; background-color: #ffffff; color: #1d1d1f;")
         self.search_box.textChanged.connect(self.load_history)
         h_layout.addWidget(self.search_box)
 
-        btn_export = QPushButton(" Export Log for Peer Review")
-        btn_export.setStyleSheet("background-color: #0ea5e9; color: white; font-weight: bold; padding: 8px 14px; border-radius: 6px; border: none;")
+        btn_export = QPushButton("Export Log for Peer Review")
+        btn_export.setStyleSheet("""
+            QPushButton {
+                background-color: #007aff;
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: 600;
+                border-radius: 8px;
+                padding: 8px 16px;
+                border: none;
+            }
+            QPushButton:hover { background-color: #0062cc; }
+        """)
         btn_export.clicked.connect(self.export_peer_review_log)
         h_layout.addWidget(btn_export)
 
@@ -64,21 +76,21 @@ class AuditHistoryWidget(QWidget):
         # 2. Blockchain Integrity Status Bar
         integrity_bar = QFrame()
         integrity_bar.setFixedHeight(44)
-        integrity_bar.setStyleSheet("background-color: #ecfdf5; border-bottom: 1px solid #a7f3d0;")
+        integrity_bar.setStyleSheet("background-color: #eafff0; border-bottom: 1px solid #a7f3d0;")
         ib_layout = QHBoxLayout(integrity_bar)
         ib_layout.setContentsMargins(24, 0, 24, 0)
 
         chain_ok = self.logger.verify_ledger_integrity()
         status_text = " SHA-256 Hash Chain Integrity: VERIFIED & IMMUTABLE (Zero Tampering Detected)" if chain_ok else " Hash Chain Warning: Modification Detected"
-        status_color = "#065f46" if chain_ok else "#991b1b"
+        status_color = "#1b8a3e" if chain_ok else "#ff3b30"
         
         lbl_status = QLabel(status_text)
-        lbl_status.setStyleSheet(f"font-weight: bold; color: {status_color}; font-size: 12px;")
+        lbl_status.setStyleSheet(f"font-weight: 600; color: {status_color}; font-size: 12px; border: none;")
         ib_layout.addWidget(lbl_status)
         ib_layout.addStretch()
         
         lbl_count = QLabel("Target Framework: ICAI SA 230 / NFRA Rules")
-        lbl_count.setStyleSheet("color: #047857; font-size: 11px; font-weight: bold;")
+        lbl_count.setStyleSheet("color: #1b8a3e; font-size: 11px; font-weight: 600; border: none;")
         ib_layout.addWidget(lbl_count)
 
         main_layout.addWidget(integrity_bar)
@@ -89,8 +101,8 @@ class AuditHistoryWidget(QWidget):
         c_layout.setContentsMargins(24, 24, 24, 24)
 
         table_card = QFrame()
-        table_card.setStyleSheet("background-color: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;")
-        apply_shadow(table_card, blur=15, dy=3, alpha=15)
+        table_card.setStyleSheet("background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 12px; padding: 16px;")
+        apply_shadow(table_card, blur=15, dy=3, alpha=6)
         
         card_v = QVBoxLayout(table_card)
         
@@ -99,8 +111,8 @@ class AuditHistoryWidget(QWidget):
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
         self.table.setStyleSheet("""
-            QTableWidget { border: 1px solid #e2e8f0; gridline-color: #f1f5f9; background: white; border-radius: 6px; }
-            QHeaderView::section { background-color: #f8fafc; color: #334155; font-weight: bold; padding: 8px; border: none; border-bottom: 1px solid #e2e8f0; }
+            QTableWidget { border: 1px solid #e5e5ea; gridline-color: #f2f2f7; background: #ffffff; border-radius: 8px; }
+            QHeaderView::section { background-color: #fafafa; color: #86868b; font-weight: 600; padding: 8px; font-size: 10px; letter-spacing: 0.5px; border: none; border-bottom: 1px solid #e5e5ea; text-transform: uppercase; }
         """)
         
         card_v.addWidget(self.table)

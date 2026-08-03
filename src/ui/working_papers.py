@@ -25,7 +25,7 @@ class WorkingPaperWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f8fafc;")
+        self.setStyleSheet("background-color: #f5f5f7;")
         self.active_wp = None
 
         main_layout = QVBoxLayout(self)
@@ -34,43 +34,67 @@ class WorkingPaperWidget(QWidget):
 
         # 1. Action Bar Header
         header = QFrame()
-        header.setFixedHeight(64)
+        header.setFixedHeight(68)
         header.setObjectName("actionHeader")
+        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
 
         title_v = QVBoxLayout()
+        title_v.setSpacing(2)
         title = QLabel("SA 230 Audit Documentation & Working Papers")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0f172a;")
+        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
         subtitle = QLabel("ICAI Standard on Auditing (SA 230) Structured Audit File")
-        subtitle.setStyleSheet("font-size: 12px; color: #64748b;")
+        subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         h_layout.addLayout(title_v)
 
         h_layout.addSpacing(30)
-        h_layout.addWidget(QLabel("<b style='color:#334155;'>Engagement:</b>"))
+        h_layout.addWidget(QLabel("<b style='color:#1d1d1f; border: none;'>Engagement:</b>"))
         
         self.project_combo = QComboBox()
         self.project_combo.setFixedWidth(240)
         self.project_combo.setToolTip("Select active audit engagement for working paper documentation")
         self.project_combo.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.project_combo.setStyleSheet("QComboBox { padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff; color: #0f172a; }")
+        self.project_combo.setStyleSheet("QComboBox { padding: 6px; border: 1px solid #e5e5ea; border-radius: 6px; background-color: #ffffff; color: #1d1d1f; }")
         self.project_combo.currentIndexChanged.connect(self.on_project_changed)
         h_layout.addWidget(self.project_combo)
 
         h_layout.addStretch()
 
-        self.ai_btn = QPushButton(" AI Draft Observation")
-        self.ai_btn.setObjectName("secondaryBtn")
+        self.ai_btn = QPushButton("AI Draft Observation")
         self.ai_btn.setToolTip("Generate automated AI audit observation draft under SA 230")
         self.ai_btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.ai_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #e5e5ea;
+                color: #1d1d1f;
+                font-size: 13px;
+                font-weight: 600;
+                border-radius: 8px;
+                padding: 8px 16px;
+                border: none;
+            }
+            QPushButton:hover { background-color: #d1d1d6; }
+        """)
         self.ai_btn.clicked.connect(self.generate_ai_draft)
 
-        self.save_btn = QPushButton(" Save Working Paper")
-        self.save_btn.setObjectName("primaryBtn")
+        self.save_btn = QPushButton("Save Working Paper")
         self.save_btn.setToolTip("Save and index working paper documentation to SA 230 audit file")
         self.save_btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.save_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #007aff;
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: 600;
+                border-radius: 8px;
+                padding: 8px 16px;
+                border: none;
+            }
+            QPushButton:hover { background-color: #0062cc; }
+        """)
         self.save_btn.clicked.connect(self.save_working_paper)
 
         h_layout.addWidget(self.ai_btn)
@@ -80,16 +104,16 @@ class WorkingPaperWidget(QWidget):
 
         # 2. Main 2-Pane Splitter View
         splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.setStyleSheet("QSplitter::handle { background-color: #e2e8f0; }")
+        splitter.setStyleSheet("QSplitter::handle { background-color: #e5e5ea; }")
 
         # Left Pane: SA 230 File Tree
         left_container = QFrame()
-        left_container.setStyleSheet("background-color: #ffffff; border-right: 1px solid #e2e8f0;")
+        left_container.setStyleSheet("background-color: #ffffff; border-right: 1px solid #e5e5ea;")
         left_layout = QVBoxLayout(left_container)
         left_layout.setContentsMargins(16, 16, 16, 16)
 
         tree_header = QLabel("AUDIT FILE INDEX (SA 230)")
-        tree_header.setStyleSheet("font-size: 11px; font-weight: bold; color: #64748b; letter-spacing: 0.5px;")
+        tree_header.setStyleSheet("font-size: 10px; font-weight: 600; color: #86868b; letter-spacing: 0.8px; border: none;")
         left_layout.addWidget(tree_header)
 
         self.wp_tree = QTreeWidget()
@@ -97,9 +121,9 @@ class WorkingPaperWidget(QWidget):
         self.wp_tree.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.wp_tree.setHeaderHidden(True)
         self.wp_tree.setStyleSheet("""
-            QTreeWidget { border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; outline: none; }
-            QTreeWidget::item { padding: 8px 6px; color: #0f172a; font-size: 13px; font-weight: 500; }
-            QTreeWidget::item:selected { background: #f0f9ff; color: #0284c7; font-weight: bold; }
+            QTreeWidget { border: 1px solid #e5e5ea; border-radius: 8px; background: #ffffff; outline: none; }
+            QTreeWidget::item { padding: 8px 6px; color: #1d1d1f; font-size: 13px; font-weight: 500; }
+            QTreeWidget::item:selected { background: #007aff; color: #ffffff; font-weight: 600; border-radius: 4px; }
         """)
         self.wp_tree.itemClicked.connect(self.on_tree_item_selected)
         left_layout.addWidget(self.wp_tree)
@@ -108,7 +132,7 @@ class WorkingPaperWidget(QWidget):
 
         # Right Pane: Working Paper Sheet & Sign-Off Panel
         right_container = QFrame()
-        right_container.setStyleSheet("background-color: #f8fafc;")
+        right_container.setStyleSheet("background-color: #f5f5f7;")
         right_layout = QVBoxLayout(right_container)
         right_layout.setContentsMargins(24, 24, 24, 24)
         right_layout.setSpacing(16)
@@ -116,19 +140,19 @@ class WorkingPaperWidget(QWidget):
         # 3-Tier Sign-Off Bar
         signoff_frame = QFrame()
         signoff_frame.setFixedHeight(54)
-        signoff_frame.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;")
+        signoff_frame.setStyleSheet("background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 8px;")
         signoff_layout = QHBoxLayout(signoff_frame)
         signoff_layout.setContentsMargins(16, 0, 16, 0)
 
         self.lbl_prepared = QLabel("Prepared By: Junior Assistant [Done]")
-        self.lbl_prepared.setStyleSheet("font-size: 12px; font-weight: bold; color: #047857; background: #ecfdf5; padding: 4px 8px; border-radius: 4px;")
+        self.lbl_prepared.setStyleSheet("font-size: 11px; font-weight: 600; color: #1b8a3e; background: #eafff0; padding: 4px 8px; border-radius: 4px; border: none;")
 
         self.btn_review = QPushButton("Mark Reviewed (Senior)")
-        self.btn_review.setStyleSheet("font-size: 11px; font-weight: bold; color: #0284c7; background: #e0f2fe; border: 1px solid #bae6fd; padding: 4px 10px; border-radius: 4px;")
+        self.btn_review.setStyleSheet("font-size: 11px; font-weight: 600; color: #007aff; background: #e8f2ff; border: 1px solid #cce4ff; padding: 4px 10px; border-radius: 4px;")
         self.btn_review.clicked.connect(self.review_working_paper)
 
         self.btn_approve = QPushButton("Final Sign-Off (Partner)")
-        self.btn_approve.setStyleSheet("font-size: 11px; font-weight: bold; color: #7c3aed; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 4px 10px; border-radius: 4px;")
+        self.btn_approve.setStyleSheet("font-size: 11px; font-weight: 600; color: #af52de; background: #f6e8ff; border: 1px solid #eec4ff; padding: 4px 10px; border-radius: 4px;")
         self.btn_approve.clicked.connect(self.approve_working_paper)
 
         signoff_layout.addWidget(self.lbl_prepared)
@@ -141,14 +165,14 @@ class WorkingPaperWidget(QWidget):
 
         # Working Paper Fields Container
         form_frame = QFrame()
-        form_frame.setStyleSheet("background-color: white; border: 1px solid #e2e8f0; border-radius: 12px;")
+        form_frame.setStyleSheet("background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 12px;")
         f_layout = QVBoxLayout(form_frame)
         f_layout.setSpacing(14)
         f_layout.setContentsMargins(20, 20, 20, 20)
 
         def add_field(label_text, placeholder, is_textarea=False):
             lbl = QLabel(label_text)
-            lbl.setStyleSheet("font-weight: bold; color: #334155; font-size: 12px; border: none;")
+            lbl.setStyleSheet("font-weight: 600; color: #1d1d1f; font-size: 12px; border: none;")
             f_layout.addWidget(lbl)
             
             if is_textarea:
@@ -159,12 +183,12 @@ class WorkingPaperWidget(QWidget):
                 field.setFixedHeight(36)
                 
             field.setPlaceholderText(placeholder)
-            field.setStyleSheet("background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; color: #0f172a; font-size: 12px;")
+            field.setStyleSheet("background-color: #f5f5f7; border: 1px solid #e5e5ea; border-radius: 6px; padding: 6px 10px; color: #1d1d1f; font-size: 12px;")
             f_layout.addWidget(field)
             return field
 
         self.index_lbl = QLabel("Index Code: PAF-01 | MOA & Statutory Registration")
-        self.index_lbl.setStyleSheet("font-size: 15px; font-weight: bold; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;")
+        self.index_lbl.setStyleSheet("font-size: 15px; font-weight: 600; color: #1d1d1f; border-bottom: 1px solid #e5e5ea; padding-bottom: 8px; border-top: none; border-left: none; border-right: none;")
         f_layout.addWidget(self.index_lbl)
 
         self.objective_field = add_field("Audit Objective", "e.g. To verify legal capacity and statutory registration objects under Companies Act 2013")

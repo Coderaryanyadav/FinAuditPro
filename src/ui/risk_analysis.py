@@ -23,7 +23,7 @@ class RiskAnalysisWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f8fafc;")
+        self.setStyleSheet("background-color: #f5f5f7;")
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -31,26 +31,38 @@ class RiskAnalysisWidget(QWidget):
         
         # 1. Action Bar Header
         header = QFrame()
-        header.setFixedHeight(64)
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
+        header.setFixedHeight(68)
+        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
+        title_v.setSpacing(2)
         title = QLabel("SA 320 Materiality Calculator & Risk Analysis Matrix")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0f172a;")
+        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
         subtitle = QLabel("ICAI SA 320 Materiality in Planning and Performing an Audit")
-        subtitle.setStyleSheet("font-size: 12px; color: #64748b;")
+        subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         h_layout.addLayout(title_v)
 
         h_layout.addStretch()
 
-        btn_calc = QPushButton(" Recalculate SA 320 Materiality")
+        btn_calc = QPushButton("Recalculate SA 320 Materiality")
         btn_calc.setToolTip("Recalculate audit materiality benchmarks under ICAI SA 320")
         btn_calc.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        btn_calc.setStyleSheet("background-color: #0ea5e9; color: white; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 12px; border: none;")
+        btn_calc.setStyleSheet("""
+            QPushButton {
+                background-color: #007aff;
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: 600;
+                border-radius: 8px;
+                padding: 8px 16px;
+                border: none;
+            }
+            QPushButton:hover { background-color: #0062cc; }
+        """)
         btn_calc.clicked.connect(self.calculate_materiality)
         h_layout.addWidget(btn_calc)
 
@@ -67,12 +79,12 @@ class RiskAnalysisWidget(QWidget):
 
         # SA 320 Materiality Worksheet Section
         mat_frame = QFrame()
-        mat_frame.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;")
+        mat_frame.setStyleSheet("background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 12px;")
         mat_layout = QVBoxLayout(mat_frame)
         mat_layout.setContentsMargins(20, 20, 20, 20)
 
         mat_title = QLabel("SA 320 MATERIALITY COMPUTATION WORKSHEET")
-        mat_title.setStyleSheet("font-size: 12px; font-weight: bold; color: #0ea5e9; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; letter-spacing: 0.5px;")
+        mat_title.setStyleSheet("font-size: 11px; font-weight: 600; color: #86868b; border-bottom: 1px solid #e5e5ea; padding-bottom: 8px; letter-spacing: 0.8px;")
         mat_layout.addWidget(mat_title)
 
         inputs_h = QHBoxLayout()
@@ -87,12 +99,12 @@ class RiskAnalysisWidget(QWidget):
         self.benchmark_combo.addItems(["Revenue from Operations (1.0%)", "Profit Before Tax (5.0%)", "Total Assets (0.5%)", "Equity Shareholders' Funds (1.0%)"])
         self.benchmark_combo.setToolTip("Select SA 320 financial benchmark basis")
         self.benchmark_combo.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.benchmark_combo.setStyleSheet("padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; background: white;")
+        self.benchmark_combo.setStyleSheet("padding: 6px; border: 1px solid #e5e5ea; border-radius: 6px; background: #ffffff; color: #1d1d1f;")
 
         self.base_amt_input = QLineEdit("32000000.00")
         self.base_amt_input.setToolTip("Enter base financial figure in INR for materiality computation")
         self.base_amt_input.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.base_amt_input.setStyleSheet("padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; font-weight: bold;")
+        self.base_amt_input.setStyleSheet("padding: 6px; border: 1px solid #e5e5ea; border-radius: 6px; background: #ffffff; font-weight: 600; color: #1d1d1f;")
         self.base_amt_input.textChanged.connect(self.calculate_materiality)
 
         f_layout.addRow("Benchmark Selection:", self.benchmark_combo)
@@ -101,17 +113,17 @@ class RiskAnalysisWidget(QWidget):
 
         # Results Summary Box
         res_frame = QFrame()
-        res_frame.setStyleSheet("background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 14px;")
+        res_frame.setStyleSheet("background-color: #f5f5f7; border: 1px solid #e5e5ea; border-radius: 12px; padding: 14px;")
         r_layout = QVBoxLayout(res_frame)
 
         self.lbl_overall_mat = QLabel("Overall Materiality (OM): ₹ 3,20,000.00")
-        self.lbl_overall_mat.setStyleSheet("font-size: 14px; font-weight: bold; color: #0369a1;")
+        self.lbl_overall_mat.setStyleSheet("font-size: 14px; font-weight: 600; color: #1d1d1f;")
 
         self.lbl_perf_mat = QLabel("Performance Materiality (PM @ 75%): ₹ 2,40,000.00")
-        self.lbl_perf_mat.setStyleSheet("font-size: 13px; font-weight: bold; color: #0284c7;")
+        self.lbl_perf_mat.setStyleSheet("font-size: 13px; font-weight: 600; color: #007aff;")
 
         self.lbl_de_minimis = QLabel("Tolerable Misstatement Limit (5%): ₹ 16,000.00")
-        self.lbl_de_minimis.setStyleSheet("font-size: 12px; color: #0369a1;")
+        self.lbl_de_minimis.setStyleSheet("font-size: 12px; font-weight: 600; color: #6e6e73;")
 
         r_layout.addWidget(self.lbl_overall_mat)
         r_layout.addWidget(self.lbl_perf_mat)
@@ -123,12 +135,12 @@ class RiskAnalysisWidget(QWidget):
 
         # Findings Table
         table_container = QFrame()
-        table_container.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;")
+        table_container.setStyleSheet("background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 12px;")
         t_layout = QVBoxLayout(table_container)
         t_layout.setContentsMargins(16, 16, 16, 16)
         
         t_title = QLabel("DETECTED RISK FINDINGS & MATERIALITY THRESHOLD AUDIT")
-        t_title.setStyleSheet("font-size: 11px; font-weight: bold; color: #64748b; letter-spacing: 0.5px; padding-bottom: 8px;")
+        t_title.setStyleSheet("font-size: 10px; font-weight: 600; color: #86868b; letter-spacing: 0.8px; padding-bottom: 8px;")
         t_layout.addWidget(t_title)
         
         self.table = QTableWidget(0, 5)
@@ -136,8 +148,8 @@ class RiskAnalysisWidget(QWidget):
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
         self.table.setStyleSheet("""
-            QTableWidget { border: 1px solid #e2e8f0; gridline-color: #f1f5f9; background: white; border-radius: 6px; }
-            QHeaderView::section { background-color: #f8fafc; color: #334155; font-weight: bold; padding: 8px; border: none; border-bottom: 1px solid #e2e8f0; }
+            QTableWidget { border: 1px solid #e5e5ea; gridline-color: #f2f2f7; background: #ffffff; border-radius: 8px; }
+            QHeaderView::section { background-color: #fafafa; color: #86868b; font-weight: 600; padding: 8px; font-size: 10px; letter-spacing: 0.5px; border: none; border-bottom: 1px solid #e5e5ea; text-transform: uppercase; }
         """)
         
         t_layout.addWidget(self.table)

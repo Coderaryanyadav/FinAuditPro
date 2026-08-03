@@ -535,30 +535,39 @@ class RiskDistributionChart(QFrame):
         chart.setBackgroundVisible(False)
         chart.setMargins(QMargins(0, 0, 0, 0))
         
-        pie_series = QPieSeries()
-        pie_series.setHoleSize(0.65)
-        
-        s1 = pie_series.append("Low Risk", max(1, low))
-        s1.setBrush(QColor("#34c759"))
-        s2 = pie_series.append("Medium Risk", med)
-        s2.setBrush(QColor("#ff9500"))
-        s3 = pie_series.append("High Risk", high)
-        s3.setBrush(QColor("#ff3b30"))
-        
-        chart.addSeries(pie_series)
-        
-        chart_view = QChartView(chart)
-        chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
-        chart_view.setObjectName("transparentChartView")
-        
         total_val = low + med + high
-        center_lbl = QLabel(f"<b style='font-size:20px; color:#1d1d1f;'>{total_val}</b><br/><span style='color:#86868b; font-size:10px;'>Total Audits</span>", chart_view)
-        center_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        center_lbl.setObjectName("donutCenterLabel")
-        
-        overlay = QVBoxLayout(chart_view)
-        overlay.addWidget(center_lbl, alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(chart_view)
+        if total_val > 0:
+            pie_series = QPieSeries()
+            pie_series.setHoleSize(0.65)
+            
+            if low > 0:
+                s1 = pie_series.append("Low Risk", low)
+                s1.setBrush(QColor("#34c759"))
+            if med > 0:
+                s2 = pie_series.append("Medium Risk", med)
+                s2.setBrush(QColor("#ff9500"))
+            if high > 0:
+                s3 = pie_series.append("High Risk", high)
+                s3.setBrush(QColor("#ff3b30"))
+            
+            chart.addSeries(pie_series)
+            
+            chart_view = QChartView(chart)
+            chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
+            chart_view.setObjectName("transparentChartView")
+            
+            center_lbl = QLabel(f"<b style='font-size:20px; color:#1d1d1f;'>{total_val}</b><br/><span style='color:#86868b; font-size:10px;'>Total Audits</span>", chart_view)
+            center_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            center_lbl.setObjectName("donutCenterLabel")
+            
+            overlay = QVBoxLayout(chart_view)
+            overlay.addWidget(center_lbl, alignment=Qt.AlignmentFlag.AlignCenter)
+            layout.addWidget(chart_view)
+        else:
+            empty_lbl = QLabel("No Risk Data — Upload documents to begin analysis")
+            empty_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            empty_lbl.setStyleSheet("color: #86868b; font-size: 12px; font-weight: 500; border: none; padding: 24px;")
+            layout.addWidget(empty_lbl)
         
         leg_layout = QHBoxLayout()
         leg_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)

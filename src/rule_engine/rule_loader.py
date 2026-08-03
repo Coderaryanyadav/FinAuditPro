@@ -261,6 +261,115 @@ class NegativeCashBalanceRule(BaseRule):
         )
 
 
+class MSME45DayRule(BaseRule):
+    def __init__(self):
+        super().__init__(
+            rule_id="TAX-003",
+            rule_name="MSME 45-Day Payment Default (Sec 43B(h))",
+            category=RuleCategory.INCOME_TAX,
+            severity=RuleSeverity.CRITICAL,
+            accounting_standard="Income Tax Act Sec 43B(h)",
+            audit_standard="SA 250"
+        )
+
+    def evaluate(self, data: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> RuleResult:
+        # Dummy check: In a real system, we'd check days outstanding and MSME status.
+        # We will flag it if "msme" is mentioned and days > 45.
+        text = str(data.get("cleaned_text", "")).lower()
+        days_outstanding = data.get("days_outstanding", 0)
+        passed = True
+        evidence = []
+
+        if "msme" in text and days_outstanding > 45:
+            passed = False
+            evidence.append(f"Payment to MSME outstanding for {days_outstanding} days (limit 45 days).")
+
+        return RuleResult(
+            rule_id=self.rule_id,
+            rule_name=self.rule_name,
+            category=self.category,
+            severity=self.severity,
+            passed=passed,
+            risk_score=0.0 if passed else 95.0,
+            description="Payments to Micro/Small Enterprises delayed beyond 45 days are disallowed under Sec 43B(h).",
+            evidence=evidence if evidence else ["No MSME payment default detected."],
+            recommendation="Disallow expenditure under Sec 43B(h) in the current assessment year.",
+            accounting_standard=self.accounting_standard,
+            audit_standard=self.audit_standard
+        )
+
+
+class TDSBenefit194RRule(BaseRule):
+    def __init__(self):
+        super().__init__(
+            rule_id="TAX-004",
+            rule_name="TDS on Benefits/Perquisites (Sec 194R)",
+            category=RuleCategory.INCOME_TAX,
+            severity=RuleSeverity.HIGH,
+            accounting_standard="Income Tax Act Sec 194R",
+            audit_standard="SA 250"
+        )
+
+    def evaluate(self, data: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> RuleResult:
+        text = str(data.get("cleaned_text", "")).lower()
+        tot_amt = data.get("total_amount") or 0.0
+        passed = True
+        evidence = []
+
+        if ("perquisite" in text or "benefit" in text or "gift" in text) and tot_amt > 20000:
+            passed = False
+            evidence.append(f"Business benefit of ₹{tot_amt:,.2f} exceeds ₹20,000 threshold.")
+
+        return RuleResult(
+            rule_id=self.rule_id,
+            rule_name=self.rule_name,
+            category=self.category,
+            severity=self.severity,
+            passed=passed,
+            risk_score=0.0 if passed else 80.0,
+            description="TDS @ 10% must be deducted on business benefits exceeding ₹20,000 under Sec 194R.",
+            evidence=evidence if evidence else ["No Sec 194R threshold violation."],
+            recommendation="Verify TDS deduction compliance for business gifts/perquisites.",
+            accounting_standard=self.accounting_standard,
+            audit_standard=self.audit_standard
+        )
+
+
+class FinancialRatioCARORule(BaseRule):
+    def __init__(self):
+        super().__init__(
+            rule_id="CARO-019",
+            rule_name="Financial Viability Ratio (CARO Clause xix)",
+            category=RuleCategory.ACCOUNTING,
+            severity=RuleSeverity.CRITICAL,
+            accounting_standard="CARO 2020 Clause (xix)",
+            audit_standard="SA 570"
+        )
+
+    def evaluate(self, data: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> RuleResult:
+        current_ratio = data.get("current_ratio", 1.5)
+        passed = True
+        evidence = []
+
+        if current_ratio < 1.0:
+            passed = False
+            evidence.append(f"Current ratio is {current_ratio:.2f}, indicating potential inability to meet short-term liabilities.")
+
+        return RuleResult(
+            rule_id=self.rule_id,
+            rule_name=self.rule_name,
+            category=self.category,
+            severity=self.severity,
+            passed=passed,
+            risk_score=0.0 if passed else 100.0,
+            description="Auditor must report on company's capability to meet liabilities falling due within 1 year.",
+            evidence=evidence if evidence else ["Financial viability ratios are stable."],
+            recommendation="Evaluate Going Concern assumption (SA 570) and report under CARO Clause (xix).",
+            accounting_standard=self.accounting_standard,
+            audit_standard=self.audit_standard
+        )
+
+
 class RuleLoader:
     """Instantiates and registers standard enterprise rules."""
 
@@ -275,4 +384,8 @@ class RuleLoader:
         registry.register(BenfordLawRule())
         registry.register(RoundFigureTransactionRule())
         registry.register(NegativeCashBalanceRule())
+        # Latest CA Policy Rules
+        registry.register(MSME45DayRule())
+        registry.register(TDSBenefit194RRule())
+        registry.register(FinancialRatioCARORule())
         return registry

@@ -10,29 +10,46 @@ from .styles import apply_shadow, EmptyStateWidget, LoadingStateWidget, ErrorSta
 class GSTVerificationWidget(QWidget):
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f1f5f9;")
+        self.setStyleSheet("background-color: #f5f5f7;")
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # Action Bar
+        # Action Bar — Apple Header
         action_bar = QFrame()
-        action_bar.setFixedHeight(80)
-        action_bar.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
+        action_bar.setFixedHeight(68)
+        action_bar.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
         action_layout = QHBoxLayout(action_bar)
         action_layout.setContentsMargins(24, 0, 24, 0)
         
+        title_v = QVBoxLayout()
+        title_v.setSpacing(2)
         title = QLabel("GST Verification & Reconciliation")
-        title.setStyleSheet("font-size: 24px; font-weight: bold; color: #0f172a; border: none;")
-        action_layout.addWidget(title)
+        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
+        subtitle = QLabel("GSTR-2B vs Books Match and Tax Compliance")
+        subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
+        title_v.addWidget(title)
+        title_v.addWidget(subtitle)
+        action_layout.addLayout(title_v)
         
         action_layout.addStretch()
         
-        btn_verify = QPushButton(" Run Re-verification")
+        btn_verify = QPushButton("Run Re-verification")
         btn_verify.setToolTip("Run live GSTR-2B vs Purchase Register re-verification and reconciliation")
         btn_verify.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        btn_verify.setStyleSheet("padding: 8px 16px; border: none; border-radius: 6px; background-color: #0ea5e9; color: white; font-weight: bold;")
+        btn_verify.setStyleSheet("""
+            QPushButton {
+                background-color: #007aff;
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: 600;
+                border-radius: 8px;
+                padding: 8px 16px;
+                border: none;
+            }
+            QPushButton:hover { background-color: #0062cc; }
+        """)
         btn_verify.clicked.connect(self.run_reverification)
         action_layout.addWidget(btn_verify)
         
@@ -48,7 +65,7 @@ class GSTVerificationWidget(QWidget):
         cards_layout = QHBoxLayout()
         cards_layout.setSpacing(20)
         
-        def create_gst_card(title, value, subtitle, tag, bg_tag, fg_tag, border_color="#e2e8f0"):
+        def create_gst_card(title, value, subtitle, tag, bg_tag, fg_tag, border_color="#e5e5ea"):
             card = QFrame()
             card.setFixedHeight(110)
             card.setStyleSheet(f"background-color: #ffffff; border: 1px solid {border_color}; border-radius: 12px;")
@@ -56,10 +73,10 @@ class GSTVerificationWidget(QWidget):
             
             top_h = QHBoxLayout()
             t_lbl = QLabel(title)
-            t_lbl.setStyleSheet("color: #334155; font-size: 13px; font-weight: 700; border: none;")
+            t_lbl.setStyleSheet("color: #1d1d1f; font-size: 13px; font-weight: 600; border: none;")
             
             tag_lbl = QLabel(tag)
-            tag_lbl.setStyleSheet(f"background-color: {bg_tag}; color: {fg_tag}; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 4px; border: none;")
+            tag_lbl.setStyleSheet(f"background-color: {bg_tag}; color: {fg_tag}; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; border: none;")
             
             top_h.addWidget(t_lbl)
             top_h.addStretch()
@@ -67,20 +84,20 @@ class GSTVerificationWidget(QWidget):
             clayout.addLayout(top_h)
             
             v_lbl = QLabel(value)
-            v_lbl.setStyleSheet("color: #0f172a; font-size: 24px; font-weight: 800; border: none;")
+            v_lbl.setStyleSheet("color: #1d1d1f; font-size: 24px; font-weight: 600; letter-spacing: -0.5px; border: none;")
             clayout.addWidget(v_lbl)
             
             s_lbl = QLabel(subtitle)
-            s_lbl.setStyleSheet("color: #475569; font-size: 11px; font-weight: 600; border: none;")
+            s_lbl.setStyleSheet("color: #6e6e73; font-size: 11px; border: none;")
             clayout.addWidget(s_lbl)
             
-            apply_shadow(card, blur=10, dy=2, alpha=10)
+            apply_shadow(card, blur=10, dy=2, alpha=6)
             return card
             
-        card1 = create_gst_card("GSTIN Status", "142 / 145 Active", "3 Suspended / Cancelled GSTINs", "ACTIVE", "#ecfdf5", "#10b981")
-        card2 = create_gst_card("2B vs Books Match", "94.2%", "₹4,25,000 Matched Input Tax Credit", "RECONCILED", "#f0f9ff", "#0ea5e9")
-        card3 = create_gst_card("ITC Mismatch", "₹48,250", "Unmatched ITC in GSTR-2B", "WARNING", "#fffbeb", "#f59e0b", "#fde68a")
-        card4 = create_gst_card("Ineligible ITC", "₹12,400", "Blocked credit under Sec 17(5)", "RISK", "#fef2f2", "#ef4444", "#fecaca")
+        card1 = create_gst_card("GSTIN Status", "142 / 145 Active", "3 Suspended / Cancelled GSTINs", "ACTIVE", "#eafff0", "#1b8a3e")
+        card2 = create_gst_card("2B vs Books Match", "94.2%", "₹4,25,000 Matched Input Tax Credit", "RECONCILED", "#e8f2ff", "#007aff")
+        card3 = create_gst_card("ITC Mismatch", "₹48,250", "Unmatched ITC in GSTR-2B", "WARNING", "#fff8e6", "#ff9500", "#ffe0b2")
+        card4 = create_gst_card("Ineligible ITC", "₹12,400", "Blocked credit under Sec 17(5)", "RISK", "#ffebeb", "#ff3b30", "#ffc6c4")
         
         cards_layout.addWidget(card1)
         cards_layout.addWidget(card2)
@@ -91,13 +108,13 @@ class GSTVerificationWidget(QWidget):
         
         # Table Section
         table_card = QFrame()
-        table_card.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;")
-        apply_shadow(table_card, blur=15, dy=3, alpha=15)
+        table_card.setStyleSheet("background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 12px;")
+        apply_shadow(table_card, blur=15, dy=3, alpha=6)
         table_v = QVBoxLayout(table_card)
         
         tb_header = QHBoxLayout()
         tb_title = QLabel("GSTR-2B vs Purchase Register Reconciliation Table")
-        tb_title.setStyleSheet("font-size: 16px; font-weight: bold; color: #0f172a; border: none;")
+        tb_title.setStyleSheet("font-size: 16px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
         tb_header.addWidget(tb_title)
         tb_header.addStretch()
         

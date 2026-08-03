@@ -20,7 +20,7 @@ class SettingsWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f8fafc;")
+        self.setStyleSheet("background-color: #f5f5f7;")
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -28,26 +28,38 @@ class SettingsWidget(QWidget):
         
         # 1. Action Bar Header
         header = QFrame()
-        header.setFixedHeight(64)
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
+        header.setFixedHeight(68)
+        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
+        title_v.setSpacing(2)
         title = QLabel("System Settings & CA Firm Configuration")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0f172a;")
+        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
         subtitle = QLabel("CA Firm Registration, Ollama Model Diagnostics & Database Encryption")
-        subtitle.setStyleSheet("font-size: 12px; color: #64748b;")
+        subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         h_layout.addLayout(title_v)
 
         h_layout.addStretch()
         
-        btn_save = QPushButton(" Save Configuration")
+        btn_save = QPushButton("Save Configuration")
         btn_save.setToolTip("Save system settings and CA firm configuration")
         btn_save.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        btn_save.setStyleSheet("padding: 8px 16px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
+        btn_save.setStyleSheet("""
+            QPushButton {
+                background-color: #007aff;
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: 600;
+                border-radius: 8px;
+                padding: 8px 16px;
+                border: none;
+            }
+            QPushButton:hover { background-color: #0062cc; }
+        """)
         btn_save.clicked.connect(self.save_settings)
         h_layout.addWidget(btn_save)
         
@@ -58,9 +70,9 @@ class SettingsWidget(QWidget):
         tabs.setToolTip("System settings and configuration tabs")
         tabs.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         tabs.setStyleSheet("""
-            QTabWidget::pane { border: 1px solid #e2e8f0; background: white; border-radius: 8px; margin: 16px; }
-            QTabBar::tab { background: #f1f5f9; color: #475569; padding: 10px 20px; font-weight: bold; border-top-left-radius: 6px; border-top-right-radius: 6px; }
-            QTabBar::tab:selected { background: #0ea5e9; color: white; }
+            QTabWidget::pane { border: 1px solid #e5e5ea; background: #ffffff; border-radius: 8px; margin: 16px; }
+            QTabBar::tab { background: #f5f5f7; color: #6e6e73; padding: 10px 20px; font-weight: 600; border-top-left-radius: 8px; border-top-right-radius: 8px; margin-right: 2px; }
+            QTabBar::tab:selected { background: #ffffff; color: #007aff; border: 1px solid #e5e5ea; border-bottom: none; }
         """)
 
         tabs.addTab(self._create_firm_profile_tab(), "CA Firm Profile & Branding")
@@ -75,7 +87,7 @@ class SettingsWidget(QWidget):
         w_layout.setContentsMargins(20, 20, 20, 20)
 
         card = QFrame()
-        card.setStyleSheet("background-color: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;")
+        card.setStyleSheet("background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 12px; padding: 16px;")
         f_layout = QFormLayout(card)
         f_layout.setSpacing(12)
 
@@ -86,13 +98,13 @@ class SettingsWidget(QWidget):
         self.firm_address = QLineEdit(getattr(config, 'ca_address', 'Suite 401, Corporate Heights, BKC, Mumbai - 400051'))
 
         for input_field in [self.firm_name, self.frn_number, self.member_no, self.partner_name, self.firm_address]:
-            input_field.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #f8fafc;")
+            input_field.setStyleSheet("padding: 8px; border: 1px solid #e5e5ea; border-radius: 8px; background-color: #ffffff; font-size: 13px; color: #1d1d1f;")
 
-        f_layout.addRow("CA Firm Name *", self.firm_name)
-        f_layout.addRow("Firm Registration Number (FRN) *", self.frn_number)
-        f_layout.addRow("Partner Membership Number *", self.member_no)
-        f_layout.addRow("Managing Partner Name", self.partner_name)
-        f_layout.addRow("Registered Office Address", self.firm_address)
+        f_layout.addRow(QLabel("<b style='color:#1d1d1f;'>CA Firm Name *</b>"), self.firm_name)
+        f_layout.addRow(QLabel("<b style='color:#1d1d1f;'>Firm Registration Number (FRN) *</b>"), self.frn_number)
+        f_layout.addRow(QLabel("<b style='color:#1d1d1f;'>Partner Membership Number *</b>"), self.member_no)
+        f_layout.addRow(QLabel("<b style='color:#1d1d1f;'>Managing Partner Name</b>"), self.partner_name)
+        f_layout.addRow(QLabel("<b style='color:#1d1d1f;'>Registered Office Address</b>"), self.firm_address)
 
         w_layout.addWidget(card)
         w_layout.addStretch()

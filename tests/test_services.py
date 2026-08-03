@@ -23,37 +23,30 @@ class TestServices(unittest.TestCase):
 
     def setUp(self):
         init_db()
-        from database.database import engine, SessionLocal
+        from database.database import get_session
         from database.models import Client, FinancialYear, Engagement
-        from sqlalchemy.orm import Session
-
-        # Begin a connection-level transaction so we can roll back after each test
-        self._connection = engine.connect()
-        self._transaction = self._connection.begin()
-        self.session = Session(bind=self._connection)
-
-        # Create dummy client, FY, and engagement to satisfy FK constraints
-        self.dummy_client = Client(name="Test Client Corp", gst_number="27AAACB1234F1Z0")
-        self.session.add(self.dummy_client)
-        self.session.flush()
-
         from datetime import datetime, timezone
         import uuid
-        now_dt = datetime.now(timezone.utc)
-        self.dummy_fy = FinancialYear(label=f"2025-{uuid.uuid4().hex[:4]}", start_date=now_dt, end_date=now_dt)
-        self.session.add(self.dummy_fy)
-        self.session.flush()
 
-        self.dummy_engagement = Engagement(client_id=self.dummy_client.id, financial_year_id=self.dummy_fy.id, audit_type="Statutory", status="Planning")
-        self.session.add(self.dummy_engagement)
-        self.session.flush()
+        with get_session() as session:
+            client = Client(name="Test Client Corp", gst_number="27AAACB1234F1Z0")
+            session.add(client)
+            session.flush()
 
-        from security.security_manager import SecurityManager
-        from security.auth import SessionToken
-        from security.rbac import UserRole
-        self.sm = SecurityManager()
-        self.sm.current_session = SessionToken(token_str="test_token", user_id=1, user_email="admin@test.com", role=UserRole.ADMINISTRATOR.value)
+            now_dt = datetime.now(timezone.utc)
+            fy = FinancialYear(label=f"2025-{uuid.uuid4().hex[:4]}", start_date=now_dt, end_date=now_dt)
+            session.add(fy)
+            session.flush()
 
+            eng = Engagement(client_id=client.id, financial_year_id=fy.id, audit_type="Statutory", status="Planning")
+            session.add(eng)
+            session.commit()
+
+            self.dummy_client_id = client.id
+            self.dummy_engagement_id = eng.id
+
+        from database.database import SessionLocal
+        self.session = SessionLocal()
         self.user_repo = UserRepository(self.session)
         self.client_repo = ClientRepository(self.session)
         self.doc_repo = DocumentRepository(self.session)
@@ -64,12 +57,18 @@ class TestServices(unittest.TestCase):
         self.doc_service = DocumentService(self.doc_repo)
         self.wp_service = WorkingPaperService(self.wp_repo)
 
+        from security.security_manager import SecurityManager
+        from security.auth import SessionToken
+        from security.rbac import UserRole
+        self.sm = SecurityManager()
+        self.sm.current_session = SessionToken(token_str="test_token", user_id=1, user_email="admin@test.com", role=UserRole.ADMINISTRATOR.value)
+
     def tearDown(self):
         self.sm.current_session = None
-        self.session.close()
-        # Roll back the outer transaction — leaves the DB pristine for the next test
-        self._transaction.rollback()
-        self._connection.close()
+        from security.security_manager import SecurityManager
+        SecurityManager._instance = None
+        if hasattr(self, 'session') and self.session:
+            self.session.close()
 
     def test_client_service_validation(self):
         # Invalid GSTIN format test
@@ -86,13 +85,13 @@ class TestServices(unittest.TestCase):
             with open(sample_file, "wb") as f:
                 f.write(b"%PDF-1.4 sample content")
 
-            doc = self.doc_service.upload_document(engagement_id=self.dummy_engagement.id, file_path=sample_file, document_type="Invoice")
+            doc = self.doc_service.upload_document(engagement_id=self.dummy_engagement_id, file_path=sample_file, document_type="Invoice")
             self.assertEqual(doc.file_name, "sample_invoice.pdf")
-            self.assertIn(f"data/documents/eng_{self.dummy_engagement.id}", doc.file_path.replace("\\", "/"))
+            self.assertIn(f"data/documents/eng_{self.dummy_engagement_id}", doc.file_path.replace("\\", "/"))
             self.assertTrue(os.path.exists(doc.file_path))
 
     def test_working_paper_service_index_creation(self):
-        index = self.wp_service.create_index(engagement_id=self.dummy_engagement.id, section_code="REV-01", section_name="Revenue Audit")
+        index = self.wp_service.create_index(engagement_id=self.dummy_engagement_id, section_code="REV-01", section_name="Revenue Audit")
         self.assertIsNotNone(index.id)
         self.assertEqual(index.section_code, "REV-01")
 
@@ -114,7 +113,7 @@ class TestServices(unittest.TestCase):
         """Calling create_index without a session must raise AuthError."""
         self.sm.current_session = None
         with self.assertRaises(AuthError):
-            self.wp_service.create_index(engagement_id=self.dummy_engagement.id, section_code="TEST-01", section_name="Test")
+            self.wp_service.create_index(engagement_id=self.dummy_engagement_id, section_code="TEST-01", section_name="Test")
 
     def test_rbac_null_session_blocks_create_paper(self):
         """Calling create_paper without a session must raise AuthError."""
@@ -167,9 +166,9 @@ class TestServices(unittest.TestCase):
         """load_client_name_cache returns name dict keyed by client ID."""
         from services.dashboard_service import DashboardService
         ds = DashboardService(self.session)
-        cache = ds.load_client_name_cache({self.dummy_client.id})
-        self.assertIn(self.dummy_client.id, cache)
-        self.assertEqual(cache[self.dummy_client.id], "Test Client Corp")
+        cache = ds.load_client_name_cache({self.dummy_client_id})
+        self.assertIn(self.dummy_client_id, cache)
+        self.assertEqual(cache[self.dummy_client_id], "Test Client Corp")
 
     def test_dashboard_service_search(self):
         """search_clients_and_findings returns matching clients."""
@@ -187,15 +186,15 @@ class TestServices(unittest.TestCase):
                 f.write(b"%PDF-1.4 audit content")
 
             # Must succeed with active admin session
-            doc = self.doc_service.upload_audit_document(audit_id=self.dummy_engagement.id, file_path=sample_file, doc_type="Audit Report")
+            doc = self.doc_service.upload_audit_document(audit_id=self.dummy_engagement_id, file_path=sample_file, doc_type="Audit Report")
             self.assertEqual(doc.file_name, "audit_doc.pdf")
-            self.assertIn(f"data/documents/eng_{self.dummy_engagement.id}", doc.file_path.replace("\\", "/"))
+            self.assertIn(f"data/documents/eng_{self.dummy_engagement_id}", doc.file_path.replace("\\", "/"))
             self.assertTrue(os.path.exists(doc.file_path))
 
             # Must fail when session is removed
             self.sm.current_session = None
             with self.assertRaises(AuthError):
-                self.doc_service.upload_audit_document(audit_id=self.dummy_engagement.id, file_path=sample_file)
+                self.doc_service.upload_audit_document(audit_id=self.dummy_engagement_id, file_path=sample_file)
 
     def test_backup_engine_rbac_enforcement(self):
         """BackupEngine enforces PERFORM_BACKUP permission."""

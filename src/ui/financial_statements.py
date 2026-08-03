@@ -270,27 +270,6 @@ class FinancialStatementsWidget(QWidget):
         w_layout.addWidget(self.pnl_table)
         return widget
 
-    def load_sample_trial_balance(self):
-        """Loads a realistic sample Trial Balance for demonstration."""
-        sample_data = [
-            ("Equity Share Capital", 0.0, 1000000.0, "Equity Share Capital"),
-            ("General Reserve & Surplus", 0.0, 450000.0, "Reserves & Surplus"),
-            ("HDFC Bank Account", 620000.0, 0.0, "Cash & Cash Equivalents"),
-            ("Petty Cash", 15000.0, 0.0, "Cash & Cash Equivalents"),
-            ("Trade Debtors / Customers", 850000.0, 0.0, "Trade Receivables (Current)"),
-            ("Trade Creditors / Vendors", 0.0, 380000.0, "Trade Payables (Current)"),
-            ("Plant & Machinery", 1200000.0, 0.0, "Tangible Assets (Property, Plant & Equipment)"),
-            ("Office Laptops & Furniture", 250000.0, 0.0, "Tangible Assets (Property, Plant & Equipment)"),
-            ("Sales / Revenue from Operations", 0.0, 3200000.0, "Revenue from Operations"),
-            ("Interest Income on FD", 0.0, 45000.0, "Other Income"),
-            ("Salaries & Staff Expenses", 1100000.0, 0.0, "Employee Benefit Expenses"),
-            ("Bank Loan Interest Paid", 48000.0, 0.0, "Finance Costs"),
-            ("Office Rent & Utilities", 320000.0, 0.0, "Other Expenses"),
-            ("Audit Fees & Legal Charges", 72000.0, 0.0, "Other Expenses"),
-            ("Depreciation Expense", 100000.0, 0.0, "Depreciation & Amortization"),
-            ("Closing Inventory Stock", 500000.0, 0.0, "Other Current Assets")
-        ]
-        self.populate_tb_table(sample_data)
 
     def populate_tb_table(self, rows):
         self.ledger_rows = rows

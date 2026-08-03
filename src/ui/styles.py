@@ -203,8 +203,9 @@ QPushButton#navButton[active="true"] {
     color: #007aff;
     font-weight: 600;
     border: none;
+    border-left: 3px solid #0284c7;
     border-radius: 8px;
-    padding-left: 12px;
+    padding-left: 9px;
 }
 
 /* ═══════════════════════════════════════════════════════════

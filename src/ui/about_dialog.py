@@ -38,11 +38,11 @@ class AboutDialog(QDialog):
         
         info_box = QVBoxLayout()
         title = QLabel("FinAuditPro")
-        title.setStyleSheet("font-size: 20px; font-weight: bold; color: #0f172a;")
+        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px;")
         
         ver_info = VersionChecker.get_version_info()
         sub = QLabel(f"Version {ver_info.version} (Build {ver_info.build_number}) — {ver_info.edition}")
-        sub.setStyleSheet("font-size: 12px; color: #64748b;")
+        sub.setStyleSheet("font-size: 12px; color: #6e6e73;")
         
         info_box.addWidget(title)
         info_box.addWidget(sub)
@@ -56,13 +56,13 @@ class AboutDialog(QDialog):
 
         # Badges Frame
         badges_frame = QFrame()
-        badges_frame.setStyleSheet("background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;")
+        badges_frame.setStyleSheet("background-color: #f5f5f7; border: 1px solid #e5e5ea; border-radius: 8px; padding: 10px;")
         b_layout = QHBoxLayout(badges_frame)
         
         b1 = QLabel(" 100% Offline AI")
-        b1.setStyleSheet("color: #0369a1; font-weight: bold; font-size: 11px;")
-        b2 = QLabel(" ICAI Standard Compliant")
-        b2.setStyleSheet("color: #15803d; font-weight: bold; font-size: 11px;")
+        b1.setStyleSheet("color: #007aff; font-weight: 600; font-size: 11px;")
+        b2 = QLabel(" ICAI Standard & CA Policy Compliant")
+        b2.setStyleSheet("color: #34c759; font-weight: 600; font-size: 11px;")
         
         b_layout.addWidget(b1)
         b_layout.addStretch()
@@ -72,14 +72,14 @@ class AboutDialog(QDialog):
 
         # Release Notes Text Area
         notes_label = QLabel("Release Notes & Version History:")
-        notes_label.setStyleSheet("font-weight: bold; color: #0f172a; font-size: 12px;")
+        notes_label.setStyleSheet("font-weight: 600; color: #1d1d1f; font-size: 12px;")
         layout.addWidget(notes_label)
 
         notes_box = QTextEdit()
         notes_box.setReadOnly(True)
-        notes_box.setStyleSheet("border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; font-family: sans-serif; font-size: 11px; color: #334155;")
+        notes_box.setStyleSheet("border: 1px solid #e5e5ea; border-radius: 8px; padding: 8px; font-family: sans-serif; font-size: 12px; color: #1d1d1f; background-color: #f5f5f7;")
         
-        notes_html = "<ul>"
+        notes_html = "<ul style='line-height: 1.5;'>"
         for note in ver_info.release_notes:
             notes_html += f"<li>{note}</li>"
         notes_html += "</ul>"
@@ -91,8 +91,15 @@ class AboutDialog(QDialog):
         btn_close = QPushButton("Close")
         btn_close.setFixedHeight(36)
         btn_close.setStyleSheet("""
-            QPushButton { background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none; }
-            QPushButton:hover { background-color: #0284c7; }
+            QPushButton {
+                background-color: #007aff;
+                color: #ffffff;
+                font-weight: 600;
+                font-size: 13px;
+                border-radius: 8px;
+                border: none;
+            }
+            QPushButton:hover { background-color: #0062cc; }
         """)
         btn_close.clicked.connect(self.accept)
         layout.addWidget(btn_close)

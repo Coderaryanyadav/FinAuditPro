@@ -34,7 +34,7 @@ class ReportsWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f8fafc;")
+        self.setStyleSheet("background-color: #f5f5f7;")
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -42,24 +42,36 @@ class ReportsWidget(QWidget):
         
         # 1. Action Bar Header
         header = QFrame()
-        header.setFixedHeight(64)
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
+        header.setFixedHeight(68)
+        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
+        title_v.setSpacing(2)
         title = QLabel("Audit Report Generator & UDIN Verification")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0f172a;")
+        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
         subtitle = QLabel("ICAI SA 700 / SA 705 Independent Auditor's Report & CARO 2020 Order Annexure")
-        subtitle.setStyleSheet("font-size: 12px; color: #64748b;")
+        subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         h_layout.addLayout(title_v)
 
         h_layout.addStretch()
 
-        export_btn = QPushButton(" Export Official PDF Audit Report")
-        export_btn.setStyleSheet("background-color: #0ea5e9; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; border: none;")
+        export_btn = QPushButton("Export Official PDF Audit Report")
+        export_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #007aff;
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: 600;
+                border-radius: 8px;
+                padding: 8px 16px;
+                border: none;
+            }
+            QPushButton:hover { background-color: #0062cc; }
+        """)
         export_btn.clicked.connect(self.export_pdf)
         h_layout.addWidget(export_btn)
 
@@ -68,12 +80,12 @@ class ReportsWidget(QWidget):
         # 2. Control Options Frame
         opts_frame = QFrame()
         opts_frame.setFixedHeight(76)
-        opts_frame.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
+        opts_frame.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
         o_layout = QHBoxLayout(opts_frame)
         o_layout.setContentsMargins(24, 0, 24, 0)
         o_layout.setSpacing(16)
 
-        o_layout.addWidget(QLabel("<b style='color:#334155;'>Report Type:</b>"))
+        o_layout.addWidget(QLabel("<b style='color:#1d1d1f; border: none;'>Report Type:</b>"))
         self.report_type_combo = QComboBox()
         self.report_type_combo.addItems([
             "Independent Auditor's Report (SA 700 Standard Unmodified)",
@@ -84,17 +96,18 @@ class ReportsWidget(QWidget):
         self.report_type_combo.setFixedWidth(300)
         self.report_type_combo.setToolTip("Select ICAI Report Template (e.g. CARO 2020, Tax Audit 3CD, Independent Auditor's Report)")
         self.report_type_combo.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.report_type_combo.setStyleSheet("QComboBox { padding: 6px; border: 1px solid #e5e5ea; border-radius: 6px; background-color: #ffffff; color: #1d1d1f; }")
         self.report_type_combo.currentIndexChanged.connect(self.load_report_draft)
         o_layout.addWidget(self.report_type_combo)
 
         o_layout.addSpacing(16)
-        o_layout.addWidget(QLabel("<b style='color:#334155;'>UDIN Number:</b>"))
+        o_layout.addWidget(QLabel("<b style='color:#1d1d1f; border: none;'>UDIN Number:</b>"))
         self.udin_input = QLineEdit()
         self.udin_input.setPlaceholderText("Enter 18-digit ICAI UDIN...")
         self.udin_input.setToolTip("Enter 18-digit Unique Document Identification Number (UDIN) issued by ICAI")
         self.udin_input.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.udin_input.setFixedWidth(180)
-        self.udin_input.setStyleSheet("padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: monospace; font-weight: bold;")
+        self.udin_input.setStyleSheet("padding: 6px; border: 1px solid #e5e5ea; border-radius: 6px; font-family: monospace; font-weight: 600; color: #1d1d1f;")
         self.udin_input.textChanged.connect(self.load_report_draft)
         o_layout.addWidget(self.udin_input)
 
@@ -146,18 +159,18 @@ class ReportsWidget(QWidget):
 
                 findings = session.query(Finding).filter_by(audit_id=active_id).all() if active_id else session.query(Finding).all()
                 # Detach objects before session closes
-                client_name = client.name if client else "Sample Client Pvt Ltd"
+                client_name = client.name if client else "[Client Not Selected]"
                 self.current_client_name = client_name
-                cin = getattr(client, 'cin_number', 'U72200MH2021PTC123456') or 'U72200MH2021PTC123456'
+                cin = getattr(client, 'cin_number', 'N/A') or 'N/A'
                 matters_html = ""
                 for f in findings:
                     matters_html += f"<li><b>{f.description[:80]}</b> - Flagged Severity: <span style='color:#dc2626;'>{f.severity or 'MEDIUM'}</span></li>"
         except Exception as e:
             logger.error("Error loading report draft: %s", e, exc_info=True)
             self.error_widget = ErrorStateWidget("Draft Generation Error", str(e))
-            client_name = "Sample Client Pvt Ltd"
+            client_name = "[Client Not Selected]"
             self.current_client_name = client_name
-            cin = "U72200MH2021PTC123456"
+            cin = "N/A"
             matters_html = ""
 
         if not matters_html:

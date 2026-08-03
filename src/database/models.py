@@ -281,8 +281,8 @@ class Finding(Base):
     working_paper_id = Column(Integer, ForeignKey('working_papers.id'), nullable=True)
     description = Column(Text, nullable=False)
     financial_impact = Column(Float, nullable=True)
-    severity = Column(String(50), default='Low') # High, Medium, Low
-    risk_level = Column(String(50), default='Low')
+    severity = Column(String(50), default='Low', index=True) # High, Medium, Low
+    risk_level = Column(String(50), default='Low', index=True)
     ai_confidence_score = Column(Integer, nullable=True)
     is_resolved = Column(Boolean, default=False)
     created_at = Column(DateTime, default=utc_now)

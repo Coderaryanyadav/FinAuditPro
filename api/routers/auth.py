@@ -19,9 +19,15 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     try:
         user = auth_service.login(username=request.username, password=request.password)
     except (AuthenticationError, ValidationError) as e:
+        detail_msg = str(e)
+        if "locked" in detail_msg.lower():
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=detail_msg,
+            )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e),
+            detail=detail_msg,
             headers={"WWW-Authenticate": "Bearer"},
         )
 

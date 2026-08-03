@@ -71,11 +71,15 @@ Thumbs.db
 *.sqlite3
 src/data/
 
-# ─── Application Secrets ───────────────────────────────────────────────────────
+# ─── Application Secrets & Runtime Data ───────────────────────────────────────
 .crypto_key
 .crypto_salt
 *.crypto_key
 *.crypto_salt
+.jwt_secret
+.login_lockouts.json
+.revoked_tokens.json
+data/
 .env
 *.env
 

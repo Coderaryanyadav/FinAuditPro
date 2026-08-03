@@ -1,3 +1,5 @@
+import os
+import json
 from datetime import datetime, timedelta, timezone
 from typing import Generator, Optional, Set
 from fastapi import Depends, HTTPException, status
@@ -16,7 +18,55 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = config.session_timeout_minutes * 16  # 8 hours default
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
-REVOKED_TOKENS: Set[str] = set()
+REVOKED_TOKENS_FILE = os.path.join(config.data_dir, ".revoked_tokens.json")
+
+
+def _get_crypto():
+    """Return an AESCryptoEngine instance for token revocation file encryption."""
+    try:
+        from security.crypto import AESCryptoEngine
+        return AESCryptoEngine()
+    except Exception:
+        return None
+
+
+def _load_revoked_tokens() -> Set[str]:
+    """Load revoked tokens set from encrypted file."""
+    if not os.path.exists(REVOKED_TOKENS_FILE):
+        return set()
+    try:
+        with open(REVOKED_TOKENS_FILE, "rb") as f:
+            encrypted = f.read()
+        crypto = _get_crypto()
+        if crypto and encrypted:
+            decrypted = crypto.decrypt_bytes(encrypted)
+            return set(json.loads(decrypted.decode("utf-8")))
+        with open(REVOKED_TOKENS_FILE, "r", encoding="utf-8") as f:
+            return set(json.load(f))
+    except Exception:
+        return set()
+
+
+def _save_revoked_tokens(revoked_set: Set[str]) -> None:
+    """Save revoked tokens set into encrypted file."""
+    try:
+        os.makedirs(os.path.dirname(REVOKED_TOKENS_FILE), exist_ok=True)
+        raw = json.dumps(list(revoked_set)).encode("utf-8")
+        crypto = _get_crypto()
+        if crypto:
+            encrypted = crypto.encrypt_bytes(raw)
+            with open(REVOKED_TOKENS_FILE, "wb") as f:
+                f.write(encrypted)
+        else:
+            with open(REVOKED_TOKENS_FILE, "w", encoding="utf-8") as f:
+                f.write(json.dumps(list(revoked_set)))
+    except Exception:
+        pass
+
+
+def is_token_revoked(token: str) -> bool:
+    """Check if token is in persistent revoked set."""
+    return token in _load_revoked_tokens()
 
 
 def get_db() -> Generator[Session, None, None]:
@@ -43,12 +93,14 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 
 def revoke_token(token: str) -> None:
     """Revoke a token on logout."""
-    REVOKED_TOKENS.add(token)
+    revoked_set = _load_revoked_tokens()
+    revoked_set.add(token)
+    _save_revoked_tokens(revoked_set)
 
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     """Validate JWT bearer token and inject security context into SecurityManager."""
-    if token in REVOKED_TOKENS:
+    if is_token_revoked(token):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has been revoked",

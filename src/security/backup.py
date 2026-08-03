@@ -39,6 +39,13 @@ class BackupEngine:
 
     def create_backup(self, db_path: str = "src/data/finauditpro.db", docs_dir: str = "data/documents") -> BackupArchive:
         """Create an AES-256 encrypted .enc archive containing the database and audit documents."""
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        from core.exceptions import AuthError
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.PERFORM_BACKUP):
+            raise AuthError("User role lacks permission PERFORM_BACKUP to create backup.")
+
         now = datetime.now(timezone.utc)
         timestamp_str = now.strftime("%Y%m%d_%H%M%S")
         backup_id = f"BACKUP_{timestamp_str}"
@@ -94,6 +101,13 @@ class BackupEngine:
 
     def restore_backup(self, backup_path: str, target_db_path: str = "src/data/finauditpro.db", target_docs_dir: str = "data/documents", expected_hash: Optional[str] = None) -> bool:
         """Validate, decrypt, and extract database & document backup archive."""
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        from core.exceptions import AuthError
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.PERFORM_BACKUP):
+            raise AuthError("User role lacks permission PERFORM_BACKUP to restore backup.")
+
         if not os.path.exists(backup_path):
             raise FileNotFoundError(f"Backup archive not found: {backup_path}")
 

@@ -25,6 +25,59 @@ def get_default_data_dir() -> str:
     return app_dir
 
 
+def _resolve_secure_jwt_secret() -> str:
+    """
+    Resolve JWT secret from environment variables or generate a persistent,
+    cryptographically secure 256-bit key per installation.
+    Rejects known default or hardcoded placeholder secrets.
+    """
+    import secrets
+    import logging
+    _log = logging.getLogger(__name__)
+
+    UNSAFE_PLACEHOLDERS = {
+        "finauditpro_production_jwt_secret_key_change_in_prod_2026",
+        "change-this-in-production-secret-key-2026",
+        "secret",
+        "changeme",
+        "your_jwt_secret_key_here",
+        "change_me",
+        "default_secret",
+    }
+
+    for env_key in ["FINAUDITPRO_JWT_SECRET", "FINAUDIT_JWT_SECRET", "JWT_SECRET"]:
+        if raw_val := os.environ.get(env_key):
+            val = raw_val.strip()
+            if val and val not in UNSAFE_PLACEHOLDERS and len(val) >= 16:
+                return val
+            else:
+                _log.warning(
+                    f"Insecure or placeholder JWT secret detected in env variable '{env_key}'. "
+                    "Auto-generating a secure installation-scoped key."
+                )
+
+    data_dir = get_default_data_dir()
+    secret_file = os.path.join(data_dir, ".jwt_secret")
+    if os.path.exists(secret_file):
+        try:
+            with open(secret_file, "r", encoding="utf-8") as f:
+                stored = f.read().strip()
+                if stored and len(stored) >= 32:
+                    return stored
+        except Exception:
+            pass
+
+    new_secret = secrets.token_hex(32)
+    try:
+        with open(secret_file, "w", encoding="utf-8") as f:
+            f.write(new_secret)
+        if hasattr(os, "chmod"):
+            os.chmod(secret_file, 0o600)
+    except Exception:
+        pass
+    return new_secret
+
+
 class AppConfig(BaseModel):
     """Application configuration model with environment variable fallbacks."""
 
@@ -65,7 +118,7 @@ class AppConfig(BaseModel):
         description="Optional custom database URL override (e.g. PostgreSQL)"
     )
     jwt_secret: str = Field(
-        default_factory=lambda: os.environ.get("FINAUDITPRO_JWT_SECRET") or os.environ.get("FINAUDIT_JWT_SECRET") or os.environ.get("JWT_SECRET") or "finauditpro_production_jwt_secret_key_change_in_prod_2026",
+        default_factory=_resolve_secure_jwt_secret,
         description="JWT secret key for FastAPI authentication"
     )
 

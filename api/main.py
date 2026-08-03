@@ -29,13 +29,24 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configure CORS
+# Configure CORS with explicit allowed origins (never wildcard * when allow_credentials=True)
+cors_env = os.environ.get("FINAUDIT_CORS_ORIGINS") or os.environ.get("CORS_ORIGINS")
+if cors_env:
+    allowed_origins = [origin.strip() for origin in cors_env.split(",") if origin.strip()]
+else:
+    allowed_origins = [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8000",
+    ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
 )
 
 
@@ -57,4 +68,5 @@ app.include_router(audit_projects.router, prefix=api_v1_prefix)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)
+    dev_reload = os.environ.get("FINAUDIT_DEV_RELOAD", "false").lower() == "true"
+    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=dev_reload)

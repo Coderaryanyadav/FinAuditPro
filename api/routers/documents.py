@@ -75,3 +75,38 @@ def get_engagement_documents(
     doc_repo = DocumentRepository(db)
     doc_service = DocumentService(doc_repo)
     return doc_service.get_engagement_documents(engagement_id)
+
+
+@router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_document(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission(Permission.DELETE_DOCUMENTS))
+):
+    """Delete a document by ID."""
+    doc_repo = DocumentRepository(db)
+    doc_service = DocumentService(doc_repo)
+    try:
+        doc_service.delete_document(document_id)
+        return None
+    except EntityNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except AuthError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+
+
+@router.post("/{document_id}/analyze", response_model=DocumentRead)
+def analyze_document(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission(Permission.RUN_AI_ANALYSIS))
+):
+    """Run AI analysis on document."""
+    doc_repo = DocumentRepository(db)
+    doc_service = DocumentService(doc_repo)
+    try:
+        return doc_service.run_ai_analysis(document_id)
+    except EntityNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except AuthError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))

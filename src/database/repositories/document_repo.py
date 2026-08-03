@@ -45,3 +45,11 @@ class DocumentRepository:
         self.session.commit()
         self.session.refresh(page)
         return page
+
+    def delete(self, document_id: int) -> bool:
+        document = self.get_by_id(document_id)
+        if document:
+            self.session.delete(document)
+            self.session.commit()
+            return True
+        return False

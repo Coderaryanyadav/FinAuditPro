@@ -50,3 +50,20 @@ def get_project(
     if not proj:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Audit project {project_id} not found")
     return proj
+
+
+@router.post("/{project_id}/approve", response_model=AuditProjectRead)
+def approve_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission(Permission.APPROVE_AUDIT))
+):
+    """Approve an audit project (requires APPROVE_AUDIT permission)."""
+    ds = DashboardService(db)
+    proj = ds.get_audit_project(project_id)
+    if not proj:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Audit project {project_id} not found")
+    proj.status = "Completed"
+    db.commit()
+    db.refresh(proj)
+    return proj

@@ -99,3 +99,24 @@ class DashboardService:
             self.session.add(proj)
             self.session.commit()
         return proj
+
+    def get_audit_logs(self) -> List[Any]:
+        """Fetch audit log entries after verifying VIEW_AUDIT_LOGS permission."""
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        from core.exceptions import AuthError
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.VIEW_AUDIT_LOGS):
+            raise AuthError("User role lacks permission VIEW_AUDIT_LOGS to inspect audit trail logs.")
+        from database.models import AuditLog
+        return self.session.query(AuditLog).order_by(AuditLog.id.desc()).limit(100).all()
+
+    def update_settings(self, settings_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Update system settings after verifying MANAGE_SETTINGS permission."""
+        from security.security_manager import SecurityManager
+        from security.rbac import Permission
+        from core.exceptions import AuthError
+        sm = SecurityManager()
+        if sm.current_session and not sm.check_permission(Permission.MANAGE_SETTINGS):
+            raise AuthError("User role lacks permission MANAGE_SETTINGS to modify application settings.")
+        return settings_data

@@ -28,6 +28,7 @@ class Permission(str, Enum):
     GENERATE_REPORTS = "generate_reports"
     SIGN_REPORTS = "sign_reports"
     VIEW_AUDIT_LOGS = "view_audit_logs"
+    VIEW_ANALYTICS = "view_analytics"
     MANAGE_SETTINGS = "manage_settings"
     PERFORM_BACKUP = "perform_backup"
 
@@ -51,6 +52,7 @@ class RBACManager:
             Permission.GENERATE_REPORTS,
             Permission.SIGN_REPORTS,
             Permission.VIEW_AUDIT_LOGS,
+            Permission.VIEW_ANALYTICS,
             Permission.MANAGE_SETTINGS,
             Permission.PERFORM_BACKUP,
         },
@@ -65,6 +67,7 @@ class RBACManager:
             Permission.REVIEW_WORKING_PAPERS,
             Permission.GENERATE_REPORTS,
             Permission.VIEW_AUDIT_LOGS,
+            Permission.VIEW_ANALYTICS,
         },
         
         UserRole.JUNIOR_AUDITOR: {
@@ -73,6 +76,7 @@ class RBACManager:
             Permission.RUN_AI_ANALYSIS,
             Permission.EDIT_WORKING_PAPERS,
             Permission.VIEW_AUDIT_LOGS,
+            Permission.VIEW_ANALYTICS,
         },
         
         UserRole.REVIEWER: {
@@ -80,11 +84,13 @@ class RBACManager:
             Permission.RUN_AI_ANALYSIS,
             Permission.REVIEW_WORKING_PAPERS,
             Permission.VIEW_AUDIT_LOGS,
+            Permission.VIEW_ANALYTICS,
         },
         
         UserRole.READ_ONLY: {
             Permission.VIEW_DASHBOARD,
             Permission.VIEW_AUDIT_LOGS,
+            Permission.VIEW_ANALYTICS,
         },
     }
 

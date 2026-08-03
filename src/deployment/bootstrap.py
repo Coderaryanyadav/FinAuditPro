@@ -49,12 +49,16 @@ class EngineBootstrap:
         # 2. Check/Start Ollama LLM Service Daemon
         try:
             import urllib.request
-            req = urllib.request.Request("http://localhost:11434/api/tags", method="GET")
+            from core.config import config
+            ollama_tags_url = f"{config.ollama_host}/api/tags"
+            req = urllib.request.Request(ollama_tags_url, method="GET")
             with urllib.request.urlopen(req, timeout=2) as resp:
                 if resp.status == 200:
                     logger.info("Background AI Bootstrap: Ollama LLM Daemon is active and responding.")
         except Exception:
-            logger.info("Ollama LLM service not responding on localhost:11434. Attempting background spawn...")
+            from core.config import config
+            logger.info(f"Ollama LLM service not responding on {config.ollama_host}. Attempting background spawn...")
+
             try:
                 subprocess.Popen(
                     ["ollama", "serve"],

@@ -129,19 +129,16 @@ class AuditHistoryWidget(QWidget):
                 audit_service = AuditTrailService(log_repo)
                 logs = audit_service.get_all_logs()
                 
+                default_user = os.environ.get("FINAUDIT_ADMIN_EMAIL") or "System Administrator"
                 if not logs:
-                    projects = session.query(AuditProject).order_by(AuditProject.id.desc()).all()
-                    if not projects:
-                        self.table.setRowCount(0)
-                        self.empty_widget = EmptyStateWidget("No Audit History Logs", "No activity logs or engagement records registered in the system.")
-                        return
+                    projects = session.query(AuditProject).order_by(AuditProject.created_at.desc()).all()
                     self.table.setRowCount(len(projects))
                     for r, p in enumerate(projects):
                         client = session.query(Client).filter_by(id=p.client_id).first()
                         name = client.name if client else f"Client #{p.client_id}"
                         dt_str = p.created_at.strftime("%d-%b-%Y %H:%M") if p.created_at else "--"
                         self.table.setItem(r, 0, QTableWidgetItem(dt_str))
-                        self.table.setItem(r, 1, QTableWidgetItem("admin@finauditpro.com"))
+                        self.table.setItem(r, 1, QTableWidgetItem(default_user))
                         self.table.setItem(r, 2, QTableWidgetItem(f"CREATE_AUDIT ({p.status})"))
                         self.table.setItem(r, 3, QTableWidgetItem(name))
                         self.table.setItem(r, 4, QTableWidgetItem("54008ddfa262c2c3..."))
@@ -151,14 +148,14 @@ class AuditHistoryWidget(QWidget):
                 for log in logs:
                     action_str = str(log.action or "").lower()
                     target_str = str(log.target_entity or "").lower()
-                    user_str = str(getattr(log, 'user_email', '') or "admin@finauditpro.com").lower()
+                    user_str = str(getattr(log, 'user_email', '') or default_user).lower()
                     if not query_text or (query_text in action_str or query_text in target_str or query_text in user_str):
                         filtered.append(log)
 
                 self.table.setRowCount(len(filtered))
                 for r, log in enumerate(filtered):
                     dt_str = log.created_at.strftime("%d-%b-%Y %H:%M") if log.created_at else "--"
-                    user_text = getattr(log, 'user_email', None) or "admin@finauditpro.com"
+                    user_text = getattr(log, 'user_email', None) or default_user
                     curr_hash = getattr(log, 'current_hash', None) or getattr(log, 'hash', None) or "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
                     self.table.setItem(r, 0, QTableWidgetItem(dt_str))

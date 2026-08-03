@@ -56,28 +56,35 @@ def _build_light_palette() -> QPalette:
 
 
 def _ensure_admin_user():
-    """Create default admin user on first launch if no users exist."""
+    """Create default admin user on first launch if no users exist (configurable via environment variables)."""
     import logging
     _log = logging.getLogger(__name__)
     try:
         from database.database import get_session
         from database.models import User
         from security.auth import PasswordHasher
+
+        admin_email = os.environ.get("FINAUDIT_ADMIN_EMAIL") or os.environ.get("ADMIN_EMAIL") or "admin@finauditpro.com"
+        admin_pass = os.environ.get("FINAUDIT_ADMIN_PASSWORD") or os.environ.get("ADMIN_PASSWORD") or "Admin@123"
+        admin_role = os.environ.get("FINAUDIT_ADMIN_ROLE") or os.environ.get("ADMIN_ROLE") or "Administrator"
+        username_part = admin_email.split("@")[0]
+
         with get_session() as session:
             if session.query(User).count() == 0:
-                hashed = PasswordHasher.hash_password("Admin@123")
+                hashed = PasswordHasher.hash_password(admin_pass)
                 admin = User(
-                    username="admin",
-                    email="admin@finauditpro.com",
+                    username=username_part,
+                    email=admin_email,
                     password_hash=hashed,
-                    role="Audit Partner",
+                    role=admin_role,
                     is_active=True,
                 )
                 session.add(admin)
                 session.commit()
-                _log.info("First-run: Created default admin user (admin@finauditpro.com).")
+                _log.info(f"First-run: Created default admin user ({admin_email}).")
     except Exception as e:
         _log.warning(f"Could not auto-create admin user: {e}")
+
 
 
 def main():

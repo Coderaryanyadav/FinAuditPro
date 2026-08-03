@@ -16,11 +16,11 @@ sqlcipher_module = None
 try:
     import sqlcipher3 as sqlcipher_module
     HAS_SQLCIPHER = True
-except ImportError:
+except Exception:
     try:
         from pysqlcipher3 import dbapi2 as sqlcipher_module
         HAS_SQLCIPHER = True
-    except ImportError:
+    except Exception:
         HAS_SQLCIPHER = False
         sqlcipher_module = None
 

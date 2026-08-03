@@ -30,10 +30,10 @@ class DatabaseMigrator:
             sqlcipher_module = None
             try:
                 import sqlcipher3 as sqlcipher_module
-            except ImportError:
+            except Exception:
                 try:
                     from pysqlcipher3 import dbapi2 as sqlcipher_module
-                except ImportError:
+                except Exception:
                     sqlcipher_module = None
 
             if sqlcipher_module and EncryptExistingDatabase.is_database_encrypted(db_path):

@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional
 import time
 import logging
+import os
 from sqlalchemy.exc import SQLAlchemyError
 
 from .document_validator import DocumentValidator

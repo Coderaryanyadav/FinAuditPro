@@ -140,17 +140,45 @@ class OCREngine:
             try:
                 import pytesseract
                 from PIL import Image
-                img = Image.open(file_path)
-                data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
-                conf_list = [float(c) for c in data.get('conf', []) if str(c).replace('-', '').isdigit() and float(c) > 0]
-                avg_conf = round((sum(conf_list) / len(conf_list) / 100.0), 4) if conf_list else 0.85
-                text = pytesseract.image_to_string(img)
-                return OCRResult(
-                    raw_text=text,
-                    pages=[OCRPageResult(page_number=1, text=text, confidence=avg_conf)],
-                    provider_used="Tesseract OCR",
-                    overall_confidence=avg_conf
-                )
+                import os
+                
+                ext = os.path.splitext(file_path)[1].lower()
+                images = []
+                
+                if ext == ".pdf":
+                    try:
+                        import pypdfium2 as pdfium
+                        pdf = pdfium.PdfDocument(file_path)
+                        for i in range(len(pdf)):
+                            images.append(pdf[i].render(scale=2).to_pil())
+                    except Exception as e:
+                        logger.warning(f"pypdfium2 failed to render PDF: {e}")
+                else:
+                    images.append(Image.open(file_path))
+
+                all_pages = []
+                full_text = []
+                total_conf = 0.0
+                
+                for idx, img in enumerate(images, start=1):
+                    data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
+                    conf_list = [float(c) for c in data.get('conf', []) if str(c).replace('-', '').isdigit() and float(c) > 0]
+                    avg_conf = round((sum(conf_list) / len(conf_list) / 100.0), 4) if conf_list else 0.85
+                    text = pytesseract.image_to_string(img)
+                    all_pages.append(OCRPageResult(page_number=idx, text=text, confidence=avg_conf))
+                    full_text.append(text)
+                    total_conf += avg_conf
+                
+                overall_conf = total_conf / len(images) if images else 0.0
+                final_text = "\n\n".join(full_text).strip()
+                
+                if final_text or images:
+                    return OCRResult(
+                        raw_text=final_text,
+                        pages=all_pages if all_pages else [OCRPageResult(page_number=1, text="", confidence=0.0)],
+                        provider_used="Tesseract OCR",
+                        overall_confidence=round(overall_conf, 4)
+                    )
             except (ImportError, OSError, ValueError, RuntimeError) as e:
                 logger.warning(f"OCR execution failed: {e}")
 

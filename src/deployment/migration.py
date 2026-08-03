@@ -6,7 +6,7 @@ Applies automatic SQLite database schema migrations and user configuration upgra
 import sqlite3
 import os
 import logging
-from typing import Optional
+from typing import Optional, Any
 from sqlalchemy.exc import SQLAlchemyError
 
 logger = logging.getLogger(__name__)
@@ -27,12 +27,12 @@ class DatabaseMigrator:
 
         try:
             from database.db_encryptor import EncryptExistingDatabase
-            sqlcipher_module = None
+            sqlcipher_module: Any = None
             try:
-                import sqlcipher3 as sqlcipher_module
+                import sqlcipher3 as sqlcipher_module  # type: ignore
             except Exception:
                 try:
-                    from pysqlcipher3 import dbapi2 as sqlcipher_module
+                    from pysqlcipher3 import dbapi2 as sqlcipher_module  # type: ignore
                 except Exception:
                     sqlcipher_module = None
 

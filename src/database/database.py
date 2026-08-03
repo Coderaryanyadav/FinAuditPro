@@ -1,7 +1,7 @@
 import os
 import platform
 import logging
-from typing import Optional
+from typing import Optional, Any
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from .models import Base
@@ -11,14 +11,14 @@ logger = logging.getLogger(__name__)
 
 # Detect SQLCipher driver if installed
 HAS_SQLCIPHER = False
-sqlcipher_module = None
+sqlcipher_module: Any = None
 
 try:
-    import sqlcipher3 as sqlcipher_module
+    import sqlcipher3 as sqlcipher_module  # type: ignore
     HAS_SQLCIPHER = True
 except Exception:
     try:
-        from pysqlcipher3 import dbapi2 as sqlcipher_module
+        from pysqlcipher3 import dbapi2 as sqlcipher_module  # type: ignore
         HAS_SQLCIPHER = True
     except Exception:
         HAS_SQLCIPHER = False

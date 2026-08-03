@@ -6,7 +6,8 @@ Provides transparent SQLCipher encryption migration for existing unencrypted SQL
 import os
 import shutil
 import logging
-from typing import Optional
+import tempfile
+from typing import Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -48,12 +49,12 @@ class EncryptExistingDatabase:
                 logger.warning(f"Could not derive encryption key for migration: {e}")
                 return False
 
-        sqlcipher_module = None
+        sqlcipher_module: Any = None
         try:
-            import sqlcipher3 as sqlcipher_module
+            import sqlcipher3 as sqlcipher_module  # type: ignore
         except Exception:
             try:
-                from pysqlcipher3 import dbapi2 as sqlcipher_module
+                from pysqlcipher3 import dbapi2 as sqlcipher_module  # type: ignore
             except Exception:
                 sqlcipher_module = None
 

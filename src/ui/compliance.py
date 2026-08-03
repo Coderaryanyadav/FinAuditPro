@@ -54,47 +54,82 @@ class ComplianceWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f8fafc;")
+        self.setStyleSheet("background-color: #f5f5f7;")
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # 1. Action Bar
+        # 1. Action Bar — Apple Header
         header = QFrame()
-        header.setFixedHeight(64)
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
+        header.setFixedHeight(68)
+        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
-        title = QLabel("Statutory Compliance Matrix & Audit Checksheets")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0f172a;")
-        subtitle = QLabel("Companies Act 2013 CARO 2020 Order & Income Tax Form 3CD Checklist")
-        subtitle.setStyleSheet("font-size: 12px; color: #64748b;")
+        title_v.setSpacing(2)
+        title = QLabel("Statutory Compliance Matrix & Checklist Engine")
+        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
+        subtitle = QLabel("Companies Act 2013 CARO 2020 (21 Clauses) & Tax Audit Form 3CD (44 Clauses)")
+        subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         h_layout.addLayout(title_v)
-
         h_layout.addStretch()
 
-        btn_save = QPushButton(" Save Compliance Sign-Offs")
-        btn_save.setToolTip("Save CARO 2020 & Form 3CD statutory verification sign-offs")
-        btn_save.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        btn_save.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
-        btn_save.clicked.connect(self.save_compliance_signoffs)
-        h_layout.addWidget(btn_save)
+        btn_run = QPushButton("Run Full Compliance Scan")
+        btn_run.setObjectName("primaryBtn")
+        btn_run.setStyleSheet("""
+            QPushButton#primaryBtn {
+                background-color: #007aff;
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: 600;
+                border-radius: 8px;
+                padding: 8px 16px;
+                border: none;
+            }
+            QPushButton#primaryBtn:hover { background-color: #0062cc; }
+        """)
+        btn_run.clicked.connect(self.run_compliance_scan)
+        h_layout.addWidget(btn_run)
 
         main_layout.addWidget(header)
-
-        # 2. Main Tabs
+        
+        # 2. Main Tabs — Apple Segmented Style
         self.tabs = QTabWidget()
-        self.tabs.setToolTip("Statutory Audit Compliance Matrix Checksheets")
-        self.tabs.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.tabs.setStyleSheet("""
-            QTabWidget::pane { border: 1px solid #e2e8f0; background: white; border-radius: 8px; margin: 16px; }
-            QTabBar::tab { background: #f1f5f9; color: #475569; padding: 10px 20px; font-weight: bold; border-top-left-radius: 6px; border-top-right-radius: 6px; }
-            QTabBar::tab:selected { background: #0ea5e9; color: white; }
+            QTabWidget::pane {
+                border: 1px solid #e5e5ea;
+                background: #ffffff;
+                border-radius: 14px;
+                margin: 16px 24px 24px 24px;
+            }
+            QTabBar {
+                background: transparent;
+                border: none;
+                margin-left: 24px;
+                margin-top: 12px;
+            }
+            QTabBar::tab {
+                background: transparent;
+                color: #6e6e73;
+                padding: 8px 18px;
+                font-weight: 500;
+                font-size: 13px;
+                border: none;
+                border-bottom: 2px solid transparent;
+                margin-right: 6px;
+            }
+            QTabBar::tab:selected {
+                color: #007aff;
+                border-bottom: 2px solid #007aff;
+                font-weight: 600;
+            }
+            QTabBar::tab:hover:!selected {
+                color: #1d1d1f;
+            }
         """)
 
         self.tabs.addTab(self._create_caro_tab(), "CARO 2020 (21 Clauses)")

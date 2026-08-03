@@ -1,88 +1,122 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QProgressBar
+"""
+FinAuditPro — Splash Screen
+Clean, light splash screen with trust sky blue accent.
+"""
+from PySide6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QProgressBar, QApplication
+)
 from PySide6.QtCore import Qt, QTimer, Signal
+
 
 class SplashScreen(QWidget):
     finished = Signal()
 
     def __init__(self):
         super().__init__()
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.WindowStaysOnTopHint |
+            Qt.WindowType.Tool
+        )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setFixedSize(600, 340)
+        self.setFixedSize(520, 280)
 
-        # Main layout
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(40, 40, 40, 40)
-        
-        # Container to act as the glass panel
-        self.container = QWidget(self)
-        self.container.setStyleSheet("""
+        # Center
+        screen = QApplication.primaryScreen().geometry()
+        self.move(
+            screen.center().x() - self.width() // 2,
+            screen.center().y() - self.height() // 2,
+        )
+
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+
+        # Card
+        card = QWidget()
+        card.setStyleSheet("""
             QWidget {
-                background-color: rgba(255, 255, 255, 0.95);
-                border-radius: 20px;
-                border: 1px solid rgba(255, 255, 255, 0.5);
+                background-color: #ffffff;
+                border-radius: 14px;
+                border: 1px solid #e2e8f0;
             }
         """)
-        container_layout = QVBoxLayout(self.container)
-        container_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        
-        # Logo/Title
-        self.title = QLabel("FinAuditPro")
-        self.title.setStyleSheet("font-size: 42px; font-weight: bold; color: #0f172a; background: transparent; border: none;")
-        self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        
-        self.subtitle = QLabel("Smart Financial Audit Assistant")
-        self.subtitle.setStyleSheet("font-size: 16px; color: #64748b; font-weight: 500; background: transparent; border: none;")
-        self.subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        
-        # Progress Bar
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setTextVisible(False)
-        self.progress_bar.setFixedHeight(6)
-        self.progress_bar.setStyleSheet("""
-            QProgressBar {
-                background-color: #e2e8f0;
-                border-radius: 3px;
-                border: none;
-            }
-            QProgressBar::chunk {
-                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #0ea5e9, stop:1 #38bdf8);
-                border-radius: 3px;
-            }
+        cl = QVBoxLayout(card)
+        cl.setContentsMargins(44, 44, 44, 36)
+        cl.setSpacing(0)
+
+        # Logo row
+        logo_row = QHBoxLayout()
+        logo_box = QLabel("FA")
+        logo_box.setFixedSize(32, 32)
+        logo_box.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        logo_box.setStyleSheet(
+            "background: #0284c7; color: #fff; border-radius: 7px;"
+            "font-size: 12px; font-weight: 800; border: none;"
+        )
+        app_name = QLabel("FinAuditPro")
+        app_name.setStyleSheet(
+            "font-size: 15px; font-weight: 700; color: #0f172a; border: none; margin-left: 10px;"
+        )
+        logo_row.addWidget(logo_box)
+        logo_row.addWidget(app_name)
+        logo_row.addStretch()
+        cl.addLayout(logo_row)
+        cl.addSpacing(28)
+
+        # Headline
+        headline = QLabel("Smart Financial\nAudit Assistant.")
+        headline.setStyleSheet(
+            "font-size: 28px; font-weight: 700; color: #0f172a; border: none; letter-spacing: -0.5px;"
+        )
+        cl.addWidget(headline)
+        cl.addStretch()
+
+        # Status
+        self.status_lbl = QLabel("Initializing…")
+        self.status_lbl.setStyleSheet(
+            "font-size: 11px; color: #64748b; border: none; font-weight: 500;"
+        )
+        cl.addWidget(self.status_lbl)
+        cl.addSpacing(10)
+
+        # Progress
+        self.bar = QProgressBar()
+        self.bar.setTextVisible(False)
+        self.bar.setFixedHeight(3)
+        self.bar.setRange(0, 100)
+        self.bar.setStyleSheet("""
+            QProgressBar { border:none; background:#e2e8f0; border-radius:1px; }
+            QProgressBar::chunk { background:#0284c7; border-radius:1px; }
         """)
+        cl.addWidget(self.bar)
+        cl.addSpacing(16)
 
-        # Status text
-        self.status = QLabel("Initializing AI Engine...")
-        self.status.setStyleSheet("font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; background: transparent; border: none;")
-        self.status.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        
-        container_layout.addStretch()
-        container_layout.addWidget(self.title)
-        container_layout.addWidget(self.subtitle)
-        container_layout.addSpacing(40)
-        container_layout.addWidget(self.status)
-        container_layout.addWidget(self.progress_bar)
-        container_layout.addStretch()
-        
-        layout.addWidget(self.container)
+        # Footer
+        ver = QLabel("Enterprise v2.4.0")
+        ver.setStyleSheet("font-size: 10px; color: #94a3b8; border: none;")
+        cl.addWidget(ver)
 
-        self.progress = 0
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_progress)
-        self.timer.start(25)
+        outer.addWidget(card)
 
-    def update_progress(self):
-        self.progress += 1
-        self.progress_bar.setValue(self.progress)
-        
-        if self.progress == 30:
-            self.status.setText("Establishing Secure Connection...")
-        elif self.progress == 60:
-            self.status.setText("Initializing Machine Learning Models...")
-        elif self.progress == 85:
-            self.status.setText("Verifying Compliance Rulesets...")
-            
-        if self.progress >= 100:
-            self.timer.stop()
+        self._progress = 0
+        self._timer = QTimer()
+        self._timer.timeout.connect(self._tick)
+        self._timer.start(16)
+
+    _MESSAGES = {
+        10: "Connecting to encrypted database…",
+        35: "Loading AI engines…",
+        60: "Bootstrapping RAG index…",
+        85: "Verifying audit rulesets…",
+        98: "Ready.",
+    }
+
+    def _tick(self):
+        self._progress += 1
+        self.bar.setValue(self._progress)
+        if self._progress in self._MESSAGES:
+            self.status_lbl.setText(self._MESSAGES[self._progress])
+        if self._progress >= 100:
+            self._timer.stop()
             self.finished.emit()
             self.close()

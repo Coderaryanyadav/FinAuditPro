@@ -42,15 +42,6 @@ def _get_app_data_dir() -> str:
 DATA_DIR = config.data_dir
 DB_PATH = os.path.join(DATA_DIR, 'finauditpro.db')
 
-# Resolve database URL: prioritize environment/config override (e.g. PostgreSQL)
-if config.database_url:
-    DATABASE_URL = config.database_url
-elif HAS_SQLCIPHER:
-    DATABASE_URL = f"sqlite+pysqlcipher:///{DB_PATH}"
-else:
-    DATABASE_URL = f"sqlite:///{DB_PATH}"
-    logger.warning("sqlcipher3 library not available. Live database running in standard plain SQLite mode.")
-
 
 def get_db_encryption_key() -> str:
     """Derive hex encryption passphrase for SQLCipher engine."""
@@ -61,30 +52,27 @@ def get_db_encryption_key() -> str:
         return "finauditpro_default_db_key"
 
 
+# Resolve database URL: prioritize environment/config override (e.g. PostgreSQL)
+if config.database_url:
+    DATABASE_URL = config.database_url
+elif HAS_SQLCIPHER:
+    passphrase = get_db_encryption_key()
+    DATABASE_URL = f"sqlite+pysqlcipher://:{passphrase}@/{DB_PATH}"
+else:
+    DATABASE_URL = f"sqlite:///{DB_PATH}"
+    logger.warning("sqlcipher3 library not available. Live database running in standard plain SQLite mode.")
+
+
 is_sqlite = DATABASE_URL.startswith("sqlite")
 
-if is_sqlite and HAS_SQLCIPHER and sqlcipher_module:
-    passphrase = get_db_encryption_key()
-    def _creator():
-        conn = sqlcipher_module.connect(DB_PATH)
-        conn.execute(f"PRAGMA key = '{passphrase}'")
-        return conn
-    engine = create_engine(DATABASE_URL, echo=False, creator=_creator, connect_args={'timeout': 30.0})
-else:
-    connect_args = {'timeout': 30.0} if is_sqlite else {}
-    engine = create_engine(DATABASE_URL, echo=False, connect_args=connect_args)
+connect_args = {'timeout': 30.0} if is_sqlite else {}
+engine = create_engine(DATABASE_URL, echo=False, connect_args=connect_args)
 
 
 @event.listens_for(engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
     if is_sqlite:
         cursor = dbapi_connection.cursor()
-        if HAS_SQLCIPHER:
-            try:
-                passphrase = get_db_encryption_key()
-                cursor.execute(f"PRAGMA key = '{passphrase}'")
-            except Exception:
-                pass
         cursor.execute("PRAGMA journal_mode=WAL")
         cursor.execute("PRAGMA synchronous=NORMAL")
         cursor.execute("PRAGMA cache_size=-64000")
@@ -100,9 +88,13 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def init_db():
     """Create all tables in the database if they don't exist and run migrations."""
     from deployment.migration import DatabaseMigrator
+    from database.db_encryptor import EncryptExistingDatabase
+    if is_sqlite and HAS_SQLCIPHER and os.path.exists(DB_PATH):
+        EncryptExistingDatabase.run(DB_PATH, DATA_DIR, get_db_encryption_key())
     Base.metadata.create_all(bind=engine)
     if is_sqlite and os.path.exists(DB_PATH):
         DatabaseMigrator.migrate(DB_PATH)
+
 
 
 from contextlib import contextmanager

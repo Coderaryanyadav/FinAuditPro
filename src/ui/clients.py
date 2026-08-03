@@ -20,14 +20,14 @@ class AddClientDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Add New Client Profile")
-        self.setStyleSheet("background-color: #ffffff; color: #0f172a;")
+        self.setStyleSheet("background-color: #ffffff; color: #1d1d1f;")
         self.resize(480, 420)
         
         layout = QVBoxLayout(self)
         layout.setContentsMargins(24, 24, 24, 24)
         
         title = QLabel("Add New Audit Client & Statutory Profile")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0f172a; margin-bottom: 12px;")
+        title.setStyleSheet("font-size: 18px; font-weight: 600; color: #1d1d1f; margin-bottom: 12px; letter-spacing: -0.4px;")
         layout.addWidget(title)
         
         form_frame = QFrame()
@@ -56,7 +56,7 @@ class AddClientDialog(QDialog):
         self.industry_input.setPlaceholderText("e.g. Technology / Retail / Finance")
         
         for input_field in [self.name_input, self.gst_input, self.pan_input, self.cin_input, self.kmp_input, self.industry_input]:
-            input_field.setStyleSheet("padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; color: #0f172a; background-color: #f8fafc;")
+            input_field.setStyleSheet("padding: 8px 12px; border: 1px solid #e5e5ea; border-radius: 8px; color: #1d1d1f; background-color: #ffffff;")
             
         form_layout.addRow("Client Legal Name *", self.name_input)
         form_layout.addRow("Entity Type", self.entity_combo)
@@ -70,9 +70,9 @@ class AddClientDialog(QDialog):
         
         self.buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.buttons.setStyleSheet("""
-            QPushButton { padding: 6px 16px; border-radius: 4px; }
-            QPushButton[text="OK"] { background-color: #0ea5e9; color: white; border: none; font-weight: bold; }
-            QPushButton[text="Cancel"] { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+            QPushButton { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; }
+            QPushButton[text="OK"] { background-color: #007aff; color: white; border: none; font-weight: 600; }
+            QPushButton[text="Cancel"] { background-color: #ffffff; color: #1d1d1f; border: 1px solid #e5e5ea; }
         """)
         self.buttons.accepted.connect(self.validate_and_accept)
         self.buttons.rejected.connect(self.reject)
@@ -101,7 +101,7 @@ class CreateAuditProjectDialog(QDialog):
     def __init__(self, session, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Create New Audit Project")
-        self.setStyleSheet("background-color: #ffffff; color: #0f172a;")
+        self.setStyleSheet("background-color: #ffffff; color: #1d1d1f;")
         self.resize(480, 420)
         self.session = session
         
@@ -109,7 +109,7 @@ class CreateAuditProjectDialog(QDialog):
         layout.setContentsMargins(24, 24, 24, 24)
         
         title = QLabel("Create New Audit Project")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0f172a; margin-bottom: 12px;")
+        title.setStyleSheet("font-size: 18px; font-weight: 600; color: #1d1d1f; margin-bottom: 12px; letter-spacing: -0.4px;")
         layout.addWidget(title)
         
         form_frame = QFrame()
@@ -132,7 +132,7 @@ class CreateAuditProjectDialog(QDialog):
         self.risk_combo.addItems(["Low", "Medium", "High"])
 
         for cb in [self.client_combo, self.fy_combo, self.audit_type_combo, self.stage_combo, self.risk_combo]:
-            cb.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; color: #0f172a; background-color: #f8fafc;")
+            cb.setStyleSheet("padding: 8px 12px; border: 1px solid #e5e5ea; border-radius: 8px; color: #1d1d1f; background-color: #ffffff;")
             
         form_layout.addRow("Target Client *", self.client_combo)
         form_layout.addRow("Financial Year *", self.fy_combo)
@@ -144,9 +144,9 @@ class CreateAuditProjectDialog(QDialog):
         
         self.buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.buttons.setStyleSheet("""
-            QPushButton { padding: 6px 16px; border-radius: 4px; }
-            QPushButton[text="OK"] { background-color: #0ea5e9; color: white; border: none; font-weight: bold; }
-            QPushButton[text="Cancel"] { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+            QPushButton { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; }
+            QPushButton[text="OK"] { background-color: #007aff; color: white; border: none; font-weight: 600; }
+            QPushButton[text="Cancel"] { background-color: #ffffff; color: #1d1d1f; border: 1px solid #e5e5ea; }
         """)
         self.buttons.accepted.connect(self.accept)
         self.buttons.rejected.connect(self.reject)
@@ -167,7 +167,7 @@ class ClientManagementWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f8fafc;")
+        self.setStyleSheet("background-color: #f5f5f7;")
         self.selected_client_id = None
         
         main_layout = QVBoxLayout(self)
@@ -176,32 +176,58 @@ class ClientManagementWidget(QWidget):
         
         # 1. Header Bar
         header = QFrame()
-        header.setFixedHeight(64)
+        header.setFixedHeight(68)
         header.setObjectName("clientsHeader")
+        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
+        title_v.setSpacing(2)
         title = QLabel("Client CRM & Statutory Profile Vault")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0f172a;")
+        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
         subtitle = QLabel("Client Master Register, Statutory Registrations & Engagement History")
-        subtitle.setStyleSheet("font-size: 12px; color: #64748b;")
+        subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         h_layout.addLayout(title_v)
 
         h_layout.addStretch()
         
-        btn_add = QPushButton(" + Add New Client")
+        btn_add = QPushButton("+ Add New Client")
         btn_add.setObjectName("primaryBtn")
         btn_add.setToolTip("Register a new client entity into statutory master vault")
         btn_add.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        btn_add.setStyleSheet("""
+            QPushButton#primaryBtn {
+                background-color: #007aff;
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: 600;
+                border-radius: 8px;
+                padding: 8px 16px;
+                border: none;
+            }
+            QPushButton#primaryBtn:hover { background-color: #0062cc; }
+        """)
         btn_add.clicked.connect(self.open_add_client_dialog)
         
-        btn_new_audit = QPushButton(" + New Audit Project")
+        btn_new_audit = QPushButton("+ New Audit Project")
         btn_new_audit.setObjectName("secondaryBtn")
         btn_new_audit.setToolTip("Initialize a new statutory audit engagement for client")
         btn_new_audit.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        btn_new_audit.setStyleSheet("""
+            QPushButton {
+                background-color: #ffffff;
+                color: #1d1d1f;
+                font-size: 13px;
+                font-weight: 500;
+                border: 1px solid #e5e5ea;
+                border-radius: 8px;
+                padding: 8px 16px;
+            }
+            QPushButton:hover { background-color: #f5f5f7; border-color: #d1d1d6; }
+        """)
         btn_new_audit.clicked.connect(self.open_create_audit_dialog)
         
         h_layout.addWidget(btn_add)
@@ -211,11 +237,12 @@ class ClientManagementWidget(QWidget):
         
         # 2. Main Splitter View
         splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.setStyleSheet("QSplitter::handle { background-color: #e2e8f0; }")
+        splitter.setStyleSheet("QSplitter::handle { background-color: #e5e5ea; }")
         
         # Left Pane: Client Table
         left_container = QFrame()
         left_container.setObjectName("clientsLeftPane")
+        left_container.setStyleSheet("background-color: #ffffff; border-right: 1px solid #e5e5ea;")
         left_layout = QVBoxLayout(left_container)
         left_layout.setContentsMargins(16, 16, 16, 16)
         
@@ -224,7 +251,7 @@ class ClientManagementWidget(QWidget):
         self.search_input.setPlaceholderText("Search by Client Name, PAN, or GSTIN...")
         self.search_input.setToolTip("Search client master records by legal name, GSTIN, or PAN")
         self.search_input.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.search_input.setStyleSheet("padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px;")
+        self.search_input.setStyleSheet("padding: 8px 12px; border: 1px solid #e5e5ea; border-radius: 8px; background-color: #f2f2f7;")
         self.search_input.textChanged.connect(self.filter_clients)
         search_layout.addWidget(self.search_input)
         left_layout.addLayout(search_layout)
@@ -235,9 +262,9 @@ class ClientManagementWidget(QWidget):
         self.table.setHorizontalHeaderLabels(["Client Legal Name", "GSTIN / PAN", "Industry"])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.table.setStyleSheet("""
-            QTableWidget { border: 1px solid #e2e8f0; gridline-color: #f1f5f9; background: white; border-radius: 6px; }
-            QHeaderView::section { background-color: #f8fafc; color: #334155; font-weight: bold; padding: 8px; border: none; border-bottom: 1px solid #e2e8f0; }
-            QTableWidget::item:selected { background-color: #f0f9ff; color: #0284c7; font-weight: bold; }
+            QTableWidget { border: 1px solid #e5e5ea; gridline-color: #f2f2f7; background: #ffffff; border-radius: 10px; }
+            QHeaderView::section { background-color: #fafafa; color: #86868b; font-weight: 600; font-size: 10px; letter-spacing: 0.8px; padding: 10px; border: none; border-bottom: 1px solid #e5e5ea; }
+            QTableWidget::item:selected { background-color: #f2f7ff; color: #007aff; font-weight: 600; }
         """)
         self.table.itemSelectionChanged.connect(self.on_client_selected)
         left_layout.addWidget(self.table)

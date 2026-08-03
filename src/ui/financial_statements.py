@@ -47,46 +47,81 @@ class FinancialStatementsWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f8fafc;")
+        self.setStyleSheet("background-color: #f5f5f7;")
         self.ledger_rows = []
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # 1. Action Bar
+        # 1. Action Bar — Apple Header
         header = QFrame()
-        header.setFixedHeight(70)
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
+        header.setFixedHeight(68)
+        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
 
         title_v = QVBoxLayout()
+        title_v.setSpacing(2)
         title = QLabel("Schedule III Financial Statements Engine")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0f172a;")
+        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
         subtitle = QLabel("Companies Act 2013 Division I & II Compliance")
-        subtitle.setStyleSheet("font-size: 12px; color: #64748b;")
+        subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         h_layout.addLayout(title_v)
         h_layout.addStretch()
 
-        btn_import = QPushButton(" Import Trial Balance (CSV/Excel)")
+        btn_import = QPushButton("Import Trial Balance (CSV/Excel)")
         btn_import.setToolTip("Import client Trial Balance CSV or Excel file for Schedule III mapping")
         btn_import.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        btn_import.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; font-weight: bold; border-radius: 6px; border: none;")
+        btn_import.setObjectName("primaryBtn")
+        btn_import.setStyleSheet("""
+            QPushButton#primaryBtn {
+                background-color: #007aff;
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: 600;
+                border-radius: 8px;
+                padding: 8px 16px;
+                border: none;
+            }
+            QPushButton#primaryBtn:hover { background-color: #0062cc; }
+        """)
         btn_import.clicked.connect(self.import_trial_balance)
 
-        btn_auto_map = QPushButton(" Auto-Map Schedule III")
+        btn_auto_map = QPushButton("Auto-Map Schedule III")
         btn_auto_map.setToolTip("Run ICAI Schedule III auto-mapping classification engine")
         btn_auto_map.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        btn_auto_map.setStyleSheet("padding: 8px 14px; background-color: #f1f5f9; color: #0ea5e9; font-weight: bold; border: 1px solid #bae6fd; border-radius: 6px;")
+        btn_auto_map.setStyleSheet("""
+            QPushButton {
+                background-color: #ffffff;
+                color: #007aff;
+                font-size: 13px;
+                font-weight: 600;
+                border: 1px solid #e5e5ea;
+                border-radius: 8px;
+                padding: 8px 16px;
+            }
+            QPushButton:hover { background-color: #f5f5f7; border-color: #d1d1d6; }
+        """)
         btn_auto_map.clicked.connect(self.run_auto_mapping)
 
-        btn_export = QPushButton(" Export Statements")
+        btn_export = QPushButton("Export Statements")
         btn_export.setToolTip("Export Schedule III Balance Sheet & Profit & Loss statements")
         btn_export.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        btn_export.setStyleSheet("padding: 8px 14px; background-color: #f1f5f9; color: #334155; font-weight: bold; border: 1px solid #cbd5e1; border-radius: 6px;")
+        btn_export.setStyleSheet("""
+            QPushButton {
+                background-color: #ffffff;
+                color: #1d1d1f;
+                font-size: 13px;
+                font-weight: 500;
+                border: 1px solid #e5e5ea;
+                border-radius: 8px;
+                padding: 8px 16px;
+            }
+            QPushButton:hover { background-color: #f5f5f7; border-color: #d1d1d6; }
+        """)
         btn_export.clicked.connect(self.export_statements)
 
         h_layout.addWidget(btn_import)
@@ -97,36 +132,82 @@ class FinancialStatementsWidget(QWidget):
 
         layout.addWidget(header)
 
-        # 2. Validation Status Banner
+        # 2. Validation Status Banner — Apple Soft Card
+        val_container = QWidget()
+        val_container_l = QVBoxLayout(val_container)
+        val_container_l.setContentsMargins(24, 16, 24, 0)
+        
         self.validation_frame = QFrame()
-        self.validation_frame.setFixedHeight(46)
-        self.validation_frame.setStyleSheet("background-color: #ecfdf5; border-bottom: 1px solid #a7f3d0;")
+        self.validation_frame.setFixedHeight(48)
+        self.validation_frame.setStyleSheet("""
+            QFrame {
+                background-color: #ffffff;
+                border: 1px solid #e5e5ea;
+                border-radius: 12px;
+            }
+        """)
         val_layout = QHBoxLayout(self.validation_frame)
-        val_layout.setContentsMargins(24, 0, 24, 0)
+        val_layout.setContentsMargins(20, 0, 20, 0)
 
         self.lbl_debit_total = QLabel("Total Debits: ₹0.00")
-        self.lbl_debit_total.setStyleSheet("font-weight: bold; color: #047857; font-size: 13px;")
+        self.lbl_debit_total.setStyleSheet("font-weight: 600; color: #1d1d1f; font-size: 13px; border: none;")
 
         self.lbl_credit_total = QLabel("Total Credits: ₹0.00")
-        self.lbl_credit_total.setStyleSheet("font-weight: bold; color: #047857; font-size: 13px;")
+        self.lbl_credit_total.setStyleSheet("font-weight: 600; color: #1d1d1f; font-size: 13px; border: none;")
 
-        self.lbl_balance_status = QLabel(" Trial Balance Balanced (Debits = Credits)")
-        self.lbl_balance_status.setStyleSheet("font-weight: bold; color: #065f46; background-color: #d1fae5; padding: 4px 10px; border-radius: 4px;")
+        self.lbl_balance_status = QLabel("Trial Balance Balanced (Debits = Credits)")
+        self.lbl_balance_status.setStyleSheet("""
+            background-color: #eafff0;
+            color: #1b8a3e;
+            border: 1px solid #bbf7d0;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+        """)
 
         val_layout.addWidget(self.lbl_debit_total)
         val_layout.addSpacing(24)
         val_layout.addWidget(self.lbl_credit_total)
         val_layout.addStretch()
         val_layout.addWidget(self.lbl_balance_status)
+        val_container_l.addWidget(self.validation_frame)
 
-        layout.addWidget(self.validation_frame)
+        layout.addWidget(val_container)
 
-        # 3. Main Tabs
+        # 3. Main Tabs — Apple Segmented / Underline Style
         self.tabs = QTabWidget()
         self.tabs.setStyleSheet("""
-            QTabWidget::pane { border: 1px solid #e2e8f0; background: white; border-radius: 8px; margin: 16px; }
-            QTabBar::tab { background: #f1f5f9; color: #475569; padding: 10px 20px; font-weight: bold; border-top-left-radius: 6px; border-top-right-radius: 6px; }
-            QTabBar::tab:selected { background: #0ea5e9; color: white; }
+            QTabWidget::pane {
+                border: 1px solid #e5e5ea;
+                background: #ffffff;
+                border-radius: 14px;
+                margin: 16px 24px 24px 24px;
+            }
+            QTabBar {
+                background: transparent;
+                border: none;
+                margin-left: 24px;
+                margin-top: 12px;
+            }
+            QTabBar::tab {
+                background: transparent;
+                color: #6e6e73;
+                padding: 8px 18px;
+                font-weight: 500;
+                font-size: 13px;
+                border: none;
+                border-bottom: 2px solid transparent;
+                margin-right: 6px;
+            }
+            QTabBar::tab:selected {
+                color: #007aff;
+                border-bottom: 2px solid #007aff;
+                font-weight: 600;
+            }
+            QTabBar::tab:hover:!selected {
+                color: #1d1d1f;
+            }
         """)
 
         self.tabs.addTab(self._create_tb_mapping_tab(), "Trial Balance & Schedule III Mapping")
@@ -135,8 +216,8 @@ class FinancialStatementsWidget(QWidget):
 
         layout.addWidget(self.tabs)
 
-        # Initialize with sample data if empty
-        self.load_sample_trial_balance()
+        # Initialize with empty state on fresh install
+        self.populate_tb_table([])
 
     def _create_tb_mapping_tab(self) -> QWidget:
         widget = QWidget()
@@ -152,8 +233,8 @@ class FinancialStatementsWidget(QWidget):
         self.tb_table.setColumnWidth(1, 150)
         self.tb_table.setColumnWidth(2, 150)
         self.tb_table.setStyleSheet("""
-            QTableWidget { border: 1px solid #e2e8f0; gridline-color: #f1f5f9; background: white; border-radius: 6px; }
-            QHeaderView::section { background-color: #f8fafc; color: #334155; font-weight: bold; padding: 8px; border: none; border-bottom: 1px solid #e2e8f0; }
+            QTableWidget { border: 1px solid #e5e5ea; gridline-color: #f2f2f7; background: #ffffff; border-radius: 10px; }
+            QHeaderView::section { background-color: #fafafa; color: #86868b; font-weight: 600; font-size: 10px; letter-spacing: 0.8px; padding: 10px; border: none; border-bottom: 1px solid #e5e5ea; }
         """)
 
         w_layout.addWidget(self.tb_table)
@@ -167,7 +248,10 @@ class FinancialStatementsWidget(QWidget):
         self.bs_table = QTableWidget(0, 3)
         self.bs_table.setHorizontalHeaderLabels(["Schedule III Particulars", "Note No.", "Amount (₹)"])
         self.bs_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        self.bs_table.setStyleSheet("border: 1px solid #e2e8f0; gridline-color: #f1f5f9; background: white;")
+        self.bs_table.setStyleSheet("""
+            QTableWidget { border: 1px solid #e5e5ea; gridline-color: #f2f2f7; background: #ffffff; border-radius: 10px; }
+            QHeaderView::section { background-color: #fafafa; color: #86868b; font-weight: 600; font-size: 10px; letter-spacing: 0.8px; padding: 10px; border: none; border-bottom: 1px solid #e5e5ea; }
+        """)
         w_layout.addWidget(self.bs_table)
         return widget
 
@@ -179,7 +263,10 @@ class FinancialStatementsWidget(QWidget):
         self.pnl_table = QTableWidget(0, 3)
         self.pnl_table.setHorizontalHeaderLabels(["Profit & Loss Particulars", "Note No.", "Amount (₹)"])
         self.pnl_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        self.pnl_table.setStyleSheet("border: 1px solid #e2e8f0; gridline-color: #f1f5f9; background: white;")
+        self.pnl_table.setStyleSheet("""
+            QTableWidget { border: 1px solid #e5e5ea; gridline-color: #f2f2f7; background: #ffffff; border-radius: 10px; }
+            QHeaderView::section { background-color: #fafafa; color: #86868b; font-weight: 600; font-size: 10px; letter-spacing: 0.8px; padding: 10px; border: none; border-bottom: 1px solid #e5e5ea; }
+        """)
         w_layout.addWidget(self.pnl_table)
         return widget
 
@@ -242,13 +329,11 @@ class FinancialStatementsWidget(QWidget):
 
         diff = abs(total_debit - total_credit)
         if diff < 0.01:
-            self.lbl_balance_status.setText(" Trial Balance Balanced (Debits = Credits)")
-            self.lbl_balance_status.setStyleSheet("font-weight: bold; color: #065f46; background-color: #d1fae5; padding: 4px 10px; border-radius: 4px;")
-            self.validation_frame.setStyleSheet("background-color: #ecfdf5; border-bottom: 1px solid #a7f3d0;")
+            self.lbl_balance_status.setText("Trial Balance Balanced (Debits = Credits)")
+            self.lbl_balance_status.setStyleSheet("background-color: #eafff0; color: #1b8a3e; border: 1px solid #bbf7d0; padding: 4px 12px; border-radius: 6px; font-weight: 600; font-size: 12px;")
         else:
-            self.lbl_balance_status.setText(f" Trial Balance Imbalanced (Diff: ₹{diff:,.2f})")
-            self.lbl_balance_status.setStyleSheet("font-weight: bold; color: #991b1b; background-color: #fef2f2; padding: 4px 10px; border-radius: 4px;")
-            self.validation_frame.setStyleSheet("background-color: #fff5f5; border-bottom: 1px solid #fecaca;")
+            self.lbl_balance_status.setText(f"Trial Balance Imbalanced (Diff: ₹{diff:,.2f})")
+            self.lbl_balance_status.setStyleSheet("background-color: #ffebeb; color: #d32f2f; border: 1px solid #ffcdd2; padding: 4px 12px; border-radius: 6px; font-weight: 600; font-size: 12px;")
 
         self.recalculate_financial_statements()
 

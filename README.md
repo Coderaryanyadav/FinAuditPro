@@ -9,7 +9,7 @@
   [![SQLite WAL](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
   <br>
   [![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-000000?style=for-the-badge&logo=ollama&logoColor=white)](https://ollama.ai/)
-  [![Tests](https://img.shields.io/badge/Tests-52%2F52%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+  [![Tests](https://img.shields.io/badge/Tests-61%2F61%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 </div>
@@ -179,6 +179,14 @@ flowchart LR
         end
     end
 
+    UI_Layer <--> Core_Engine
+    Core_Engine <--> OCREngines
+    Core_Engine <--> OllamaDaemon
+    Core_Engine <--> DB
+    Core_Engine <--> FAISS_Store
+    Core_Engine <--> AuditVault
+```
+
 ---
 
 ### Dual Deployment Modes
@@ -226,13 +234,6 @@ flowchart LR
     RBAC_Gate --> Redis_Store
     API --> Ollama_Server
 ```
-
-    UI_Layer <--> Core_Engine
-    Core_Engine <--> OCREngines
-    Core_Engine <--> OllamaDaemon
-    Core_Engine <--> DB
-    Core_Engine <--> FAISS_Store
-    Core_Engine <--> AuditVault
 ```
 
 ---
@@ -369,7 +370,7 @@ chmod +x install.sh && ./install.sh
 pytest tests/ -v
 ```
 
-**Current status: 52/52 passing** across security, analytics, reporting, rule engine, document intelligence, deployment, config, and UI component integration tests.
+**Current status: 61/61 passing** across security, API REST endpoints, analytics, reporting, rule engine, document intelligence, deployment, config, and UI component integration tests.
 
 ---
 

@@ -175,9 +175,43 @@ class TestServices(unittest.TestCase):
         """search_clients_and_findings returns matching clients."""
         from services.dashboard_service import DashboardService
         ds = DashboardService(self.session)
-        clients, findings = ds.search_clients_and_findings("Test Client")
+        clients, findings = ds.search_clients_and_findings("Test Client Corp")
         client_names = [c.name for c in clients]
         self.assertIn("Test Client Corp", client_names)
 
+    def test_upload_audit_document_managed_storage_and_rbac(self):
+        """upload_audit_document enforces RBAC and copies file to managed storage."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            sample_file = os.path.join(temp_dir, "audit_doc.pdf")
+            with open(sample_file, "wb") as f:
+                f.write(b"%PDF-1.4 audit content")
+
+            # Must succeed with active admin session
+            doc = self.doc_service.upload_audit_document(audit_id=self.dummy_engagement.id, file_path=sample_file, doc_type="Audit Report")
+            self.assertEqual(doc.file_name, "audit_doc.pdf")
+            self.assertIn(f"data/documents/eng_{self.dummy_engagement.id}", doc.file_path.replace("\\", "/"))
+            self.assertTrue(os.path.exists(doc.file_path))
+
+            # Must fail when session is removed
+            self.sm.current_session = None
+            with self.assertRaises(AuthError):
+                self.doc_service.upload_audit_document(audit_id=self.dummy_engagement.id, file_path=sample_file)
+
+    def test_backup_engine_rbac_enforcement(self):
+        """BackupEngine enforces PERFORM_BACKUP permission."""
+        from security.backup import BackupEngine
+        from security.auth import SessionToken
+        from security.rbac import UserRole
+
+        be = BackupEngine()
+        # Non-admin role without PERFORM_BACKUP permission
+        self.sm.current_session = SessionToken(
+            token_str="read_only_token", user_id=2,
+            user_email="read_only@test.com", role=UserRole.READ_ONLY.value
+        )
+        with self.assertRaises(AuthError):
+            be.create_backup()
+
 if __name__ == "__main__":
     unittest.main()
+

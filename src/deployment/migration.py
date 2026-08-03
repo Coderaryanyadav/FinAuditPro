@@ -6,6 +6,7 @@ Applies automatic SQLite database schema migrations and user configuration upgra
 import sqlite3
 import os
 import logging
+from typing import Optional
 from sqlalchemy.exc import SQLAlchemyError
 
 logger = logging.getLogger(__name__)
@@ -14,14 +15,34 @@ class DatabaseMigrator:
     """Manages SQLite schema version tracking and automatic migrations."""
 
     @staticmethod
-    def migrate(db_path: str = "src/data/finauditpro.db") -> bool:
+    def migrate(db_path: Optional[str] = None) -> bool:
         """Applies pending schema migrations to SQLite database."""
+        if not db_path:
+            from database.database import DB_PATH
+            db_path = DB_PATH
+
         if not os.path.exists(db_path):
             logger.info("Database file does not exist yet. Migration skipped.")
             return True
 
         try:
-            con = sqlite3.connect(db_path)
+            from database.db_encryptor import EncryptExistingDatabase
+            sqlcipher_module = None
+            try:
+                import sqlcipher3 as sqlcipher_module
+            except ImportError:
+                try:
+                    from pysqlcipher3 import dbapi2 as sqlcipher_module
+                except ImportError:
+                    sqlcipher_module = None
+
+            if sqlcipher_module and EncryptExistingDatabase.is_database_encrypted(db_path):
+                from database.database import get_db_encryption_key
+                passphrase = get_db_encryption_key()
+                con = sqlcipher_module.connect(db_path)
+                con.execute(f"PRAGMA key = '{passphrase}'")
+            else:
+                con = sqlite3.connect(db_path)
             cur = con.cursor()
 
             # Create schema_version table if not exists

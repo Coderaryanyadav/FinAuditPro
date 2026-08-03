@@ -4,40 +4,47 @@ Provides centralized Color Palettes, Typography scale, Spacing tokens, and Theme
 """
 
 class Colors:
-    # Primary Palette
-    PRIMARY = "#0ea5e9"       # Sky Blue 500
-    PRIMARY_DARK = "#0284c7"  # Sky Blue 600
+    # Primary Trust Palette (Sky / Corporate Blue)
+    PRIMARY = "#0284c7"       # Sky Blue 600
+    PRIMARY_DARK = "#0369a1"  # Sky Blue 700
     PRIMARY_HOVER = "#0369a1" # Sky Blue 700
     PRIMARY_LIGHT = "#e0f2fe" # Sky Blue 100
+    PRIMARY_BG_SUBTLE = "#eff6ff" # Soft Trust Blue Tint
 
     # Status / Functional Colors
-    SUCCESS = "#10b981"       # Emerald 500
-    SUCCESS_BG = "#dcfce7"    # Emerald 100
-    WARNING = "#f59e0b"       # Amber 500
+    SUCCESS = "#16a34a"       # Green 600
+    SUCCESS_BG = "#dcfce7"    # Green 100
+    WARNING = "#d97706"       # Amber 600
     WARNING_BG = "#fef3c7"    # Amber 100
-    DANGER = "#ef4444"        # Red 500
-    DANGER_DARK = "#dc2626"   # Red 600
+    DANGER = "#dc2626"        # Red 600
+    DANGER_DARK = "#991b1b"   # Red 800
     DANGER_BG = "#fee2e2"     # Red 100
+    INFO = "#0284c7"          # Sky 600
+    INFO_BG = "#e0f2fe"       # Sky 100
 
-    # Neutral / Slate Scale
+    # Neutral / Crisp Light Slate Scale
     BG_MAIN = "#f8fafc"       # Slate 50
     SURFACE_WHITE = "#ffffff"
-    BORDER_LIGHT = "#e2e8f0"  # Slate 200
-    BORDER_DEFAULT = "#cbd5e1"# Slate 300
+    SURFACE_CARD = "#ffffff"
+    BORDER_LIGHT = "#f1f5f9"  # Slate 100
+    BORDER_DEFAULT = "#e2e8f0"# Slate 200
+    BORDER_INPUT = "#cbd5e1"  # Slate 300
     
-    TEXT_MAIN = "#0f172a"     # Slate 900
-    TEXT_MUTED = "#64748b"    # Slate 500
-    TEXT_SUBTLE = "#94a3b8"   # Slate 400
+    TEXT_MAIN = "#0f172a"     # Slate 900 (High contrast text)
+    TEXT_MUTED = "#475569"    # Slate 600 (Secondary text)
+    TEXT_SUBTLE = "#64748b"   # Slate 500 (Captions / Labels)
+    TEXT_PLACEHOLDER = "#94a3b8" # Slate 400
 
-    # Dark Navigation Sidebar Colors
-    NAV_BG = "#0b0f19"
-    NAV_BORDER = "#1e293b"    # Slate 800
-    NAV_ITEM_HOVER = "#1e293b"
-    NAV_ITEM_ACTIVE = "#0ea5e9"
+    # Navigation Sidebar Colors
+    NAV_BG = "#ffffff"
+    NAV_BORDER = "#e2e8f0"    # Slate 200
+    NAV_ITEM_HOVER = "#f8fafc"
+    NAV_ITEM_ACTIVE = "#e0f2fe"
+    NAV_TEXT_ACTIVE = "#0284c7"
 
 
 class Fonts:
-    FAMILY = "'Inter', system-ui, -apple-system, sans-serif"
+    FAMILY = "'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', Roboto, sans-serif"
     
     # Font Sizes
     SIZE_XS = "10px"

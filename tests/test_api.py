@@ -46,7 +46,10 @@ class TestFastAPIBackend(unittest.TestCase):
         self.test_user = user
 
     def tearDown(self):
-        self.session.close()
+        try:
+            self.session.close()
+        except Exception:
+            pass
 
     def test_health_check(self):
         """GET /health returns 200 OK."""

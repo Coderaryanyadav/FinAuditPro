@@ -234,7 +234,6 @@ flowchart LR
     RBAC_Gate --> Redis_Store
     API --> Ollama_Server
 ```
-```
 
 ---
 

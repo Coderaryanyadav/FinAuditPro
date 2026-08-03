@@ -25,6 +25,11 @@ from typing import List, Optional
 logger = logging.getLogger(__name__)
 
 
+_PROCESS_INSTALLATION_KEY: Optional[bytes] = None
+_PROCESS_INSTALLATION_SALT: Optional[bytes] = None
+
+
+
 def _get_or_create_installation_key(data_dir: str) -> bytes:
     """
     Retrieve or generate a 256-bit cryptographically secure installation key secret.
@@ -33,12 +38,17 @@ def _get_or_create_installation_key(data_dir: str) -> bytes:
     This key is persisted to `.crypto_key` for machine-bound offline execution without a user password.
     Users requiring protection against local file access should initialize AESCryptoEngine with master_password.
     """
+    global _PROCESS_INSTALLATION_KEY
+    if _PROCESS_INSTALLATION_KEY and len(_PROCESS_INSTALLATION_KEY) == 32:
+        return _PROCESS_INSTALLATION_KEY
+
     key_file = os.path.join(data_dir, ".crypto_key")
     if os.path.exists(key_file):
         try:
             with open(key_file, "rb") as f:
                 key_bytes = f.read()
                 if len(key_bytes) == 32:
+                    _PROCESS_INSTALLATION_KEY = key_bytes
                     return key_bytes
         except (OSError, IOError) as e:
             logger.warning(f"Could not read existing crypto key file: {e}")
@@ -58,7 +68,9 @@ def _get_or_create_installation_key(data_dir: str) -> bytes:
                 f.write(new_key)
     except (OSError, IOError) as e:
         logger.warning(f"Could not persist installation crypto key to disk: {e}")
+    _PROCESS_INSTALLATION_KEY = new_key
     return new_key
+
 
 
 from core.config import config
@@ -85,24 +97,31 @@ class AESCryptoEngine:
             salt_filename = ".crypto_salt"
 
         if salt is None:
-            os.makedirs(data_dir, exist_ok=True)
-            salt_file = os.path.join(data_dir, salt_filename)
-            if os.path.exists(salt_file):
-                try:
-                    with open(salt_file, "rb") as f:
-                        self.salt = f.read(16)
-                except (OSError, IOError) as e:
-                    logger.warning(f"Could not read crypto salt: {e}")
-                    self.salt = secrets.token_bytes(16)
+            global _PROCESS_INSTALLATION_SALT
+            if not master_password and _PROCESS_INSTALLATION_SALT:
+                self.salt = _PROCESS_INSTALLATION_SALT
             else:
-                self.salt = secrets.token_bytes(16)
-                try:
-                    with open(salt_file, "wb") as f:
-                        f.write(self.salt)
-                except (OSError, IOError) as e:
-                    logger.warning(f"Could not persist crypto salt to disk: {e}")
+                os.makedirs(data_dir, exist_ok=True)
+                salt_file = os.path.join(data_dir, salt_filename)
+                if os.path.exists(salt_file):
+                    try:
+                        with open(salt_file, "rb") as f:
+                            self.salt = f.read(16)
+                    except (OSError, IOError) as e:
+                        logger.warning(f"Could not read crypto salt: {e}")
+                        self.salt = secrets.token_bytes(16)
+                else:
+                    self.salt = secrets.token_bytes(16)
+                    try:
+                        with open(salt_file, "wb") as f:
+                            f.write(self.salt)
+                    except (OSError, IOError) as e:
+                        logger.warning(f"Could not persist crypto salt to disk: {e}")
+                if not master_password:
+                    _PROCESS_INSTALLATION_SALT = self.salt
         else:
             self.salt = salt
+
 
         self.key = hashlib.pbkdf2_hmac("sha256", secret_bytes, self.salt, self.ITERATIONS)
         self._fernet = None

@@ -41,13 +41,22 @@ else:
         "http://127.0.0.1:8000",
     ]
 
+# Never combine wildcard '*' with allow_credentials=True
+allow_creds = True
+if "*" in allowed_origins:
+    if len(allowed_origins) == 1:
+        allow_creds = False
+    else:
+        allowed_origins = [o for o in allowed_origins if o != "*"]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True,
+    allow_credentials=allow_creds,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Accept"],
 )
+
 
 
 @app.get("/health", tags=["Health"])

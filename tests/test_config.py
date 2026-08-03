@@ -8,6 +8,21 @@ from unittest.mock import patch
 from core.config import AppConfig
 
 
+import core.config
+
+
+def teardown_module(module):
+    """Restore default global config and crypto keys after environment override tests."""
+    try:
+        import security.crypto
+        security.crypto._PROCESS_INSTALLATION_KEY = None
+        security.crypto._PROCESS_INSTALLATION_SALT = None
+    except Exception:
+        pass
+    core.config.config = core.config.AppConfig.load()
+
+
+
 def test_app_config_defaults():
     """Verify default config values when environment variables are unset."""
     with patch.dict(os.environ, {}, clear=True):
@@ -48,3 +63,4 @@ def test_app_config_fallback_env_keys():
         assert cfg.ollama_host == "http://ollama-server:11434"
         assert cfg.session_timeout_minutes == 15
         assert cfg.pbkdf2_iterations == 500000
+

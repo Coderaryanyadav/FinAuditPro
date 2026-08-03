@@ -1,13 +1,15 @@
 import os
 import json
+import secrets
 from datetime import datetime, timedelta, timezone
+
 from typing import Generator, Optional, Set
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from core.config import config
+import core.config
 from database.database import SessionLocal
 from database.models import User
 from database.repositories.user_repo import UserRepository
@@ -15,13 +17,10 @@ from security.security_manager import SecurityManager
 from security.auth import SessionToken
 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = config.session_timeout_minutes * 16  # 8 hours default
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
-REVOKED_TOKENS_FILE = os.path.join(config.data_dir, ".revoked_tokens.json")
-
 
 def _get_crypto():
+
     """Return an AESCryptoEngine instance for token revocation file encryption."""
     try:
         from security.crypto import AESCryptoEngine
@@ -30,19 +29,29 @@ def _get_crypto():
         return None
 
 
+def _get_revoked_file_path() -> str:
+    return os.path.join(core.config.config.data_dir, ".revoked_tokens.json")
+
+
+
 def _load_revoked_tokens() -> Set[str]:
     """Load revoked tokens set from encrypted file."""
-    if not os.path.exists(REVOKED_TOKENS_FILE):
+    rev_file = _get_revoked_file_path()
+    if not os.path.exists(rev_file):
         return set()
     try:
-        with open(REVOKED_TOKENS_FILE, "rb") as f:
+        with open(rev_file, "rb") as f:
             encrypted = f.read()
+        if not encrypted:
+            return set()
         crypto = _get_crypto()
-        if crypto and encrypted:
-            decrypted = crypto.decrypt_bytes(encrypted)
-            return set(json.loads(decrypted.decode("utf-8")))
-        with open(REVOKED_TOKENS_FILE, "r", encoding="utf-8") as f:
-            return set(json.load(f))
+        if crypto:
+            try:
+                decrypted = crypto.decrypt_bytes(encrypted)
+                return set(json.loads(decrypted.decode("utf-8")))
+            except Exception:
+                return set()
+        return set(json.loads(encrypted.decode("utf-8")))
     except Exception:
         return set()
 
@@ -50,18 +59,22 @@ def _load_revoked_tokens() -> Set[str]:
 def _save_revoked_tokens(revoked_set: Set[str]) -> None:
     """Save revoked tokens set into encrypted file."""
     try:
-        os.makedirs(os.path.dirname(REVOKED_TOKENS_FILE), exist_ok=True)
+        rev_file = _get_revoked_file_path()
+        os.makedirs(os.path.dirname(rev_file), exist_ok=True)
         raw = json.dumps(list(revoked_set)).encode("utf-8")
         crypto = _get_crypto()
         if crypto:
             encrypted = crypto.encrypt_bytes(raw)
-            with open(REVOKED_TOKENS_FILE, "wb") as f:
+            with open(rev_file, "wb") as f:
                 f.write(encrypted)
         else:
-            with open(REVOKED_TOKENS_FILE, "w", encoding="utf-8") as f:
+            with open(rev_file, "w", encoding="utf-8") as f:
                 f.write(json.dumps(list(revoked_set)))
     except Exception:
         pass
+
+
+
 
 
 def is_token_revoked(token: str) -> bool:
@@ -83,12 +96,17 @@ def get_db() -> Generator[Session, None, None]:
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    """Create a signed JWT access token."""
+    """Create a signed JWT access token with unique JTI claim."""
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
-    secret = config.jwt_secret
+    expire_mins = core.config.config.session_timeout_minutes * 16
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=expire_mins))
+    to_encode.update({
+        "exp": expire,
+        "jti": secrets.token_hex(16)
+    })
+    secret = core.config.config.jwt_secret
     return jwt.encode(to_encode, secret, algorithm=ALGORITHM)
+
 
 
 def revoke_token(token: str) -> None:
@@ -96,6 +114,7 @@ def revoke_token(token: str) -> None:
     revoked_set = _load_revoked_tokens()
     revoked_set.add(token)
     _save_revoked_tokens(revoked_set)
+
 
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
@@ -113,7 +132,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, config.jwt_secret, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, core.config.config.jwt_secret, algorithms=[ALGORITHM])
         sub = payload.get("sub")
         username: str = payload.get("username")
         role: str = payload.get("role")
@@ -127,6 +146,10 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     user = user_repo.get_by_id(user_id)
     if user is None or not user.is_active:
         raise credentials_exception
+
+
+
+
 
     # Synchronize current SecurityManager singleton session
     sm = SecurityManager()

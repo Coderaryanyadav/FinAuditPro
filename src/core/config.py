@@ -25,12 +25,19 @@ def get_default_data_dir() -> str:
     return app_dir
 
 
+_PROCESS_JWT_SECRET = None
+
+
 def _resolve_secure_jwt_secret() -> str:
     """
     Resolve JWT secret from environment variables or generate a persistent,
     cryptographically secure 256-bit key per installation.
     Rejects known default or hardcoded placeholder secrets.
     """
+    global _PROCESS_JWT_SECRET
+    if _PROCESS_JWT_SECRET:
+        return _PROCESS_JWT_SECRET
+
     import secrets
     import logging
     _log = logging.getLogger(__name__)
@@ -49,6 +56,7 @@ def _resolve_secure_jwt_secret() -> str:
         if raw_val := os.environ.get(env_key):
             val = raw_val.strip()
             if val and val not in UNSAFE_PLACEHOLDERS and len(val) >= 16:
+                _PROCESS_JWT_SECRET = val
                 return val
             else:
                 _log.warning(
@@ -63,6 +71,7 @@ def _resolve_secure_jwt_secret() -> str:
             with open(secret_file, "r", encoding="utf-8") as f:
                 stored = f.read().strip()
                 if stored and len(stored) >= 32:
+                    _PROCESS_JWT_SECRET = stored
                     return stored
         except Exception:
             pass
@@ -75,7 +84,9 @@ def _resolve_secure_jwt_secret() -> str:
             os.chmod(secret_file, 0o600)
     except Exception:
         pass
+    _PROCESS_JWT_SECRET = new_secret
     return new_secret
+
 
 
 class AppConfig(BaseModel):

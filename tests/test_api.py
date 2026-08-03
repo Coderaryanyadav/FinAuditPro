@@ -26,6 +26,7 @@ class TestFastAPIBackend(unittest.TestCase):
     def setUp(self):
         init_db()
         self.session = SessionLocal()
+        self.client = TestClient(app)
 
         # Seed test user
         self.test_username = "api_test_admin"
@@ -42,6 +43,11 @@ class TestFastAPIBackend(unittest.TestCase):
             )
             self.session.add(user)
             self.session.commit()
+        else:
+            user.password_hash = PasswordHasher.hash_password(self.test_password)
+            user.is_active = True
+            user.role = "Administrator"
+            self.session.commit()
 
         self.test_user = user
 
@@ -53,7 +59,7 @@ class TestFastAPIBackend(unittest.TestCase):
 
     def test_health_check(self):
         """GET /health returns 200 OK."""
-        response = client.get("/health")
+        response = self.client.get("/health")
         self.assertEqual(response.status_code, 200)
         json_data = response.json()
         self.assertEqual(json_data.get("status"), "ok")
@@ -61,11 +67,11 @@ class TestFastAPIBackend(unittest.TestCase):
     def test_auth_login_and_unauthorized_access(self):
         """POST /auth/login returns JWT token, and unauthenticated requests return 401."""
         # Unauthenticated request should fail with 401
-        res = client.get("/api/v1/clients")
+        res = self.client.get("/api/v1/clients")
         self.assertEqual(res.status_code, 401)
 
         # Login with valid credentials
-        login_res = client.post("/api/v1/auth/login", json={
+        login_res = self.client.post("/api/v1/auth/login", json={
             "username": self.test_username,
             "password": self.test_password
         })
@@ -76,13 +82,13 @@ class TestFastAPIBackend(unittest.TestCase):
 
         # Authenticated request should succeed with 200
         headers = {"Authorization": f"Bearer {token}"}
-        authenticated_res = client.get("/api/v1/clients", headers=headers)
+        authenticated_res = self.client.get("/api/v1/clients", headers=headers)
         self.assertEqual(authenticated_res.status_code, 200)
         self.assertIsInstance(authenticated_res.json(), list)
 
     def test_create_client_and_dashboard_metrics(self):
         """Create client via API and fetch dashboard metrics."""
-        login_res = client.post("/api/v1/auth/login", json={
+        login_res = self.client.post("/api/v1/auth/login", json={
             "username": self.test_username,
             "password": self.test_password
         })
@@ -91,7 +97,7 @@ class TestFastAPIBackend(unittest.TestCase):
 
         import uuid
         c_name = f"API Client Corp {uuid.uuid4().hex[:6]}"
-        create_res = client.post("/api/v1/clients", headers=headers, json={
+        create_res = self.client.post("/api/v1/clients", headers=headers, json={
             "name": c_name,
             "gst_number": "27AAACB1234F1Z0"
         })
@@ -100,7 +106,7 @@ class TestFastAPIBackend(unittest.TestCase):
         self.assertEqual(created_client["name"], c_name)
 
         # Check metrics
-        metrics_res = client.get("/api/v1/dashboard/metrics", headers=headers)
+        metrics_res = self.client.get("/api/v1/dashboard/metrics", headers=headers)
         self.assertEqual(metrics_res.status_code, 200)
         m_data = metrics_res.json()
         self.assertIn("total_clients", m_data)
@@ -108,7 +114,7 @@ class TestFastAPIBackend(unittest.TestCase):
 
     def test_api_audit_logs_and_project_approval(self):
         """Test GET /dashboard/audit-logs and POST /audit-projects/{id}/approve."""
-        login_res = client.post("/api/v1/auth/login", json={
+        login_res = self.client.post("/api/v1/auth/login", json={
             "username": self.test_username,
             "password": self.test_password
         })
@@ -116,13 +122,13 @@ class TestFastAPIBackend(unittest.TestCase):
         headers = {"Authorization": f"Bearer {token}"}
 
         # Check audit logs endpoint
-        logs_res = client.get("/api/v1/dashboard/audit-logs", headers=headers)
+        logs_res = self.client.get("/api/v1/dashboard/audit-logs", headers=headers)
         self.assertEqual(logs_res.status_code, 200)
         self.assertIsInstance(logs_res.json(), list)
 
     def test_api_token_revocation_on_logout(self):
         """Test token revocation persistence on POST /auth/logout."""
-        login_res = client.post("/api/v1/auth/login", json={
+        login_res = self.client.post("/api/v1/auth/login", json={
             "username": self.test_username,
             "password": self.test_password
         })
@@ -130,13 +136,14 @@ class TestFastAPIBackend(unittest.TestCase):
         headers = {"Authorization": f"Bearer {token}"}
 
         # Logout
-        logout_res = client.post("/api/v1/auth/logout", headers=headers)
+        logout_res = self.client.post("/api/v1/auth/logout", headers=headers)
         self.assertEqual(logout_res.status_code, 200)
 
         # Subsequent request with revoked token should fail with 401
-        res_after_logout = client.get("/api/v1/clients", headers=headers)
+        res_after_logout = self.client.get("/api/v1/clients", headers=headers)
         self.assertEqual(res_after_logout.status_code, 401)
         self.assertIn("revoked", res_after_logout.json().get("detail", "").lower())
+
 
 
 if __name__ == "__main__":

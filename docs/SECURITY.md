@@ -9,11 +9,14 @@ FinAuditPro is an air-gapped, privacy-first desktop application designed for Ind
 ## 1. Cryptographic Safeguards
 
 - **Password Hashing**: PBKDF2-HMAC-SHA256 with 600,000 iterations default and a strict, enforced floor of **100,000 iterations** (`MINIMUM_ITERATIONS` enforced in both `src/core/config.py` and `src/security/auth.py`). Each user account uses a unique 16-byte cryptographically secure random salt.
-- **Fernet Cipher & Key Derivation**: AES-128-CBC encryption with HMAC-SHA256 authentication (via Fernet specification) used for session storage, persistent lockout state (`data/.login_lockouts.json`), and compressed backup archives (`.enc`).
+- **Fernet Cipher & Key Derivation**: AES-128-CBC encryption with HMAC-SHA256 authentication (via Fernet specification) used for session storage, persistent lockout state (`data/.login_lockouts.json`), and compressed backup archives (`.enc`). AES installation keys (`.crypto_key` and `.crypto_salt`) are cached per process to prevent inter-test decryption mismatches.
+- **JWT Authentication & Anti-Replay Claims**: API tokens include standard RFC 7519 `jti` (unique 16-byte hexadecimal token identifier) claims. Revoked tokens are tracked in encrypted persistent storage (`.revoked_tokens.json`). Unique `jti` claims guarantee that duplicate logins for the same user yield cryptographically distinct token signatures, preventing revocation collisions.
+- **CORS Middleware Hardening**: `api/main.py` dynamically detects wildcard origins (`"*"`) in `allowed_origins` and automatically enforces `allow_credentials=False`, preventing cross-origin credential theft vulnerabilities (CWE-942).
 - **Live Database Security & At-Rest Encryption**:
   - Primary local database: Standard SQLite database (`finauditpro.db`) with SQLCipher (`pysqlcipher3`) transparent AES-256 page-level encryption enabled when driver is present.
   - Disk Encryption: OS-level full disk encryption (BitLocker on Windows, FileVault on macOS, LUKS on Linux) is strongly recommended for offline workstation protection.
 - **Audit Ledger Hash-Chain Integrity**: Immutable hash chain (`entry_hash` including `previous_hash` with SHA-256) verified on application bootstrap (`src/deployment/bootstrap.py`). Integrity failures generate `CRITICAL` log alerts and self-log security tamper events.
+
 
 ---
 

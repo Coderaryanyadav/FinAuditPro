@@ -9,7 +9,7 @@
   [![SQLite WAL](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
   <br>
   [![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-000000?style=for-the-badge&logo=ollama&logoColor=white)](https://ollama.ai/)
-  [![Tests](https://img.shields.io/badge/Tests-73%2F73%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+  [![Tests](https://img.shields.io/badge/Tests-78%2F78%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 </div>
@@ -37,7 +37,7 @@
 
 ## Overview
 
-**FinAuditPro** is an air-gapped desktop application built for statutory auditors and CA firms. It combines local LLM inference, multi-engine OCR, offline FAISS vector search, deterministic rule checking, and cryptographic report verification — all without transmitting sensitive client data to any external server.
+**FinAuditPro** is an air-gapped desktop application and enterprise API platform built for statutory auditors and Chartered Accountant (CA) firms. It combines local LLM inference, multi-engine OCR, offline FAISS vector search, deterministic Indian statutory rule checking (GSTIN, Section 40A(3), Benford's Law), and cryptographic report verification — all without transmitting sensitive client data to external servers.
 
 ---
 
@@ -45,14 +45,14 @@
 
 | Module | Description |
 |--------|-------------|
-| **Security & Auth** | PBKDF2-HMAC-SHA256 password hashing (100k iterations), RBAC with role-based permission gates, AES-256 encrypted backups, SHA-256 immutable audit ledger |
-| **Document Intelligence** | PyPDF text extraction + OCR fallback (PaddleOCR / Tesseract / EasyOCR), table extraction, multi-format ingestion |
-| **AI Audit Engine** | FAISS `IndexFlatIP` vector store, SentenceTransformer embeddings, RAG context retrieval via Ollama (llama3 / deepseek-r1) |
-| **Rule Engine** | GSTIN / PAN format validation, Section 40A(3) cash limit detection, Benford's Law distribution analysis, CARO 2020 checklist |
+| **Security & Auth** | PBKDF2-HMAC-SHA256 password hashing (600k iterations, 100k floor), 15-permission RBAC matrix, RFC 7519 `jti` JWT revocation protection, hardened CORS, AES-256 encrypted backups, SHA-256 immutable audit ledger |
+| **Document Intelligence** | PyPDF text extraction + OCR fallback cascade (PaddleOCR / Tesseract / EasyOCR), table parsing, magic-byte document validation |
+| **AI Audit Engine** | FAISS `IndexFlatIP` vector store, SentenceTransformer embeddings, RAG context retrieval via local Ollama (`llama3` / `deepseek-r1`) |
+| **Statutory Rule Engine** | GSTIN / PAN format validation, Indian statutory GST rate verification (`0.0%`–`28.0%`), Section 40A(3) cash limit detection, Benford's Law distribution analysis, CARO 2020 checklist |
 | **Financial Statements** | Trial balance CSV import, Schedule III auto-mapping, Balance Sheet and P&L generation |
 | **Audit Reports** | SA 700 / SA 705 WYSIWYG editor, real SHA-256 tamper hash, `DigitalSignatureManager`, `QRVerificationManager`, PDF export via `QPdfWriter` |
 | **Working Papers** | Engagement-scoped audit file management, indexed document registry |
-| **Analytics** | KPI cards, QtCharts spline/pie charts, real-time dashboard from live DB queries |
+| **Analytics & UI** | macOS-styled dashboard, QtCharts spline/pie charts, dynamic empty states, real-time SQL KPIs |
 | **Workflow Engine** | Audit lifecycle state machine with event bus and progress tracking |
 
 ---
@@ -60,7 +60,6 @@
 ## See it in action
 
 <p align="center">
-  <!-- TODO: Drop in a GIF demo here. Recommended: 8–15 sec, <5MB via ScreenToGif or Kap showing importing a trial balance and generating a report -->
   <img src="docs/assets/demo-placeholder.gif" alt="FinAuditPro Demo Workflow" width="800" />
 </p>
 
@@ -70,19 +69,16 @@
   <tr>
     <td align="center" width="50%">
       <b>Dashboard</b><br/>
-      <!-- TODO: Capture a 1280x800 dark theme screenshot with sample data loaded -->
       <img src="docs/assets/screenshot-dashboard.png" alt="Dashboard View" width="100%"/>
     </td>
     <td align="center" width="50%">
       <b>Audit Report View</b><br/>
-      <!-- TODO: Capture a 1280x800 dark theme screenshot showing WYSIWYG editor -->
       <img src="docs/assets/screenshot-report.png" alt="Audit Report View" width="100%"/>
     </td>
   </tr>
   <tr>
     <td align="center" colspan="2">
       <b>Rule Engine & Analytics</b><br/>
-      <!-- TODO: Capture a 1280x800 dark theme screenshot showing statutory rules or charts -->
       <img src="docs/assets/screenshot-analytics.png" alt="Analytics View" width="100%"/>
     </td>
   </tr>
@@ -197,7 +193,7 @@ FinAuditPro supports two deployment models depending on firm security requiremen
 Individual CAs or air-gapped auditor laptops running PySide6 GUI + embedded SQLite/SQLCipher + local Ollama LLM. No external network connectivity required.
 
 #### 2. Multi-User Client-Server API Mode (FastAPI + PostgreSQL)
-Enterprise CA firms collaborating across multiple auditor workstations. Uses a centralized FastAPI REST backend, JWT bearer authentication, role-based access control, PostgreSQL database, and Docker containerization.
+Enterprise CA firms collaborating across multiple auditor workstations. Uses a centralized FastAPI REST backend, JWT bearer authentication with `jti` claims, role-based access control, PostgreSQL database, and Docker containerization.
 
 ```mermaid
 %%{init: {
@@ -221,7 +217,7 @@ flowchart LR
     end
 
     subgraph Server[" Enterprise Backend Server (Docker Containerized)"]
-        API["FastAPI REST Service\n(/api/v1 - JWT Auth)"]
+        API["FastAPI REST Service\n(/api/v1 - JWT Auth & JTI Tracking)"]
         RBAC_Gate["Service RBAC & Permission Enforcer"]
         Postgres[(PostgreSQL Database)]
         Redis_Store[("Encrypted Token & Lockout Store")]
@@ -347,18 +343,13 @@ pip install -r requirements.txt
 # 4. Pull a local LLM model (Ollama)
 ollama pull llama3
 
-# 5. Launch application
+# 5. Launch application (Default Admin: admin@finauditpro.com / Admin@123)
 python src/main.py
 ```
 
-**Windows One-Click Installer:**
-```cmd
-install.bat
-```
-
-**macOS / Linux One-Click Installer:**
+**Database Wipe Utility:**
 ```bash
-chmod +x install.sh && ./install.sh
+python reset_db.py
 ```
 
 ---
@@ -369,7 +360,7 @@ chmod +x install.sh && ./install.sh
 pytest tests/ -v
 ```
 
-**Current status: 73/73 passing** across security, API REST endpoints, analytics, reporting, rule engine, document intelligence, deployment, config, and UI component integration tests.
+**Current status: 78/78 passing** across security, API REST endpoints, analytics, reporting, rule engine, document intelligence, deployment, config, worker threads, and UI component integration tests.
 
 ---
 
@@ -377,44 +368,58 @@ pytest tests/ -v
 
 ```text
 FinAuditPro/
-├── src/
-│   ├── main.py                    # Application entry point
-│   ├── core/config.py             # Pydantic AppConfig settings
-│   ├── ui/                        # PySide6 desktop interface components
-│   ├── services/                  # Business logic & authentication layer
-│   ├── database/
-│   │   ├── models.py              # SQLAlchemy ORM models
-│   │   └── repositories/          # Repository pattern DAOs
-│   ├── security/                  # RBAC, AES-256 crypto, audit ledger
-│   ├── ai/                        # Local Ollama client, FAISS RAG pipeline
-│   ├── reporting/                 # PDF generator, digital signatures, QR validation
-│   ├── rule_engine/               # Statutory compliance rules (GSTIN, Sec 40A(3), Benford)
-│   ├── document_intelligence/     # PyPDF & Multi-engine OCR pipeline
-│   ├── analytics/                 # KPI cards, forecasting, QtCharts
-│   └── workflow/                  # Audit lifecycle state machine & event bus
-├── tests/                         # Pytest integration & unit test suite
-│   └── sample_data/               # Sample bank statements & financial trial balances
-├── docs/                          # Architecture guides & documentation
-│   └── assets/                    # Diagram assets & visual documentation
-├── scripts/                       # Deployment, installer, & packaging scripts
-├── pyproject.toml                 # Build system & linting configuration
-├── requirements.txt               # Production Python dependencies
-├── requirements-dev.txt           # Development & testing dependencies
-├── FinAuditPro.spec               # PyInstaller executable build spec
-├── install.bat                    # Windows one-click installer
-└── install.sh                     # macOS/Linux one-click installer
+├── api/                           # FastAPI REST Service & Endpoint Routers
+│   ├── main.py                    # FastAPI server entry point & CORS configuration
+│   ├── dependencies.py            # JWT token validation, JTI claims & database session DI
+│   └── routers/                   # Endpoint routers (auth, clients, documents, dashboard, projects)
+├── assets/                        # SVG banners, logos, and UI asset graphics
+├── docs/                          # Developer, Architecture, Security, API & User documentation
+│   ├── audit_history/             # Engineering audit reports & remediation logs
+│   ├── assets/                    # Screenshots and diagram assets
+│   ├── API.md                     # REST API & Service Layer reference
+│   ├── ARCHITECTURE.md            # Clean Architecture specification
+│   ├── CHANGELOG.md               # Version changelog
+│   ├── INSTALLATION.md            # Installation & setup guide
+│   ├── SECURITY.md                # Security policy & cryptographic governance
+│   └── USER_MANUAL.md             # Operational user guide
+├── installer/                     # Distribution installer configurations
+├── scripts/                       # Packaging, DMG/AppImage creation & administrative scripts
+├── src/                           # Core Application Source Code
+│   ├── main.py                    # PySide6 Application Entry Point & Auto-Bootstrapping
+│   ├── core/config.py             # Cross-Platform Pydantic AppConfig
+│   ├── ui/                        # PySide6 Desktop User Interface Components
+│   ├── services/                  # Business Logic Services & RBAC Permission Enforcers
+│   ├── database/                  # SQLAlchemy ORM Models & Repository DAOs
+│   ├── security/                  # AES-256 Cryptography, PBKDF2 Hasher & Audit Ledger
+│   ├── ai/                        # Local Ollama Client & FAISS RAG Vector Store
+│   ├── reporting/                 # ReportLab PDF Generator, Ed25519 Signatures & QR Verification
+│   ├── rule_engine/               # Indian Statutory Rule Engine (GST, Sec 40A(3), Benford)
+│   ├── document_intelligence/     # PyPDF & Multi-Engine OCR Ingestion Pipeline
+│   ├── analytics/                 # KPI Aggregations & QtCharts Visualizations
+│   └── workflow/                  # Audit Lifecycle State Machine
+├── tests/                         # Pytest Automated Test Suite (78/78 Passing)
+│   ├── sample_data/               # Sample Financial Trial Balances & Statements
+│   └── create_test_pdfs.py        # Test PDF Generator Script
+├── FinAuditPro.spec               # PyInstaller Binary Packaging Specification
+├── pyproject.toml                 # Build System & Tooling Configuration
+├── requirements.txt               # Production Python Dependencies
+├── reset_db.py                    # CLI Database Wipe & Reset Tool
+├── install.bat                    # Windows One-Click Installer
+└── install.sh                     # macOS/Linux One-Click Installer
 ```
 
 ---
 
 ## Documentation
 
-Full technical docs are located in [`docs/`](docs/):
+Full technical documentation is located in [`docs/`](docs/):
 
+- [`API.md`](docs/API.md) — REST API & Python Service API reference
 - [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) — Clean architecture & layer specifications
-- [`ARCHITECTURE_GUIDE.md`](docs/ARCHITECTURE_GUIDE.md) — Architecture guide & security setup
-- [`AUDIT_REPORT.md`](docs/AUDIT_REPORT.md) — Full technical project audit report
-- [`DEVELOPER_GUIDE.md`](docs/DEVELOPER_GUIDE.md) — Contributor onboarding
+- [`CHANGELOG.md`](docs/CHANGELOG.md) — Version release notes & history
+- [`DEVELOPER_GUIDE.md`](docs/DEVELOPER_GUIDE.md) — Developer onboarding & guidelines
+- [`INSTALLATION.md`](docs/INSTALLATION.md) — Setup & packaging guide
+- [`SECURITY.md`](docs/SECURITY.md) — Cryptographic security & RBAC governance
 - [`USER_MANUAL.md`](docs/USER_MANUAL.md) — End-user operational guide
 
 ---
@@ -430,4 +435,5 @@ MIT License — see [`LICENSE`](LICENSE).
 <div align="center">
   <sub>Built with ❤️ by <b>Aryan Yadav</b>, <b>Jeet Shah</b>, and <b>Hitansh Jasani</b></sub>
 </div>
+
 

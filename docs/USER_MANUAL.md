@@ -1,6 +1,6 @@
 # FinAuditPro — End-User Operational Manual
 
-> **Software Version**: 1.0.0\
+> **Software Version**: 2.4.0\
 > **Target Audience**: Statutory Auditors, Chartered Accountants (CAs), Audit
 > Managers, Compliance Officers
 
@@ -8,7 +8,7 @@
 
 ## 1. Introduction
 
-**FinAuditPro** is an offline-first desktop application designed specifically
+**FinAuditPro** is an offline-first desktop application and enterprise API platform designed specifically
 for Chartered Accountants and statutory auditing firms in India. It automates
 financial document ingestion, statutory compliance verification (ICAI Standards
 on Auditing, CARO 2020, Income Tax Act, Companies Act 2013), working paper
@@ -33,9 +33,9 @@ graph LR
   from PDFs, Excel workbooks, and scanned images using PyPDF and multi-engine
   OCR (PaddleOCR / Tesseract).
 - **Statutory Rule Engine**: Evaluates statutory rules including GSTIN presence,
-  Section 40A(3) cash limit violation (> ₹10,000), Benford's Law numerical
+  GST rate slab verification (`0.0%`–`28.0%`), Section 40A(3) cash limit violation (> ₹10,000), Benford's Law numerical
   anomaly detection, and CARO 2020 inventory checks.
-- **Offline RAG AI Assistant**: Uses a local Ollama LLM (`llama3.2`) and local
+- **Offline RAG AI Assistant**: Uses a local Ollama LLM (`llama3`) and local
   FAISS vector search to query client documents securely.
 - **Tamper-Evident Report Generation**: Compiles professional SA 700 / SA 705
   audit reports in PDF format with SHA-256 digital signature hashes and QR
@@ -55,26 +55,32 @@ graph LR
 
 #### Windows (One-Click Installer)
 
-1. Download `FinAuditPro-v1.0.0-Windows.zip`.
-2. Extract the ZIP archive to your desired location.
-3. Double-click `install.bat` to run the automated setup wizard.
+1. Download `FinAuditPro-Setup.exe` or clone the repository.
+2. Double-click `install.bat` to run automated setup.
 
 #### macOS & Linux
 
-1. Open Terminal and navigate to the extracted directory.
+1. Open Terminal and navigate to the root project directory.
 2. Run the installer script:
    ```bash
    chmod +x install.sh && ./install.sh
    ```
 
-### 3.3 Initial Launch & Admin Registration
+### 3.3 Initial Launch & Default Credentials
 
-1. Launch FinAuditPro from your desktop shortcut or terminal
-   (`python src/main.py`).
-2. On first run, create your initial CA Partner Admin Account (Username, Email,
-   Strong Password).
-3. Set your Firm Name, ICAI Firm Registration Number (FRN), and CA Membership
-   Number.
+1. Launch FinAuditPro from your desktop shortcut or terminal (`python src/main.py`).
+2. On initial clean boot, the application automatically provisions default Partner Admin credentials:
+   - **Username / Email**: `admin@finauditpro.com`
+   - **Password**: `Admin@123`
+3. Update your password after initial login and configure your Firm Name, ICAI Firm Registration Number (FRN), and CA Membership Number under **Settings**.
+
+### 3.4 Database Wipe & Reset Utility
+
+To reset the database and active session lockouts for testing or fresh deployment:
+```bash
+python reset_db.py
+```
+
 
 ---
 

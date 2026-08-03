@@ -1,6 +1,6 @@
 # FinAuditPro — Developer Onboarding & Engineering Manual
 
-> **Version**: 1.0.0\
+> **Version**: 2.4.0\
 > **Audience**: Core Developers, Open-Source Contributors, Technical Reviewers
 
 ---
@@ -8,9 +8,9 @@
 ## 1. Introduction & Overview
 
 Welcome to the **FinAuditPro** developer onboarding manual. FinAuditPro is an
-enterprise-grade desktop audit platform engineered for Chartered Accountants and
+enterprise-grade desktop audit platform and REST API backend engineered for Chartered Accountants and
 statutory auditors. The codebase is written in Python 3.11+, using **PySide6 (Qt
-for Python)** for the GUI, **SQLAlchemy 2.0 / SQLite WAL** for data persistence,
+for Python)** for the GUI, **FastAPI** for REST endpoints, **SQLAlchemy 2.0 / SQLite WAL** for data persistence,
 **FAISS & Ollama** for offline AI RAG, and **ReportLab / OpenPyXL** for report
 output compilation.
 
@@ -67,22 +67,26 @@ pip install -r requirements.txt
 
 # 5. Start Local Ollama Daemon (In a separate terminal)
 ollama serve
-ollama pull llama3.2
+ollama pull llama3
 ```
 
 ---
 
 ## 4. Development Commands & Workflows
 
-### 4.1 Launching the Desktop Application
+### 4.1 Launching the Desktop Application & REST Server
 
 ```bash
+# Launch PySide6 Desktop Application
 python src/main.py
+
+# Launch FastAPI REST Server
+uvicorn api.main:app --reload --port 8000
 ```
 
 ### 4.2 Running Test Suites (`pytest`)
 
-FinAuditPro includes a comprehensive unit and integration test suite:
+FinAuditPro includes a comprehensive unit and integration test suite (78/78 tests passing):
 
 ```bash
 # Run all tests with verbosity
@@ -95,17 +99,10 @@ pytest tests/test_security.py -v
 pytest --cov=src tests/
 ```
 
-### 4.3 Code Quality & Linting Tools
+### 4.3 Database Wipe Utility
 
 ```bash
-# Check code formatting with Black
-black --check src/ tests/
-
-# Auto-format codebase
-black src/ tests/
-
-# Run Ruff linter
-ruff check src/ tests/
+python reset_db.py
 ```
 
 ---
@@ -114,8 +111,18 @@ ruff check src/ tests/
 
 ```text
 FinAuditPro/
-├── src/
-│   ├── main.py                    # Application Entry Point
+├── api/                           # FastAPI REST Service & Endpoint Routers
+│   ├── main.py                    # Server entry point & CORS configuration
+│   ├── dependencies.py            # JWT auth, JTI claims & Session DI
+│   └── routers/                   # Endpoint routers (auth, clients, docs, dashboard)
+├── assets/                        # SVG banners, logos, and UI asset graphics
+├── docs/                          # Architecture, Developer & Security Documentation
+│   ├── audit_history/             # Audit logs & remediation history
+│   └── assets/                    # Screenshot & diagram assets
+├── installer/                     # Distribution installer configurations
+├── scripts/                       # Packaging, DMG/AppImage creation & management scripts
+├── src/                           # Core Application Source Code
+│   ├── main.py                    # Application Entry Point & Auto-Bootstrapping
 │   ├── core/                      # Configuration & Domain Exceptions
 │   ├── database/                  # ORM Models & Repository DAOs
 │   ├── services/                  # Business Logic Controllers
@@ -127,14 +134,15 @@ FinAuditPro/
 │   ├── analytics/                 # Live SQL Metrics, KPI Engines, Forecast Charts
 │   ├── workflow/                  # Audit Lifecycle State Machine & Event Bus
 │   └── ui/                        # PySide6 Desktop Widgets & QSS Styles
-├── tests/                         # Pytest Integration & Unit Test Suite
-├── docs/                          # Architecture & Developer Documentation
-├── scripts/                       # Environment Bootstrapper & Release Packaging
+├── tests/                         # Pytest Integration & Unit Test Suite (78/78 Passing)
+├── FinAuditPro.spec               # PyInstaller Binary Packaging Specification
 ├── pyproject.toml                 # Build & Tool Configurations
 ├── requirements.txt               # Unified Master Requirements File
+├── reset_db.py                    # CLI Database Reset & Wipe Tool
 ├── install.bat                    # Windows One-Click Installer
 └── install.sh                     # macOS/Linux One-Click Installer
 ```
+
 
 ---
 

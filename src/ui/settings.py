@@ -13,7 +13,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QColor
 import requests
 from .styles import apply_shadow, EmptyStateWidget, LoadingStateWidget, ErrorStateWidget
-from core.config import config
+from core.config import config, get_default_data_dir
+from database.database import DB_PATH
 
 class SettingsWidget(QWidget):
     """CA Firm Settings & AI Ollama Model Configuration Manager Widget."""
@@ -153,7 +154,7 @@ class SettingsWidget(QWidget):
         sec_badge.setStyleSheet("background-color: #ecfdf5; color: #047857; font-weight: bold; padding: 8px; border-radius: 6px; font-size: 12px;")
         f_layout.addRow(sec_badge)
 
-        self.db_path = QLineEdit("data/finauditpro.db")
+        self.db_path = QLineEdit(DB_PATH)
         self.db_path.setReadOnly(True)
         self.db_path.setStyleSheet("padding: 8px; border: 1px solid #e2e8f0; background-color: #f8fafc; border-radius: 6px;")
         f_layout.addRow("SQLite Database Location:", self.db_path)
@@ -219,6 +220,7 @@ class SettingsWidget(QWidget):
 
     def save_settings(self):
         try:
+            import json
             config.ca_firm_name = self.firm_name.text().strip() or "Default CA Firm"
             config.ca_frn = self.frn_number.text().strip() or "000000W"
             config.ca_membership_no = self.member_no.text().strip() or "000000"
@@ -229,6 +231,17 @@ class SettingsWidget(QWidget):
             os.environ["FINAUDIT_CA_MEMBERSHIP_NO"] = config.ca_membership_no
             os.environ["FINAUDIT_CA_NAME"] = config.ca_name
 
+            # Persist settings to JSON
+            settings_path = os.path.join(get_default_data_dir(), "settings.json")
+            user_settings = {
+                "ca_firm_name": config.ca_firm_name,
+                "ca_frn": config.ca_frn,
+                "ca_membership_no": config.ca_membership_no,
+                "ca_name": config.ca_name
+            }
+            with open(settings_path, "w", encoding="utf-8") as f:
+                json.dump(user_settings, f, indent=4)
+
             QMessageBox.information(self, "Settings Saved", "CA Firm Profile and System Settings saved successfully!")
         except Exception as e:
             self.error_widget = ErrorStateWidget("Save Settings Error", str(e))
@@ -237,12 +250,12 @@ class SettingsWidget(QWidget):
         file_path, _ = QFileDialog.getSaveFileName(self, "Export Database Backup", "finauditpro_backup.db", "Database Files (*.db)")
         if not file_path: return
         try:
-            src = "data/finauditpro.db"
+            src = DB_PATH
             if os.path.exists(src):
                 shutil.copy(src, file_path)
                 QMessageBox.information(self, "Backup Successful", f"Database backup exported to:\n{file_path}")
             else:
-                QMessageBox.warning(self, "Backup Warning", "Main database file data/finauditpro.db not found.")
+                QMessageBox.warning(self, "Backup Warning", f"Main database file {DB_PATH} not found.")
         except Exception as e:
             self.error_widget = ErrorStateWidget("Database Backup Error", str(e))
             QMessageBox.critical(self, "Backup Error", f"Failed to export backup: {e}")

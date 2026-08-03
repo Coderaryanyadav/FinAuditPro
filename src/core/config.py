@@ -135,8 +135,24 @@ class AppConfig(BaseModel):
 
     @classmethod
     def load(cls) -> "AppConfig":
-        """Instantiate AppConfig reading current environment state."""
-        return cls()
+        """Instantiate AppConfig reading current environment state and user settings JSON."""
+        import json
+        settings_path = os.path.join(get_default_data_dir(), "settings.json")
+        kwargs = {}
+        if os.path.exists(settings_path):
+            try:
+                with open(settings_path, "r", encoding="utf-8") as f:
+                    user_settings = json.load(f)
+                    
+                if "ca_firm_name" in user_settings: kwargs["ca_firm_name"] = user_settings["ca_firm_name"]
+                if "ca_frn" in user_settings: kwargs["ca_frn"] = user_settings["ca_frn"]
+                if "ca_name" in user_settings: kwargs["ca_name"] = user_settings["ca_name"]
+                if "ca_membership_no" in user_settings: kwargs["ca_membership_no"] = user_settings["ca_membership_no"]
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"Failed to load settings.json: {e}")
+                
+        return cls(**kwargs)
 
 
 # Singleton config instance

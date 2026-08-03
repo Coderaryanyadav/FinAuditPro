@@ -32,13 +32,19 @@ class BackupArchive:
 class BackupEngine:
     """Manages automatic compressed database & document backups with AES-256 encryption."""
 
-    def __init__(self, backup_dir: str = "data/backups", master_password: Optional[str] = None):
-        self.backup_dir = backup_dir
+    def __init__(self, backup_dir: Optional[str] = None, master_password: Optional[str] = None):
+        from core.config import get_default_data_dir
+        self.backup_dir = backup_dir or os.path.join(get_default_data_dir(), "backups")
         self.crypto = AESCryptoEngine(master_password=master_password)
         os.makedirs(self.backup_dir, exist_ok=True)
 
-    def create_backup(self, db_path: str = "src/data/finauditpro.db", docs_dir: str = "data/documents") -> BackupArchive:
+    def create_backup(self, db_path: Optional[str] = None, docs_dir: Optional[str] = None) -> BackupArchive:
         """Create an AES-256 encrypted .enc archive containing the database and audit documents."""
+        from database.database import DB_PATH
+        from core.config import get_default_data_dir
+        db_path = db_path or DB_PATH
+        docs_dir = docs_dir or os.path.join(get_default_data_dir(), "documents")
+        
         from security.security_manager import SecurityManager
         from security.rbac import Permission
         from core.exceptions import AuthError
@@ -99,8 +105,13 @@ class BackupEngine:
         finally:
             storage.cleanup()
 
-    def restore_backup(self, backup_path: str, target_db_path: str = "src/data/finauditpro.db", target_docs_dir: str = "data/documents", expected_hash: Optional[str] = None) -> bool:
+    def restore_backup(self, backup_path: str, target_db_path: Optional[str] = None, target_docs_dir: Optional[str] = None, expected_hash: Optional[str] = None) -> bool:
         """Validate, decrypt, and extract database & document backup archive."""
+        from database.database import DB_PATH
+        from core.config import get_default_data_dir
+        target_db_path = target_db_path or DB_PATH
+        target_docs_dir = target_docs_dir or os.path.join(get_default_data_dir(), "documents")
+        
         from security.security_manager import SecurityManager
         from security.rbac import Permission
         from core.exceptions import AuthError
@@ -111,7 +122,7 @@ class BackupEngine:
         if not os.path.exists(backup_path):
             raise FileNotFoundError(f"Backup archive not found: {backup_path}")
 
-        temp_dir = os.path.join("src", "data", "restore_temp")
+        temp_dir = os.path.join(get_default_data_dir(), "restore_temp")
         storage = SecureStorage()
         temp_zip = storage.create_secure_temp_file(suffix=".zip")
 

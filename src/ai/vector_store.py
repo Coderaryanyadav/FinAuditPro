@@ -19,8 +19,9 @@ class VectorStore:
     Supports metadata filtering, embedding computation, and persistence.
     """
 
-    def __init__(self, index_path: str = "data/faiss_index.bin"):
-        self.index_path = index_path
+    def __init__(self, index_path: Optional[str] = None):
+        from core.config import get_default_data_dir
+        self.index_path = index_path or os.path.join(get_default_data_dir(), "faiss_index.bin")
         self.metadata: Dict[int, Dict[str, Any]] = {}
         self._next_id = 0
         self._embedding_service = None

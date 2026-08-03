@@ -43,8 +43,9 @@ class SessionState:
 class CrashRecoveryManager:
     """Manages periodic session state autosaving and crash recovery restoration."""
 
-    def __init__(self, state_file_path: str = "data/session_autosave.json"):
-        self.state_file_path = state_file_path
+    def __init__(self, state_file_path: Optional[str] = None):
+        from core.config import get_default_data_dir
+        self.state_file_path = state_file_path or os.path.join(get_default_data_dir(), "session_autosave.json")
         os.makedirs(os.path.dirname(self.state_file_path), exist_ok=True)
 
     def autosave_session(self, state: SessionState) -> bool:

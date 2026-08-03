@@ -81,13 +81,14 @@ class DropZoneFrame(QFrame):
 
 class AIProcessWorker(QThread):
     progress = Signal(str, int)  # status message, percentage
-    finished = Signal(bool)
+    finished = Signal(list)
 
     def __init__(self, document_ids):
         super().__init__()
         self.document_ids = document_ids
 
     def run(self):
+        failures = []
         try:
             with get_session() as session:
                 pipeline = DocumentPipeline()
@@ -96,32 +97,43 @@ class AIProcessWorker(QThread):
                     doc = session.query(Document).filter_by(id=doc_id).first()
                     if not doc: continue
                     
-                    def progress_cb(stage_name, pct):
-                        overall_pct = int((i / total) * 100 + (pct / total))
-                        self.progress.emit(f"Ingesting {doc.file_name} ({stage_name})...", overall_pct)
-                    
-                    result = pipeline.process_and_ingest(
-                        file_path=doc.file_path,
-                        engagement_id=doc.audit_id,
-                        client_id=doc.audit_id,
-                        document_id=doc.id,
-                        progress_callback=progress_cb
-                    )
-                    
-                    if result and result.status == "SUCCESS":
-                        doc.doc_type = "Ingested"
+                    try:
+                        def progress_cb(stage_name, pct):
+                            overall_pct = int((i / total) * 100 + (pct / total))
+                            self.progress.emit(f"Ingesting {doc.file_name} ({stage_name})...", overall_pct)
+                        
+                        result = pipeline.process_and_ingest(
+                            file_path=doc.file_path,
+                            engagement_id=doc.audit_id,
+                            client_id=doc.audit_id,
+                            document_id=doc.id,
+                            progress_callback=progress_cb
+                        )
+                        
+                        if result and result.status == "SUCCESS":
+                            doc.doc_type = "Ingested"
+                        else:
+                            doc.doc_type = "Failed"
+                            error_msg = getattr(result, "error_message", "Unknown processing error") if result else "No result returned"
+                            doc.error_message = error_msg
+                            failures.append(f"{doc.file_name}: {error_msg}")
                         session.commit()
-                    else:
+                    except Exception as e:
+                        logger.exception(f"Failed to process document {doc.file_name} (id={doc_id})")
                         doc.doc_type = "Failed"
+                        doc.error_message = str(e)
+                        failures.append(f"{doc.file_name}: {e}")
                         session.commit()
+                        self.progress.emit(f"Failed: {doc.file_name} — {e}", int((i / total) * 100))
             
             self.progress.emit("AI Processing Complete", 100)
-            self.finished.emit(True)
-        except (SQLAlchemyError, OSError, ValueError) as e:
-            logger.exception("Document Ingestion Error")
-            self.finished.emit(False)
+            self.finished.emit(failures)
+        except Exception as e:
+            logger.exception("Fatal Document Ingestion Error")
+            self.finished.emit([f"Fatal error: {str(e)}"])
         finally:
-            session.close()
+            if 'session' in locals():
+                session.close()
 
 class DocumentUploadWidget(QWidget):
     """Multi-document Ingestion, Classification & Inspector Pipeline Widget."""
@@ -445,8 +457,6 @@ class DocumentUploadWidget(QWidget):
             files = file_paths
 
         if files:
-            dest_dir = f"data/documents/proj_{proj_id}"
-            os.makedirs(dest_dir, exist_ok=True)
             uploaded_count = 0
             
             with get_session() as session:
@@ -454,12 +464,17 @@ class DocumentUploadWidget(QWidget):
                 service = DocumentService(repo)
                 for file_path in files:
                     if not os.path.exists(file_path): continue
-                    filename = os.path.basename(file_path)
-                    dest_path = os.path.join(dest_dir, filename)
-                    shutil.copy(file_path, dest_path)
                     
-                    service.upload_audit_document(audit_id=proj_id, file_path=dest_path, doc_type="Uploaded")
-                    uploaded_count += 1
+                    try:
+                        service.upload_audit_document(
+                            audit_id=proj_id,
+                            file_path=file_path,
+                            doc_type="Uploaded"
+                        )
+                        uploaded_count += 1
+                    except Exception as e:
+                        logger.error(f"Failed to upload {file_path}: {e}")
+                        QMessageBox.warning(self, "Upload Failed", f"Could not upload {os.path.basename(file_path)}:\n{e}")
                 
             self.load_uploaded_files()
             if uploaded_count > 0:
@@ -490,14 +505,15 @@ class DocumentUploadWidget(QWidget):
         self.progress_bar.setValue(pct)
         self.progress_bar.setFormat(f"{msg} ({pct}%)")
 
-    def on_process_finished(self, success):
+    def on_process_finished(self, failures):
         self.progress_bar.setVisible(False)
         self.btn_process.setEnabled(True)
         self.load_uploaded_files()
-        if success:
-            QMessageBox.information(self, "Processing Complete", "AI Document Ingestion Completed Successfully!")
+        if not failures:
+            QMessageBox.information(self, "Processing Complete", "All documents were ingested successfully!")
         else:
-            QMessageBox.critical(self, "Error", "AI Document Ingestion Failed.")
+            error_details = "\n".join(failures)
+            QMessageBox.warning(self, "Processing Completed with Errors", f"The following documents failed:\n\n{error_details}")
 
     def closeEvent(self, event):
         event.accept()

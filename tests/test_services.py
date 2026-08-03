@@ -87,7 +87,7 @@ class TestServices(unittest.TestCase):
 
             doc = self.doc_service.upload_document(engagement_id=self.dummy_engagement_id, file_path=sample_file, document_type="Invoice")
             self.assertEqual(doc.file_name, "sample_invoice.pdf")
-            self.assertIn(f"data/documents/eng_{self.dummy_engagement_id}", doc.file_path.replace("\\", "/"))
+            self.assertIn(f"documents/eng_{self.dummy_engagement_id}", doc.file_path.replace("\\", "/"))
             self.assertTrue(os.path.exists(doc.file_path))
 
     def test_working_paper_service_index_creation(self):
@@ -188,7 +188,7 @@ class TestServices(unittest.TestCase):
             # Must succeed with active admin session
             doc = self.doc_service.upload_audit_document(audit_id=self.dummy_engagement_id, file_path=sample_file, doc_type="Audit Report")
             self.assertEqual(doc.file_name, "audit_doc.pdf")
-            self.assertIn(f"data/documents/eng_{self.dummy_engagement_id}", doc.file_path.replace("\\", "/"))
+            self.assertIn(f"documents/eng_{self.dummy_engagement_id}", doc.file_path.replace("\\", "/"))
             self.assertTrue(os.path.exists(doc.file_path))
 
             # Must fail when session is removed

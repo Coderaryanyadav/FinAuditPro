@@ -96,7 +96,17 @@ class DatabaseMigrator:
                     logger.info("Applied Database Migration 5: Added entry_hash column to audit_logs table.")
 
             if current_version < 5:
-                cur.execute("INSERT INTO schema_version (version) VALUES (5);")
+                cur.execute("INSERT OR IGNORE INTO schema_version (version) VALUES (5);")
+
+            # Migration 6: Add error_message column to documents table if missing
+            cur.execute("PRAGMA table_info(documents);")
+            doc_cols_v2 = [col[1] for col in cur.fetchall()]
+            if doc_cols_v2 and "error_message" not in doc_cols_v2:
+                cur.execute("ALTER TABLE documents ADD COLUMN error_message TEXT;")
+                logger.info("Applied Database Migration 6: Added error_message column to documents table.")
+
+            if current_version < 6:
+                cur.execute("INSERT OR IGNORE INTO schema_version (version) VALUES (6);")
 
             con.commit()
             con.close()

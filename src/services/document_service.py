@@ -5,6 +5,7 @@ from database.repositories.document_repo import DocumentRepository
 from database.models import Document, DocumentPage
 from security.security_manager import SecurityManager
 from security.rbac import Permission
+from core.config import get_default_data_dir
 
 class DocumentService:
     """
@@ -26,7 +27,7 @@ class DocumentService:
             raise ValidationError(f"File does not exist at path: {file_path}")
             
         file_name = os.path.basename(file_path)
-        managed_dir = os.path.join("data", "documents", f"eng_{engagement_id}")
+        managed_dir = os.path.join(get_default_data_dir(), "documents", f"eng_{engagement_id}")
         os.makedirs(managed_dir, exist_ok=True)
         dest_path = os.path.join(managed_dir, file_name)
         if os.path.abspath(file_path) != os.path.abspath(dest_path):
@@ -67,7 +68,7 @@ class DocumentService:
             raise ValidationError(f"File does not exist at path: {file_path}")
 
         file_name = os.path.basename(file_path)
-        managed_dir = os.path.join("data", "documents", f"eng_{audit_id}")
+        managed_dir = os.path.join(get_default_data_dir(), "documents", f"eng_{audit_id}")
         os.makedirs(managed_dir, exist_ok=True)
         dest_path = os.path.join(managed_dir, file_name)
         if os.path.abspath(file_path) != os.path.abspath(dest_path):

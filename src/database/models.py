@@ -178,6 +178,7 @@ class Document(Base):
     document_type = Column(String(50), nullable=True)
     doc_type = Column(String(50), default='Uploaded')
     upload_status = Column(String(50), default='Uploaded')
+    error_message = Column(Text, nullable=True)
     ocr_confidence = Column(Float, default=98.5)
     is_vectorized = Column(Boolean, default=False)
     created_at = Column(DateTime, default=utc_now)

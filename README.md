@@ -9,7 +9,7 @@
   [![SQLite WAL](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
   <br>
   [![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-000000?style=for-the-badge&logo=ollama&logoColor=white)](https://ollama.ai/)
-  [![Tests](https://img.shields.io/badge/Tests-61%2F61%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+  [![Tests](https://img.shields.io/badge/Tests-73%2F73%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 </div>
@@ -370,7 +370,7 @@ chmod +x install.sh && ./install.sh
 pytest tests/ -v
 ```
 
-**Current status: 61/61 passing** across security, API REST endpoints, analytics, reporting, rule engine, document intelligence, deployment, config, and UI component integration tests.
+**Current status: 73/73 passing** across security, API REST endpoints, analytics, reporting, rule engine, document intelligence, deployment, config, and UI component integration tests.
 
 ---
 
@@ -429,6 +429,6 @@ MIT License — see [`LICENSE`](LICENSE).
 ---
 
 <div align="center">
-  <sub>Built with  by <b>Aryan Yadav</b>, <b>Jeet Shah</b>, and <b>Hitansh Jasani</b>)</sub>
+  <sub>Built with ❤️ by <b>Aryan Yadav</b>, <b>Jeet Shah</b>, and <b>Hitansh Jasani</b></sub>
 </div>
 

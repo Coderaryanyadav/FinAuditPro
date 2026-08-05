@@ -1146,6 +1146,50 @@ QSplitter::handle {
     width: 1px;
     height: 1px;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   AI COPILOT CHIPS & BADGES
+═══════════════════════════════════════════════════════════ */
+QPushButton#promptChipBtn {
+    background-color: #f1f5f9;
+    color: #0284c7;
+    border: 1px solid #bae6fd;
+    border-radius: 12px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+QPushButton#promptChipBtn:hover {
+    background-color: #e0f2fe;
+    border-color: #7dd3fc;
+}
+QLabel#statusBadgeGreen {
+    background-color: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+    border-radius: 10px;
+    padding: 4px 10px;
+    font-size: 10px;
+    font-weight: bold;
+}
+QLabel#statusBadgeAmber {
+    background-color: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 4px 10px;
+    font-size: 10px;
+    font-weight: bold;
+}
+QLabel#statusBadgeRed {
+    background-color: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 4px 10px;
+    font-size: 10px;
+    font-weight: bold;
+}
 """
 
 

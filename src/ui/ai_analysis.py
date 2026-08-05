@@ -327,7 +327,7 @@ class AIAuditWidget(QWidget):
         self.handle_input()
 
     def handle_input(self):
-        text = self.chat_input.text().strip()
+        text = self.chat_input.toPlainText().strip()
         if not text: return
         self.chat_input.clear()
         

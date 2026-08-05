@@ -30,6 +30,7 @@ class SettingsWidget(QWidget):
         # 1. Action Bar Header
         header = QFrame()
         header.setFixedHeight(68)
+        header.setObjectName("settingsHeader")
         header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
@@ -47,10 +48,11 @@ class SettingsWidget(QWidget):
         h_layout.addStretch()
         
         btn_save = QPushButton("Save Configuration")
+        btn_save.setObjectName("primaryBtn")
         btn_save.setToolTip("Save system settings and CA firm configuration")
         btn_save.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_save.setStyleSheet("""
-            QPushButton {
+            QPushButton#primaryBtn {
                 background-color: #007aff;
                 color: #ffffff;
                 font-size: 13px;
@@ -59,7 +61,7 @@ class SettingsWidget(QWidget):
                 padding: 8px 16px;
                 border: none;
             }
-            QPushButton:hover { background-color: #0062cc; }
+            QPushButton#primaryBtn:hover { background-color: #0062cc; }
         """)
         btn_save.clicked.connect(self.save_settings)
         h_layout.addWidget(btn_save)
@@ -93,10 +95,24 @@ class SettingsWidget(QWidget):
         f_layout.setSpacing(12)
 
         self.firm_name = QLineEdit(config.ca_firm_name)
+        self.firm_name.setToolTip("Legal name of Chartered Accountancy firm")
+        self.firm_name.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
         self.frn_number = QLineEdit(config.ca_frn)
+        self.frn_number.setToolTip("7-character ICAI Firm Registration Number (FRN)")
+        self.frn_number.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
         self.member_no = QLineEdit(config.ca_membership_no)
+        self.member_no.setToolTip("6-digit ICAI CA Membership Number")
+        self.member_no.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
         self.partner_name = QLineEdit(config.ca_name)
+        self.partner_name.setToolTip("Name of signing Chartered Accountant / Partner")
+        self.partner_name.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
         self.firm_address = QLineEdit(getattr(config, 'ca_address', 'Suite 401, Corporate Heights, BKC, Mumbai - 400051'))
+        self.firm_address.setToolTip("Registered office address of CA Firm")
+        self.firm_address.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         for input_field in [self.firm_name, self.frn_number, self.member_no, self.partner_name, self.firm_address]:
             input_field.setStyleSheet("padding: 8px; border: 1px solid #e5e5ea; border-radius: 8px; background-color: #ffffff; font-size: 13px; color: #1d1d1f;")
@@ -122,16 +138,22 @@ class SettingsWidget(QWidget):
         f_layout.setSpacing(12)
 
         self.ollama_url = QLineEdit(config.ollama_host)
+        self.ollama_url.setToolTip("Ollama local daemon base URL endpoint")
+        self.ollama_url.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.ollama_url.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;")
         f_layout.addRow("Ollama Local Endpoint URL:", self.ollama_url)
 
         self.model_combo = QComboBox()
+        self.model_combo.setToolTip("Select target local LLM model for RAG audit reasoning")
+        self.model_combo.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.model_combo.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;")
         self.model_combo.addItems(["llama3.2:latest", "mistral:latest", "qwen2.5:latest", "deepseek-r1:latest"])
 
         f_layout.addRow("Local Model Target:", self.model_combo)
 
         btn_test_ollama = QPushButton(" Test Ollama Connection")
+        btn_test_ollama.setToolTip("Test connection to local Ollama AI daemon")
+        btn_test_ollama.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_test_ollama.setStyleSheet("padding: 6px 12px; background-color: #f1f5f9; color: #0284c7; border: 1px solid #bae6fd; font-weight: bold; border-radius: 6px;")
         btn_test_ollama.clicked.connect(self.test_ollama)
         f_layout.addRow("Diagnostics:", btn_test_ollama)

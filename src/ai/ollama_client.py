@@ -55,6 +55,50 @@ class OllamaClient:
         except Exception:
             return False
 
+    @classmethod
+    def check_status_details(cls, base_url: Optional[str] = None) -> tuple:
+        """
+        Detailed diagnostic check returning (status_code, headline, instructions_html).
+        Status codes:
+          - 'online': Daemon running with at least 1 model installed.
+          - 'no_models': Daemon running but 0 models installed.
+          - 'offline': Daemon unreachable / not installed.
+        """
+        try:
+            from core.config import config as _cfg
+            url = base_url or _cfg.ollama_host
+            res = requests.get(f"{url}/api/tags", timeout=3)
+            if res.status_code == 200:
+                models = res.json().get("models", [])
+                if len(models) > 0:
+                    return ("online", "Ollama Local RAG Engine Active", "")
+                else:
+                    return (
+                        "no_models",
+                        "Ollama Daemon Active — No AI Models Downloaded",
+                        "Ollama is running on your system, but no AI models have been downloaded yet.<br/>"
+                        "To activate local LLM RAG capabilities, open Terminal/CMD and run:<br/>"
+                        "<code><b>ollama pull llama3.2</b></code><br/>"
+                        "Then restart FinAuditPro."
+                    )
+            return (
+                "offline",
+                "Local AI Engine (Ollama) Not Installed or Stopped",
+                "Local RAG features require <b>Ollama</b>, a free open-source local AI engine.<br/>"
+                "1. Download and install Ollama from <a href='https://ollama.com'>https://ollama.com</a><br/>"
+                "2. Open Terminal/CMD and run: <code><b>ollama pull llama3.2</b></code><br/>"
+                "3. Restart FinAuditPro to enable local LLM analysis."
+            )
+        except Exception:
+            return (
+                "offline",
+                "Local AI Engine (Ollama) Not Installed or Stopped",
+                "Local RAG features require <b>Ollama</b>, a free open-source local AI engine.<br/>"
+                "1. Download and install Ollama from <a href='https://ollama.com'>https://ollama.com</a><br/>"
+                "2. Open Terminal/CMD and run: <code><b>ollama pull llama3.2</b></code><br/>"
+                "3. Restart FinAuditPro to enable local LLM analysis."
+            )
+
     def generate(self, prompt: str, system_prompt: Optional[str] = None, json_mode: bool = False, retries: int = 3) -> str:
         """Synchronous generation with retries."""
         url = f"{self.base_url}/api/generate"

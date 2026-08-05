@@ -5,6 +5,7 @@ and 1-Click Peer Review / NFRA Log Export.
 """
 
 import csv
+import os
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                                QPushButton, QFrame, QTableWidget, QTableWidgetItem, 
                                QHeaderView, QLineEdit, QFileDialog, QMessageBox)
@@ -32,6 +33,7 @@ class AuditHistoryWidget(QWidget):
         # 1. Action Bar Header
         header = QFrame()
         header.setFixedHeight(68)
+        header.setObjectName("historyHeader")
         header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
@@ -49,15 +51,21 @@ class AuditHistoryWidget(QWidget):
         h_layout.addStretch()
 
         self.search_box = QLineEdit()
+        self.search_box.setObjectName("searchField")
         self.search_box.setPlaceholderText("Filter by User, Action, or Entity...")
+        self.search_box.setToolTip("Filter audit logs by user, action, or target entity name")
+        self.search_box.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.search_box.setFixedWidth(240)
         self.search_box.setStyleSheet("padding: 6px 12px; border: 1px solid #e5e5ea; border-radius: 6px; background-color: #ffffff; color: #1d1d1f;")
         self.search_box.textChanged.connect(self.load_history)
         h_layout.addWidget(self.search_box)
 
         btn_export = QPushButton("Export Log for Peer Review")
+        btn_export.setObjectName("primaryBtn")
+        btn_export.setToolTip("Export full immutable audit trail ledger to CSV for ICAI Peer Review")
+        btn_export.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_export.setStyleSheet("""
-            QPushButton {
+            QPushButton#primaryBtn {
                 background-color: #007aff;
                 color: #ffffff;
                 font-size: 13px;
@@ -66,7 +74,7 @@ class AuditHistoryWidget(QWidget):
                 padding: 8px 16px;
                 border: none;
             }
-            QPushButton:hover { background-color: #0062cc; }
+            QPushButton#primaryBtn:hover { background-color: #0062cc; }
         """)
         btn_export.clicked.connect(self.export_peer_review_log)
         h_layout.addWidget(btn_export)
@@ -104,9 +112,11 @@ class AuditHistoryWidget(QWidget):
         table_card.setStyleSheet("background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 12px; padding: 16px;")
         apply_shadow(table_card, blur=15, dy=3, alpha=6)
         
-        card_v = QVBoxLayout(table_card)
+        self.card_v = QVBoxLayout(table_card)
         
         self.table = QTableWidget(0, 5)
+        self.table.setToolTip("Immutable SHA-256 Audit Trail Activity Ledger")
+        self.table.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.table.setHorizontalHeaderLabels(["Timestamp", "Auditor / User", "Event Action", "Target Entity", "SHA-256 Block Hash"])
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
@@ -115,13 +125,24 @@ class AuditHistoryWidget(QWidget):
             QHeaderView::section { background-color: #fafafa; color: #86868b; font-weight: 600; padding: 8px; font-size: 10px; letter-spacing: 0.5px; border: none; border-bottom: 1px solid #e5e5ea; text-transform: uppercase; }
         """)
         
-        card_v.addWidget(self.table)
+        self.card_v.addWidget(self.table)
         c_layout.addWidget(table_card)
         
         main_layout.addWidget(content)
+        self.empty_widget = None
+        self.error_widget = None
         self.load_history()
 
+    def clear_state_widgets(self):
+        if self.empty_widget:
+            self.empty_widget.deleteLater()
+            self.empty_widget = None
+        if self.error_widget:
+            self.error_widget.deleteLater()
+            self.error_widget = None
+
     def load_history(self):
+        self.clear_state_widgets()
         query_text = self.search_box.text().lower().strip()
         try:
             with get_session() as session:
@@ -132,6 +153,12 @@ class AuditHistoryWidget(QWidget):
                 default_user = os.environ.get("FINAUDIT_ADMIN_EMAIL") or "System Administrator"
                 if not logs:
                     projects = session.query(AuditProject).order_by(AuditProject.created_at.desc()).all()
+                    if not projects:
+                        self.table.hide()
+                        self.empty_widget = EmptyStateWidget("No Audit Logs", "No audit log activity recorded in cryptographic ledger.")
+                        self.card_v.addWidget(self.empty_widget)
+                        return
+                    self.table.show()
                     self.table.setRowCount(len(projects))
                     for r, p in enumerate(projects):
                         client = session.query(Client).filter_by(id=p.client_id).first()
@@ -152,6 +179,13 @@ class AuditHistoryWidget(QWidget):
                     if not query_text or (query_text in action_str or query_text in target_str or query_text in user_str):
                         filtered.append(log)
 
+                if not filtered:
+                    self.table.hide()
+                    self.empty_widget = EmptyStateWidget("No Matching Activity", f"No audit trail records matched search filter '{query_text}'.")
+                    self.card_v.addWidget(self.empty_widget)
+                    return
+
+                self.table.show()
                 self.table.setRowCount(len(filtered))
                 for r, log in enumerate(filtered):
                     dt_str = log.created_at.strftime("%d-%b-%Y %H:%M") if log.created_at else "--"
@@ -168,8 +202,9 @@ class AuditHistoryWidget(QWidget):
                     hash_item.setFont(QFont("monospace", 9))
                     self.table.setItem(r, 4, hash_item)
         except Exception as e:
-            self.table.setRowCount(0)
+            self.table.hide()
             self.error_widget = ErrorStateWidget("Audit Trail Query Error", str(e))
+            self.card_v.addWidget(self.error_widget)
 
     def export_peer_review_log(self):
         file_path, _ = QFileDialog.getSaveFileName(self, "Export Audit Trail for Peer Review", "Audit_Trail_Ledger.csv", "CSV Files (*.csv)")

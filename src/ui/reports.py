@@ -43,6 +43,7 @@ class ReportsWidget(QWidget):
         # 1. Action Bar Header
         header = QFrame()
         header.setFixedHeight(68)
+        header.setObjectName("reportsHeader")
         header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
@@ -60,8 +61,11 @@ class ReportsWidget(QWidget):
         h_layout.addStretch()
 
         export_btn = QPushButton("Export Official PDF Audit Report")
+        export_btn.setObjectName("primaryBtn")
+        export_btn.setToolTip("Export formal ICAI Audit Report & CARO Annexure to PDF format")
+        export_btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         export_btn.setStyleSheet("""
-            QPushButton {
+            QPushButton#primaryBtn {
                 background-color: #007aff;
                 color: #ffffff;
                 font-size: 13px;
@@ -70,7 +74,7 @@ class ReportsWidget(QWidget):
                 padding: 8px 16px;
                 border: none;
             }
-            QPushButton:hover { background-color: #0062cc; }
+            QPushButton#primaryBtn:hover { background-color: #0062cc; }
         """)
         export_btn.clicked.connect(self.export_pdf)
         h_layout.addWidget(export_btn)
@@ -126,25 +130,32 @@ class ReportsWidget(QWidget):
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         body = QWidget()
-        b_layout = QVBoxLayout(body)
-        b_layout.setContentsMargins(32, 24, 32, 32)
+        self.b_layout = QVBoxLayout(body)
+        self.b_layout.setContentsMargins(32, 24, 32, 32)
 
-        editor_frame = QFrame()
-        editor_frame.setStyleSheet("background-color: white; border: 1px solid #e2e8f0; border-radius: 12px;")
-        e_layout = QVBoxLayout(editor_frame)
+        self.editor_frame = QFrame()
+        self.editor_frame.setStyleSheet("background-color: white; border: 1px solid #e2e8f0; border-radius: 12px;")
+        e_layout = QVBoxLayout(self.editor_frame)
         e_layout.setContentsMargins(24, 24, 24, 24)
 
         self.editor_content = QTextEdit()
+        self.editor_content.setToolTip("Live WYSIWYG Audit Report Text Editor & Preview Pane")
+        self.editor_content.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.editor_content.setStyleSheet("background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; font-size: 13px; color: #0f172a; line-height: 1.6;")
         e_layout.addWidget(self.editor_content)
-        b_layout.addWidget(editor_frame)
+        self.b_layout.addWidget(self.editor_frame)
 
         scroll.setWidget(body)
         main_layout.addWidget(scroll)
+        self.error_widget = None
 
         self.load_report_draft()
 
     def load_report_draft(self):
+        if self.error_widget:
+            self.error_widget.deleteLater()
+            self.error_widget = None
+        self.editor_frame.show()
         active_id = getattr(self, 'active_engagement_id', None)
         client = None
         proj = None
@@ -169,7 +180,9 @@ class ReportsWidget(QWidget):
                     matters_html += f"<li><b>{f.description[:80]}</b> - Flagged Severity: <span style='color:#dc2626;'>{f.severity or 'MEDIUM'}</span></li>"
         except Exception as e:
             logger.error("Error loading report draft: %s", e, exc_info=True)
+            self.editor_frame.hide()
             self.error_widget = ErrorStateWidget("Draft Generation Error", str(e))
+            self.b_layout.addWidget(self.error_widget)
             client_name = "[Client Not Selected]"
             self.current_client_name = client_name
             cin = "N/A"

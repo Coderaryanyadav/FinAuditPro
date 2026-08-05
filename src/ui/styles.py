@@ -354,14 +354,22 @@ QPushButton#aiPromptBtn:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SECTION / ACTION HEADER BARS
+   SECTION / ACTION HEADER BARS & BOOTSTRAP PANELS
 ═══════════════════════════════════════════════════════════ */
 QFrame#actionHeader,
 QFrame#clientsHeader,
 QFrame#docsHeader,
-QFrame#headerBar {
+QFrame#headerBar,
+QFrame#historyHeader,
+QFrame#reportsHeader,
+QFrame#settingsHeader {
     background-color: #ffffff;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e5e5ea;
+}
+QFrame#ollamaOnboardingPanel {
+    background-color: #fff8e6;
+    border: 1px solid #ffe0b2;
+    border-radius: 10px;
 }
 QLabel#headerTitle {
     font-size: 16px;

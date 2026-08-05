@@ -135,12 +135,20 @@ class AIAuditWidget(QWidget):
         header_layout.addLayout(title_v)
         header_layout.addStretch()
         
-        # --- Ollama Status Badge ---
-        self._ollama_online = OllamaClient.is_available()
+        # --- Ollama Status & Onboarding Diagnostic Check ---
+        status_code, headline, instructions_html = OllamaClient.check_status_details()
+        self._ollama_online = (status_code == "online")
+        
         if self._ollama_online:
             self._status_badge = QLabel("Ollama Local RAG Engine Active")
             self._status_badge.setStyleSheet(
                 "background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; "
+                "border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 600;"
+            )
+        elif status_code == "no_models":
+            self._status_badge = QLabel("Ollama Active — No Models Downloaded")
+            self._status_badge.setStyleSheet(
+                "background-color: #fffbeb; color: #b45309; border: 1px solid #fef3c7; "
                 "border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 600;"
             )
         else:
@@ -211,6 +219,40 @@ class AIAuditWidget(QWidget):
         self.chat_layout.setContentsMargins(16, 16, 16, 16)
         self.chat_layout.setSpacing(12)
         self.chat_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        # Onboarding Banner Panel when Ollama is offline or has no models
+        if not self._ollama_online:
+            onboarding_panel = QFrame()
+            onboarding_panel.setObjectName("ollamaOnboardingPanel")
+            onboarding_panel.setStyleSheet("""
+                QFrame#ollamaOnboardingPanel {
+                    background-color: #fff8e6;
+                    border: 1px solid #ffe0b2;
+                    border-radius: 10px;
+                    padding: 14px;
+                    margin-bottom: 8px;
+                }
+            """)
+            ob_layout = QVBoxLayout(onboarding_panel)
+            ob_layout.setContentsMargins(12, 12, 12, 12)
+            ob_layout.setSpacing(6)
+
+            title_lbl = QLabel(f"🤖 {headline}")
+            title_lbl.setStyleSheet("font-weight: 700; font-size: 13px; color: #9a3412; border: none;")
+
+            desc_lbl = QLabel(instructions_html)
+            desc_lbl.setWordWrap(True)
+            desc_lbl.setOpenExternalLinks(True)
+            desc_lbl.setStyleSheet("font-size: 11px; color: #7c2d12; line-height: 1.5; border: none;")
+
+            fallback_note = QLabel("<b>Rule Engine Fallback Active:</b> Local statutory rules and document search remain fully operational.")
+            fallback_note.setStyleSheet("font-size: 10px; color: #9a3412; font-style: italic; border: none; margin-top: 4px;")
+
+            ob_layout.addWidget(title_lbl)
+            ob_layout.addWidget(desc_lbl)
+            ob_layout.addWidget(fallback_note)
+            self.chat_layout.addWidget(onboarding_panel)
+
         self.chat_area.setWidget(self.chat_widget)
         c2_layout.addWidget(self.chat_area)
         

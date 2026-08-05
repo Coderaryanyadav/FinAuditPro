@@ -958,11 +958,11 @@ QTextEdit#aiDocContent {
     font-family: monospace;
     font-size: 11px;
     color: #0f172a;
-    line-height: 1.4;
 }
 QFrame#chatBubbleUser {
     background-color: #0284c7;
     color: #ffffff;
+    border: 1px solid transparent;
     border-radius: 12px;
     margin-left: 40px;
 }
@@ -988,13 +988,11 @@ QLabel#chatSenderAI {
 QLabel#chatMsgUser {
     font-size: 12px;
     border: none;
-    line-height: 1.4;
     color: #ffffff;
 }
 QLabel#chatMsgAI {
     font-size: 12px;
     border: none;
-    line-height: 1.4;
     color: #0f172a;
 }
 QTextEdit#chatInput {
@@ -1014,11 +1012,12 @@ QPushButton#chatSendBtn {
     font-weight: 700;
     font-size: 12px;
     border-radius: 8px;
-    border: none;
+    border: 1px solid #0284c7;
     padding: 8px 16px;
 }
 QPushButton#chatSendBtn:hover {
     background-color: #0369a1;
+    border-color: #0369a1;
 }
 
 QFrame#findingCard {

@@ -156,6 +156,12 @@ class CreateAuditProjectDialog(QDialog):
         clients = self.session.query(Client).all()
         for c in clients:
             self.client_combo.addItem(f"{c.name} ({c.industry or 'General'})", c.id)
+            
+    def accept(self):
+        if self.client_combo.count() == 0:
+            QMessageBox.warning(self, "No Clients", "Please add a client first before creating an audit project.")
+            return
+        super().accept()
 
 from database.database import get_session
 from database.repositories.client_repo import ClientRepository

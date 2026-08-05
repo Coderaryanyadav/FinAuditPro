@@ -25,9 +25,9 @@ class GSTVerificationWidget(QWidget):
         
         title_v = QVBoxLayout()
         title_v.setSpacing(2)
-        title = QLabel("GST Verification & Reconciliation")
+        title = QLabel("GST Findings & Mismatches")
         title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
-        subtitle = QLabel("GSTR-2B vs Books Match and Tax Compliance")
+        subtitle = QLabel("Review GST-related audit findings and financial impacts")
         subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
@@ -35,8 +35,8 @@ class GSTVerificationWidget(QWidget):
         
         action_layout.addStretch()
         
-        btn_verify = QPushButton("Run Re-verification")
-        btn_verify.setToolTip("Run live GSTR-2B vs Purchase Register re-verification and reconciliation")
+        btn_verify = QPushButton("Refresh Findings")
+        btn_verify.setToolTip("Reload GST findings from the database")
         btn_verify.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_verify.setStyleSheet("""
             QPushButton {
@@ -50,7 +50,7 @@ class GSTVerificationWidget(QWidget):
             }
             QPushButton:hover { background-color: #0062cc; }
         """)
-        btn_verify.clicked.connect(self.run_reverification)
+        btn_verify.clicked.connect(self.load_data)
         action_layout.addWidget(btn_verify)
         
         main_layout.addWidget(action_bar)
@@ -62,76 +62,35 @@ class GSTVerificationWidget(QWidget):
         content_layout.setSpacing(24)
         
         # Summary Cards
-        cards_layout = QHBoxLayout()
-        cards_layout.setSpacing(20)
-        
-        def create_gst_card(title, value, subtitle, tag, bg_tag, fg_tag, border_color="#e5e5ea"):
-            card = QFrame()
-            card.setFixedHeight(110)
-            card.setStyleSheet(f"background-color: #ffffff; border: 1px solid {border_color}; border-radius: 12px;")
-            clayout = QVBoxLayout(card)
-            
-            top_h = QHBoxLayout()
-            t_lbl = QLabel(title)
-            t_lbl.setStyleSheet("color: #1d1d1f; font-size: 13px; font-weight: 600; border: none;")
-            
-            tag_lbl = QLabel(tag)
-            tag_lbl.setStyleSheet(f"background-color: {bg_tag}; color: {fg_tag}; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; border: none;")
-            
-            top_h.addWidget(t_lbl)
-            top_h.addStretch()
-            top_h.addWidget(tag_lbl)
-            clayout.addLayout(top_h)
-            
-            v_lbl = QLabel(value)
-            v_lbl.setStyleSheet("color: #1d1d1f; font-size: 24px; font-weight: 600; letter-spacing: -0.5px; border: none;")
-            clayout.addWidget(v_lbl)
-            
-            s_lbl = QLabel(subtitle)
-            s_lbl.setStyleSheet("color: #6e6e73; font-size: 11px; border: none;")
-            clayout.addWidget(s_lbl)
-            
-            apply_shadow(card, blur=10, dy=2, alpha=6)
-            return card
-            
-        card1 = create_gst_card("GSTIN Status", "142 / 145 Active", "3 Suspended / Cancelled GSTINs", "ACTIVE", "#eafff0", "#1b8a3e")
-        card2 = create_gst_card("2B vs Books Match", "94.2%", "₹4,25,000 Matched Input Tax Credit", "RECONCILED", "#e8f2ff", "#007aff")
-        card3 = create_gst_card("ITC Mismatch", "₹48,250", "Unmatched ITC in GSTR-2B", "WARNING", "#fff8e6", "#ff9500", "#ffe0b2")
-        card4 = create_gst_card("Ineligible ITC", "₹12,400", "Blocked credit under Sec 17(5)", "RISK", "#ffebeb", "#ff3b30", "#ffc6c4")
-        
-        cards_layout.addWidget(card1)
-        cards_layout.addWidget(card2)
-        cards_layout.addWidget(card3)
-        cards_layout.addWidget(card4)
-        
-        content_layout.addLayout(cards_layout)
+        self.cards_layout = QHBoxLayout()
+        self.cards_layout.setSpacing(20)
+        content_layout.addLayout(self.cards_layout)
         
         # Table Section
         table_card = QFrame()
         table_card.setStyleSheet("background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 12px;")
         apply_shadow(table_card, blur=15, dy=3, alpha=6)
-        table_v = QVBoxLayout(table_card)
+        self.table_v = QVBoxLayout(table_card)
         
         tb_header = QHBoxLayout()
-        tb_title = QLabel("GSTR-2B vs Purchase Register Reconciliation Table")
+        tb_title = QLabel("GST Findings Registry")
         tb_title.setStyleSheet("font-size: 16px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
         tb_header.addWidget(tb_title)
         tb_header.addStretch()
         
         search = QLineEdit()
-        search.setPlaceholderText("Filter Invoice or GSTIN...")
+        search.setPlaceholderText("Filter Findings...")
         search.setFixedWidth(240)
-        search.setToolTip("Filter invoices by invoice number or vendor GSTIN")
         search.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         search.setStyleSheet("padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px;")
         tb_header.addWidget(search)
         
-        table_v.addLayout(tb_header)
+        self.table_v.addLayout(tb_header)
         
-        self.table = QTableWidget(0, 6)
-        self.table.setToolTip("GSTR-2B vs Purchase Register Reconciliation Table")
+        self.table = QTableWidget(0, 4)
+        self.table.setToolTip("GST Findings Registry")
         self.table.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.table.setHorizontalHeaderLabels(["Invoice No", "Vendor Name & GSTIN", "Books ITC", "2B ITC", "Variance", "Match Status"])
+        self.table.setHorizontalHeaderLabels(["Finding ID", "Description", "Financial Impact", "Severity"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table.setStyleSheet("""
             QTableWidget { border: none; gridline-color: #f1f5f9; }
@@ -140,7 +99,63 @@ class GSTVerificationWidget(QWidget):
         """)
         self.table.setShowGrid(False)
         self.table.verticalHeader().setVisible(False)
+        self.table_v.addWidget(self.table)
         
+        content_layout.addWidget(table_card)
+        main_layout.addWidget(content_widget)
+        
+        # Initialize placeholders
+        self.empty_widget = None
+        self.error_widget = None
+        self.load_data()
+
+    def create_gst_card(self, title, value, subtitle, tag, bg_tag, fg_tag, border_color="#e5e5ea"):
+        card = QFrame()
+        card.setFixedHeight(110)
+        card.setStyleSheet(f"background-color: #ffffff; border: 1px solid {border_color}; border-radius: 12px;")
+        clayout = QVBoxLayout(card)
+        
+        top_h = QHBoxLayout()
+        t_lbl = QLabel(title)
+        t_lbl.setStyleSheet("color: #1d1d1f; font-size: 13px; font-weight: 600; border: none;")
+        
+        tag_lbl = QLabel(tag)
+        tag_lbl.setStyleSheet(f"background-color: {bg_tag}; color: {fg_tag}; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; border: none;")
+        
+        top_h.addWidget(t_lbl)
+        top_h.addStretch()
+        top_h.addWidget(tag_lbl)
+        clayout.addLayout(top_h)
+        
+        v_lbl = QLabel(value)
+        v_lbl.setStyleSheet("color: #1d1d1f; font-size: 24px; font-weight: 600; letter-spacing: -0.5px; border: none;")
+        clayout.addWidget(v_lbl)
+        
+        s_lbl = QLabel(subtitle)
+        s_lbl.setStyleSheet("color: #6e6e73; font-size: 11px; border: none;")
+        clayout.addWidget(s_lbl)
+        
+        apply_shadow(card, blur=10, dy=2, alpha=6)
+        return card
+
+    def clear_layout(self, layout):
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+            elif child.layout():
+                self.clear_layout(child.layout())
+
+    def load_data(self):
+        # Clear existing cards and table messages
+        self.clear_layout(self.cards_layout)
+        if self.empty_widget:
+            self.empty_widget.deleteLater()
+            self.empty_widget = None
+        if self.error_widget:
+            self.error_widget.deleteLater()
+            self.error_widget = None
+
         active_id = getattr(self, 'active_engagement_id', None)
         try:
             with get_session() as session:
@@ -150,33 +165,44 @@ class GSTVerificationWidget(QWidget):
                     all_f = finding_service.get_findings_by_audit_id(active_id)
                 else:
                     all_f = finding_service.get_all_findings()
+                
                 gst_findings = [f for f in all_f if 'gst' in str(f.description or '').lower()]
+                
+                # Compute Real values
+                total_mismatch = sum(f.financial_impact or 0 for f in gst_findings if 'mismatch' in str(f.description or '').lower())
+                total_ineligible = sum(f.financial_impact or 0 for f in gst_findings if 'ineligible' in str(f.description or '').lower() or '17(5)' in str(f.description or '').lower())
+                
+                # If the description doesn't specify, just sum all for total impact to be safe
+                if total_mismatch == 0 and total_ineligible == 0:
+                    total_mismatch = sum(f.financial_impact or 0 for f in gst_findings)
+                
+                # Add cards
+                card1 = self.create_gst_card("GSTIN Status", "N/A", "Data source not configured", "UNAVAILABLE", "#f2f2f7", "#8e8e93")
+                card2 = self.create_gst_card("2B vs Books Match", "N/A", "GSTR-2B sync unavailable", "UNAVAILABLE", "#f2f2f7", "#8e8e93")
+                card3 = self.create_gst_card("ITC Mismatch", f"₹{total_mismatch:,.2f}", "Total mismatch impact", "WARNING", "#fff8e6", "#ff9500", "#ffe0b2")
+                card4 = self.create_gst_card("Ineligible ITC", f"₹{total_ineligible:,.2f}", "Total ineligible impact", "RISK", "#ffebeb", "#ff3b30", "#ffc6c4")
+                
+                self.cards_layout.addWidget(card1)
+                self.cards_layout.addWidget(card2)
+                self.cards_layout.addWidget(card3)
+                self.cards_layout.addWidget(card4)
                 
                 if gst_findings:
                     self.table.setRowCount(len(gst_findings))
+                    self.table.show()
                     for r, f in enumerate(gst_findings):
                         self.table.setItem(r, 0, QTableWidgetItem(f"FINDING-{f.id}"))
-                        self.table.setItem(r, 1, QTableWidgetItem("Audit Record"))
-                        self.table.setItem(r, 2, QTableWidgetItem(f"₹ {f.financial_impact or 0:.2f}"))
-                        self.table.setItem(r, 3, QTableWidgetItem("₹ 0.00"))
-                        self.table.setItem(r, 4, QTableWidgetItem(f"₹ {f.financial_impact or 0:.2f}"))
-                        self.table.setItem(r, 5, QTableWidgetItem(f.severity or "Medium"))
+                        desc = f.description if f.description else "Audit Record"
+                        self.table.setItem(r, 1, QTableWidgetItem(desc))
+                        self.table.setItem(r, 2, QTableWidgetItem(f"₹ {f.financial_impact or 0:,.2f}"))
+                        self.table.setItem(r, 3, QTableWidgetItem(f.severity or "Medium"))
                 else:
                     self.table.setRowCount(0)
-                    self.empty_widget = EmptyStateWidget("No GST Variance Findings", "No GSTR-2B mismatches or ineligible ITC findings flagged.")
-                    table_v.addWidget(self.empty_widget)
+                    self.table.hide()
+                    self.empty_widget = EmptyStateWidget("No GST Findings", "No GST-related issues or anomalies flagged.")
+                    self.table_v.addWidget(self.empty_widget)
         except Exception as e:
             self.table.setRowCount(0)
+            self.table.hide()
             self.error_widget = ErrorStateWidget("GST Data Error", str(e))
-            table_v.addWidget(self.error_widget)
-                
-        table_v.addWidget(self.table)
-        content_layout.addWidget(table_card)
-        
-        main_layout.addWidget(content_widget)
-
-    def run_reverification(self):
-        try:
-            QMessageBox.information(self, "GST Verification", "Re-verification complete! All vendor GSTIN status and 2B records updated.")
-        except Exception as e:
-            self.error_widget = ErrorStateWidget("Re-verification Error", str(e))
+            self.table_v.addWidget(self.error_widget)

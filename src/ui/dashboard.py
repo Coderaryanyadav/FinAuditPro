@@ -789,11 +789,6 @@ class DashboardWindow(QWidget):
         
         header_layout.addStretch()
         
-        self.btn_theme = QPushButton("")
-        self.btn_theme.setFixedSize(34, 34)
-        self.btn_theme.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_theme.setObjectName("iconToolBtn")
-        self.btn_theme.clicked.connect(self.toggle_theme)
         
         self.btn_help = QPushButton("")
         self.btn_help.setFixedSize(34, 34)
@@ -807,7 +802,7 @@ class DashboardWindow(QWidget):
         self.btn_notif.setObjectName("iconToolBtn")
         self.btn_notif.clicked.connect(self.show_notifications_popup)
 
-        header_layout.addWidget(self.btn_theme)
+
         header_layout.addSpacing(6)
         header_layout.addWidget(self.btn_help)
         header_layout.addSpacing(6)
@@ -1085,26 +1080,27 @@ class DashboardWindow(QWidget):
             QMessageBox.warning(self, "Access Denied", "Your role does not have permission to create audit projects.")
             return
 
-        dialog = CreateAuditProjectDialog(None, self)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            client_id = dialog.client_combo.currentData()
-            fy = dialog.fy_combo.currentText().strip() if hasattr(dialog, 'fy_combo') else "2025-26"
-            audit_type = dialog.audit_type_combo.currentText().strip() if hasattr(dialog, 'audit_type_combo') else "Statutory Audit"
-            status = dialog.stage_combo.currentText().strip() if hasattr(dialog, 'stage_combo') else "Planning"
-            risk = dialog.risk_combo.currentText().strip() if hasattr(dialog, 'risk_combo') else "Medium"
+        from database.database import get_session
+        with get_session() as session:
+            dialog = CreateAuditProjectDialog(session, self)
+            if dialog.exec() == QDialog.DialogCode.Accepted:
+                client_id = dialog.client_combo.currentData()
+                fy = dialog.fy_combo.currentText().strip() if hasattr(dialog, 'fy_combo') else "2025-26"
+                audit_type = dialog.audit_type_combo.currentText().strip() if hasattr(dialog, 'audit_type_combo') else "Statutory Audit"
+                status = dialog.stage_combo.currentText().strip() if hasattr(dialog, 'stage_combo') else "Planning"
+                risk = dialog.risk_combo.currentText().strip() if hasattr(dialog, 'risk_combo') else "Medium"
 
-            with get_session() as session:
                 ds = DashboardService(session)
                 proj = ds.create_audit_project(
                     client_id=client_id, financial_year=fy, status=status, risk_level=risk
                 )
                 proj_id = proj.id
 
-            self.populate_client_selector()
-            idx = self.client_selector.findData(proj_id)
-            if idx >= 0: self.client_selector.setCurrentIndex(idx)
-            self.data_changed.emit()
-            QMessageBox.information(self, "Audit Created", f"Successfully initialized new {audit_type} for FY {fy}.")
+                self.populate_client_selector()
+                idx = self.client_selector.findData(proj_id)
+                if idx >= 0: self.client_selector.setCurrentIndex(idx)
+                self.data_changed.emit()
+                QMessageBox.information(self, "Audit Created", f"Successfully initialized new {audit_type} for FY {fy}.")
 
     def populate_client_selector(self):
         self.client_selector.clear()
@@ -1177,10 +1173,6 @@ class DashboardWindow(QWidget):
         self._setup_search_shortcut()
         self._setup_nav_shortcuts()
 
-    def toggle_theme(self):
-        is_dark = getattr(self, '_dark_mode', False)
-        self._dark_mode = not is_dark
-        QMessageBox.information(self, "Theme Preferences", f"Switched to {'Dark' if self._dark_mode else 'Standard Enterprise Light Sky'} palette.")
 
     def show_keyboard_shortcuts_dialog(self):
         shortcuts_text = """
@@ -1203,10 +1195,7 @@ class DashboardWindow(QWidget):
         QMessageBox.information(
             self,
             "Active Audit Alerts",
-            "<b>Active Compliance Alerts:</b><br/><br/>"
-            "• GSTR-3B Tax Filing Deadline: <b>5 days remaining</b><br/>"
-            "• Income Tax Audit Report (Form 3CD): <b>In Progress</b><br/>"
-            "• CARO 2020 Physical Inventory Verification: <b>Completed</b>"
+            "No active alerts or upcoming statutory deadlines for this engagement."
         )
 
     def closeEvent(self, event):

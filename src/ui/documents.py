@@ -418,22 +418,32 @@ class DocumentUploadWidget(QWidget):
             service = DocumentService(repo)
             try:
                 doc = service.get_document(doc_id)
+                file_name = doc.file_name
+                file_path = doc.file_path
             except Exception:
                 return
 
-            self.doc_title_lbl.setText(doc.file_name)
-            sha_hash = compute_sha256(doc.file_path) if os.path.exists(doc.file_path) else "N/A"
-            self.hash_info_lbl.setText(f"SHA-256 Anti-Tamper Evidence Hash:\n{sha_hash}")
+        self.doc_title_lbl.setText(file_name)
+        sha_hash = compute_sha256(file_path) if os.path.exists(file_path) else "N/A"
+        self.hash_info_lbl.setText(f"SHA-256 Anti-Tamper Evidence Hash:\n{sha_hash}")
 
-            if os.path.exists(doc.file_path):
-                try:
-                    with open(doc.file_path, "r", encoding="utf-8", errors="ignore") as f:
-                        snippet = f.read(3000)
-                        self.text_preview.setPlainText(snippet or f"Binary Document ({os.path.basename(doc.file_path)}). Ingested into local FAISS Vector Index.")
-                except Exception:
-                    self.text_preview.setPlainText(f"File Path: {doc.file_path}\nStatus: Ingested & FAISS Vector Index Active.")
-            else:
-                self.text_preview.setPlainText("Document file not found on local disk.")
+        if os.path.exists(file_path):
+            try:
+                from document_intelligence.document_parser import DocumentParser
+                parsed = DocumentParser.parse_document(file_path)
+                text = parsed.cleaned_text or parsed.raw_text
+                if text and text.strip():
+                    snippet = text[:3000]
+                    if len(text) > 3000:
+                        snippet += "\n\n[... preview truncated ...]"
+                    self.text_preview.setPlainText(snippet)
+                else:
+                    self.text_preview.setPlainText(f"Document ({file_name}) ingested. Binary or empty document preview unavailable.")
+            except Exception as e:
+                logger.warning(f"Error parsing preview for {file_path}: {e}")
+                self.text_preview.setPlainText(f"File Path: {file_path}\nStatus: Ingested & FAISS Vector Index Active.")
+        else:
+            self.text_preview.setPlainText("Document file not found on local disk.")
 
     def browse_files(self, file_paths=None):
         sm = SecurityManager()

@@ -119,7 +119,7 @@ class OCREngine:
 
             raw_text = "\n\n".join(full_text_parts).strip()
             overall_conf = cls._compute_text_confidence(raw_text, default_base=0.96)
-            if len(raw_text) > 50:  # Valid native digital PDF text
+            if len(raw_text.strip()) > 0:  # Valid native digital PDF text
                 return OCRResult(
                     raw_text=raw_text,
                     pages=pages,
@@ -182,20 +182,22 @@ class OCREngine:
             except (ImportError, OSError, ValueError, RuntimeError) as e:
                 logger.warning(f"OCR execution failed: {e}")
 
-        # Fallback to direct file parsing for text/CSV/MD files
-        try:
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-                content = f.read()
-                if content.strip():
-                    f_conf = cls._compute_text_confidence(content, default_base=0.92)
-                    return OCRResult(
-                        raw_text=content,
-                        pages=[OCRPageResult(page_number=1, text=content, confidence=f_conf)],
-                        provider_used="Direct File Parser",
-                        overall_confidence=f_conf
-                    )
-        except (ImportError, OSError, ValueError, RuntimeError) as e:
-            logger.warning(f"Direct file parsing fallback encountered exception: {e}")
+        # Fallback to direct file parsing for text/CSV/MD files only (avoid binary/PDF files)
+        ext = os.path.splitext(file_path)[1].lower()
+        if ext in [".txt", ".csv", ".json", ".xml", ".md", ".log", ".tsv", ".html", ".rst"]:
+            try:
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                    content = f.read()
+                    if content.strip():
+                        f_conf = cls._compute_text_confidence(content, default_base=0.92)
+                        return OCRResult(
+                            raw_text=content,
+                            pages=[OCRPageResult(page_number=1, text=content, confidence=f_conf)],
+                            provider_used="Direct File Parser",
+                            overall_confidence=f_conf
+                        )
+            except (ImportError, OSError, ValueError, RuntimeError) as e:
+                logger.warning(f"Direct file parsing fallback encountered exception: {e}")
 
         return OCRResult(
             raw_text=f"[OCR Processing Disabled for {os.path.basename(file_path)}: {status_msg}]",

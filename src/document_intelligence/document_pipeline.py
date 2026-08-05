@@ -132,15 +132,18 @@ class DocumentPipeline:
                         meta_bonus = 4.0 if (getattr(meta, 'gstin', None) or getattr(meta, 'pan', None)) else 1.0
                         amount_bonus = 2.0 if extracted_amounts else 0.0
                         conf_score = round(min(99.0, max(75.0, base_score + desc_len_bonus + meta_bonus + amount_bonus)), 1)
-                        finding = Finding(
-                            audit_id=engagement_id,
-                            description=f"[{r_id}] {r_name}: {r_desc}",
-                            severity=str(r_sev),
-                            risk_level=str(r_sev),
-                            financial_impact=impact,
-                            ai_confidence_score=conf_score
-                        )
-                        session.add(finding)
+                        desc_text = f"[{r_id}] {r_name}: {r_desc}"
+                        existing = session.query(Finding).filter_by(audit_id=engagement_id, description=desc_text).first()
+                        if not existing:
+                            finding = Finding(
+                                audit_id=engagement_id,
+                                description=desc_text,
+                                severity=str(r_sev),
+                                risk_level=str(r_sev),
+                                financial_impact=impact,
+                                ai_confidence_score=conf_score
+                            )
+                            session.add(finding)
         except (SQLAlchemyError, OSError, ValueError) as e:
             logger.warning(f"Rule Engine evaluation warning: {e}")
 

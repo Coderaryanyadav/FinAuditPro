@@ -318,7 +318,7 @@ class WorkingPaperWidget(QWidget):
             if not wp:
                 wp_idx = session.query(WorkingPaperIndex).filter_by(engagement_id=proj_id).first()
                 if not wp_idx:
-                    wp_idx = WorkingPaperIndex(engagement_id=proj_id, ref_code="A-100", title="Audit Planning & General Index")
+                    wp_idx = WorkingPaperIndex(engagement_id=proj_id, section_code="A-100", section_name="Audit Planning & General Index")
                     session.add(wp_idx)
                     session.flush()
                 wp = WorkingPaper(audit_id=proj_id, index_id=wp_idx.id)

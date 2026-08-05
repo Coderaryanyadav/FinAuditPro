@@ -1150,8 +1150,19 @@ class DashboardWindow(QWidget):
                         client_id=proj.client_id,
                         financial_year=proj.financial_year or "2025-26"
                     )
-                    if hasattr(self, 'ai_page') and self.ai_page is not None:
-                        self.ai_page.active_engagement_id = proj.id
+                    for attr in ['ai_page', 'risk_page', 'reports_page', 'gst_page']:
+                        page = getattr(self, attr, None)
+                        if page is not None:
+                            page.active_engagement_id = proj.id
+                            if hasattr(page, 'load_findings'):
+                                try: page.load_findings()
+                                except Exception: pass
+                            if hasattr(page, 'load_database_findings'):
+                                try: page.load_database_findings()
+                                except Exception: pass
+                            if hasattr(page, 'load_active_document_view'):
+                                try: page.load_active_document_view()
+                                except Exception: pass
         except (SQLAlchemyError, ValueError, RuntimeError) as e:
             logger.warning(f"Engagement change warning: {e}")
 

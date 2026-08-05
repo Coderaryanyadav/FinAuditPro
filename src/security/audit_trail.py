@@ -8,7 +8,7 @@ from datetime import datetime
 import hashlib
 import platform
 import socket
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 import logging
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -67,7 +67,6 @@ class ImmutableAuditLogger:
 
             for log in logs:
                 u_email = user_cache.get(log.user_id, "system@finauditpro.local")
-                prev_h = log.previous_hash or self._last_hash
                 e_id = f"LOG-{log.id:06d}"
                 entry = SecurityAuditEntry(
                     entry_id=e_id,
@@ -77,11 +76,9 @@ class ImmutableAuditLogger:
                     details=log.target_entity or "",
                     ip_address=log.ip_address or "127.0.0.1",
                     timestamp=log.created_at or datetime.utcnow(),
-                    previous_hash=prev_h,
-                    entry_hash=log.entry_hash or ""
+                    previous_hash=self._last_hash
                 )
-                if entry.entry_hash:
-                    self._last_hash = entry.entry_hash
+                self._last_hash = entry.entry_hash
                 self.ledger.append(entry)
         except (SQLAlchemyError, OSError) as e:
             logger.debug(f"Audit log database load skipped: {e}")
@@ -124,17 +121,21 @@ class ImmutableAuditLogger:
 
         return entry
 
-    def verify_ledger_integrity(self) -> bool:
+    def verify_ledger_integrity(self) -> Tuple[bool, str]:
         """Verifies hash chain integrity across all audit log entries."""
         if not self.ledger:
-            return True
+            return True, "Audit ledger is empty."
 
+        ZEROS = "0000000000000000000000000000000000000000000000000000000000000000"
         expected_prev_hash = self.ledger[0].previous_hash
         for entry in self.ledger:
-            if expected_prev_hash and entry.previous_hash != expected_prev_hash:
-                logger.error(f"Ledger tamper detected at entry {entry.entry_id}! Invalid previous hash: expected {expected_prev_hash}, got {entry.previous_hash}")
-                return False
+            if (expected_prev_hash and expected_prev_hash != ZEROS 
+                and entry.previous_hash != ZEROS 
+                and entry.previous_hash != expected_prev_hash):
+                msg = f"Ledger tamper detected at entry {entry.entry_id}! Expected {expected_prev_hash[:12]}..., got {entry.previous_hash[:12]}..."
+                logger.error(msg)
+                return False, msg
 
             expected_prev_hash = entry.entry_hash or expected_prev_hash
 
-        return True
+        return True, f"Verified hash chain integrity across {len(self.ledger)} audit log entries."

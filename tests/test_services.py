@@ -34,7 +34,7 @@ class TestServices(unittest.TestCase):
             session.flush()
 
             now_dt = datetime.now(timezone.utc)
-            fy = FinancialYear(label=f"2025-{uuid.uuid4().hex[:4]}", start_date=now_dt, end_date=now_dt)
+            fy = FinancialYear(label=f"2025-{uuid.uuid4().hex}", start_date=now_dt, end_date=now_dt)
             session.add(fy)
             session.flush()
 

@@ -66,7 +66,7 @@ class WorkingPaperService:
         if not wp:
             wp_idx = self.wp_repo.session.query(WorkingPaperIndex).filter_by(engagement_id=audit_id).first()
             if not wp_idx:
-                wp_idx = WorkingPaperIndex(engagement_id=audit_id, ref_code="A-100", title="Audit Planning & General Index")
+                wp_idx = WorkingPaperIndex(engagement_id=audit_id, section_code="A-100", section_name="Audit Planning & General Index")
                 self.wp_repo.session.add(wp_idx)
                 self.wp_repo.session.flush()
             wp = WorkingPaper(audit_id=audit_id, index_id=wp_idx.id)

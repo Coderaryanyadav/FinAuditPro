@@ -35,18 +35,23 @@ class OllamaClient:
                 if models:
                     logger.info(f"Selected first available Ollama model: {models[0]}")
                     return models[0]
+                logger.info("Ollama service active but 0 models downloaded.")
+                return ""
         except (ConnectionError, TimeoutError, OSError, ValueError) as e:
             logger.warning(f"Failed to query Ollama models: {e}")
-        return "llama3.2"
+        return ""
 
     @staticmethod
     def is_available(base_url: Optional[str] = None) -> bool:
-        """Quick check whether the local Ollama daemon is reachable."""
+        """Quick check whether local Ollama daemon is reachable AND has installed models."""
         try:
             from core.config import config as _cfg
             url = base_url or _cfg.ollama_host
             res = requests.get(f"{url}/api/tags", timeout=3)
-            return res.status_code == 200
+            if res.status_code == 200:
+                models = res.json().get("models", [])
+                return len(models) > 0
+            return False
         except Exception:
             return False
 

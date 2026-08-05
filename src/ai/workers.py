@@ -73,18 +73,7 @@ class OllamaWorker(QThread):
 
             self.finished.emit()
         except Exception as e:
-            logger.warning(f"Ollama execution error: {e}")
-            from core.config import config
-            err_msg = (
-                f" [AI COPILOT LOCAL SERVICE NOTICE]\n\n"
-                f"The local Ollama LLM service is currently offline or unreachable at {config.ollama_host}.\n\n"
-                f"Details: {e}\n\n"
-                f" Quick Fix: Ensure Ollama is installed and running on your machine by executing `ollama serve` or opening the Ollama application. "
-                f"FinAuditPro offline audit rules, compliance checksheets, and financial statement auto-mapping remain 100% active."
-            )
-
-            self.chunk_received.emit(err_msg)
-            self.error.emit(err_msg)
-            self.ollama_offline.emit(self.raw_query)  # Trigger rule-engine fallback in UI layer
+            logger.info(f"Ollama offline or unavailable ({e}); switching to Local RAG Analysis Engine.")
+            self.ollama_offline.emit(self.raw_query)
             self.finished.emit()
 

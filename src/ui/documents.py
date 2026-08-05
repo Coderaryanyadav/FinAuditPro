@@ -59,17 +59,18 @@ class DropZoneFrame(QFrame):
         self.callback = callback
         self.setAcceptDrops(True)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setObjectName("dropZone")
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
-            self.setStyleSheet("background-color: #e0f2fe; border: 2px dashed #0284c7; border-radius: 8px;")
+            self.setObjectName("dropZoneHover")
 
     def dragLeaveEvent(self, event):
-        self.setStyleSheet("background-color: #f0f9ff; border: 2px dashed #0ea5e9; border-radius: 8px;")
+        self.setObjectName("dropZone")
 
     def dropEvent(self, event):
-        self.setStyleSheet("background-color: #f0f9ff; border: 2px dashed #0ea5e9; border-radius: 8px;")
+        self.setObjectName("dropZone")
         urls = event.mimeData().urls()
         files = [u.toLocalFile() for u in urls if u.isLocalFile()]
         if files and self.callback:

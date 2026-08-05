@@ -32,14 +32,7 @@ PROMPT_LIBRARY = [
 
 def create_finding_card(title, severity, desc, evidence, border_color, top_border_color, badge_bg, badge_text_color, on_add_wp_cb=None):
     card = QFrame()
-    card.setStyleSheet("""
-        QFrame {
-            background-color: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
-    """)
+    card.setObjectName("findingCard")
     
     clayout = QVBoxLayout(card)
     clayout.setContentsMargins(14, 14, 14, 14)
@@ -47,7 +40,7 @@ def create_finding_card(title, severity, desc, evidence, border_color, top_borde
     
     h1 = QHBoxLayout()
     t = QLabel(title)
-    t.setStyleSheet("font-weight: 700; font-size: 13px; color: #0f172a; border: none;")
+    t.setObjectName("findingCardTitle")
     b = QLabel(severity)
     b.setStyleSheet(f"background-color: {badge_bg}; color: {badge_text_color}; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; border: none;")
     h1.addWidget(t)
@@ -56,19 +49,19 @@ def create_finding_card(title, severity, desc, evidence, border_color, top_borde
     clayout.addLayout(h1)
     
     d = QLabel(desc)
+    d.setObjectName("findingCardDesc")
     d.setWordWrap(True)
-    d.setStyleSheet("color: #475569; font-size: 12px; line-height: 1.4; border: none;")
     clayout.addWidget(d)
     
     ev = QFrame()
-    ev.setStyleSheet("background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;")
+    ev.setObjectName("evidenceBox")
     ev_l = QVBoxLayout(ev)
     ev_l.setContentsMargins(10, 8, 10, 8)
     ev_l.setSpacing(2)
     ev_t = QLabel("EVIDENCE / CITATION SOURCE")
-    ev_t.setStyleSheet("color: #94a3b8; font-size: 9px; font-weight: 700; letter-spacing: 0.6px; border: none;")
+    ev_t.setObjectName("evidenceTitle")
     ev_d = QLabel(evidence)
-    ev_d.setStyleSheet("color: #0f172a; font-size: 11px; font-weight: 600; font-family: monospace; border: none;")
+    ev_d.setObjectName("evidenceData")
     ev_l.addWidget(ev_t)
     ev_l.addWidget(ev_d)
     clayout.addWidget(ev)
@@ -76,19 +69,7 @@ def create_finding_card(title, severity, desc, evidence, border_color, top_borde
     h2 = QHBoxLayout()
     h2.addStretch()
     btn_add = QPushButton("Add to SA 230 Working Papers")
-    btn_add.setStyleSheet("""
-        QPushButton {
-            background-color: #0284c7;
-            color: #ffffff;
-            border: none;
-            font-size: 11px;
-            font-weight: 600;
-            border-radius: 6px;
-            padding: 6px 14px;
-        }
-        QPushButton:hover { background-color: #0369a1; }
-        QPushButton:disabled { background-color: #10b981; color: #ffffff; }
-    """)
+    btn_add.setObjectName("btnIngestWP")
     
     def _handle_click():
         if on_add_wp_cb:
@@ -119,17 +100,16 @@ class AIAuditWidget(QWidget):
         # 1. Header Bar
         header = QFrame()
         header.setFixedHeight(68)
-        header.setObjectName("headerBar")
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e2e8f0;")
+        header.setObjectName("aiHeader")
         header_layout = QHBoxLayout(header)
-        header_layout.setContentsMargins(24, 0, 24, 0)
+        header_layout.setContentsMargins(20, 16, 20, 16)
         
         title_v = QVBoxLayout()
         title_v.setSpacing(2)
         title = QLabel("AI Audit Copilot & Anomalies Detector")
-        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px; border: none;")
+        title.setObjectName("aiTitle")
         subtitle = QLabel("SA 200-790 ICAI Standards, CARO 2020 & Companies Act Compliance Engine")
-        subtitle.setStyleSheet("font-size: 11px; color: #64748b; border: none;")
+        subtitle.setObjectName("aiSubtitle")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         header_layout.addLayout(title_v)
@@ -141,22 +121,13 @@ class AIAuditWidget(QWidget):
         
         if self._ollama_online:
             self._status_badge = QLabel("Ollama Local RAG Engine Active")
-            self._status_badge.setStyleSheet(
-                "background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; "
-                "border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 600;"
-            )
+            self._status_badge.setObjectName("statusBadgeGreen")
         elif status_code == "no_models":
             self._status_badge = QLabel("Ollama Active — No Models Downloaded")
-            self._status_badge.setStyleSheet(
-                "background-color: #fffbeb; color: #b45309; border: 1px solid #fef3c7; "
-                "border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 600;"
-            )
+            self._status_badge.setObjectName("statusBadgeAmber")
         else:
             self._status_badge = QLabel("Ollama Offline — Rule Engine Fallback Active")
-            self._status_badge.setStyleSheet(
-                "background-color: #fffbeb; color: #b45309; border: 1px solid #fef3c7; "
-                "border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 600;"
-            )
+            self._status_badge.setObjectName("statusBadgeAmber")
         header_layout.addWidget(self._status_badge)
         
         main_layout.addWidget(header)
@@ -175,10 +146,10 @@ class AIAuditWidget(QWidget):
         
         c1_header = QFrame()
         c1_header.setFixedHeight(42)
-        c1_header.setStyleSheet("background-color: #f1f5f9; border-bottom: 1px solid #e2e8f0;")
+        c1_header.setObjectName("aiColHeader")
         c1_h_layout = QHBoxLayout(c1_header)
         c1_title = QLabel("RAG SOURCE CONTEXT")
-        c1_title.setStyleSheet("font-size: 10px; font-weight: 700; color: #475569; letter-spacing: 0.8px; border: none;")
+        c1_title.setObjectName("aiColTitle")
         c1_h_layout.addWidget(c1_title)
         c1_layout.addWidget(c1_header)
         
@@ -187,9 +158,9 @@ class AIAuditWidget(QWidget):
         doc_scroll.setFrameShape(QFrame.Shape.NoFrame)
         
         self.doc_content = QLabel()
+        self.doc_content.setObjectName("aiDocContent")
         self.doc_content.setWordWrap(True)
         self.doc_content.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
-        self.doc_content.setStyleSheet("background-color: #ffffff; margin: 10px; padding: 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: monospace; font-size: 11px; color: #0f172a; line-height: 1.4;")
         self.load_active_document_view()
         doc_scroll.setWidget(self.doc_content)
         c1_layout.addWidget(doc_scroll)
@@ -202,10 +173,10 @@ class AIAuditWidget(QWidget):
         
         c2_header = QFrame()
         c2_header.setFixedHeight(42)
-        c2_header.setStyleSheet("background-color: #f1f5f9; border-bottom: 1px solid #e2e8f0;")
+        c2_header.setObjectName("aiColHeader")
         c2_h_layout = QHBoxLayout(c2_header)
         bot_text = QLabel("FinAudit Copilot (Local RAG)")
-        bot_text.setStyleSheet("border: none; font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 0.8px;")
+        bot_text.setObjectName("aiColTitle")
         c2_h_layout.addWidget(bot_text)
         c2_h_layout.addStretch()
         c2_layout.addWidget(c2_header)
@@ -256,7 +227,7 @@ class AIAuditWidget(QWidget):
         
         chips_hdr = QHBoxLayout()
         chips_lbl = QLabel("ICAI AUDIT PROMPT LIBRARY")
-        chips_lbl.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748b; letter-spacing: 0.6px; border: none;")
+        chips_lbl.setObjectName("aiColTitle")
         chips_hdr.addWidget(chips_lbl)
         chips_hdr.addStretch()
         p_layout.addLayout(chips_hdr)
@@ -287,52 +258,29 @@ class AIAuditWidget(QWidget):
         chips_scroll.setWidget(chips_w)
         p_layout.addWidget(chips_scroll)
 
-        # Input & Send Control Box
-        input_box = QHBoxLayout()
-        input_box.setSpacing(8)
+        # Input row
+        input_frame = QFrame()
+        input_layout = QHBoxLayout(input_frame)
+        input_layout.setContentsMargins(0, 4, 0, 0)
         
-        self.chat_input = QLineEdit()
-        self.chat_input.setPlaceholderText("Ask AI Copilot about revenue, inventory, tax, or statutory compliance...")
-        self.chat_input.setToolTip("Type audit prompt or question for local RAG AI Copilot")
+        self.chat_input = QTextEdit()
+        self.chat_input.setObjectName("chatInput")
+        self.chat_input.setPlaceholderText("Ask AI Copilot for SA 500 audit evidence analysis or GST anomaly explanation...")
+        self.chat_input.setFixedHeight(50)
+        self.chat_input.setToolTip("Type query or audit observation prompt for local RAG model (Press Ctrl+Enter to send)")
         self.chat_input.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.chat_input.setFixedHeight(40)
-        self.chat_input.setStyleSheet("""
-            QLineEdit {
-                background-color: #f8fafc;
-                border: 1px solid #cbd5e1;
-                border-radius: 8px;
-                padding: 0 14px;
-                color: #0f172a;
-                font-size: 12px;
-            }
-            QLineEdit:focus {
-                border: 1.5px solid #0284c7;
-                background-color: #ffffff;
-            }
-        """)
-        self.chat_input.returnPressed.connect(self.handle_input)
         
         btn_send = QPushButton("Send Prompt")
-        btn_send.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_send.setFixedHeight(40)
-        btn_send.setStyleSheet("""
-            QPushButton {
-                background-color: #0284c7;
-                color: #ffffff;
-                border: none;
-                font-size: 12px;
-                font-weight: 600;
-                border-radius: 8px;
-                padding: 0 16px;
-            }
-            QPushButton:hover { background-color: #0369a1; }
-        """)
+        btn_send.setObjectName("chatSendBtn")
+        btn_send.setToolTip("Submit query to local Ollama RAG model")
+        btn_send.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        btn_send.setFixedHeight(50)
         btn_send.clicked.connect(self.handle_input)
         
-        input_box.addWidget(self.chat_input, 1)
-        input_box.addWidget(btn_send)
-        p_layout.addLayout(input_box)
-
+        input_layout.addWidget(self.chat_input)
+        input_layout.addWidget(btn_send)
+        p_layout.addWidget(input_frame)
+        
         c2_layout.addWidget(prompt_frame)
         
         # COL 3: AI Findings List
@@ -510,22 +458,20 @@ class AIAuditWidget(QWidget):
     def add_message(self, sender, message, is_user=False):
         bubble_frame = QFrame()
         if is_user:
-            bubble_frame.setStyleSheet("background-color: #0284c7; color: #ffffff; border-radius: 12px; margin-left: 40px;")
+            bubble_frame.setObjectName("chatBubbleUser")
         else:
-            bubble_frame.setStyleSheet("background-color: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; border-radius: 12px; margin-right: 40px;")
+            bubble_frame.setObjectName("chatBubbleAI")
             
         b_layout = QVBoxLayout(bubble_frame)
         b_layout.setContentsMargins(14, 10, 14, 10)
         b_layout.setSpacing(4)
         
         lbl_sender = QLabel(sender)
-        lbl_sender.setObjectName("chatSenderLabel")
-        lbl_sender.setStyleSheet("font-size: 10px; font-weight: 700; border: none;" + ("color: rgba(255, 255, 255, 0.9);" if is_user else "color: #64748b;"))
+        lbl_sender.setObjectName("chatSenderUser" if is_user else "chatSenderAI")
         
         lbl_msg = QLabel(message)
-        lbl_msg.setObjectName("chatMessageLabel")
+        lbl_msg.setObjectName("chatMsgUser" if is_user else "chatMsgAI")
         lbl_msg.setWordWrap(True)
-        lbl_msg.setStyleSheet("font-size: 12px; border: none; line-height: 1.4;" + ("color: #ffffff;" if is_user else "color: #0f172a;"))
         
         b_layout.addWidget(lbl_sender)
         b_layout.addWidget(lbl_msg)

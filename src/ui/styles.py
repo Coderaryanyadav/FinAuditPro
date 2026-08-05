@@ -887,31 +887,160 @@ QLabel#onboardingFallbackNote {
     border: none;
     margin-top: 4px;
 }
-QFrame#findingCardFrame {
+/* ═══════════════════════════════════════════════════════════
+   AI COPILOT & ANOMALY INSPECTOR COMPONENTS
+═══════════════════════════════════════════════════════════ */
+QFrame#aiHeader {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+}
+QLabel#aiTitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.3px;
+    border: none;
+}
+QLabel#aiSubtitle {
+    font-size: 11px;
+    color: #64748b;
+    border: none;
+}
+QFrame#aiColHeader {
+    background-color: #f1f5f9;
+    border-bottom: 1px solid #e2e8f0;
+}
+QLabel#aiColTitle {
+    font-size: 10px;
+    font-weight: 700;
+    color: #475569;
+    letter-spacing: 0.8px;
+    border: none;
+}
+QTextEdit#aiDocContent {
+    background-color: #ffffff;
+    margin: 10px;
+    padding: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 11px;
+    color: #0f172a;
+    line-height: 1.4;
+}
+QFrame#chatBubbleUser {
+    background-color: #0284c7;
+    color: #ffffff;
+    border-radius: 12px;
+    margin-left: 40px;
+}
+QFrame#chatBubbleAI {
+    background-color: #ffffff;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-right: 40px;
+}
+QLabel#chatSenderUser {
+    font-size: 10px;
+    font-weight: 700;
+    border: none;
+    color: rgba(255, 255, 255, 0.9);
+}
+QLabel#chatSenderAI {
+    font-size: 10px;
+    font-weight: 700;
+    border: none;
+    color: #64748b;
+}
+QLabel#chatMsgUser {
+    font-size: 12px;
+    border: none;
+    line-height: 1.4;
+    color: #ffffff;
+}
+QLabel#chatMsgAI {
+    font-size: 12px;
+    border: none;
+    line-height: 1.4;
+    color: #0f172a;
+}
+QTextEdit#chatInput {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    background-color: #ffffff;
+    color: #0f172a;
+}
+QTextEdit#chatInput:focus {
+    border-color: #0284c7;
+}
+QPushButton#chatSendBtn {
+    background-color: #0284c7;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 12px;
+    border-radius: 8px;
+    border: none;
+    padding: 8px 16px;
+}
+QPushButton#chatSendBtn:hover {
+    background-color: #0369a1;
+}
+
+QFrame#findingCard {
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     margin-bottom: 10px;
+}
+QLabel#findingCardTitle {
+    font-weight: 700;
+    font-size: 13px;
+    color: #0f172a;
+    border: none;
+}
+QLabel#findingCardDesc {
+    color: #475569;
+    font-size: 12px;
+    line-height: 1.4;
+    border: none;
 }
 QFrame#evidenceBox {
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
 }
-QPushButton#promptChipBtn {
-    background-color: #f0f7ff;
-    color: #0284c7;
-    font-weight: 600;
-    border: 1px solid #bae6fd;
-    border-radius: 6px;
-    padding: 5px 12px;
-    font-size: 11px;
-    text-align: center;
+QLabel#evidenceTitle {
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    border: none;
 }
-QPushButton#promptChipBtn:hover {
-    background-color: #e0f2fe;
-    border-color: #38bdf8;
-    color: #0369a1;
+QLabel#evidenceData {
+    color: #0f172a;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: monospace;
+    border: none;
+}
+QPushButton#btnIngestWP {
+    background-color: #0284c7;
+    color: #ffffff;
+    border: none;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 6px 14px;
+}
+QPushButton#btnIngestWP:hover {
+    background-color: #0369a1;
+}
+QPushButton#btnIngestWP:disabled {
+    background-color: #10b981;
+    color: #ffffff;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -961,6 +1090,20 @@ QPushButton#loginSubmitBtn:pressed {
 QPushButton#loginSubmitBtn:disabled {
     background-color: #f1f5f9;
     color: #cbd5e1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DROP ZONE & DOCUMENT INGESTION
+═══════════════════════════════════════════════════════════ */
+QFrame#dropZone {
+    background-color: #f0f9ff;
+    border: 2px dashed #0ea5e9;
+    border-radius: 8px;
+}
+QFrame#dropZoneHover {
+    background-color: #e0f2fe;
+    border: 2px dashed #0284c7;
+    border-radius: 8px;
 }
 
 /* ═══════════════════════════════════════════════════════════

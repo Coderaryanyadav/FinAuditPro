@@ -237,18 +237,94 @@ class ComplianceWidget(QWidget):
         return os.path.join(get_default_data_dir(), "compliance_signoffs.json")
 
     def run_compliance_scan(self):
-        """Refreshes statutory compliance checklist status and evaluates rule engine checks."""
+        """Refreshes statutory compliance checklist status and evaluates rule engine checks with real DB evidence."""
         try:
             self.load_compliance_data()
-            try:
+            active_id = getattr(self, 'active_engagement_id', None)
+            
+            with get_session() as session:
+                proj = None
+                client = None
+                if active_id:
+                    proj = session.query(AuditProject).filter_by(id=active_id).first()
+                if not proj:
+                    proj = session.query(AuditProject).order_by(AuditProject.created_at.desc()).first()
+
+                if proj:
+                    client = session.query(Client).filter_by(id=proj.client_id).first()
+                    docs = session.query(Document).filter_by(audit_id=proj.id).all()
+                    doc_texts = [d.extracted_text for d in docs if d.extracted_text]
+                    combined_text = "\n\n".join(doc_texts)
+                else:
+                    combined_text = ""
+
+                # Collect current signoffs from tables
+                caro_data = {}
+                for r in range(self.caro_table.rowCount()):
+                    item = self.caro_table.item(r, 0)
+                    combo = self.caro_table.cellWidget(r, 3)
+                    if item and isinstance(combo, QComboBox):
+                        caro_data[item.text()] = combo.currentText()
+
+                f3cd_data = {}
+                for r in range(self.f3cd_table.rowCount()):
+                    item = self.f3cd_table.item(r, 0)
+                    combo = self.f3cd_table.cellWidget(r, 3)
+                    if item and isinstance(combo, QComboBox):
+                        f3cd_data[item.text()] = combo.currentText()
+
+                data = {
+                    "cleaned_text": combined_text,
+                    "caro_signoffs": caro_data,
+                    "form3cd_signoffs": f3cd_data,
+                    "client_name": client.name if client else "Default CA Client",
+                    "cin": getattr(client, 'cin_number', 'N/A') or 'N/A',
+                    "gstin": getattr(client, 'gst_number', 'N/A') or 'N/A'
+                }
+                context = {
+                    "engagement_id": proj.id if proj else None,
+                    "financial_year": getattr(proj, 'financial_year', 'FY 2024-25'),
+                    "audit_type": getattr(proj, 'audit_type', 'Statutory Audit')
+                }
+
                 from rule_engine.rule_engine import AuditRuleEngine
                 engine = AuditRuleEngine()
-                engine.evaluate_document({}, {})
-            except Exception:
-                pass
-            QMessageBox.information(self, "Compliance Status", "Compliance status reloaded and statutory rules refreshed successfully!")
+                res = engine.evaluate_document(data, context)
+
+                total_rules = res.get("total_rules", 0)
+                passed_count = res.get("passed_count", 0)
+                failed_count = res.get("failed_count", 0)
+                risk_score = res.get("risk_score", 0.0)
+                failed_results = res.get("failed_results", [])
+
+                # Create findings for failed rules if active project exists
+                if proj and failed_results:
+                    for fr in failed_results:
+                        existing = session.query(Finding).filter_by(audit_id=proj.id, rule_id=fr.rule_id).first()
+                        if not existing:
+                            new_finding = Finding(
+                                audit_id=proj.id,
+                                rule_id=fr.rule_id,
+                                description=f"[{fr.rule_id}] {fr.message}",
+                                severity=str(fr.severity.name if hasattr(fr.severity, 'name') else fr.severity),
+                                status="Open"
+                            )
+                            session.add(new_finding)
+                    session.commit()
+
+            QMessageBox.information(
+                self,
+                "Compliance Scan Completed",
+                f"CARO 2020 & Form 3CD Statutory Rule Scan Finished:\n\n"
+                f"• Total Rules Evaluated: {total_rules}\n"
+                f"• Compliant Rules: {passed_count}\n"
+                f"• Statutory Flags / Observations: {failed_count}\n"
+                f"• Aggregated Portfolio Risk Score: {risk_score}%\n\n"
+                f"Statutory sign-offs and database audit findings updated successfully!"
+            )
         except Exception as e:
-            self.error_widget = ErrorStateWidget("Compliance Scan Error", str(e))
+            logger.error("Compliance scan evaluation failed: %s", e, exc_info=True)
+            self.error_widget = ErrorStateWidget("Compliance Scan Failure", f"Failed to execute rule engine scan: {e}")
 
     def save_compliance_signoffs(self):
         """Persists CARO 2020 and Form 3CD statutory verification sign-offs to disk and DB."""

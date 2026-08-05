@@ -147,7 +147,20 @@ class SettingsWidget(QWidget):
         self.model_combo.setToolTip("Select target local LLM model for RAG audit reasoning")
         self.model_combo.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.model_combo.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;")
-        self.model_combo.addItems(["llama3.2:latest", "mistral:latest", "qwen2.5:latest", "deepseek-r1:latest"])
+        
+        # Populate available models from Ollama API
+        try:
+            res = requests.get(f"{config.ollama_host}/api/tags", timeout=2)
+            if res.status_code == 200:
+                installed_models = [m.get("name", "") for m in res.json().get("models", [])]
+                if installed_models:
+                    self.model_combo.addItems(installed_models)
+                else:
+                    self.model_combo.addItems(["qwen3.5:9b", "llama3.2:latest", "qwen2.5:latest", "deepseek-r1:latest"])
+            else:
+                self.model_combo.addItems(["qwen3.5:9b", "llama3.2:latest", "qwen2.5:latest", "deepseek-r1:latest"])
+        except Exception:
+            self.model_combo.addItems(["qwen3.5:9b", "llama3.2:latest", "qwen2.5:latest", "deepseek-r1:latest"])
 
         f_layout.addRow("Local Model Target:", self.model_combo)
 

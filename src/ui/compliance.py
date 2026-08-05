@@ -203,6 +203,7 @@ class ComplianceWidget(QWidget):
         w_layout.setContentsMargins(16, 16, 16, 16)
 
         self.f3cd_table = QTableWidget(len(FORM_3CD_CLAUSES), 4)
+        self.f3cd_table.setObjectName("complianceTable")
         self.f3cd_table.setToolTip("Tax Audit Form 3CD Statutory Clause Verification Table")
         self.f3cd_table.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.f3cd_table.setHorizontalHeaderLabels(["Form 3CD Clause", "Clause Name", "Scope & Particulars", "Verification Status"])
@@ -210,10 +211,6 @@ class ComplianceWidget(QWidget):
         self.f3cd_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         self.f3cd_table.setColumnWidth(0, 120)
         self.f3cd_table.setColumnWidth(1, 200)
-        self.f3cd_table.setStyleSheet("""
-            QTableWidget { border: 1px solid #e2e8f0; gridline-color: #f1f5f9; background: white; border-radius: 6px; }
-            QHeaderView::section { background-color: #f8fafc; color: #334155; font-weight: bold; padding: 8px; border: none; border-bottom: 1px solid #e2e8f0; }
-        """)
 
         for r, (code, name, scope) in enumerate(FORM_3CD_CLAUSES):
             c_item = QTableWidgetItem(code)

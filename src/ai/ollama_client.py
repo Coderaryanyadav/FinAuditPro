@@ -28,8 +28,16 @@ class OllamaClient:
             res = requests.get(f"{self.base_url}/api/tags", timeout=5)
             if res.status_code == 200:
                 models = [m.get("name", "") for m in res.json().get("models", [])]
-                for preferred in ["llama3.2:latest", "llama3.2", "qwen2.5-coder:14b", "qwen3-coder:latest"]:
+                preferred_list = [
+                    "qwen3.5:9b", "qwen3.5", "qwen2.5:9b", "qwen2.5-coder:14b",
+                    "qwen2.5:latest", "qwen2.5", "llama3.2:latest", "llama3.2"
+                ]
+                for preferred in preferred_list:
                     if preferred in models or any(preferred in m for m in models):
+                        for m in models:
+                            if preferred in m:
+                                logger.info(f"Auto-selected Ollama model: {m}")
+                                return m
                         logger.info(f"Auto-selected Ollama model: {preferred}")
                         return preferred
                 if models:

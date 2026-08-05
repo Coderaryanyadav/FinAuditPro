@@ -846,7 +846,7 @@ QLabel#settingsSectionTitle {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   COMPLIANCE / HISTORY ROW CARDS
+   COMPLIANCE / HISTORY ROW CARDS & TABLES
 ═══════════════════════════════════════════════════════════ */
 QFrame#complianceTaskRow {
     background: #ffffff;
@@ -856,6 +856,38 @@ QFrame#complianceTaskRow {
 QFrame#complianceTaskRow:hover {
     border-color: #cbd5e1;
     background: #f8fafc;
+}
+QPushButton#saveBtn {
+    background-color: #34c759;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 8px 16px;
+    border: none;
+}
+QPushButton#saveBtn:hover {
+    background-color: #28a745;
+}
+QTabWidget#complianceTabPane::pane {
+    border: 1px solid #e5e5ea;
+    background: #ffffff;
+    border-radius: 14px;
+    margin: 16px 24px 24px 24px;
+}
+QTableWidget#complianceTable {
+    border: 1px solid #e2e8f0;
+    gridline-color: #f1f5f9;
+    background: #ffffff;
+    border-radius: 6px;
+}
+QTableWidget#complianceTable QHeaderView::section {
+    background-color: #f8fafc;
+    color: #334155;
+    font-weight: bold;
+    padding: 8px;
+    border: none;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 /* ═══════════════════════════════════════════════════════════

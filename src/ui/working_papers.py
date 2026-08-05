@@ -64,37 +64,15 @@ class WorkingPaperWidget(QWidget):
         h_layout.addStretch()
 
         self.ai_btn = QPushButton("AI Draft Observation")
+        self.ai_btn.setObjectName("secondaryBtn")
         self.ai_btn.setToolTip("Generate automated AI audit observation draft under SA 230")
         self.ai_btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.ai_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #e5e5ea;
-                color: #1d1d1f;
-                font-size: 13px;
-                font-weight: 600;
-                border-radius: 8px;
-                padding: 8px 16px;
-                border: none;
-            }
-            QPushButton:hover { background-color: #d1d1d6; }
-        """)
         self.ai_btn.clicked.connect(self.generate_ai_draft)
 
         self.save_btn = QPushButton("Save Working Paper")
+        self.save_btn.setObjectName("primaryBtn")
         self.save_btn.setToolTip("Save and index working paper documentation to SA 230 audit file")
         self.save_btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.save_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #007aff;
-                color: #ffffff;
-                font-size: 13px;
-                font-weight: 600;
-                border-radius: 8px;
-                padding: 8px 16px;
-                border: none;
-            }
-            QPushButton:hover { background-color: #0062cc; }
-        """)
         self.save_btn.clicked.connect(self.save_working_paper)
 
         h_layout.addWidget(self.ai_btn)

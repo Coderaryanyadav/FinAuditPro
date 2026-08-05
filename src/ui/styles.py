@@ -859,6 +859,111 @@ QFrame#complianceTaskRow:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   OLLAMA ONBOARDING PANEL & AI COPILOT COMPONENTS
+═══════════════════════════════════════════════════════════ */
+QFrame#ollamaOnboardingPanel {
+    background-color: #fff8e6;
+    border: 1px solid #ffe0b2;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 8px;
+}
+QLabel#onboardingTitle {
+    font-weight: 700;
+    font-size: 13px;
+    color: #9a3412;
+    border: none;
+}
+QLabel#onboardingDesc {
+    font-size: 11px;
+    color: #7c2d12;
+    line-height: 1.5;
+    border: none;
+}
+QLabel#onboardingFallbackNote {
+    font-size: 10px;
+    color: #9a3412;
+    font-style: italic;
+    border: none;
+    margin-top: 4px;
+}
+QFrame#findingCardFrame {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+QFrame#evidenceBox {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+}
+QPushButton#promptChipBtn {
+    background-color: #f0f7ff;
+    color: #0284c7;
+    font-weight: 600;
+    border: 1px solid #bae6fd;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 11px;
+    text-align: center;
+}
+QPushButton#promptChipBtn:hover {
+    background-color: #e0f2fe;
+    border-color: #38bdf8;
+    color: #0369a1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   WORKING PAPERS & CLIENT CRM PANELS
+═══════════════════════════════════════════════════════════ */
+QFrame#wpSignoffBox {
+    background-color: #ffffff;
+    border: 1px solid #e5e5ea;
+    border-radius: 8px;
+}
+QFrame#clientFormCard {
+    background-color: #ffffff;
+    border: 1px solid #e5e5ea;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LOGIN WINDOW COMPONENTS
+═══════════════════════════════════════════════════════════ */
+QFrame#loginHeroPanel {
+    background-color: #ffffff;
+    border-right: 1px solid #e5e5ea;
+}
+QWidget#loginRightBg {
+    background-color: #f5f5f7;
+}
+QFrame#loginFormContainer {
+    background-color: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e5e5ea;
+}
+QPushButton#loginSubmitBtn {
+    background-color: #0284c7;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 8px;
+    border: none;
+}
+QPushButton#loginSubmitBtn:hover {
+    background-color: #0369a1;
+}
+QPushButton#loginSubmitBtn:pressed {
+    background-color: #075985;
+}
+QPushButton#loginSubmitBtn:disabled {
+    background-color: #f1f5f9;
+    color: #cbd5e1;
+}
+
+/* ═══════════════════════════════════════════════════════════
    SPLITTER
 ═══════════════════════════════════════════════════════════ */
 QSplitter::handle {

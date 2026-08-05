@@ -224,29 +224,20 @@ class AIAuditWidget(QWidget):
         if not self._ollama_online:
             onboarding_panel = QFrame()
             onboarding_panel.setObjectName("ollamaOnboardingPanel")
-            onboarding_panel.setStyleSheet("""
-                QFrame#ollamaOnboardingPanel {
-                    background-color: #fff8e6;
-                    border: 1px solid #ffe0b2;
-                    border-radius: 10px;
-                    padding: 14px;
-                    margin-bottom: 8px;
-                }
-            """)
             ob_layout = QVBoxLayout(onboarding_panel)
             ob_layout.setContentsMargins(12, 12, 12, 12)
             ob_layout.setSpacing(6)
 
             title_lbl = QLabel(f"🤖 {headline}")
-            title_lbl.setStyleSheet("font-weight: 700; font-size: 13px; color: #9a3412; border: none;")
+            title_lbl.setObjectName("onboardingTitle")
 
             desc_lbl = QLabel(instructions_html)
+            desc_lbl.setObjectName("onboardingDesc")
             desc_lbl.setWordWrap(True)
             desc_lbl.setOpenExternalLinks(True)
-            desc_lbl.setStyleSheet("font-size: 11px; color: #7c2d12; line-height: 1.5; border: none;")
 
             fallback_note = QLabel("<b>Rule Engine Fallback Active:</b> Local statutory rules and document search remain fully operational.")
-            fallback_note.setStyleSheet("font-size: 10px; color: #9a3412; font-style: italic; border: none; margin-top: 4px;")
+            fallback_note.setObjectName("onboardingFallbackNote")
 
             ob_layout.addWidget(title_lbl)
             ob_layout.addWidget(desc_lbl)
@@ -286,26 +277,10 @@ class AIAuditWidget(QWidget):
 
         for chip_title, chip_prompt in PROMPT_LIBRARY:
             btn = QPushButton(chip_title)
+            btn.setObjectName("promptChipBtn")
             btn.setToolTip(f"Execute AI audit prompt: {chip_prompt}")
             btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            btn.setStyleSheet("""
-                QPushButton {
-                    background-color: #f0f7ff;
-                    color: #0284c7;
-                    font-weight: 600;
-                    border: 1px solid #bae6fd;
-                    border-radius: 6px;
-                    padding: 5px 12px;
-                    font-size: 11px;
-                    text-align: center;
-                }
-                QPushButton:hover {
-                    background-color: #e0f2fe;
-                    border-color: #38bdf8;
-                    color: #0369a1;
-                }
-            """)
             btn.clicked.connect(lambda _, p=chip_prompt: self.execute_prompt(p))
             chips_l.addWidget(btn)
 

@@ -41,7 +41,7 @@ class VectorStore:
             import faiss
             self._index = faiss.IndexFlatL2(self._dim)
             logger.info("Initialized FAISS IndexFlatL2 for VectorStore.")
-        except (OSError, ValueError, RuntimeError) as e:
+        except (ImportError, OSError, ValueError, RuntimeError) as e:
             logger.warning(f"FAISS not available ({e}). Falling back to memory search.")
             self._index = None
 

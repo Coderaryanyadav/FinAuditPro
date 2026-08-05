@@ -75,7 +75,6 @@ class LoginWindow(QWidget):
         # ── LEFT: brand panel ────────────────────────────────────────
         left = QFrame()
         left.setObjectName("loginHeroPanel")
-        left.setStyleSheet("QFrame { background-color: #ffffff; border-right: 1px solid #e5e5ea; }")
         ll = QVBoxLayout(left)
         ll.setContentsMargins(56, 60, 56, 48)
         ll.setSpacing(0)
@@ -145,7 +144,6 @@ class LoginWindow(QWidget):
         # ── RIGHT: form ───────────────────────────────────────────────
         right_bg = QWidget()
         right_bg.setObjectName("loginRightBg")
-        right_bg.setStyleSheet("background-color: #f5f5f7;")
         rl = QVBoxLayout(right_bg)
         rl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         rl.setContentsMargins(52, 40, 52, 40)
@@ -153,13 +151,6 @@ class LoginWindow(QWidget):
         form = QFrame()
         form.setObjectName("loginFormContainer")
         form.setFixedWidth(400)
-        form.setStyleSheet("""
-            QFrame {
-                background-color: #ffffff;
-                border-radius: 14px;
-                border: 1px solid #e5e5ea;
-            }
-        """)
         apply_shadow(form, blur=24, dy=8, alpha=15)
 
         fl = QVBoxLayout(form)
@@ -184,7 +175,6 @@ class LoginWindow(QWidget):
         self.email_input = QLineEdit()
         self.email_input.setPlaceholderText("admin@finauditpro.com")
         self.email_input.setFixedHeight(42)
-        self.email_input.setStyleSheet(_INPUT)
         fl.addWidget(self.email_input)
         fl.addSpacing(14)
 
@@ -194,7 +184,6 @@ class LoginWindow(QWidget):
         self.password_input.setPlaceholderText("••••••••")
         self.password_input.setFixedHeight(42)
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
-        self.password_input.setStyleSheet(_INPUT)
         self.password_input.returnPressed.connect(self.handle_login)
         fl.addWidget(self.password_input)
         fl.addSpacing(14)
@@ -202,14 +191,6 @@ class LoginWindow(QWidget):
         # options row
         opts = QHBoxLayout()
         self.chk = QCheckBox("Show password")
-        self.chk.setStyleSheet("""
-            QCheckBox { border: none; background: transparent; color: #6e6e73; font-size: 12px; spacing: 6px; }
-            QCheckBox::indicator {
-                width: 15px; height: 15px; border-radius: 4px;
-                border: 1px solid #c7c7cc; background: #ffffff;
-            }
-            QCheckBox::indicator:checked { background: #007aff; border-color: #007aff; }
-        """)
         self.chk.stateChanged.connect(self._toggle_pass)
 
         fp = QLabel("<a href='#' style='color:#007aff; text-decoration:none; font-size:12px; font-weight:500;'>Forgot password?</a>")
@@ -240,19 +221,6 @@ class LoginWindow(QWidget):
         self.btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn.setObjectName("loginSubmitBtn")
         self.btn.clicked.connect(self.handle_login)
-        self.btn.setStyleSheet("""
-            QPushButton {
-                background-color: #0284c7;
-                color: #ffffff;
-                font-size: 13px;
-                font-weight: 700;
-                border-radius: 8px;
-                border: none;
-            }
-            QPushButton:hover { background-color: #0369a1; }
-            QPushButton:pressed { background-color: #075985; }
-            QPushButton:disabled { background-color: #f1f5f9; color: #cbd5e1; }
-        """)
         fl.addWidget(self.btn)
         fl.addSpacing(20)
 

@@ -204,36 +204,12 @@ class ClientManagementWidget(QWidget):
         btn_add.setObjectName("primaryBtn")
         btn_add.setToolTip("Register a new client entity into statutory master vault")
         btn_add.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        btn_add.setStyleSheet("""
-            QPushButton#primaryBtn {
-                background-color: #007aff;
-                color: #ffffff;
-                font-size: 13px;
-                font-weight: 600;
-                border-radius: 8px;
-                padding: 8px 16px;
-                border: none;
-            }
-            QPushButton#primaryBtn:hover { background-color: #0062cc; }
-        """)
         btn_add.clicked.connect(self.open_add_client_dialog)
         
         btn_new_audit = QPushButton("+ New Audit Project")
         btn_new_audit.setObjectName("secondaryBtn")
         btn_new_audit.setToolTip("Initialize a new statutory audit engagement for client")
         btn_new_audit.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        btn_new_audit.setStyleSheet("""
-            QPushButton {
-                background-color: #ffffff;
-                color: #1d1d1f;
-                font-size: 13px;
-                font-weight: 500;
-                border: 1px solid #e5e5ea;
-                border-radius: 8px;
-                padding: 8px 16px;
-            }
-            QPushButton:hover { background-color: #f5f5f7; border-color: #d1d1d6; }
-        """)
         btn_new_audit.clicked.connect(self.open_create_audit_dialog)
         
         h_layout.addWidget(btn_add)

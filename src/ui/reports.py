@@ -34,7 +34,7 @@ class ReportsWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #0f172a;")
+        self.setStyleSheet("background-color: #f0f6ff;")
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -44,16 +44,16 @@ class ReportsWidget(QWidget):
         header = QFrame()
         header.setFixedHeight(68)
         header.setObjectName("reportsHeader")
-        header.setStyleSheet("background-color: #1e293b; border-bottom: 1px solid #334155;")
+        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e1e8f4;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
         title_v.setSpacing(2)
         title = QLabel("Independent Auditor's Report Generator")
-        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #f8fafc; letter-spacing: -0.4px; border: none; background: transparent;")
+        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.4px; border: none; background: transparent; background-color: transparent;")
         subtitle = QLabel("ICAI SA 700/705/706 Opinion Drafting, CARO 2020 & Form 3CD Annexure Export")
-        subtitle.setStyleSheet("font-size: 12px; color: #94a3b8; border: none; background: transparent;")
+        subtitle.setStyleSheet("font-size: 12px; color: #64748b; border: none; background: transparent; background-color: transparent;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         h_layout.addLayout(title_v)
@@ -66,7 +66,7 @@ class ReportsWidget(QWidget):
         export_btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         export_btn.setStyleSheet("""
             QPushButton#primaryBtn {
-                background-color: #007aff;
+                background-color: #0284c7;
                 color: #ffffff;
                 font-size: 13px;
                 font-weight: 600;
@@ -74,7 +74,7 @@ class ReportsWidget(QWidget):
                 padding: 8px 16px;
                 border: none;
             }
-            QPushButton#primaryBtn:hover { background-color: #0062cc; }
+            QPushButton#primaryBtn:hover { background-color: #0369a1; }
         """)
         export_btn.clicked.connect(self.export_pdf)
         h_layout.addWidget(export_btn)

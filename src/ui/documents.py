@@ -141,7 +141,7 @@ class DocumentUploadWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #0f172a;")
+        self.setStyleSheet("background-color: #f0f6ff;")
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -151,22 +151,22 @@ class DocumentUploadWidget(QWidget):
         action_bar = QFrame()
         action_bar.setFixedHeight(68)
         action_bar.setObjectName("headerBar")
-        action_bar.setStyleSheet("background-color: #1e293b; border-bottom: 1px solid #334155;")
+        action_bar.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e1e8f4;")
         action_layout = QHBoxLayout(action_bar)
         action_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
         title_v.setSpacing(2)
         title = QLabel("Document Ingestion & Intelligence Pipeline")
-        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #f8fafc; letter-spacing: -0.4px; border: none; background: transparent;")
+        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.4px; border: none; background: transparent; background-color: transparent;")
         subtitle = QLabel("Auto-Classification, OCR & SHA-256 Anti-Tamper Verification")
-        subtitle.setStyleSheet("font-size: 12px; color: #94a3b8; border: none; background: transparent;")
+        subtitle.setStyleSheet("font-size: 12px; color: #64748b; border: none; background: transparent; background-color: transparent;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         action_layout.addLayout(title_v)
         
         action_layout.addSpacing(30)
-        action_layout.addWidget(QLabel("<b style='color:#f8fafc;'>Audit Project:</b>"))
+        action_layout.addWidget(QLabel("<b style='color:#0f172a; border: none; background: transparent;'>Audit Project:</b>"))
         
         self.project_combo = QComboBox()
         self.project_combo.setFixedWidth(240)
@@ -174,14 +174,14 @@ class DocumentUploadWidget(QWidget):
         self.project_combo.setStyleSheet("""
             QComboBox {
                 padding: 6px 12px;
-                border: 1px solid #334155;
+                border: 1px solid #e1e8f4;
                 border-radius: 8px;
-                background-color: #0f172a;
-                color: #f8fafc;
+                background-color: #ffffff;
+                color: #0f172a;
                 font-size: 12px;
                 font-weight: 500;
             }
-            QComboBox:focus { background-color: #0f172a; border-color: #38bdf8; }
+            QComboBox:focus { background-color: #ffffff; border-color: #0284c7; }
         """)
         self.project_combo.currentIndexChanged.connect(self.load_uploaded_files)
         action_layout.addWidget(self.project_combo)
@@ -208,15 +208,15 @@ class DocumentUploadWidget(QWidget):
         btn_process.setObjectName("secondaryButton")
         btn_process.setStyleSheet("""
             QPushButton {
-                background-color: #1e293b;
-                color: #f8fafc;
+                background-color: #ffffff;
+                color: #0284c7;
                 font-size: 13px;
-                font-weight: 500;
-                border: 1px solid #334155;
+                font-weight: 600;
+                border: 1px solid #e1e8f4;
                 border-radius: 8px;
                 padding: 8px 16px;
             }
-            QPushButton:hover { background-color: #334155; border-color: #475569; }
+            QPushButton:hover { background-color: #f8fafc; border-color: #0284c7; }
         """)
         btn_process.clicked.connect(self.start_ai_processing)
         self.btn_process = btn_process
@@ -232,11 +232,11 @@ class DocumentUploadWidget(QWidget):
             if not ocr_ok:
                 ocr_banner = QFrame()
                 ocr_banner.setFixedHeight(36)
-                ocr_banner.setStyleSheet("background-color: #fff8e6; border-bottom: 1px solid #ffe0b2;")
+                ocr_banner.setStyleSheet("background-color: #fffbe6; border-bottom: 1px solid #ffe58f;")
                 b_layout = QHBoxLayout(ocr_banner)
                 b_layout.setContentsMargins(24, 0, 24, 0)
                 warn_lbl = QLabel(f"ℹ {ocr_msg}")
-                warn_lbl.setStyleSheet("color: #b36b00; font-size: 11px; font-weight: 600; border: none; background: transparent;")
+                warn_lbl.setStyleSheet("color: #d97706; font-size: 11px; font-weight: 600; border: none; background: transparent; background-color: transparent;")
                 b_layout.addWidget(warn_lbl)
                 main_layout.addWidget(ocr_banner)
         except (SQLAlchemyError, OSError, ValueError):
@@ -244,11 +244,11 @@ class DocumentUploadWidget(QWidget):
 
         # 3. Main 2-Pane Splitter View
         splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.setStyleSheet("QSplitter::handle { background-color: #e5e5ea; }")
+        splitter.setStyleSheet("QSplitter::handle { background-color: #e1e8f4; }")
 
         # Left Pane: Upload Zone & Document Table
         left_container = QFrame()
-        left_container.setStyleSheet("background-color: #ffffff; border-right: 1px solid #e5e5ea;")
+        left_container.setStyleSheet("background-color: #ffffff; border-right: 1px solid #e1e8f4;")
         left_layout = QVBoxLayout(left_container)
         left_layout.setContentsMargins(16, 16, 16, 16)
         left_layout.setSpacing(12)
@@ -258,19 +258,19 @@ class DocumentUploadWidget(QWidget):
         self.upload_area.setFixedHeight(95)
         self.upload_area.setStyleSheet("""
             QFrame {
-                background-color: #f2f7ff;
-                border: 2px dashed #007aff;
+                background-color: #f0f6ff;
+                border: 2px dashed #0284c7;
                 border-radius: 12px;
             }
             QFrame:hover {
-                background-color: #e8f2ff;
+                background-color: #e0f2fe;
             }
         """)
         upload_l = QVBoxLayout(self.upload_area)
         upload_l.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         drop_lbl = QLabel("Drag & drop financial documents here or click 'Select Files'")
-        drop_lbl.setStyleSheet("color: #007aff; font-weight: 600; font-size: 13px; border: none;")
+        drop_lbl.setStyleSheet("color: #0284c7; font-weight: 600; font-size: 13px; border: none; background: transparent; background-color: transparent;")
         drop_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         upload_l.addWidget(drop_lbl)
 
@@ -280,14 +280,14 @@ class DocumentUploadWidget(QWidget):
         self.progress_bar = QProgressBar()
         self.progress_bar.setVisible(False)
         self.progress_bar.setStyleSheet("""
-            QProgressBar { border: 1px solid #e5e5ea; border-radius: 6px; text-align: center; background-color: #e5e5ea; color: #1d1d1f; font-weight: 600; height: 18px; }
-            QProgressBar::chunk { background-color: #007aff; border-radius: 5px; }
+            QProgressBar { border: 1px solid #e1e8f4; border-radius: 6px; text-align: center; background-color: #f0f6ff; color: #0f172a; font-weight: 600; height: 18px; }
+            QProgressBar::chunk { background-color: #0284c7; border-radius: 5px; }
         """)
         left_layout.addWidget(self.progress_bar)
 
         # Ingested Files Table
         table_lbl = QLabel("INGESTED DOCUMENTS & FAISS STATUS")
-        table_lbl.setStyleSheet("font-size: 10px; font-weight: 600; color: #86868b; letter-spacing: 0.8px;")
+        table_lbl.setStyleSheet("font-size: 10px; font-weight: 700; color: #0284c7; letter-spacing: 0.8px; border: none; background: transparent; background-color: transparent;")
         left_layout.addWidget(table_lbl)
 
         self.doc_table = QTableWidget(0, 4)
@@ -299,15 +299,10 @@ class DocumentUploadWidget(QWidget):
         self.doc_table.verticalHeader().setVisible(False)
         self.doc_table.setShowGrid(False)
         self.doc_table.setStyleSheet("""
-            QTableWidget { border: 1px solid #e5e5ea; gridline-color: #f2f2f7; background: #ffffff; border-radius: 10px; }
-            QHeaderView::section { background-color: #fafafa; color: #86868b; font-weight: 600; font-size: 10px; letter-spacing: 0.8px; padding: 10px; border: none; border-bottom: 1px solid #e5e5ea; }
-            QTableWidget::item:selected { background-color: #f2f7ff; color: #007aff; font-weight: 600; }
-        """)
-        self.doc_table.setStyleSheet("""
-            QTableWidget { border: 1px solid #e2e8f0; gridline-color: #f1f5f9; background: white; border-radius: 6px; }
-            QHeaderView::section { background-color: #f8fafc; color: #334155; font-weight: bold; padding: 6px 10px; border: none; border-bottom: 1px solid #e2e8f0; font-size: 11px; }
-            QTableWidget::item { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-size: 12px; }
-            QTableWidget::item:selected { background-color: #f0f9ff; color: #0284c7; font-weight: bold; }
+            QTableWidget { border: 1px solid #e1e8f4; gridline-color: #f0f6ff; background: #ffffff; border-radius: 8px; color: #0f172a; }
+            QHeaderView::section { background-color: #f8fafc; color: #64748b; font-weight: 600; padding: 8px 10px; border: none; border-bottom: 1px solid #e1e8f4; font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase; }
+            QTableWidget::item { padding: 6px 10px; border-bottom: 1px solid #f0f6ff; color: #0f172a; font-size: 12px; }
+            QTableWidget::item:selected { background-color: rgba(2, 132, 199, 0.12); color: #0284c7; font-weight: bold; }
         """)
         self.doc_table.itemSelectionChanged.connect(self.on_doc_selected)
         left_layout.addWidget(self.doc_table)
@@ -316,7 +311,7 @@ class DocumentUploadWidget(QWidget):
 
         # Right Pane: Document Inspector & Text Preview
         right_container = QFrame()
-        right_container.setStyleSheet("background-color: #f8fafc;")
+        right_container.setStyleSheet("background-color: #f0f6ff;")
         right_layout = QVBoxLayout(right_container)
         right_layout.setContentsMargins(16, 16, 16, 16)
         right_layout.setSpacing(10)

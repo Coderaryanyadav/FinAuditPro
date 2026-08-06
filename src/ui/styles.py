@@ -889,32 +889,33 @@ QPushButton#saveBtn:hover {
     background-color: #059669;
 }
 QTabWidget#complianceTabPane::pane {
-    border: 1px solid #334155;
-    background: #1e293b;
+    border: 1px solid #e1e8f4;
+    background: #ffffff;
     border-radius: 14px;
     margin: 16px 24px 24px 24px;
 }
 QTableWidget#complianceTable {
-    border: 1px solid #334155;
-    gridline-color: #334155;
-    background: #1e293b;
+    border: 1px solid #e1e8f4;
+    gridline-color: #f0f6ff;
+    background: #ffffff;
     border-radius: 6px;
+    color: #334155;
 }
 QTableWidget#complianceTable QHeaderView::section {
-    background-color: #0f172a;
-    color: #cbd5e1;
+    background-color: #f8fafc;
+    color: #64748b;
     font-weight: bold;
     padding: 8px;
     border: none;
-    border-bottom: 1px solid #334155;
+    border-bottom: 1px solid #e1e8f4;
 }
 
 /* ═══════════════════════════════════════════════════════════
    OLLAMA ONBOARDING PANEL & AI COPILOT COMPONENTS
 ═══════════════════════════════════════════════════════════ */
 QFrame#ollamaOnboardingPanel {
-    background-color: rgba(245, 158, 11, 0.1);
-    border: 1px solid rgba(245, 158, 11, 0.3);
+    background-color: #fffbe6;
+    border: 1px solid #ffe58f;
     border-radius: 10px;
     padding: 14px;
     margin-bottom: 8px;
@@ -922,20 +923,20 @@ QFrame#ollamaOnboardingPanel {
 QLabel#onboardingTitle {
     font-weight: 700;
     font-size: 13px;
-    color: #fbbf24;
+    color: #d97706;
     border: none;
     background: transparent;
 }
 QLabel#onboardingDesc {
     font-size: 11px;
-    color: #fde68a;
+    color: #92400e;
     line-height: 1.5;
     border: none;
     background: transparent;
 }
 QLabel#onboardingFallbackNote {
     font-size: 10px;
-    color: #fbbf24;
+    color: #d97706;
     font-style: italic;
     border: none;
     margin-top: 4px;
@@ -946,44 +947,44 @@ QLabel#onboardingFallbackNote {
    AI COPILOT & ANOMALY INSPECTOR COMPONENTS
 ═══════════════════════════════════════════════════════════ */
 QFrame#aiHeader {
-    background-color: #1e293b;
-    border-bottom: 1px solid #334155;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e1e8f4;
 }
 QLabel#aiTitle {
     font-size: 18px;
     font-weight: 700;
-    color: #f8fafc;
+    color: #0f172a;
     letter-spacing: -0.3px;
     border: none;
     background: transparent;
 }
 QLabel#aiSubtitle {
     font-size: 11px;
-    color: #94a3b8;
+    color: #64748b;
     border: none;
     background: transparent;
 }
 QFrame#aiColHeader {
-    background-color: #0f172a;
-    border-bottom: 1px solid #334155;
+    background-color: #e0f2fe;
+    border-bottom: 1px solid #e1e8f4;
 }
 QLabel#aiColTitle {
     font-size: 10px;
     font-weight: 700;
-    color: #38bdf8;
+    color: #0284c7;
     letter-spacing: 0.8px;
     border: none;
     background: transparent;
 }
 QTextEdit#aiDocContent {
-    background-color: #0f172a;
+    background-color: #f8fafc;
     margin: 10px;
     padding: 14px;
-    border: 1px solid #334155;
+    border: 1px solid #e1e8f4;
     border-radius: 8px;
     font-family: monospace;
     font-size: 11px;
-    color: #f8fafc;
+    color: #0f172a;
 }
 QFrame#chatBubbleUser {
     background-color: #0284c7;
@@ -993,9 +994,9 @@ QFrame#chatBubbleUser {
     margin-left: 40px;
 }
 QFrame#chatBubbleAI {
-    background-color: #0f172a;
-    color: #f8fafc;
-    border: 1px solid #334155;
+    background-color: #f8fafc;
+    color: #0f172a;
+    border: 1px solid #e1e8f4;
     border-radius: 12px;
     margin-right: 40px;
 }
@@ -1010,7 +1011,7 @@ QLabel#chatSenderAI {
     font-size: 10px;
     font-weight: 700;
     border: none;
-    color: #38bdf8;
+    color: #0284c7;
     background: transparent;
 }
 QLabel#chatMsgUser {
@@ -1022,19 +1023,19 @@ QLabel#chatMsgUser {
 QLabel#chatMsgAI {
     font-size: 12px;
     border: none;
-    color: #f8fafc;
+    color: #0f172a;
     background: transparent;
 }
 QTextEdit#chatInput {
-    border: 1px solid #334155;
+    border: 1px solid #e1e8f4;
     border-radius: 8px;
     padding: 8px 12px;
     font-size: 12px;
-    background-color: #0f172a;
-    color: #f8fafc;
+    background-color: #ffffff;
+    color: #0f172a;
 }
 QTextEdit#chatInput:focus {
-    border-color: #38bdf8;
+    border-color: #0284c7;
 }
 QPushButton#chatSendBtn {
     background-color: #0284c7;
@@ -1051,28 +1052,28 @@ QPushButton#chatSendBtn:hover {
 }
 
 QFrame#findingCard {
-    background-color: #1e293b;
-    border: 1px solid #334155;
+    background-color: #ffffff;
+    border: 1px solid #e1e8f4;
     border-radius: 10px;
     margin-bottom: 10px;
 }
 QLabel#findingCardTitle {
     font-weight: 700;
     font-size: 13px;
-    color: #f8fafc;
+    color: #0f172a;
     border: none;
     background: transparent;
 }
 QLabel#findingCardDesc {
-    color: #cbd5e1;
+    color: #334155;
     font-size: 12px;
     line-height: 1.4;
     border: none;
     background: transparent;
 }
 QFrame#evidenceBox {
-    background-color: #0f172a;
-    border: 1px solid #334155;
+    background-color: #f8fafc;
+    border: 1px solid #e1e8f4;
     border-radius: 6px;
 }
 QLabel#evidenceTitle {
@@ -1084,7 +1085,7 @@ QLabel#evidenceTitle {
     background: transparent;
 }
 QLabel#evidenceData {
-    color: #38bdf8;
+    color: #0284c7;
     font-size: 11px;
     font-weight: 600;
     font-family: monospace;
@@ -1108,13 +1109,13 @@ QPushButton#btnIngestWP:hover {
    WORKING PAPERS & CLIENT CRM PANELS
 ═══════════════════════════════════════════════════════════ */
 QFrame#wpSignoffBox {
-    background-color: #1e293b;
-    border: 1px solid #334155;
+    background-color: #ffffff;
+    border: 1px solid #e1e8f4;
     border-radius: 8px;
 }
 QFrame#clientFormCard {
-    background-color: #1e293b;
-    border: 1px solid #334155;
+    background-color: #ffffff;
+    border: 1px solid #e1e8f4;
     border-radius: 12px;
     padding: 16px;
 }
@@ -1123,7 +1124,7 @@ QFrame#clientFormCard {
    SPLITTER
 ═══════════════════════════════════════════════════════════ */
 QSplitter::handle {
-    background: #334155;
+    background: #e1e8f4;
     width: 1px;
     height: 1px;
 }
@@ -1132,17 +1133,17 @@ QSplitter::handle {
    AI COPILOT CHIPS & BADGES
 ═══════════════════════════════════════════════════════════ */
 QPushButton#promptChipBtn {
-    background-color: #0f172a;
-    color: #38bdf8;
-    border: 1px solid #334155;
+    background-color: #ffffff;
+    color: #0284c7;
+    border: 1px solid #bae6fd;
     border-radius: 12px;
     padding: 6px 12px;
     font-size: 11px;
     font-weight: 600;
 }
 QPushButton#promptChipBtn:hover {
-    background-color: rgba(2, 132, 199, 0.2);
-    border-color: #38bdf8;
+    background-color: #e0f2fe;
+    border-color: #0284c7;
 }
 """
 

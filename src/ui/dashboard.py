@@ -796,7 +796,7 @@ class DashboardWindow(QWidget):
         header_layout.addWidget(self.search_bar)
         
         header_layout.addSpacing(20)
-        header_layout.addWidget(QLabel("<b style='color:#f8fafc;'>Active Audit:</b>"))
+        header_layout.addWidget(QLabel("<b style='color:#0f172a; border: none; background: transparent;'>Active Audit:</b>"))
         self.client_selector = QComboBox()
         self.client_selector.setFixedWidth(220)
         self.client_selector.setObjectName("clientSelectorCombo")

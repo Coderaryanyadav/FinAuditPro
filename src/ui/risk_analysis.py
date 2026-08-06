@@ -23,7 +23,7 @@ class RiskAnalysisWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #0f172a;")
+        self.setStyleSheet("background-color: #f0f6ff;")
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -33,16 +33,16 @@ class RiskAnalysisWidget(QWidget):
         header = QFrame()
         header.setFixedHeight(68)
         header.setObjectName("riskHeader")
-        header.setStyleSheet("background-color: #1e293b; border-bottom: 1px solid #334155;")
+        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e1e8f4;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
         title_v.setSpacing(2)
         title = QLabel("Audit Risk Assessment & Materiality Calculator")
-        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #f8fafc; letter-spacing: -0.4px; border: none; background: transparent;")
+        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.4px; border: none; background: transparent; background-color: transparent;")
         subtitle = QLabel("SA 315 Risk Identification, Performance Materiality (SA 320) & Risk Heatmap")
-        subtitle.setStyleSheet("font-size: 12px; color: #94a3b8; border: none; background: transparent;")
+        subtitle.setStyleSheet("font-size: 12px; color: #64748b; border: none; background: transparent; background-color: transparent;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         h_layout.addLayout(title_v)
@@ -54,7 +54,7 @@ class RiskAnalysisWidget(QWidget):
         btn_calc.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_calc.setStyleSheet("""
             QPushButton {
-                background-color: #007aff;
+                background-color: #0284c7;
                 color: #ffffff;
                 font-size: 13px;
                 font-weight: 600;
@@ -62,7 +62,7 @@ class RiskAnalysisWidget(QWidget):
                 padding: 8px 16px;
                 border: none;
             }
-            QPushButton:hover { background-color: #0062cc; }
+            QPushButton:hover { background-color: #0369a1; }
         """)
         btn_calc.clicked.connect(self.calculate_materiality)
         h_layout.addWidget(btn_calc)
@@ -73,19 +73,22 @@ class RiskAnalysisWidget(QWidget):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setStyleSheet("background-color: #f0f6ff;")
         body = QWidget()
+        body.setStyleSheet("background-color: #f0f6ff;")
         b_layout = QVBoxLayout(body)
         b_layout.setContentsMargins(24, 24, 24, 24)
         b_layout.setSpacing(20)
 
         # SA 320 Materiality Worksheet Section
         mat_frame = QFrame()
-        mat_frame.setStyleSheet("background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 12px;")
+        mat_frame.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        mat_frame.setStyleSheet("background-color: #ffffff; border: 1px solid #e1e8f4; border-radius: 12px;")
         mat_layout = QVBoxLayout(mat_frame)
         mat_layout.setContentsMargins(20, 20, 20, 20)
 
         mat_title = QLabel("SA 320 MATERIALITY COMPUTATION WORKSHEET")
-        mat_title.setStyleSheet("font-size: 11px; font-weight: 600; color: #86868b; border-bottom: 1px solid #e5e5ea; padding-bottom: 8px; letter-spacing: 0.8px;")
+        mat_title.setStyleSheet("font-size: 11px; font-weight: 700; color: #0284c7; border-bottom: 1px solid #e1e8f4; padding-bottom: 8px; letter-spacing: 0.8px; background: transparent; background-color: transparent;")
         mat_layout.addWidget(mat_title)
 
         inputs_h = QHBoxLayout()

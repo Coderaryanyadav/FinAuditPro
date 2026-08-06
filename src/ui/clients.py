@@ -18,16 +18,16 @@ from sqlalchemy.exc import SQLAlchemyError
 
 class AddClientDialog(QDialog):
     def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Add New Client Profile")
-        self.setStyleSheet("background-color: #1e293b; color: #f8fafc;")
-        self.resize(480, 420)
+        super().__init__()
+        self.setWindowTitle("Register New Client Entity")
+        self.setStyleSheet("background-color: #ffffff; color: #0f172a;")
+        self.resize(520, 480)
         
         layout = QVBoxLayout(self)
         layout.setContentsMargins(24, 24, 24, 24)
         
         title = QLabel("Add New Audit Client & Statutory Profile")
-        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #f8fafc; margin-bottom: 12px; letter-spacing: -0.4px; background: transparent;")
+        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.4px; background: transparent; background-color: transparent;")
         layout.addWidget(title)
         
         form_frame = QFrame()
@@ -56,15 +56,15 @@ class AddClientDialog(QDialog):
         self.industry_input.setPlaceholderText("e.g. Technology / Retail / Finance")
         
         for input_field in [self.name_input, self.gst_input, self.pan_input, self.cin_input, self.kmp_input, self.industry_input]:
-            input_field.setStyleSheet("padding: 8px 12px; border: 1px solid #334155; border-radius: 8px; color: #f8fafc; background-color: #0f172a;")
+            input_field.setStyleSheet("padding: 8px 12px; border: 1px solid #e1e8f4; border-radius: 8px; color: #0f172a; background-color: #ffffff;")
             
-        form_layout.addRow(QLabel("<b style='color:#f8fafc;'>Client Legal Name *</b>"), self.name_input)
-        form_layout.addRow(QLabel("<b style='color:#f8fafc;'>Entity Type</b>"), self.entity_combo)
-        form_layout.addRow(QLabel("<b style='color:#f8fafc;'>GSTIN Number</b>"), self.gst_input)
-        form_layout.addRow(QLabel("<b style='color:#f8fafc;'>PAN Number</b>"), self.pan_input)
-        form_layout.addRow(QLabel("<b style='color:#f8fafc;'>CIN Number</b>"), self.cin_input)
-        form_layout.addRow(QLabel("<b style='color:#f8fafc;'>Managing Director / KMP</b>"), self.kmp_input)
-        form_layout.addRow(QLabel("<b style='color:#f8fafc;'>Industry Sector</b>"), self.industry_input)
+        form_layout.addRow(QLabel("<b style='color:#0f172a;'>Client Legal Name *</b>"), self.name_input)
+        form_layout.addRow(QLabel("<b style='color:#0f172a;'>Entity Type</b>"), self.entity_combo)
+        form_layout.addRow(QLabel("<b style='color:#0f172a;'>GSTIN Number</b>"), self.gst_input)
+        form_layout.addRow(QLabel("<b style='color:#0f172a;'>PAN Number</b>"), self.pan_input)
+        form_layout.addRow(QLabel("<b style='color:#0f172a;'>CIN Number</b>"), self.cin_input)
+        form_layout.addRow(QLabel("<b style='color:#0f172a;'>Managing Director / KMP</b>"), self.kmp_input)
+        form_layout.addRow(QLabel("<b style='color:#0f172a;'>Industry Sector</b>"), self.industry_input)
         
         layout.addWidget(form_frame)
         
@@ -72,7 +72,7 @@ class AddClientDialog(QDialog):
         self.buttons.setStyleSheet("""
             QPushButton { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; }
             QPushButton[text="OK"] { background-color: #0284c7; color: white; border: none; font-weight: 600; }
-            QPushButton[text="Cancel"] { background-color: #1e293b; color: #f8fafc; border: 1px solid #334155; }
+            QPushButton[text="Cancel"] { background-color: #ffffff; color: #334155; border: 1px solid #e1e8f4; }
         """)
         self.buttons.accepted.connect(self.validate_and_accept)
         self.buttons.rejected.connect(self.reject)
@@ -101,7 +101,7 @@ class CreateAuditProjectDialog(QDialog):
     def __init__(self, parent=None, client_id=None):
         super().__init__(parent)
         self.setWindowTitle("Initialize Statutory Audit Project")
-        self.setStyleSheet("background-color: #1e293b; color: #f8fafc;")
+        self.setStyleSheet("background-color: #ffffff; color: #0f172a;")
         self.resize(460, 320)
         self.client_id = client_id
         
@@ -109,7 +109,7 @@ class CreateAuditProjectDialog(QDialog):
         layout.setContentsMargins(24, 24, 24, 24)
         
         title = QLabel("Create Statutory Audit Engagement")
-        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #f8fafc; margin-bottom: 12px; letter-spacing: -0.4px; background: transparent;")
+        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.4px; background: transparent; background-color: transparent;")
         layout.addWidget(title)
         
         form_frame = QFrame()
@@ -123,18 +123,14 @@ class CreateAuditProjectDialog(QDialog):
         self.fy_combo.addItems(["2025-26", "2024-25", "2023-24", "2022-23"])
         
         self.type_combo = QComboBox()
-        self.type_combo.addItems(["Statutory Audit (Companies Act 2013)", "Tax Audit (Form 3CD / Sec 44AB)", "GST Audit & Annual Return", "Internal Controls & Risk Audit"])
+        self.type_combo.addItems(["Statutory Audit (Companies Act)", "Tax Audit (Sec 44AB)", "GST Audit", "Internal Financial Controls (IFCoFR)", "Limited Review (Quarterly)"])
         
-        self.risk_combo = QComboBox()
-        self.risk_combo.addItems(["Low", "Medium", "High"])
-
-        for cb in [self.client_combo, self.fy_combo, self.type_combo, self.risk_combo]:
-            cb.setStyleSheet("padding: 8px; border: 1px solid #334155; border-radius: 6px; background-color: #0f172a; color: #f8fafc;")
-
-        form_layout.addRow(QLabel("<b style='color:#f8fafc;'>Select Client Entity *</b>"), self.client_combo)
-        form_layout.addRow(QLabel("<b style='color:#f8fafc;'>Financial Year (FY) *</b>"), self.fy_combo)
-        form_layout.addRow(QLabel("<b style='color:#f8fafc;'>Audit Scope & Type</b>"), self.type_combo)
-        form_layout.addRow(QLabel("<b style='color:#f8fafc;'>Initial Risk Level</b>"), self.risk_combo)
+        for cb in [self.client_combo, self.fy_combo, self.type_combo]:
+            cb.setStyleSheet("padding: 8px; border: 1px solid #e1e8f4; border-radius: 6px; background-color: #ffffff; color: #0f172a;")
+            
+        form_layout.addRow(QLabel("<b style='color:#0f172a;'>Audit Client *</b>"), self.client_combo)
+        form_layout.addRow(QLabel("<b style='color:#0f172a;'>Financial Year (FY) *</b>"), self.fy_combo)
+        form_layout.addRow(QLabel("<b style='color:#0f172a;'>Audit Engagement Type *</b>"), self.type_combo)
         
         layout.addWidget(form_frame)
         
@@ -142,7 +138,7 @@ class CreateAuditProjectDialog(QDialog):
         self.buttons.setStyleSheet("""
             QPushButton { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; }
             QPushButton[text="OK"] { background-color: #0284c7; color: white; border: none; font-weight: 600; }
-            QPushButton[text="Cancel"] { background-color: #1e293b; color: #f8fafc; border: 1px solid #334155; }
+            QPushButton[text="Cancel"] { background-color: #ffffff; color: #334155; border: 1px solid #e1e8f4; }
         """)
         self.buttons.accepted.connect(self.accept)
         self.buttons.rejected.connect(self.reject)
@@ -165,11 +161,11 @@ class CreateAuditProjectDialog(QDialog):
             pass
 
 class ClientManagementWidget(QWidget):
-    """Master-Detail Client Management CRM & Statutory Vault."""
+    """Statutory Master Client Register & Engagement Management Workspace."""
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #0f172a;")
+        self.setStyleSheet("background-color: #f0f6ff;")
         self.selected_client_id = None
         
         main_layout = QVBoxLayout(self)
@@ -180,16 +176,16 @@ class ClientManagementWidget(QWidget):
         header = QFrame()
         header.setFixedHeight(68)
         header.setObjectName("clientsHeader")
-        header.setStyleSheet("background-color: #1e293b; border-bottom: 1px solid #334155;")
+        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e1e8f4;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
         title_v.setSpacing(2)
         title = QLabel("Client CRM & Statutory Profile Vault")
-        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #f8fafc; letter-spacing: -0.4px; border: none; background: transparent;")
+        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.4px; border: none; background: transparent; background-color: transparent;")
         subtitle = QLabel("Client Master Register, Statutory Registrations & Engagement History")
-        subtitle.setStyleSheet("font-size: 12px; color: #94a3b8; border: none; background: transparent;")
+        subtitle.setStyleSheet("font-size: 12px; color: #64748b; border: none; background: transparent; background-color: transparent;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         h_layout.addLayout(title_v)
@@ -200,12 +196,36 @@ class ClientManagementWidget(QWidget):
         btn_add.setObjectName("primaryBtn")
         btn_add.setToolTip("Register a new client entity into statutory master vault")
         btn_add.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        btn_add.setStyleSheet("""
+            QPushButton#primaryBtn {
+                background-color: #0284c7;
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: 600;
+                border-radius: 8px;
+                padding: 8px 16px;
+                border: none;
+            }
+            QPushButton#primaryBtn:hover { background-color: #0369a1; }
+        """)
         btn_add.clicked.connect(self.open_add_client_dialog)
         
         btn_new_audit = QPushButton("+ New Audit Project")
         btn_new_audit.setObjectName("secondaryBtn")
         btn_new_audit.setToolTip("Initialize a new statutory audit engagement for client")
         btn_new_audit.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        btn_new_audit.setStyleSheet("""
+            QPushButton {
+                background-color: #ffffff;
+                color: #0284c7;
+                font-size: 13px;
+                font-weight: 600;
+                border: 1px solid #e1e8f4;
+                border-radius: 8px;
+                padding: 8px 16px;
+            }
+            QPushButton:hover { background-color: #f8fafc; border-color: #0284c7; }
+        """)
         btn_new_audit.clicked.connect(self.open_create_audit_dialog)
         
         h_layout.addWidget(btn_add)
@@ -215,12 +235,12 @@ class ClientManagementWidget(QWidget):
         
         # 2. Main Splitter View
         splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.setStyleSheet("QSplitter::handle { background-color: #334155; }")
+        splitter.setStyleSheet("QSplitter::handle { background-color: #e1e8f4; }")
         
         # Left Pane: Client Table
         left_container = QFrame()
         left_container.setObjectName("clientsLeftPane")
-        left_container.setStyleSheet("background-color: #1e293b; border-right: 1px solid #334155;")
+        left_container.setStyleSheet("background-color: #ffffff; border-right: 1px solid #e1e8f4;")
         left_layout = QVBoxLayout(left_container)
         left_layout.setContentsMargins(16, 16, 16, 16)
         
@@ -229,7 +249,7 @@ class ClientManagementWidget(QWidget):
         self.search_input.setPlaceholderText("Search by Client Name, PAN, or GSTIN...")
         self.search_input.setToolTip("Search client master records by legal name, GSTIN, or PAN")
         self.search_input.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.search_input.setStyleSheet("padding: 8px 12px; border: 1px solid #334155; border-radius: 8px; background-color: #0f172a; color: #f8fafc;")
+        self.search_input.setStyleSheet("padding: 8px 12px; border: 1px solid #e1e8f4; border-radius: 8px; background-color: #ffffff; color: #0f172a;")
         self.search_input.textChanged.connect(self.filter_clients)
         search_layout.addWidget(self.search_input)
         left_layout.addLayout(search_layout)
@@ -240,10 +260,10 @@ class ClientManagementWidget(QWidget):
         self.table.setHorizontalHeaderLabels(["Client Legal Name", "GSTIN / PAN", "Industry"])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.table.setStyleSheet("""
-            QTableWidget, QTableWidget::viewport { border: 1px solid #334155; gridline-color: #334155; background: #1e293b; color: #f8fafc; border-radius: 10px; }
-            QHeaderView::section { background-color: #0f172a; color: #94a3b8; font-weight: 600; font-size: 10px; letter-spacing: 0.8px; padding: 10px; border: none; border-bottom: 1px solid #334155; }
-            QTableWidget::item { color: #f8fafc; }
-            QTableWidget::item:selected { background-color: rgba(2, 132, 199, 0.3); color: #38bdf8; font-weight: 600; }
+            QTableWidget, QTableWidget::viewport { border: 1px solid #e1e8f4; gridline-color: #f0f6ff; background: #ffffff; color: #0f172a; border-radius: 10px; }
+            QHeaderView::section { background-color: #f8fafc; color: #64748b; font-weight: 600; font-size: 10px; letter-spacing: 0.8px; padding: 10px; border: none; border-bottom: 1px solid #e1e8f4; }
+            QTableWidget::item { color: #0f172a; }
+            QTableWidget::item:selected { background-color: rgba(2, 132, 199, 0.12); color: #0284c7; font-weight: 600; }
         """)
         self.table.itemSelectionChanged.connect(self.on_client_selected)
         left_layout.addWidget(self.table)
@@ -252,14 +272,14 @@ class ClientManagementWidget(QWidget):
         
         # Right Pane: 4-Tab Client Details Vault
         right_container = QFrame()
-        right_container.setStyleSheet("background-color: #0f172a;")
+        right_container.setStyleSheet("background-color: #f0f6ff;")
         right_layout = QVBoxLayout(right_container)
         right_layout.setContentsMargins(20, 20, 20, 20)
         
         self.tabs = QTabWidget()
         self.tabs.setStyleSheet("""
-            QTabWidget::pane { border: 1px solid #334155; background: #1e293b; border-radius: 8px; }
-            QTabBar::tab { background: #0f172a; color: #94a3b8; padding: 8px 16px; font-weight: bold; border-top-left-radius: 6px; border-top-right-radius: 6px; margin-right: 2px; }
+            QTabWidget::pane { border: 1px solid #e1e8f4; background: #ffffff; border-radius: 8px; }
+            QTabBar::tab { background: #e0f2fe; color: #64748b; padding: 8px 16px; font-weight: bold; border-top-left-radius: 6px; border-top-right-radius: 6px; margin-right: 2px; }
             QTabBar::tab:selected { background: #0284c7; color: white; }
         """)
         
@@ -282,8 +302,9 @@ class ClientManagementWidget(QWidget):
         w_layout.setSpacing(12)
         
         card = QFrame()
+        card.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         card.setObjectName("clientFormCard")
-        card.setStyleSheet("background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 16px;")
+        card.setStyleSheet("background-color: #ffffff; border: 1px solid #e1e8f4; border-radius: 12px; padding: 16px;")
         f_layout = QFormLayout(card)
         f_layout.setSpacing(10)
         
@@ -295,14 +316,14 @@ class ClientManagementWidget(QWidget):
         self.edit_industry = QLineEdit()
 
         for f in [self.edit_name, self.edit_gst, self.edit_pan, self.edit_cin, self.edit_entity, self.edit_industry]:
-            f.setStyleSheet("padding: 8px 12px; border: 1px solid #334155; border-radius: 8px; background-color: #0f172a; color: #f8fafc;")
+            f.setStyleSheet("padding: 8px 12px; border: 1px solid #e1e8f4; border-radius: 8px; background-color: #ffffff; color: #0f172a;")
 
-        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>Legal Entity Name</b>"), self.edit_name)
-        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>GSTIN Registration</b>"), self.edit_gst)
-        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>PAN Identification</b>"), self.edit_pan)
-        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>CIN Registration</b>"), self.edit_cin)
-        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>Structure / Entity Type</b>"), self.edit_entity)
-        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>Industry Sector</b>"), self.edit_industry)
+        f_layout.addRow(QLabel("<b style='color:#0f172a; border: none; background: transparent;'>Legal Entity Name</b>"), self.edit_name)
+        f_layout.addRow(QLabel("<b style='color:#0f172a; border: none; background: transparent;'>GSTIN Registration</b>"), self.edit_gst)
+        f_layout.addRow(QLabel("<b style='color:#0f172a; border: none; background: transparent;'>PAN Identification</b>"), self.edit_pan)
+        f_layout.addRow(QLabel("<b style='color:#0f172a; border: none; background: transparent;'>CIN Registration</b>"), self.edit_cin)
+        f_layout.addRow(QLabel("<b style='color:#0f172a; border: none; background: transparent;'>Structure / Entity Type</b>"), self.edit_entity)
+        f_layout.addRow(QLabel("<b style='color:#0f172a; border: none; background: transparent;'>Industry Sector</b>"), self.edit_industry)
         
         w_layout.addWidget(card)
         

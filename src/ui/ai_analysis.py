@@ -142,45 +142,50 @@ class AIAuditWidget(QWidget):
         
         # COL 1: Source Document
         col1 = QFrame()
-        col1.setStyleSheet("background-color: #f8fafc; border-right: 1px solid #e1e8f4;")
+        col1.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        col1.setStyleSheet("background-color: #ffffff; border-right: 1px solid #e2e8f0;")
         c1_layout = QVBoxLayout(col1)
         c1_layout.setContentsMargins(0, 0, 0, 0)
         
         c1_header = QFrame()
-        c1_header.setFixedHeight(42)
-        c1_header.setStyleSheet("background-color: #e0f2fe; border-bottom: 1px solid #e1e8f4;")
+        c1_header.setFixedHeight(44)
+        c1_header.setStyleSheet("background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;")
         c1_h_layout = QHBoxLayout(c1_header)
-        c1_title = QLabel("RAG SOURCE CONTEXT")
-        c1_title.setStyleSheet("font-size: 10px; font-weight: 700; color: #0284c7; letter-spacing: 0.8px; border: none;")
+        c1_h_layout.setContentsMargins(16, 0, 16, 0)
+        c1_title = QLabel("📄 RAG SOURCE CONTEXT")
+        c1_title.setStyleSheet("font-size: 11px; font-weight: 700; color: #0f172a; letter-spacing: 0.8px; border: none; background: transparent;")
         c1_h_layout.addWidget(c1_title)
         c1_layout.addWidget(c1_header)
         
         doc_scroll = QScrollArea()
         doc_scroll.setWidgetResizable(True)
         doc_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        doc_scroll.setStyleSheet("background-color: #f8fafc;")
+        doc_scroll.setStyleSheet("background-color: #ffffff;")
         
         self.doc_content = QLabel()
         self.doc_content.setObjectName("aiDocContent")
         self.doc_content.setWordWrap(True)
         self.doc_content.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
-        self.doc_content.setContentsMargins(14, 14, 14, 14)
+        self.doc_content.setContentsMargins(16, 16, 16, 16)
+        self.doc_content.setStyleSheet("color: #0f172a; font-size: 12px; line-height: 1.5;")
         self.load_active_document_view()
         doc_scroll.setWidget(self.doc_content)
         c1_layout.addWidget(doc_scroll)
         
         # COL 2: AI Chat & Prompt Library
         col2 = QFrame()
-        col2.setStyleSheet("background-color: #ffffff; border-right: 1px solid #e1e8f4;")
+        col2.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        col2.setStyleSheet("background-color: #ffffff; border-right: 1px solid #e2e8f0;")
         c2_layout = QVBoxLayout(col2)
         c2_layout.setContentsMargins(0, 0, 0, 0)
         
         c2_header = QFrame()
-        c2_header.setFixedHeight(42)
-        c2_header.setStyleSheet("background-color: #e0f2fe; border-bottom: 1px solid #e1e8f4;")
+        c2_header.setFixedHeight(44)
+        c2_header.setStyleSheet("background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;")
         c2_h_layout = QHBoxLayout(c2_header)
-        bot_text = QLabel("FinAudit Copilot (Local RAG)")
-        bot_text.setStyleSheet("font-size: 11px; font-weight: 700; color: #0f172a; border: none;")
+        c2_h_layout.setContentsMargins(16, 0, 16, 0)
+        bot_text = QLabel("🤖 FinAudit Copilot (Local RAG)")
+        bot_text.setStyleSheet("font-size: 11px; font-weight: 700; color: #0f172a; border: none; background: transparent;")
         c2_h_layout.addWidget(bot_text)
         c2_h_layout.addStretch()
         c2_layout.addWidget(c2_header)
@@ -190,6 +195,7 @@ class AIAuditWidget(QWidget):
         self.chat_area.setFrameShape(QFrame.Shape.NoFrame)
         self.chat_area.setStyleSheet("background-color: #ffffff;")
         self.chat_widget = QWidget()
+        self.chat_widget.setStyleSheet("background-color: #ffffff;")
         self.chat_layout = QVBoxLayout(self.chat_widget)
         self.chat_layout.setContentsMargins(16, 16, 16, 16)
         self.chat_layout.setSpacing(12)
@@ -198,21 +204,29 @@ class AIAuditWidget(QWidget):
         # Onboarding Banner Panel when Ollama is offline or has no models
         if not self._ollama_online:
             onboarding_panel = QFrame()
+            onboarding_panel.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
             onboarding_panel.setObjectName("ollamaOnboardingPanel")
+            onboarding_panel.setStyleSheet("""
+                QFrame#ollamaOnboardingPanel {
+                    background-color: #fffbe6;
+                    border: 1px solid #ffe58f;
+                    border-radius: 10px;
+                }
+            """)
             ob_layout = QVBoxLayout(onboarding_panel)
-            ob_layout.setContentsMargins(12, 12, 12, 12)
+            ob_layout.setContentsMargins(14, 14, 14, 14)
             ob_layout.setSpacing(6)
 
             title_lbl = QLabel(f"🤖 {headline}")
-            title_lbl.setObjectName("onboardingTitle")
+            title_lbl.setStyleSheet("font-weight: 700; font-size: 13px; color: #d97706; border: none; background: transparent;")
 
             desc_lbl = QLabel(instructions_html)
-            desc_lbl.setObjectName("onboardingDesc")
+            desc_lbl.setStyleSheet("font-size: 12px; color: #92400e; line-height: 1.5; border: none; background: transparent;")
             desc_lbl.setWordWrap(True)
             desc_lbl.setOpenExternalLinks(True)
 
             fallback_note = QLabel("<b>Rule Engine Fallback Active:</b> Local statutory rules and document search remain fully operational.")
-            fallback_note.setObjectName("onboardingFallbackNote")
+            fallback_note.setStyleSheet("font-size: 11px; color: #d97706; font-style: italic; border: none; background: transparent; margin-top: 4px;")
 
             ob_layout.addWidget(title_lbl)
             ob_layout.addWidget(desc_lbl)
@@ -222,63 +236,107 @@ class AIAuditWidget(QWidget):
         self.chat_area.setWidget(self.chat_widget)
         c2_layout.addWidget(self.chat_area)
         
-        # Prompt Chips Layout
+        # Prompt Chips Layout — Clean Slate Container
         prompt_frame = QFrame()
-        prompt_frame.setStyleSheet("background-color: #e0f2fe; border-top: 1px solid #e1e8f4; padding: 6px;")
+        prompt_frame.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        prompt_frame.setStyleSheet("background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 8px;")
         p_layout = QVBoxLayout(prompt_frame)
         p_layout.setContentsMargins(12, 10, 12, 10)
         p_layout.setSpacing(8)
         
         chips_hdr = QHBoxLayout()
         chips_lbl = QLabel("ICAI AUDIT PROMPT LIBRARY")
-        chips_lbl.setStyleSheet("font-size: 10px; font-weight: 700; color: #0284c7; letter-spacing: 0.8px; border: none;")
+        chips_lbl.setStyleSheet("font-size: 10px; font-weight: 700; color: #0f172a; letter-spacing: 0.8px; border: none; background: transparent;")
         chips_hdr.addWidget(chips_lbl)
         chips_hdr.addStretch()
         p_layout.addLayout(chips_hdr)
 
         chips_scroll = QScrollArea()
-        chips_scroll.setFixedHeight(48)
+        chips_scroll.setFixedHeight(46)
         chips_scroll.setWidgetResizable(True)
         chips_scroll.setFrameShape(QFrame.Shape.NoFrame)
         chips_scroll.setStyleSheet("""
             QScrollArea { border: none; background: transparent; }
-            QScrollBar:horizontal { height: 4px; background: #f0f6ff; border-radius: 2px; }
+            QScrollBar:horizontal { height: 4px; background: #e2e8f0; border-radius: 2px; }
             QScrollBar::handle:horizontal { background: #cbd5e1; border-radius: 2px; }
         """)
         chips_w = QWidget()
+        chips_w.setStyleSheet("background: transparent;")
         chips_l = QHBoxLayout(chips_w)
         chips_l.setContentsMargins(0, 0, 0, 0)
         chips_l.setSpacing(8)
 
         for chip_title, chip_prompt in PROMPT_LIBRARY:
             btn = QPushButton(chip_title)
-            btn.setObjectName("promptChipBtn")
             btn.setToolTip(f"Execute AI audit prompt: {chip_prompt}")
             btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #ffffff;
+                    color: #0284c7;
+                    border: 1px solid #bae6fd;
+                    border-radius: 8px;
+                    padding: 6px 12px;
+                    font-size: 12px;
+                    font-weight: 600;
+                }
+                QPushButton:hover {
+                    background-color: #e0f2fe;
+                    border-color: #0284c7;
+                }
+            """)
             btn.clicked.connect(lambda _, p=chip_prompt: self.execute_prompt(p))
             chips_l.addWidget(btn)
 
         chips_scroll.setWidget(chips_w)
         p_layout.addWidget(chips_scroll)
 
-        # Input row
+        # Input row — Crisp Dark Input Text
         input_frame = QFrame()
+        input_frame.setStyleSheet("background: transparent;")
         input_layout = QHBoxLayout(input_frame)
         input_layout.setContentsMargins(0, 4, 0, 0)
+        input_layout.setSpacing(10)
         
         self.chat_input = QTextEdit()
-        self.chat_input.setObjectName("chatInput")
         self.chat_input.setPlaceholderText("Ask AI Copilot for SA 500 audit evidence analysis or GST anomaly explanation...")
         self.chat_input.setFixedHeight(50)
         self.chat_input.setToolTip("Type query or audit observation prompt for local RAG model (Press Ctrl+Enter to send)")
         self.chat_input.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.chat_input.setStyleSheet("""
+            QTextEdit {
+                background-color: #ffffff;
+                color: #0f172a;
+                border: 1.5px solid #cbd5e1;
+                border-radius: 8px;
+                padding: 10px;
+                font-size: 13px;
+            }
+            QTextEdit:focus {
+                border-color: #0284c7;
+            }
+        """)
         
         btn_send = QPushButton("Send Prompt")
-        btn_send.setObjectName("chatSendBtn")
         btn_send.setToolTip("Submit query to local Ollama RAG model")
         btn_send.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_send.setFixedHeight(50)
+        btn_send.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_send.setStyleSheet("""
+            QPushButton {
+                background-color: #0284c7;
+                color: #ffffff;
+                font-weight: 700;
+                font-size: 13px;
+                border-radius: 8px;
+                border: none;
+                padding: 8px 18px;
+            }
+            QPushButton:hover {
+                background-color: #0369a1;
+            }
+        """)
         btn_send.clicked.connect(self.handle_input)
         
         input_layout.addWidget(self.chat_input)
@@ -289,16 +347,18 @@ class AIAuditWidget(QWidget):
         
         # COL 3: AI Findings List
         col3 = QFrame()
-        col3.setStyleSheet("background-color: #f8fafc;")
+        col3.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        col3.setStyleSheet("background-color: #ffffff;")
         c3_layout = QVBoxLayout(col3)
         c3_layout.setContentsMargins(0, 0, 0, 0)
         
         c3_header = QFrame()
-        c3_header.setFixedHeight(42)
-        c3_header.setStyleSheet("background-color: #e0f2fe; border-bottom: 1px solid #e1e8f4;")
+        c3_header.setFixedHeight(44)
+        c3_header.setStyleSheet("background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;")
         c3_h_layout = QHBoxLayout(c3_header)
-        self.f_title = QLabel("AI FINDINGS & ANOMALIES")
-        self.f_title.setStyleSheet("border: none; font-size: 10px; font-weight: 700; color: #0284c7; letter-spacing: 0.8px;")
+        c3_h_layout.setContentsMargins(16, 0, 16, 0)
+        self.f_title = QLabel("🔍 AI FINDINGS & ANOMALIES")
+        self.f_title.setStyleSheet("border: none; font-size: 11px; font-weight: 700; color: #0f172a; letter-spacing: 0.8px; background: transparent;")
         c3_h_layout.addWidget(self.f_title)
         c3_h_layout.addStretch()
         c3_layout.addWidget(c3_header)

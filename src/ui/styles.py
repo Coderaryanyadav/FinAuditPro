@@ -450,34 +450,36 @@ QFrame#docsDropZone:hover {
    GLOBAL SEARCH
 ═══════════════════════════════════════════════════════════ */
 QFrame#globalSearchFrame {
-    background-color: #1e293b;
-    border: 1px solid #334155;
+    background-color: #f8fafc;
+    border: 1px solid #e1e8f4;
     border-radius: 8px;
 }
 QLineEdit#globalSearchInput {
     border: none;
     background: transparent;
     font-size: 12px;
-    color: #f8fafc;
+    color: #0f172a;
 }
 QLabel#globalSearchIcon {
     border: none;
     font-size: 13px;
-    color: #94a3b8;
+    color: #64748b;
     background: transparent;
 }
 QLabel#globalShortcutBadge {
-    border: 1px solid #334155;
-    background-color: #0f172a;
-    color: #94a3b8;
+    border: 1px solid #cbd5e1;
+    background-color: #ffffff;
+    color: #64748b;
     font-size: 10px;
     font-weight: 600;
     border-radius: 4px;
     padding: 1px 5px;
 }
 QMenu#globalSearchMenu {
-    background-color: #1e293b;
-    border: 1px solid #334155;
+    background-color: #ffffff;
+    border: 1px solid #e1e8f4;
+    color: #0f172a;
+}
     border-radius: 8px;
     font-size: 12px;
     padding: 4px;

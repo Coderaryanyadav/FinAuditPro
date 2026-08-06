@@ -1,9 +1,9 @@
 # FinAuditPro Remediation Flaws & Technical Verification Audit
 
 **Reference Audit:**
-[`FinAuditPro_Engineering_Audit.md`](file:///Users/aryanyadav/Desktop/PROJECTS/Audit/FinAuditPro_Engineering_Audit.md)\
+[`FinAuditPro_Engineering_Audit.md`](FinAuditPro_Engineering_Audit.md)\
 **Remediation Report Reviewed:**
-[`FinAuditPro_Engineering_Remediation_Report.md`](file:///Users/aryanyadav/Desktop/PROJECTS/Audit/FinAuditPro_Engineering_Remediation_Report.md)\
+[`FinAuditPro_Engineering_Remediation_Report.md`](FinAuditPro_Engineering_Remediation_Report.md)\
 **Audit Purpose:** Deep technical verification of claimed fixes, identification
 of items implemented incorrectly, superficially, or partially, and concrete
 architectural corrections.\
@@ -15,9 +15,9 @@ architectural corrections.\
 
 A comprehensive line-by-line audit was conducted comparing the original
 engineering audit
-([`FinAuditPro_Engineering_Audit.md`](file:///Users/aryanyadav/Desktop/PROJECTS/Audit/FinAuditPro_Engineering_Audit.md)),
+([`FinAuditPro_Engineering_Audit.md`](FinAuditPro_Engineering_Audit.md)),
 the previous remediation report
-([`FinAuditPro_Engineering_Remediation_Report.md`](file:///Users/aryanyadav/Desktop/PROJECTS/Audit/FinAuditPro_Engineering_Remediation_Report.md)),
+([`FinAuditPro_Engineering_Remediation_Report.md`](FinAuditPro_Engineering_Remediation_Report.md)),
 and the actual codebase implementation.
 
 ### Key Audit Finding

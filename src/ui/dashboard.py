@@ -151,26 +151,29 @@ class AuditStatusDelegate(QStyledItemDelegate):
 
         # Row background selection highlight
         if bool(option.state & QStyle.StateFlag.State_Selected):
-            painter.fillRect(rect, QColor("#e0f2fe"))
+            painter.fillRect(rect, QColor("rgba(5, 150, 105, 0.12)"))
         elif index.row() % 2 == 1:
-            painter.fillRect(rect, QColor("#f8fafc"))
+            painter.fillRect(rect, QColor("#f9fffe"))
         else:
             painter.fillRect(rect, QColor("#ffffff"))
 
         if col == 2: # Status Pill
             if "Active" in text or "Execution" in text:
-                bg_color = QColor("#e0f2fe")
-                text_color = QColor("#0284c7")
+                bg_color = QColor("rgba(5, 150, 105, 0.12)")
+                text_color = QColor("#059669")
+                border_color = QColor("rgba(5, 150, 105, 0.35)")
             elif "Completed" in text:
-                bg_color = QColor("#dcfce7")
-                text_color = QColor("#16a34a")
+                bg_color = QColor("rgba(16, 185, 129, 0.1)")
+                text_color = QColor("#047857")
+                border_color = QColor("rgba(16, 185, 129, 0.35)")
             else:
-                bg_color = QColor("#fef3c7")
+                bg_color = QColor("rgba(245, 158, 11, 0.12)")
                 text_color = QColor("#d97706")
+                border_color = QColor("rgba(245, 158, 11, 0.35)")
             
-            pill_rect = rect.adjusted(12, 6, -12, -6)
+            pill_rect = rect.adjusted(12, 7, -12, -7)
             painter.setBrush(QBrush(bg_color))
-            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setPen(QPen(border_color, 1))
             painter.drawRoundedRect(pill_rect, 6, 6)
             
             painter.setPen(QPen(text_color))
@@ -178,7 +181,7 @@ class AuditStatusDelegate(QStyledItemDelegate):
             painter.drawText(pill_rect, Qt.AlignmentFlag.AlignCenter, text)
 
         elif col == 3: # Risk Dot & Text
-            dot_color = QColor("#16a34a") if "Low" in text else QColor("#d97706") if "Medium" in text else QColor("#dc2626")
+            dot_color = QColor("#059669") if "Low" in text else QColor("#d97706") if "Medium" in text else QColor("#dc2626")
             
             dot_x = rect.left() + 16
             dot_y = rect.top() + (rect.height() // 2) - 4
@@ -186,9 +189,9 @@ class AuditStatusDelegate(QStyledItemDelegate):
             painter.setPen(Qt.PenStyle.NoPen)
             painter.drawEllipse(dot_x, dot_y, 8, 8)
             
-            text_rect = rect.adjusted(30, 0, 0, 0)
-            painter.setPen(QPen(QColor("#0f172a")))
-            painter.setFont(QFont("Inter", 9, QFont.Weight.Bold))
+            text_rect = rect.adjusted(32, 0, 0, 0)
+            painter.setPen(QPen(QColor("#374151")))
+            painter.setFont(QFont("Inter", 9, QFont.Weight.Medium))
             painter.drawText(text_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, text)
             
         else:
@@ -282,70 +285,85 @@ class GlobalSearchWidget(QFrame):
             pass
 
 class MetricCard(QFrame):
-    """Apple macOS Minimalist KPI Metric Card."""
-    def __init__(self, title, value, subtitle, badge_bg, badge_fg, accent_hex="#007aff", icon_str="", parent=None):
+    """Sky Blue Light KPI Metric Card with Icon Badge."""
+    def __init__(self, title, value, subtitle, badge_bg, badge_fg, accent_hex="#0284c7", icon_str="", parent=None):
         super().__init__(parent)
-        self.setFixedHeight(115)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.setFixedHeight(128)
         self.setObjectName("metricCard")
         self.setStyleSheet("""
             QFrame#metricCard {
                 background-color: #ffffff;
-                border: 1px solid #e5e5ea;
+                border: 1px solid #e1e8f4;
                 border-radius: 14px;
             }
             QFrame#metricCard:hover {
-                border-color: #d1d1d6;
-                background-color: #fafafa;
+                border-color: #0284c7;
+                background-color: #f8fafc;
             }
         """)
         
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 16, 20, 16)
-        layout.setSpacing(6)
+        layout.setContentsMargins(18, 14, 18, 14)
+        layout.setSpacing(10)
         
-        h_layout = QHBoxLayout()
-        h_layout.setContentsMargins(0, 0, 0, 0)
+        top_row = QHBoxLayout()
+        top_row.setContentsMargins(0, 0, 0, 0)
+        top_row.setSpacing(10)
         
-        # Uppercase subtle tracking label
-        self.title_lbl = QLabel(title.upper())
-        self.title_lbl.setStyleSheet("color: #86868b; font-size: 11px; font-weight: 600; border: none; letter-spacing: 0.6px;")
+        if icon_str:
+            icon_box = QLabel()
+            icon_box.setFixedSize(36, 36)
+            icon_box.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            icon_box.setStyleSheet(
+                f"background-color: {badge_bg}; border-radius: 10px; border: 1px solid {accent_hex}40;"
+            )
+            pix = get_app_pixmap(icon_str, color=badge_fg, size=18)
+            if not pix.isNull():
+                icon_box.setPixmap(pix)
+            top_row.addWidget(icon_box)
+
+        self.title_lbl = QLabel(title)
+        self.title_lbl.setStyleSheet("color: #64748b; font-size: 12px; font-weight: 600; border: none; background: transparent; letter-spacing: 0.2px;")
         
         self.badge_lbl = QLabel(subtitle)
         self.badge_lbl.setStyleSheet(
-            f"color: {badge_fg}; font-size: 11px; font-weight: 600; "
-            f"background-color: {badge_bg}; padding: 3px 9px; border-radius: 6px; border: none;"
+            f"color: {badge_fg}; font-size: 10px; font-weight: 700; "
+            f"background-color: {badge_bg}; padding: 4px 10px; border-radius: 12px; "
+            f"border: 1px solid {accent_hex}50;"
         )
         
-        h_layout.addWidget(self.title_lbl)
-        h_layout.addStretch()
-        h_layout.addWidget(self.badge_lbl)
+        top_row.addWidget(self.title_lbl)
+        top_row.addStretch()
+        top_row.addWidget(self.badge_lbl)
         
         val_layout = QHBoxLayout()
         val_layout.setContentsMargins(0, 0, 0, 0)
         
         self.val_lbl = QLabel(str(value))
-        self.val_lbl.setStyleSheet("font-size: 34px; font-weight: 600; color: #1d1d1f; border: none; letter-spacing: -0.6px;")
+        self.val_lbl.setStyleSheet("font-size: 34px; font-weight: 800; color: #0f172a; border: none; background: transparent; letter-spacing: -0.8px;")
         
         val_layout.addWidget(self.val_lbl)
         val_layout.addStretch()
         
-        layout.addLayout(h_layout)
+        layout.addLayout(top_row)
         layout.addLayout(val_layout)
-        apply_shadow(self, blur=16, dx=0, dy=2, alpha=8)
+        apply_shadow(self, blur=16, dx=0, dy=2, alpha=12)
 
     def update_value(self, value):
         self.val_lbl.setText(str(value))
 
 class AIAuditSummaryCard(QFrame):
-    """RAG AI Audit Executive Summary Card — Apple Minimalist split layout."""
+    """Sky Blue Light AI Audit Summary Split Card."""
     def __init__(self, risk_score: int, comp_score: int, findings: list, parent=None):
         super().__init__(parent)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.setObjectName("aiSummaryCard")
         self.setStyleSheet("""
             QFrame#aiSummaryCard {
                 background-color: #ffffff;
-                border: 1px solid #e5e5ea;
-                border-radius: 14px;
+                border: 1px solid #e1e8f4;
+                border-radius: 16px;
             }
         """)
         
@@ -356,8 +374,8 @@ class AIAuditSummaryCard(QFrame):
         # Header
         h_layout = QHBoxLayout()
         h_layout.setContentsMargins(0, 0, 0, 0)
-        title_lbl = QLabel("AI Audit Summary")
-        title_lbl.setStyleSheet("font-weight: 600; font-size: 15px; color: #1d1d1f; border: none;")
+        title_lbl = QLabel("🤖 AI Audit Summary")
+        title_lbl.setStyleSheet("font-weight: 700; font-size: 15px; color: #0f172a; border: none;")
         h_layout.addWidget(title_lbl)
         h_layout.addStretch()
         self.layout.addLayout(h_layout)
@@ -369,25 +387,25 @@ class AIAuditSummaryCard(QFrame):
         
         # Left Panel — Scores
         left_panel = QFrame()
-        left_panel.setStyleSheet("background-color: #f5f5f7; border: 1px solid #e5e5ea; border-radius: 10px;")
+        left_panel.setStyleSheet("background-color: #f8fafc; border: 1px solid #e1e8f4; border-radius: 12px;")
         lp_layout = QVBoxLayout(left_panel)
         lp_layout.setContentsMargins(14, 12, 14, 12)
         lp_layout.setSpacing(10)
         
-        self.risk_bar_widget = self.create_bar("Portfolio Risk", risk_score, "#ff9500" if risk_score > 20 else "#34c759")
-        self.comp_bar_widget = self.create_bar("Compliance Score", comp_score, "#007aff")
+        self.risk_bar_widget = self.create_bar("Portfolio Risk", risk_score, "#f59e0b" if risk_score > 20 else "#0284c7")
+        self.comp_bar_widget = self.create_bar("Compliance Score", comp_score, "#0284c7")
         lp_layout.addWidget(self.risk_bar_widget)
         lp_layout.addWidget(self.comp_bar_widget)
         
         # Right Panel — Findings
         self.f_box = QFrame()
-        self.f_box.setStyleSheet("background-color: #f5f5f7; border: 1px solid #e5e5ea; border-radius: 10px;")
+        self.f_box.setStyleSheet("background-color: #f8fafc; border: 1px solid #e1e8f4; border-radius: 12px;")
         self.f_layout = QVBoxLayout(self.f_box)
         self.f_layout.setContentsMargins(14, 12, 14, 12)
         self.f_layout.setSpacing(8)
         
         f_lbl = QLabel("RECENT AI FINDINGS")
-        f_lbl.setStyleSheet("font-size: 10px; font-weight: 600; color: #86868b; letter-spacing: 0.8px; border: none;")
+        f_lbl.setStyleSheet("font-size: 10px; font-weight: 700; color: #0284c7; letter-spacing: 1px; border: none;")
         self.f_layout.addWidget(f_lbl)
         
         if findings:
@@ -395,16 +413,16 @@ class AIAuditSummaryCard(QFrame):
                 row = QHBoxLayout()
                 row.setSpacing(6)
                 dot = QLabel("●")
-                dot.setStyleSheet("color: #ff9500; font-size: 8px; border: none;")
+                dot.setStyleSheet("color: #d97706; font-size: 8px; border: none;")
                 item_lbl = QLabel(str(item))
                 item_lbl.setWordWrap(True)
-                item_lbl.setStyleSheet("font-size: 12px; color: #1d1d1f; border: none;")
+                item_lbl.setStyleSheet("font-size: 12px; color: #334155; border: none;")
                 row.addWidget(dot)
                 row.addWidget(item_lbl, stretch=1)
                 self.f_layout.addLayout(row)
         else:
             no_findings = QLabel("No anomalies detected. Ingest audit documents to activate RAG analysis.")
-            no_findings.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
+            no_findings.setStyleSheet("font-size: 12px; color: #64748b; border: none;")
             no_findings.setWordWrap(True)
             self.f_layout.addWidget(no_findings)
             
@@ -412,41 +430,45 @@ class AIAuditSummaryCard(QFrame):
         body_split.addWidget(self.f_box, 1)
         
         self.layout.addLayout(body_split)
-        apply_shadow(self, blur=16, dx=0, dy=2, alpha=8)
+        apply_shadow(self, blur=16, dx=0, dy=2, alpha=10)
 
-    def create_bar(self, label_text, val_pct, color_hex):
+    def create_bar(self, label: str, value: int, color_hex: str) -> QWidget:
         w = QWidget()
         l = QVBoxLayout(w)
         l.setContentsMargins(0, 0, 0, 0)
         l.setSpacing(4)
-        top_h = QHBoxLayout()
-        t_lbl = QLabel(label_text)
-        t_lbl.setStyleSheet("font-size: 11px; color: #6e6e73; font-weight: 500; border: none;")
-        v_lbl = QLabel(f"{val_pct}%")
+        
+        hdr = QHBoxLayout()
+        t_lbl = QLabel(label)
+        t_lbl.setStyleSheet("font-size: 11px; color: #64748b; font-weight: 500; border: none;")
+        v_lbl = QLabel(f"{value}%")
         v_lbl.setStyleSheet(f"font-size: 12px; font-weight: 600; color: {color_hex}; border: none;")
-        top_h.addWidget(t_lbl)
-        top_h.addStretch()
-        top_h.addWidget(v_lbl)
-        l.addLayout(top_h)
+        hdr.addWidget(t_lbl)
+        hdr.addStretch()
+        hdr.addWidget(v_lbl)
         
         pbar = QProgressBar()
-        pbar.setFixedHeight(5)
-        pbar.setValue(min(100, val_pct))
+        pbar.setRange(0, 100)
+        pbar.setValue(value)
+        pbar.setFixedHeight(4)
         pbar.setTextVisible(False)
-        pbar.setStyleSheet(f"QProgressBar {{ border: none; background-color: #e5e5ea; border-radius: 2px; }} QProgressBar::chunk {{ background-color: {color_hex}; border-radius: 2px; }}")
+        pbar.setStyleSheet(f"QProgressBar {{ border: none; background-color: #e1e8f4; border-radius: 2px; }} QProgressBar::chunk {{ background-color: {color_hex}; border-radius: 2px; }}")
+        
+        l.addLayout(hdr)
         l.addWidget(pbar)
         return w
 
 class AuditProgressChart(QFrame):
-    """Apple macOS Spline Line Chart for Audit Trends."""
+    """Sky Blue Light Audit Progress Trend Chart."""
     def __init__(self, projects: list, parent=None):
         super().__init__(parent)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.setObjectName("auditProgressCard")
         self.setStyleSheet("""
             QFrame#auditProgressCard {
                 background-color: #ffffff;
-                border: 1px solid #e5e5ea;
-                border-radius: 14px;
+                border: 1px solid #e1e8f4;
+                border-radius: 16px;
             }
         """)
         
@@ -457,7 +479,7 @@ class AuditProgressChart(QFrame):
         h_layout = QHBoxLayout()
         h_layout.setContentsMargins(0, 0, 0, 0)
         title_lbl = QLabel("Audit Progress Trend")
-        title_lbl.setStyleSheet("font-weight: 600; font-size: 15px; color: #1d1d1f; border: none;")
+        title_lbl.setStyleSheet("font-weight: 600; font-size: 15px; color: #0f172a; border: none;")
         
         period_combo = QComboBox()
         period_combo.addItems(["Last 6 Months", "FY 2025-26", "All Time"])
@@ -475,7 +497,7 @@ class AuditProgressChart(QFrame):
         chart.setMargins(QMargins(4, 4, 4, 4))
         
         series = QSplineSeries()
-        series.setPen(QPen(QColor("#007aff"), 3))
+        series.setPen(QPen(QColor("#0284c7"), 3))
         
         months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
         data_points = [12, 18, 15, 25, 22, 28]
@@ -490,15 +512,15 @@ class AuditProgressChart(QFrame):
         
         axis_x = QCategoryAxis()
         for i, m in enumerate(months): axis_x.append(m, i)
-        axis_x.setLabelsColor(QColor("#86868b"))
-        axis_x.setGridLineColor(QColor("#f2f2f7"))
+        axis_x.setLabelsColor(QColor("#64748b"))
+        axis_x.setGridLineColor(QColor("#e1e8f4"))
         chart.addAxis(axis_x, Qt.AlignmentFlag.AlignBottom)
         series.attachAxis(axis_x)
         
         axis_y = QValueAxis()
         axis_y.setRange(0, 100)
-        axis_y.setLabelsColor(QColor("#86868b"))
-        axis_y.setGridLineColor(QColor("#f2f2f7"))
+        axis_y.setLabelsColor(QColor("#64748b"))
+        axis_y.setGridLineColor(QColor("#e1e8f4"))
         chart.addAxis(axis_y, Qt.AlignmentFlag.AlignLeft)
         series.attachAxis(axis_y)
         
@@ -510,15 +532,16 @@ class AuditProgressChart(QFrame):
         apply_shadow(self, blur=16, dx=0, dy=2, alpha=8)
 
 class RiskDistributionChart(QFrame):
-    """Apple macOS Donut Chart for Risk Level Classification."""
+    """Sky Blue Light Risk Distribution Donut Chart."""
     def __init__(self, low: int, med: int, high: int, parent=None):
         super().__init__(parent)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.setObjectName("riskDistributionCard")
         self.setStyleSheet("""
             QFrame#riskDistributionCard {
                 background-color: #ffffff;
-                border: 1px solid #e5e5ea;
-                border-radius: 14px;
+                border: 1px solid #e1e8f4;
+                border-radius: 16px;
             }
         """)
         
@@ -527,7 +550,7 @@ class RiskDistributionChart(QFrame):
         layout.setSpacing(8)
         
         title_lbl = QLabel("Risk Distribution")
-        title_lbl.setStyleSheet("font-weight: 600; font-size: 15px; color: #1d1d1f; border: none;")
+        title_lbl.setStyleSheet("font-weight: 600; font-size: 15px; color: #0f172a; border: none;")
         layout.addWidget(title_lbl)
         
         chart = QChart()
@@ -542,21 +565,22 @@ class RiskDistributionChart(QFrame):
             
             if low > 0:
                 s1 = pie_series.append("Low Risk", low)
-                s1.setBrush(QColor("#34c759"))
+                s1.setBrush(QColor("#0284c7"))
             if med > 0:
                 s2 = pie_series.append("Medium Risk", med)
-                s2.setBrush(QColor("#ff9500"))
+                s2.setBrush(QColor("#d97706"))
             if high > 0:
                 s3 = pie_series.append("High Risk", high)
-                s3.setBrush(QColor("#ff3b30"))
+                s3.setBrush(QColor("#dc2626"))
             
             chart.addSeries(pie_series)
             
             chart_view = QChartView(chart)
             chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
+            chart_view.setStyleSheet("background-color: transparent; background: transparent; border: none;")
             chart_view.setObjectName("transparentChartView")
             
-            center_lbl = QLabel(f"<b style='font-size:20px; color:#1d1d1f;'>{total_val}</b><br/><span style='color:#86868b; font-size:10px;'>Total Audits</span>", chart_view)
+            center_lbl = QLabel(f"<b style='font-size:20px; color:#0f172a;'>{total_val}</b><br/><span style='color:#64748b; font-size:10px;'>Total Audits</span>", chart_view)
             center_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
             center_lbl.setObjectName("donutCenterLabel")
             
@@ -566,7 +590,7 @@ class RiskDistributionChart(QFrame):
         else:
             empty_lbl = QLabel("No Risk Data — Upload documents to begin analysis")
             empty_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            empty_lbl.setStyleSheet("color: #86868b; font-size: 12px; font-weight: 500; border: none; padding: 24px;")
+            empty_lbl.setStyleSheet("color: #64748b; font-size: 12px; font-weight: 500; border: none; padding: 24px;")
             layout.addWidget(empty_lbl)
         
         leg_layout = QHBoxLayout()
@@ -581,16 +605,15 @@ class RiskDistributionChart(QFrame):
             dot = QLabel("●")
             dot.setStyleSheet(f"color: {color_hex}; font-size: 8px; border: none;")
             txt = QLabel(label_text)
-            txt.setStyleSheet("color: #6e6e73; font-size: 11px; font-weight: 500; border: none;")
+            txt.setStyleSheet("color: #334155; font-size: 11px; font-weight: 500; border: none;")
             l.addWidget(dot)
             l.addWidget(txt)
             return w
             
-        leg_layout.addWidget(create_leg_item("#34c759", "Low Risk"))
-        leg_layout.addWidget(create_leg_item("#ff9500", "Medium Risk"))
-        leg_layout.addWidget(create_leg_item("#ff3b30", "High Risk"))
+        leg_layout.addWidget(create_leg_item("#0284c7", "Low Risk"))
+        leg_layout.addWidget(create_leg_item("#d97706", "Medium Risk"))
+        leg_layout.addWidget(create_leg_item("#dc2626", "High Risk"))
         layout.addLayout(leg_layout)
-        
         apply_shadow(self, blur=16, dx=0, dy=2, alpha=8)
 
 # ==============================================================================
@@ -621,7 +644,7 @@ class DashboardWindow(QWidget):
         
         # 2. Main Content Stacked Container
         main_content = QFrame()
-        main_content.setStyleSheet("background-color: #f8fafc; border: none;")
+        main_content.setStyleSheet("background-color: #f0f6ff; border: none;")
         content_layout = QVBoxLayout(main_content)
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
@@ -773,7 +796,7 @@ class DashboardWindow(QWidget):
         header_layout.addWidget(self.search_bar)
         
         header_layout.addSpacing(20)
-        header_layout.addWidget(QLabel("<b style='color:#0f172a;'>Active Audit:</b>"))
+        header_layout.addWidget(QLabel("<b style='color:#f8fafc;'>Active Audit:</b>"))
         self.client_selector = QComboBox()
         self.client_selector.setFixedWidth(220)
         self.client_selector.setObjectName("clientSelectorCombo")
@@ -813,57 +836,65 @@ class DashboardWindow(QWidget):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setStyleSheet("background-color: #f0f6ff; border: none;")
         
         body_widget = QWidget()
+        body_widget.setStyleSheet("background-color: #f0f6ff;")
         body_layout = QVBoxLayout(body_widget)
         body_layout.setContentsMargins(28, 24, 28, 28)
         body_layout.setSpacing(20)
         
-        # Greeting Header Strip — Apple Minimalist Header
+        # Greeting Header Strip — Sky Blue Soft Header
         hero_frame = QFrame()
+        hero_frame.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         hero_frame.setStyleSheet("""
             QFrame {
-                background-color: #ffffff;
-                border: 1px solid #e5e5ea;
-                border-radius: 14px;
-                padding: 16px 20px;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #e0f2fe, stop:0.5 #f0f6ff, stop:1 #e0f2fe);
+                border: 1px solid #bae6fd;
+                border-radius: 16px;
+                padding: 20px 24px;
             }
         """)
         hero_h = QHBoxLayout(hero_frame)
         hero_h.setContentsMargins(0, 0, 0, 0)
         
         hero_v = QVBoxLayout()
-        hero_v.setSpacing(3)
+        hero_v.setSpacing(4)
         
         user_name = self.current_user.username.title() if self.current_user and getattr(self.current_user, 'username', None) else "Auditor"
         _hour = datetime.now().hour
         _greeting = "Good Morning" if _hour < 12 else "Good Afternoon" if _hour < 17 else "Good Evening"
-        hero_title = QLabel(f"{_greeting}, {user_name}")
-        hero_title.setStyleSheet("font-size: 24px; font-weight: 600; color: #1d1d1f; border: none; letter-spacing: -0.5px;")
+        hero_title = QLabel(f"✨ {_greeting}, {user_name}")
+        hero_title.setStyleSheet("font-size: 24px; font-weight: 800; color: #0f172a; border: none; background: transparent; letter-spacing: -0.5px;")
         hero_sub = QLabel("Here is your statutory audit portfolio overview and AI risk assessment for today.")
-        hero_sub.setStyleSheet("font-size: 13px; color: #6e6e73; border: none;")
+        hero_sub.setStyleSheet("font-size: 13px; color: #64748b; border: none; background: transparent;")
         
         hero_v.addWidget(hero_title)
         hero_v.addWidget(hero_sub)
         
         date_lbl = QLabel(datetime.now().strftime("%A, %d %b %Y"))
-        date_lbl.setStyleSheet("font-size: 12px; font-weight: 500; color: #6e6e73; background: #f5f5f7; padding: 6px 14px; border-radius: 8px; border: 1px solid #e5e5ea;")
+        date_lbl.setStyleSheet(
+            "font-size: 12px; font-weight: 600; color: #0284c7; "
+            "background: rgba(2, 132, 199, 0.08); padding: 8px 16px; "
+            "border-radius: 20px; border: 1px solid rgba(2, 132, 199, 0.35);"
+        )
         
         hero_h.addLayout(hero_v)
         hero_h.addStretch()
-        hero_h.addWidget(date_lbl)
+        hero_h.addWidget(date_lbl, alignment=Qt.AlignmentFlag.AlignVCenter)
         
         body_layout.addWidget(hero_frame)
-        apply_shadow(hero_frame, blur=16, dx=0, dy=2, alpha=8)
+        apply_shadow(hero_frame, blur=20, dx=0, dy=4, alpha=15)
         
-        # 4 KPI Cards Row with Apple macOS Color Tokens
+        # 4 KPI Cards Row with Sky Blue Theme Badges
         stats_layout = QHBoxLayout()
         stats_layout.setSpacing(16)
         
-        self.card_clients = MetricCard("Total Clients", "0", "+12%", "#e8f2ff", "#007aff", "#007aff", "clients")
-        self.card_completed = MetricCard("Completed Audits", "0", "This Year", "#eafff0", "#34c759", "#34c759", "check")
-        self.card_pending = MetricCard("Pending Reviews", "0", "Action Req.", "#fff8e6", "#ff9500", "#ff9500", "risk")
-        self.card_high_risk = MetricCard("High Risk Cases", "0", "Flagged by AI", "#ffebeb", "#ff3b30", "#ff3b30", "shield")
+        self.card_clients = MetricCard("Total Clients", "0", "+12%", "rgba(2, 132, 199, 0.1)", "#0284c7", "#0284c7", "clients")
+        self.card_completed = MetricCard("Completed Audits", "0", "This Year", "rgba(16, 185, 129, 0.1)", "#047857", "#047857", "check")
+        self.card_pending = MetricCard("Pending Reviews", "0", "Action Req.", "rgba(217, 119, 6, 0.1)", "#d97706", "#d97706", "risk")
+        self.card_high_risk = MetricCard("High Risk Cases", "0", "Flagged by AI", "rgba(220, 38, 38, 0.1)", "#dc2626", "#dc2626", "shield")
 
         stats_layout.addWidget(self.card_clients)
         stats_layout.addWidget(self.card_completed)
@@ -872,12 +903,13 @@ class DashboardWindow(QWidget):
         
         body_layout.addLayout(stats_layout)
 
-        # Welcome / onboarding banner — Apple Glass/Acrylic Card
+        # Welcome / onboarding banner — Sky Blue Light Card
         self.welcome_banner = QFrame()
+        self.welcome_banner.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.welcome_banner.setStyleSheet("""
             QFrame {
                 background-color: #ffffff;
-                border: 1px solid #e5e5ea;
+                border: 1px solid #e1e8f4;
                 border-radius: 14px;
             }
         """)
@@ -888,9 +920,9 @@ class DashboardWindow(QWidget):
         wb_text_v = QVBoxLayout()
         wb_text_v.setSpacing(3)
         wb_title = QLabel("Welcome to FinAuditPro Workspace")
-        wb_title.setStyleSheet("font-size: 15px; font-weight: 600; color: #1d1d1f; border: none;")
+        wb_title.setStyleSheet("font-size: 15px; font-weight: 600; color: #0f172a; border: none; background: transparent;")
         wb_sub = QLabel("No active audit engagements or clients registered yet. Start by adding a client to set up statutory audits.")
-        wb_sub.setStyleSheet("font-size: 13px; color: #6e6e73; border: none;")
+        wb_sub.setStyleSheet("font-size: 13px; color: #64748b; border: none; background: transparent;")
         wb_sub.setWordWrap(True)
         wb_text_v.addWidget(wb_title)
         wb_text_v.addWidget(wb_sub)
@@ -900,7 +932,7 @@ class DashboardWindow(QWidget):
         btn_add_client.setObjectName("primaryBtn")
         btn_add_client.setStyleSheet("""
             QPushButton#primaryBtn {
-                background-color: #007aff;
+                background-color: #0284c7;
                 color: #ffffff;
                 font-size: 13px;
                 font-weight: 600;
@@ -908,7 +940,7 @@ class DashboardWindow(QWidget):
                 padding: 8px 18px;
                 border: none;
             }
-            QPushButton#primaryBtn:hover { background-color: #0062cc; }
+            QPushButton#primaryBtn:hover { background-color: #0369a1; }
         """)
         btn_add_client.clicked.connect(lambda: self.btn_clients.click())
 
@@ -932,14 +964,15 @@ class DashboardWindow(QWidget):
         
         body_layout.addLayout(mid_layout)
         
-        # QTableView Model-View Section — Apple Table Container
+        # QTableView Model-View Section — Sky Blue Light Table Container
         table_frame = QFrame()
+        table_frame.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         table_frame.setObjectName("recentProjectsTableFrame")
         table_frame.setStyleSheet("""
             QFrame#recentProjectsTableFrame {
                 background-color: #ffffff;
-                border: 1px solid #e5e5ea;
-                border-radius: 14px;
+                border: 1px solid #e1e8f4;
+                border-radius: 16px;
             }
         """)
         t_layout = QVBoxLayout(table_frame)
@@ -948,7 +981,7 @@ class DashboardWindow(QWidget):
         
         t_header = QHBoxLayout()
         t_title = QLabel("Recent Audit Projects")
-        t_title.setStyleSheet("font-weight: 600; font-size: 15px; color: #1d1d1f; border: none;")
+        t_title.setStyleSheet("font-weight: 600; font-size: 15px; color: #0f172a; border: none; background: transparent;")
         t_header.addWidget(t_title)
         t_header.addStretch()
         t_layout.addLayout(t_header)
@@ -956,6 +989,22 @@ class DashboardWindow(QWidget):
         self.table_model = AuditProjectsTableModel([])
         
         self.table_view = QTableView()
+        self.table_view.setStyleSheet("""
+            QTableView {
+                background-color: #ffffff;
+                gridline-color: #f0f6ff;
+                border: none;
+                color: #334155;
+            }
+            QHeaderView::section {
+                background-color: #f8fafc;
+                color: #64748b;
+                border-bottom: 1px solid #e1e8f4;
+                font-weight: 600;
+                font-size: 11px;
+                padding: 8px;
+            }
+        """)
         self.table_view.setModel(self.table_model)
         self.table_view.setItemDelegate(AuditStatusDelegate(self.table_view))
         self.table_view.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)

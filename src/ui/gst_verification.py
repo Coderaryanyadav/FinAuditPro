@@ -10,7 +10,7 @@ from .styles import apply_shadow, EmptyStateWidget, LoadingStateWidget, ErrorSta
 class GSTVerificationWidget(QWidget):
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f5f5f7;")
+        self.setStyleSheet("background-color: #0f172a;")
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -19,16 +19,17 @@ class GSTVerificationWidget(QWidget):
         # Action Bar — Apple Header
         action_bar = QFrame()
         action_bar.setFixedHeight(68)
-        action_bar.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
+        action_bar.setObjectName("gstHeader")
+        action_bar.setStyleSheet("background-color: #1e293b; border-bottom: 1px solid #334155;")
         action_layout = QHBoxLayout(action_bar)
         action_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
         title_v.setSpacing(2)
-        title = QLabel("GST Findings & Mismatches")
-        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
-        subtitle = QLabel("Review GST-related audit findings and financial impacts")
-        subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
+        title = QLabel("GST 2B vs Purchase Register Reconciliation Engine")
+        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #f8fafc; letter-spacing: -0.4px; border: none; background: transparent;")
+        subtitle = QLabel("Automated Input Tax Credit (ITC) Mismatch & Vendor Non-Compliance Finder")
+        subtitle.setStyleSheet("font-size: 12px; color: #94a3b8; border: none; background: transparent;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         action_layout.addLayout(title_v)

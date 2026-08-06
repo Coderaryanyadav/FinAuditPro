@@ -2,7 +2,7 @@
 
 **Target Project:** FinAuditPro Enterprise Statutory Audit Platform\
 **Audit Document Reference:**
-[`FinAuditPro_Engineering_Audit.md`](file:///Users/aryanyadav/Desktop/PROJECTS/Audit/FinAuditPro_Engineering_Audit.md)\
+[`FinAuditPro_Engineering_Audit.md`](FinAuditPro_Engineering_Audit.md)\
 **Status:** **100% Remediated, Verified, and Pushed to Production Branch
 (`main`)**\
 **Remediation Date:** August 2, 2026
@@ -14,7 +14,7 @@
 This report documents the total technical remediation, architecture hardening,
 and security upgrade of the **FinAuditPro** platform in response to the
 comprehensive engineering audit
-([`FinAuditPro_Engineering_Audit.md`](file:///Users/aryanyadav/Desktop/PROJECTS/Audit/FinAuditPro_Engineering_Audit.md)).
+([`FinAuditPro_Engineering_Audit.md`](FinAuditPro_Engineering_Audit.md)).
 
 All critical, high-priority, medium-priority, and architectural findings
 identified in the audit have been systematically addressed in code, covered by
@@ -72,7 +72,7 @@ automated test suites, and pushed to `origin/main`.
 ## 3. Actionable Roadmap Remediation Matrix
 
 The table below maps all 20 action items from Section 14 of
-[`FinAuditPro_Engineering_Audit.md`](file:///Users/aryanyadav/Desktop/PROJECTS/Audit/FinAuditPro_Engineering_Audit.md)
+[`FinAuditPro_Engineering_Audit.md`](FinAuditPro_Engineering_Audit.md)
 to their exact resolution in the codebase.
 
 |   #    | Priority     | Issue Description                        | Target File(s)                                |  Status  | Resolution Summary                                                                      |

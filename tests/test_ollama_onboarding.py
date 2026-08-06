@@ -11,28 +11,28 @@ app = QApplication.instance() or QApplication(sys.argv)
 
 def test_ollama_status_offline():
     with patch("requests.get", side_effect=Exception("Connection refused")):
-        status, headline, instructions = OllamaClient.check_status_details()
+        status, headline, instructions, active_model = OllamaClient.check_status_details()
         assert status == "offline"
         assert "Not Installed" in headline or "Stopped" in headline
         assert "https://ollama.com" in instructions
-        assert "ollama pull llama3.2" in instructions
+        assert "ollama pull" in instructions
 
 def test_ollama_status_no_models():
     mock_res = MagicMock()
     mock_res.status_code = 200
     mock_res.json.return_value = {"models": []}
     with patch("requests.get", return_value=mock_res):
-        status, headline, instructions = OllamaClient.check_status_details()
+        status, headline, instructions, active_model = OllamaClient.check_status_details()
         assert status == "no_models"
         assert "No AI Models Downloaded" in headline
-        assert "ollama pull llama3.2" in instructions
+        assert "ollama pull" in instructions
 
 def test_ollama_status_online():
     mock_res = MagicMock()
     mock_res.status_code = 200
     mock_res.json.return_value = {"models": [{"name": "llama3.2:latest"}]}
     with patch("requests.get", return_value=mock_res):
-        status, headline, instructions = OllamaClient.check_status_details()
+        status, headline, instructions, active_model = OllamaClient.check_status_details()
         assert status == "online"
         assert "Active" in headline
 

@@ -24,11 +24,50 @@ class OllamaClient:
 
     def _auto_detect_model(self) -> str:
         """Find best installed Ollama model automatically."""
+        return self._auto_detect_model_cls(self.base_url)
+
+    @classmethod
+    def get_recommended_model(cls) -> str:
+        """Check system RAM and recommend a model size."""
         try:
-            res = requests.get(f"{self.base_url}/api/tags", timeout=5)
+            import os
+            if hasattr(os, 'sysconf'):
+                mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
+            else:
+                import ctypes
+                kernel32 = ctypes.windll.kernel32
+                class MEMORYSTATUSEX(ctypes.Structure):
+                    _fields_ = [
+                        ('dwLength', ctypes.c_ulong), ('dwMemoryLoad', ctypes.c_ulong),
+                        ('ullTotalPhys', ctypes.c_ulonglong), ('ullAvailPhys', ctypes.c_ulonglong),
+                        ('ullTotalPageFile', ctypes.c_ulonglong), ('ullAvailPageFile', ctypes.c_ulonglong),
+                        ('ullTotalVirtual', ctypes.c_ulonglong), ('ullAvailVirtual', ctypes.c_ulonglong),
+                        ('sullAvailExtendedVirtual', ctypes.c_ulonglong),
+                    ]
+                memoryStatus = MEMORYSTATUSEX()
+                memoryStatus.dwLength = ctypes.sizeof(MEMORYSTATUSEX)
+                kernel32.GlobalMemoryStatusEx(ctypes.byref(memoryStatus))
+                mem_bytes = memoryStatus.ullTotalPhys
+            mem_gb = mem_bytes / (1024**3)
+            if mem_gb >= 16:
+                return "qwen2.5-coder:14b"
+            elif mem_gb >= 8:
+                return "llama3.2"
+            else:
+                return "llama3.2:1b"
+        except Exception:
+            return "llama3.2"
+
+    @classmethod
+    def _auto_detect_model_cls(cls, base_url: str) -> str:
+        """Find best installed Ollama model automatically."""
+        try:
+            res = requests.get(f"{base_url}/api/tags", timeout=5)
             if res.status_code == 200:
                 models = [m.get("name", "") for m in res.json().get("models", [])]
+                recommended = cls.get_recommended_model()
                 preferred_list = [
+                    recommended,
                     "qwen3.5:9b", "qwen3.5", "qwen2.5:9b", "qwen2.5-coder:14b",
                     "qwen2.5:latest", "qwen2.5", "llama3.2:latest", "llama3.2"
                 ]
@@ -66,12 +105,13 @@ class OllamaClient:
     @classmethod
     def check_status_details(cls, base_url: Optional[str] = None) -> tuple:
         """
-        Detailed diagnostic check returning (status_code, headline, instructions_html).
+        Detailed diagnostic check returning (status_code, headline, instructions_html, active_model).
         Status codes:
           - 'online': Daemon running with at least 1 model installed.
           - 'no_models': Daemon running but 0 models installed.
           - 'offline': Daemon unreachable / not installed.
         """
+        recommended_model = cls.get_recommended_model()
         try:
             from core.config import config as _cfg
             url = base_url or _cfg.ollama_host
@@ -79,23 +119,26 @@ class OllamaClient:
             if res.status_code == 200:
                 models = res.json().get("models", [])
                 if len(models) > 0:
-                    return ("online", "Ollama Local RAG Engine Active", "")
+                    active_model = cls._auto_detect_model_cls(url)
+                    return ("online", "Ollama Local RAG Engine Active", "", active_model)
                 else:
                     return (
                         "no_models",
                         "Ollama Daemon Active — No AI Models Downloaded",
                         "Ollama is running on your system, but no AI models have been downloaded yet.<br/>"
                         "To activate local LLM RAG capabilities, open Terminal/CMD and run:<br/>"
-                        "<code><b>ollama pull llama3.2</b></code><br/>"
-                        "Then restart FinAuditPro."
+                        f"<code><b>ollama pull {recommended_model}</b></code><br/>"
+                        "Then restart FinAuditPro.",
+                        ""
                     )
             return (
                 "offline",
                 "Local AI Engine (Ollama) Not Installed or Stopped",
                 "Local RAG features require <b>Ollama</b>, a free open-source local AI engine.<br/>"
                 "1. Download and install Ollama from <a href='https://ollama.com'>https://ollama.com</a><br/>"
-                "2. Open Terminal/CMD and run: <code><b>ollama pull llama3.2</b></code><br/>"
-                "3. Restart FinAuditPro to enable local LLM analysis."
+                f"2. Open Terminal/CMD and run: <code><b>ollama pull {recommended_model}</b></code><br/>"
+                "3. Restart FinAuditPro to enable local LLM analysis.",
+                ""
             )
         except Exception:
             return (
@@ -103,8 +146,9 @@ class OllamaClient:
                 "Local AI Engine (Ollama) Not Installed or Stopped",
                 "Local RAG features require <b>Ollama</b>, a free open-source local AI engine.<br/>"
                 "1. Download and install Ollama from <a href='https://ollama.com'>https://ollama.com</a><br/>"
-                "2. Open Terminal/CMD and run: <code><b>ollama pull llama3.2</b></code><br/>"
-                "3. Restart FinAuditPro to enable local LLM analysis."
+                f"2. Open Terminal/CMD and run: <code><b>ollama pull {recommended_model}</b></code><br/>"
+                "3. Restart FinAuditPro to enable local LLM analysis.",
+                ""
             )
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None, json_mode: bool = False, retries: int = 3) -> str:

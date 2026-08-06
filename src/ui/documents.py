@@ -141,32 +141,32 @@ class DocumentUploadWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f5f5f7;")
+        self.setStyleSheet("background-color: #0f172a;")
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # 1. Action Bar — Apple Header
+        # 1. Action Bar — Header
         action_bar = QFrame()
         action_bar.setFixedHeight(68)
         action_bar.setObjectName("headerBar")
-        action_bar.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
+        action_bar.setStyleSheet("background-color: #1e293b; border-bottom: 1px solid #334155;")
         action_layout = QHBoxLayout(action_bar)
         action_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
         title_v.setSpacing(2)
         title = QLabel("Document Ingestion & Intelligence Pipeline")
-        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
+        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #f8fafc; letter-spacing: -0.4px; border: none; background: transparent;")
         subtitle = QLabel("Auto-Classification, OCR & SHA-256 Anti-Tamper Verification")
-        subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
+        subtitle.setStyleSheet("font-size: 12px; color: #94a3b8; border: none; background: transparent;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         action_layout.addLayout(title_v)
         
         action_layout.addSpacing(30)
-        action_layout.addWidget(QLabel("<b style='color:#1d1d1f;'>Audit Project:</b>"))
+        action_layout.addWidget(QLabel("<b style='color:#f8fafc;'>Audit Project:</b>"))
         
         self.project_combo = QComboBox()
         self.project_combo.setFixedWidth(240)
@@ -174,14 +174,14 @@ class DocumentUploadWidget(QWidget):
         self.project_combo.setStyleSheet("""
             QComboBox {
                 padding: 6px 12px;
-                border: 1px solid #e5e5ea;
+                border: 1px solid #334155;
                 border-radius: 8px;
-                background-color: #f2f2f7;
-                color: #1d1d1f;
+                background-color: #0f172a;
+                color: #f8fafc;
                 font-size: 12px;
                 font-weight: 500;
             }
-            QComboBox:focus { background-color: #ffffff; border-color: #007aff; }
+            QComboBox:focus { background-color: #0f172a; border-color: #38bdf8; }
         """)
         self.project_combo.currentIndexChanged.connect(self.load_uploaded_files)
         action_layout.addWidget(self.project_combo)
@@ -192,7 +192,7 @@ class DocumentUploadWidget(QWidget):
         btn_upload.setObjectName("primaryButton")
         btn_upload.setStyleSheet("""
             QPushButton#primaryButton {
-                background-color: #007aff;
+                background-color: #0284c7;
                 color: #ffffff;
                 font-size: 13px;
                 font-weight: 600;
@@ -200,7 +200,7 @@ class DocumentUploadWidget(QWidget):
                 padding: 8px 16px;
                 border: none;
             }
-            QPushButton#primaryButton:hover { background-color: #0062cc; }
+            QPushButton#primaryButton:hover { background-color: #0369a1; }
         """)
         btn_upload.clicked.connect(self.browse_files)
 
@@ -208,15 +208,15 @@ class DocumentUploadWidget(QWidget):
         btn_process.setObjectName("secondaryButton")
         btn_process.setStyleSheet("""
             QPushButton {
-                background-color: #ffffff;
-                color: #1d1d1f;
+                background-color: #1e293b;
+                color: #f8fafc;
                 font-size: 13px;
                 font-weight: 500;
-                border: 1px solid #e5e5ea;
+                border: 1px solid #334155;
                 border-radius: 8px;
                 padding: 8px 16px;
             }
-            QPushButton:hover { background-color: #f5f5f7; border-color: #d1d1d6; }
+            QPushButton:hover { background-color: #334155; border-color: #475569; }
         """)
         btn_process.clicked.connect(self.start_ai_processing)
         self.btn_process = btn_process

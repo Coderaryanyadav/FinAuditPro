@@ -23,25 +23,26 @@ class RiskAnalysisWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f5f5f7;")
+        self.setStyleSheet("background-color: #0f172a;")
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # 1. Action Bar Header
+        # 1. Action Bar
         header = QFrame()
         header.setFixedHeight(68)
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
+        header.setObjectName("riskHeader")
+        header.setStyleSheet("background-color: #1e293b; border-bottom: 1px solid #334155;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
         title_v.setSpacing(2)
-        title = QLabel("SA 320 Materiality Calculator & Risk Analysis Matrix")
-        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
-        subtitle = QLabel("ICAI SA 320 Materiality in Planning and Performing an Audit")
-        subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
+        title = QLabel("Audit Risk Assessment & Materiality Calculator")
+        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #f8fafc; letter-spacing: -0.4px; border: none; background: transparent;")
+        subtitle = QLabel("SA 315 Risk Identification, Performance Materiality (SA 320) & Risk Heatmap")
+        subtitle.setStyleSheet("font-size: 12px; color: #94a3b8; border: none; background: transparent;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         h_layout.addLayout(title_v)

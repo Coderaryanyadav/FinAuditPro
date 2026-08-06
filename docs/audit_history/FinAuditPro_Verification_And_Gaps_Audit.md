@@ -1,7 +1,7 @@
 # FinAuditPro Engineering Verification & Technical Gaps Audit Report
 
 **Reference Document:**
-[`FinAuditPro_Engineering_Audit.md`](file:///Users/aryanyadav/Desktop/PROJECTS/Audit/FinAuditPro_Engineering_Audit.md)\
+[`FinAuditPro_Engineering_Audit.md`](FinAuditPro_Engineering_Audit.md)\
 **Target Project:** FinAuditPro Enterprise Statutory Audit Platform\
 **Audit Purpose:** Comprehensive verification of completed fixes, technical
 accuracy audit, and identification of items implemented incorrectly, partially,
@@ -13,7 +13,7 @@ or with architectural limitations.\
 ## 1. Executive Verification Summary
 
 A line-by-line verification of the 20 actionable roadmap items in Section 14 of
-[`FinAuditPro_Engineering_Audit.md`](file:///Users/aryanyadav/Desktop/PROJECTS/Audit/FinAuditPro_Engineering_Audit.md)
+[`FinAuditPro_Engineering_Audit.md`](FinAuditPro_Engineering_Audit.md)
 was performed across the codebase.
 
 While **all 20 roadmap items have code changes implemented and pushed**, an

@@ -47,26 +47,26 @@ class FinancialStatementsWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f5f5f7;")
-        self.ledger_rows = []
-
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        # 1. Action Bar — Apple Header
+        self.setStyleSheet("background-color: #f0f6ff;")
+        
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+        
+        # 1. Action Bar
         header = QFrame()
         header.setFixedHeight(68)
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
+        header.setObjectName("fsHeader")
+        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e1e8f4;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
-
+        
         title_v = QVBoxLayout()
         title_v.setSpacing(2)
-        title = QLabel("Schedule III Financial Statements Engine")
-        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
-        subtitle = QLabel("Companies Act 2013 Division I & II Compliance")
-        subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
+        title = QLabel("Schedule III Financial Statements & Analytical Review")
+        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.4px; border: none; background: transparent;")
+        subtitle = QLabel("Balance Sheet, Profit & Loss Statement, Cash Flow & Financial Ratios")
+        subtitle.setStyleSheet("font-size: 12px; color: #64748b; border: none; background: transparent;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         h_layout.addLayout(title_v)
@@ -78,7 +78,7 @@ class FinancialStatementsWidget(QWidget):
         btn_import.setObjectName("primaryBtn")
         btn_import.setStyleSheet("""
             QPushButton#primaryBtn {
-                background-color: #007aff;
+                background-color: #0284c7;
                 color: #ffffff;
                 font-size: 13px;
                 font-weight: 600;
@@ -86,7 +86,7 @@ class FinancialStatementsWidget(QWidget):
                 padding: 8px 16px;
                 border: none;
             }
-            QPushButton#primaryBtn:hover { background-color: #0062cc; }
+            QPushButton#primaryBtn:hover { background-color: #0369a1; }
         """)
         btn_import.clicked.connect(self.import_trial_balance)
 
@@ -96,14 +96,14 @@ class FinancialStatementsWidget(QWidget):
         btn_auto_map.setStyleSheet("""
             QPushButton {
                 background-color: #ffffff;
-                color: #007aff;
+                color: #0284c7;
                 font-size: 13px;
                 font-weight: 600;
-                border: 1px solid #e5e5ea;
+                border: 1px solid #e1e8f4;
                 border-radius: 8px;
                 padding: 8px 16px;
             }
-            QPushButton:hover { background-color: #f5f5f7; border-color: #d1d1d6; }
+            QPushButton:hover { background-color: #f8fafc; border-color: #0284c7; }
         """)
         btn_auto_map.clicked.connect(self.run_auto_mapping)
 
@@ -113,14 +113,14 @@ class FinancialStatementsWidget(QWidget):
         btn_export.setStyleSheet("""
             QPushButton {
                 background-color: #ffffff;
-                color: #1d1d1f;
+                color: #334155;
                 font-size: 13px;
                 font-weight: 500;
-                border: 1px solid #e5e5ea;
+                border: 1px solid #e1e8f4;
                 border-radius: 8px;
                 padding: 8px 16px;
             }
-            QPushButton:hover { background-color: #f5f5f7; border-color: #d1d1d6; }
+            QPushButton:hover { background-color: #f8fafc; border-color: #0284c7; }
         """)
         btn_export.clicked.connect(self.export_statements)
 
@@ -130,7 +130,7 @@ class FinancialStatementsWidget(QWidget):
         h_layout.addSpacing(8)
         h_layout.addWidget(btn_export)
 
-        layout.addWidget(header)
+        main_layout.addWidget(header)
 
         # 2. Validation Status Banner — Apple Soft Card
         val_container = QWidget()
@@ -142,7 +142,7 @@ class FinancialStatementsWidget(QWidget):
         self.validation_frame.setStyleSheet("""
             QFrame {
                 background-color: #ffffff;
-                border: 1px solid #e5e5ea;
+                border: 1px solid #e1e8f4;
                 border-radius: 12px;
             }
         """)
@@ -173,7 +173,7 @@ class FinancialStatementsWidget(QWidget):
         val_layout.addWidget(self.lbl_balance_status)
         val_container_l.addWidget(self.validation_frame)
 
-        layout.addWidget(val_container)
+        main_layout.addWidget(val_container)
 
         # 3. Main Tabs — Apple Segmented / Underline Style
         self.tabs = QTabWidget()

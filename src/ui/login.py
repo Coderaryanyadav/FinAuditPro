@@ -1,8 +1,8 @@
 """
 FinAuditPro — Login Screen
-Design language: Trustworthy Light Sky Blue — clean, modern, high-contrast.
+Design language: Slate Dark — deep slate navy with sky-blue accents.
 Left: brand panel with clear typography and trust indicators.
-Right: enterprise login form with crisp inputs and primary blue CTA.
+Right: enterprise login form with crisp dark card, glowing inputs and primary CTA.
 """
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
@@ -16,40 +16,41 @@ from .styles import apply_shadow
 
 
 # ── Shared field styles ───────────────────────────────────────────────────────
+# ── Shared field styles ───────────────────────────────────────────────────────
 _INPUT = """
     QLineEdit {
-        border: 1px solid #e5e5ea;
+        border: 1.5px solid #e1e8f4;
         border-radius: 8px;
         padding: 10px 14px;
-        background-color: #f5f5f7;
+        background-color: #ffffff;
         font-size: 13px;
-        color: #1d1d1f;
+        color: #0f172a;
     }
     QLineEdit:focus {
-        border-color: #007aff;
+        border-color: #0284c7;
         background-color: #ffffff;
     }
-    QLineEdit:hover { border-color: #c7c7cc; }
+    QLineEdit:hover { border-color: #93c5fd; }
 """
 
 _COMBO = """
     QComboBox {
-        border: 1px solid #e5e5ea;
+        border: 1.5px solid #e1e8f4;
         border-radius: 8px;
         padding: 10px 14px;
-        background-color: #f5f5f7;
+        background-color: #ffffff;
         font-size: 13px;
-        color: #1d1d1f;
+        color: #0f172a;
         font-weight: 400;
     }
-    QComboBox:focus  { border-color: #007aff; background-color: #ffffff; }
-    QComboBox:hover  { border-color: #c7c7cc; }
+    QComboBox:focus  { border-color: #0284c7; background-color: #ffffff; }
+    QComboBox:hover  { border-color: #93c5fd; }
     QComboBox::drop-down { border: none; width: 26px; }
     QComboBox QAbstractItemView {
         background: #ffffff;
-        border: 1px solid #e5e5ea;
-        color: #1d1d1f;
-        selection-background-color: #007aff;
+        border: 1px solid #e1e8f4;
+        color: #0f172a;
+        selection-background-color: #0284c7;
         selection-color: #ffffff;
         outline: none;
         padding: 4px;
@@ -58,7 +59,7 @@ _COMBO = """
 
 
 class LoginWindow(QWidget):
-    """Enterprise Auditor Login Window."""
+    """Enterprise Auditor Login Window — Sky Blue & White Theme."""
     login_successful = Signal(object)
 
     def __init__(self):
@@ -67,6 +68,7 @@ class LoginWindow(QWidget):
         self.resize(1080, 680)
         self.setObjectName("appBg")
         self.setMinimumSize(780, 560)
+        self.setStyleSheet("background-color: #f0f6ff;")
 
         root = QHBoxLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
@@ -75,6 +77,10 @@ class LoginWindow(QWidget):
         # ── LEFT: brand panel ────────────────────────────────────────
         left = QFrame()
         left.setObjectName("loginHeroPanel")
+        left.setStyleSheet(
+            "background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #0f172a, stop:1 #1e293b);"
+            "border-right: 1px solid #1e293b;"
+        )
         ll = QVBoxLayout(left)
         ll.setContentsMargins(56, 60, 56, 48)
         ll.setSpacing(0)
@@ -85,12 +91,12 @@ class LoginWindow(QWidget):
         logo_box.setFixedSize(34, 34)
         logo_box.setAlignment(Qt.AlignmentFlag.AlignCenter)
         logo_box.setStyleSheet(
-            "background: #007aff; color: #fff; border-radius: 8px;"
+            "background: #0284c7; color: #fff; border-radius: 8px;"
             "font-size: 13px; font-weight: 800; border: none;"
         )
         logo_name = QLabel("FinAuditPro")
         logo_name.setStyleSheet(
-            "font-size: 16px; font-weight: 700; color: #1d1d1f; border: none; margin-left: 10px;"
+            "font-size: 16px; font-weight: 700; color: #ffffff; border: none; background: transparent; background-color: transparent; margin-left: 10px;"
         )
         logo_row.addWidget(logo_box)
         logo_row.addWidget(logo_name)
@@ -101,7 +107,8 @@ class LoginWindow(QWidget):
         # headline
         h1 = QLabel("Built for\nstatutory auditors.")
         h1.setStyleSheet(
-            "font-size: 36px; font-weight: 700; color: #1d1d1f; border: none; line-height: 1.2; letter-spacing: -0.8px;"
+            "font-size: 36px; font-weight: 700; color: #ffffff; border: none; background: transparent; background-color: transparent;"
+            "line-height: 1.2; letter-spacing: -0.8px;"
         )
         h1.setWordWrap(True)
         ll.addWidget(h1)
@@ -110,7 +117,7 @@ class LoginWindow(QWidget):
         sub = QLabel(
             "Automated working papers, AI-assisted findings,\nGST reconciliation — all offline, all secure."
         )
-        sub.setStyleSheet("font-size: 14px; color: #6e6e73; border: none; line-height: 1.5;")
+        sub.setStyleSheet("font-size: 14px; color: #94a3b8; border: none; background: transparent; background-color: transparent; line-height: 1.5;")
         sub.setWordWrap(True)
         ll.addWidget(sub)
         ll.addStretch(2)
@@ -124,10 +131,10 @@ class LoginWindow(QWidget):
         for f in features:
             row = QHBoxLayout()
             dot = QLabel("✓")
-            dot.setStyleSheet("font-size: 13px; color: #007aff; border: none; font-weight: 700;")
+            dot.setStyleSheet("font-size: 13px; color: #38bdf8; border: none; background: transparent; background-color: transparent; font-weight: 700;")
             dot.setFixedWidth(20)
             tx = QLabel(f)
-            tx.setStyleSheet("font-size: 13px; color: #1d1d1f; border: none; font-weight: 500;")
+            tx.setStyleSheet("font-size: 13px; color: #cbd5e1; border: none; background: transparent; background-color: transparent; font-weight: 500;")
             row.addWidget(dot)
             row.addWidget(tx)
             row.addStretch()
@@ -138,12 +145,13 @@ class LoginWindow(QWidget):
 
         # version footer
         ver = QLabel("Enterprise v2.4.0 · Local deployment")
-        ver.setStyleSheet("font-size: 11px; color: #86868b; border: none;")
+        ver.setStyleSheet("font-size: 11px; color: #64748b; border: none; background: transparent; background-color: transparent;")
         ll.addWidget(ver)
 
         # ── RIGHT: form ───────────────────────────────────────────────
         right_bg = QWidget()
         right_bg.setObjectName("loginRightBg")
+        right_bg.setStyleSheet("background-color: #f0f6ff;")
         rl = QVBoxLayout(right_bg)
         rl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         rl.setContentsMargins(52, 40, 52, 40)
@@ -151,7 +159,14 @@ class LoginWindow(QWidget):
         form = QFrame()
         form.setObjectName("loginFormContainer")
         form.setFixedWidth(400)
-        apply_shadow(form, blur=24, dy=8, alpha=15)
+        form.setStyleSheet(
+            "QFrame#loginFormContainer {"
+            "  background-color: #ffffff;"
+            "  border: 1px solid #e1e8f4;"
+            "  border-radius: 16px;"
+            "}"
+        )
+        apply_shadow(form, blur=40, dy=16, alpha=20)
 
         fl = QVBoxLayout(form)
         fl.setContentsMargins(36, 36, 36, 36)
@@ -160,11 +175,11 @@ class LoginWindow(QWidget):
         # form heading
         form_title = QLabel("Sign in")
         form_title.setStyleSheet(
-            "font-size: 22px; font-weight: 700; color: #1d1d1f; border: none; letter-spacing: -0.3px;"
+            "font-size: 22px; font-weight: 700; color: #0f172a; border: none; background: transparent; background-color: transparent; letter-spacing: -0.3px;"
         )
         form_sub = QLabel("Enter your credentials to access the workspace.")
         form_sub.setStyleSheet(
-            "font-size: 13px; color: #6e6e73; border: none; margin-top: 4px; margin-bottom: 24px;"
+            "font-size: 13px; color: #64748b; border: none; background: transparent; background-color: transparent; margin-top: 4px; margin-bottom: 24px;"
         )
         form_sub.setWordWrap(True)
         fl.addWidget(form_title)
@@ -175,6 +190,7 @@ class LoginWindow(QWidget):
         self.email_input = QLineEdit()
         self.email_input.setPlaceholderText("admin@finauditpro.com")
         self.email_input.setFixedHeight(42)
+        self.email_input.setStyleSheet(_INPUT)
         fl.addWidget(self.email_input)
         fl.addSpacing(14)
 
@@ -184,6 +200,7 @@ class LoginWindow(QWidget):
         self.password_input.setPlaceholderText("••••••••")
         self.password_input.setFixedHeight(42)
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
+        self.password_input.setStyleSheet(_INPUT)
         self.password_input.returnPressed.connect(self.handle_login)
         fl.addWidget(self.password_input)
         fl.addSpacing(14)
@@ -191,11 +208,17 @@ class LoginWindow(QWidget):
         # options row
         opts = QHBoxLayout()
         self.chk = QCheckBox("Show password")
+        self.chk.setStyleSheet(
+            "QCheckBox { font-size: 12px; color: #475569; border: none; background: transparent; spacing: 6px; }"
+            "QCheckBox::indicator { width: 15px; height: 15px; border-radius: 4px;"
+            "  border: 1.5px solid #cbd5e1; background: #ffffff; }"
+            "QCheckBox::indicator:checked { background: #0284c7; border-color: #0284c7; }"
+        )
         self.chk.stateChanged.connect(self._toggle_pass)
 
-        fp = QLabel("<a href='#' style='color:#007aff; text-decoration:none; font-size:12px; font-weight:500;'>Forgot password?</a>")
+        fp = QLabel("<a href='#' style='color:#0284c7; text-decoration:none; font-size:12px; font-weight:500;'>Forgot password?</a>")
         fp.setOpenExternalLinks(False)
-        fp.setStyleSheet("border:none; background:transparent;")
+        fp.setStyleSheet("border:none; background:transparent; background-color:transparent;")
         fp.linkActivated.connect(self._forgot)
 
         opts.addWidget(self.chk)
@@ -207,7 +230,7 @@ class LoginWindow(QWidget):
         # error label (hidden by default)
         self.err = QLabel()
         self.err.setStyleSheet(
-            "background: #fee2e2; color: #dc2626; border: 1px solid #fecaca;"
+            "background: rgba(244, 63, 94, 0.1); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.3);"
             "border-radius: 8px; padding: 8px 12px; font-size: 12px; font-weight: 500;"
         )
         self.err.setWordWrap(True)
@@ -217,9 +240,27 @@ class LoginWindow(QWidget):
 
         # submit button
         self.btn = QPushButton("Continue")
-        self.btn.setFixedHeight(42)
+        self.btn.setFixedHeight(44)
         self.btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn.setObjectName("loginSubmitBtn")
+        self.btn.setStyleSheet("""
+            QPushButton#loginSubmitBtn {
+                background-color: #0284c7;
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: 700;
+                border-radius: 8px;
+                border: none;
+                letter-spacing: 0.3px;
+            }
+            QPushButton#loginSubmitBtn:hover {
+                background-color: #0369a1;
+            }
+            QPushButton#loginSubmitBtn:pressed {
+                background-color: #075985;
+            }
+            QPushButton#loginSubmitBtn:disabled { background: #e2e8f0; color: #94a3b8; border: none; }
+        """)
         self.btn.clicked.connect(self.handle_login)
         fl.addWidget(self.btn)
         fl.addSpacing(20)
@@ -231,17 +272,17 @@ class LoginWindow(QWidget):
             "</span>"
         )
         note.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        note.setStyleSheet("border:none; background:transparent;")
+        note.setStyleSheet("border:none; background:transparent; background-color:transparent;")
         fl.addWidget(note)
 
         # Default credential hint (shown only when initial default password is active)
         self.cred_hint = QLabel(
-            "<span style='color:#94a3b8; font-size:10px;'>"
+            "<span style='color:#64748b; font-size:10px;'>"
             "Default login: <b>admin@finauditpro.com</b> / <b>Admin@123</b>"
             "</span>"
         )
         self.cred_hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.cred_hint.setStyleSheet("border:none; background:transparent;")
+        self.cred_hint.setStyleSheet("border:none; background:transparent; background-color:transparent;")
         fl.addWidget(self.cred_hint)
         self._update_cred_hint_visibility()
 
@@ -254,7 +295,7 @@ class LoginWindow(QWidget):
     def _label(self, layout, text):
         lbl = QLabel(text)
         lbl.setStyleSheet(
-            "font-size: 12px; font-weight: 600; color: #475569; border: none; margin-bottom: 6px;"
+            "font-size: 12px; font-weight: 600; color: #475569; border: none; background: transparent; background-color: transparent; margin-bottom: 6px;"
         )
         layout.addWidget(lbl)
 

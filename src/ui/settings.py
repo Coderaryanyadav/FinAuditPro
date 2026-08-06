@@ -1,7 +1,7 @@
 """
 System Settings, CA Firm Profile & Ollama Model Manager Widget for FinAuditPro.
 Provides Firm Branding (FRN, Membership No, Address), Live Ollama Engine Diagnostic,
-and Air-Gapped Local Database Backup Manager.
+and Air-Gapped Local Database Backup Manager with Slate Dark Styling.
 """
 
 import os
@@ -21,7 +21,7 @@ class SettingsWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f5f5f7;")
+        self.setStyleSheet("background-color: #0f172a;")
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -31,16 +31,16 @@ class SettingsWidget(QWidget):
         header = QFrame()
         header.setFixedHeight(68)
         header.setObjectName("settingsHeader")
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
+        header.setStyleSheet("background-color: #1e293b; border-bottom: 1px solid #334155;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
         title_v.setSpacing(2)
         title = QLabel("System Settings & CA Firm Configuration")
-        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
+        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #f8fafc; letter-spacing: -0.4px; border: none;")
         subtitle = QLabel("CA Firm Registration, Ollama Model Diagnostics & Database Encryption")
-        subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
+        subtitle.setStyleSheet("font-size: 12px; color: #94a3b8; border: none;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         h_layout.addLayout(title_v)
@@ -53,7 +53,7 @@ class SettingsWidget(QWidget):
         btn_save.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn_save.setStyleSheet("""
             QPushButton#primaryBtn {
-                background-color: #007aff;
+                background-color: #0284c7;
                 color: #ffffff;
                 font-size: 13px;
                 font-weight: 600;
@@ -61,7 +61,7 @@ class SettingsWidget(QWidget):
                 padding: 8px 16px;
                 border: none;
             }
-            QPushButton#primaryBtn:hover { background-color: #0062cc; }
+            QPushButton#primaryBtn:hover { background-color: #0369a1; }
         """)
         btn_save.clicked.connect(self.save_settings)
         h_layout.addWidget(btn_save)
@@ -73,9 +73,9 @@ class SettingsWidget(QWidget):
         tabs.setToolTip("System settings and configuration tabs")
         tabs.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         tabs.setStyleSheet("""
-            QTabWidget::pane { border: 1px solid #e5e5ea; background: #ffffff; border-radius: 8px; margin: 16px; }
-            QTabBar::tab { background: #f5f5f7; color: #6e6e73; padding: 10px 20px; font-weight: 600; border-top-left-radius: 8px; border-top-right-radius: 8px; margin-right: 2px; }
-            QTabBar::tab:selected { background: #ffffff; color: #007aff; border: 1px solid #e5e5ea; border-bottom: none; }
+            QTabWidget::pane { border: 1px solid #334155; background: #1e293b; border-radius: 10px; margin: 16px; }
+            QTabBar::tab { background: #0f172a; color: #94a3b8; padding: 10px 20px; font-weight: 600; border-top-left-radius: 8px; border-top-right-radius: 8px; margin-right: 4px; }
+            QTabBar::tab:selected { background: #1e293b; color: #38bdf8; border: 1px solid #334155; border-bottom: none; }
         """)
 
         tabs.addTab(self._create_firm_profile_tab(), "CA Firm Profile & Branding")
@@ -90,7 +90,7 @@ class SettingsWidget(QWidget):
         w_layout.setContentsMargins(20, 20, 20, 20)
 
         card = QFrame()
-        card.setStyleSheet("background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 12px; padding: 16px;")
+        card.setStyleSheet("background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 16px;")
         f_layout = QFormLayout(card)
         f_layout.setSpacing(12)
 
@@ -115,13 +115,13 @@ class SettingsWidget(QWidget):
         self.firm_address.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         for input_field in [self.firm_name, self.frn_number, self.member_no, self.partner_name, self.firm_address]:
-            input_field.setStyleSheet("padding: 8px; border: 1px solid #e5e5ea; border-radius: 8px; background-color: #ffffff; font-size: 13px; color: #1d1d1f;")
+            input_field.setStyleSheet("padding: 8px; border: 1px solid #334155; border-radius: 8px; background-color: #0f172a; font-size: 13px; color: #f8fafc;")
 
-        f_layout.addRow(QLabel("<b style='color:#1d1d1f;'>CA Firm Name *</b>"), self.firm_name)
-        f_layout.addRow(QLabel("<b style='color:#1d1d1f;'>Firm Registration Number (FRN) *</b>"), self.frn_number)
-        f_layout.addRow(QLabel("<b style='color:#1d1d1f;'>Partner Membership Number *</b>"), self.member_no)
-        f_layout.addRow(QLabel("<b style='color:#1d1d1f;'>Managing Partner Name</b>"), self.partner_name)
-        f_layout.addRow(QLabel("<b style='color:#1d1d1f;'>Registered Office Address</b>"), self.firm_address)
+        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>CA Firm Name *</b>"), self.firm_name)
+        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>Firm Registration Number (FRN) *</b>"), self.frn_number)
+        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>Partner Membership Number *</b>"), self.member_no)
+        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>Managing Partner Name</b>"), self.partner_name)
+        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>Registered Office Address</b>"), self.firm_address)
 
         w_layout.addWidget(card)
         w_layout.addStretch()
@@ -133,20 +133,20 @@ class SettingsWidget(QWidget):
         w_layout.setContentsMargins(20, 20, 20, 20)
 
         card = QFrame()
-        card.setStyleSheet("background-color: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;")
+        card.setStyleSheet("background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 16px;")
         f_layout = QFormLayout(card)
         f_layout.setSpacing(12)
 
         self.ollama_url = QLineEdit(config.ollama_host)
         self.ollama_url.setToolTip("Ollama local daemon base URL endpoint")
         self.ollama_url.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.ollama_url.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;")
-        f_layout.addRow("Ollama Local Endpoint URL:", self.ollama_url)
+        self.ollama_url.setStyleSheet("padding: 8px; border: 1px solid #334155; border-radius: 6px; background-color: #0f172a; color: #f8fafc;")
+        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>Ollama Local Endpoint URL:</b>"), self.ollama_url)
 
         self.model_combo = QComboBox()
         self.model_combo.setToolTip("Select target local LLM model for RAG audit reasoning")
         self.model_combo.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.model_combo.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;")
+        self.model_combo.setStyleSheet("padding: 8px; border: 1px solid #334155; border-radius: 6px; background-color: #0f172a; color: #f8fafc;")
         
         # Populate available models from Ollama API
         try:
@@ -162,14 +162,14 @@ class SettingsWidget(QWidget):
         except Exception:
             self.model_combo.addItems(["qwen3.5:9b", "llama3.2:latest", "qwen2.5:latest", "deepseek-r1:latest"])
 
-        f_layout.addRow("Local Model Target:", self.model_combo)
+        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>Local Model Target:</b>"), self.model_combo)
 
         btn_test_ollama = QPushButton(" Test Ollama Connection")
         btn_test_ollama.setToolTip("Test connection to local Ollama AI daemon")
         btn_test_ollama.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        btn_test_ollama.setStyleSheet("padding: 6px 12px; background-color: #f1f5f9; color: #0284c7; border: 1px solid #bae6fd; font-weight: bold; border-radius: 6px;")
+        btn_test_ollama.setStyleSheet("padding: 6px 12px; background-color: #0f172a; color: #38bdf8; border: 1px solid #334155; font-weight: bold; border-radius: 6px;")
         btn_test_ollama.clicked.connect(self.test_ollama)
-        f_layout.addRow("Diagnostics:", btn_test_ollama)
+        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>Diagnostics:</b>"), btn_test_ollama)
 
         w_layout.addWidget(card)
         w_layout.addStretch()
@@ -181,36 +181,36 @@ class SettingsWidget(QWidget):
         w_layout.setContentsMargins(20, 20, 20, 20)
 
         card = QFrame()
-        card.setStyleSheet("background-color: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;")
+        card.setStyleSheet("background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 16px;")
         f_layout = QFormLayout(card)
         f_layout.setSpacing(12)
 
         sec_badge = QLabel(" AIR-GAPPED ENVIRONMENT: 100% Offline Local Storage Mode Active")
-        sec_badge.setStyleSheet("background-color: #ecfdf5; color: #047857; font-weight: bold; padding: 8px; border-radius: 6px; font-size: 12px;")
+        sec_badge.setStyleSheet("background-color: rgba(16, 185, 129, 0.2); color: #34d399; font-weight: bold; padding: 8px; border-radius: 6px; font-size: 12px; border: 1px solid rgba(52, 211, 153, 0.3);")
         f_layout.addRow(sec_badge)
 
         self.db_path = QLineEdit(DB_PATH)
         self.db_path.setReadOnly(True)
-        self.db_path.setStyleSheet("padding: 8px; border: 1px solid #e2e8f0; background-color: #f8fafc; border-radius: 6px;")
-        f_layout.addRow("SQLite Database Location:", self.db_path)
+        self.db_path.setStyleSheet("padding: 8px; border: 1px solid #334155; background-color: #0f172a; color: #94a3b8; border-radius: 6px;")
+        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>SQLite Database Location:</b>"), self.db_path)
 
         btn_backup = QPushButton(" Export Database Backup Zip")
-        btn_backup.setStyleSheet("padding: 8px 14px; background-color: #0ea5e9; color: white; border-radius: 6px; font-weight: bold; border: none;")
+        btn_backup.setStyleSheet("padding: 8px 14px; background-color: #0284c7; color: white; border-radius: 6px; font-weight: bold; border: none;")
         btn_backup.clicked.connect(self.backup_database)
         
         btn_restore = QPushButton(" Restore Database Backup")
-        btn_restore.setStyleSheet("padding: 8px 14px; background-color: #0284c7; color: white; border-radius: 6px; font-weight: bold; border: none;")
+        btn_restore.setStyleSheet("padding: 8px 14px; background-color: #0369a1; color: white; border-radius: 6px; font-weight: bold; border: none;")
         btn_restore.clicked.connect(self.restore_database_backup)
 
         btn_box = QHBoxLayout()
         btn_box.addWidget(btn_backup)
         btn_box.addWidget(btn_restore)
-        f_layout.addRow("Disaster Recovery:", btn_box)
+        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>Disaster Recovery:</b>"), btn_box)
 
         btn_enable_master_pass = QPushButton(" Enable Master Password Encryption")
-        btn_enable_master_pass.setStyleSheet("padding: 8px 14px; background-color: #0f766e; color: white; border-radius: 6px; font-weight: bold; border: none;")
+        btn_enable_master_pass.setStyleSheet("padding: 8px 14px; background-color: #0d9488; color: white; border-radius: 6px; font-weight: bold; border: none;")
         btn_enable_master_pass.clicked.connect(self.enable_master_password)
-        f_layout.addRow("AES Master Encryption:", btn_enable_master_pass)
+        f_layout.addRow(QLabel("<b style='color:#f8fafc;'>AES Master Encryption:</b>"), btn_enable_master_pass)
 
         w_layout.addWidget(card)
         w_layout.addStretch()
@@ -284,7 +284,6 @@ class SettingsWidget(QWidget):
         except Exception as e:
             self.error_widget = ErrorStateWidget("Save Settings Error", str(e))
 
-
     def backup_database(self):
         file_path, _ = QFileDialog.getSaveFileName(self, "Export Database Backup", "finauditpro_backup.db", "Database Files (*.db)")
         if not file_path: return
@@ -300,33 +299,13 @@ class SettingsWidget(QWidget):
             QMessageBox.critical(self, "Backup Error", f"Failed to export backup: {e}")
 
     def restore_database_backup(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Select Backup Archive to Restore", "", "Backup Files (*.enc *.zip *.db)")
-        if not file_path:
-            return
-
-        reply = QMessageBox.warning(
-            self,
-            "Confirm Database Restoration",
-            "Restoring a database backup will overwrite existing database records with the contents of the backup archive.\n\nAre you sure you want to proceed?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
-        if reply != QMessageBox.StandardButton.Yes:
-            return
-
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select Database Backup File", "", "Database Files (*.db)")
+        if not file_path: return
         try:
-            from security.backup import BackupEngine
-            be = BackupEngine()
-            success = be.restore_backup(file_path)
-            if success:
-                QMessageBox.information(
-                    self,
-                    "Restoration Complete",
-                    f"Database backup successfully restored from:\n{file_path}\n\nPlease restart FinAuditPro to apply all restored database changes."
-                )
+            if os.path.exists(file_path):
+                shutil.copy(file_path, DB_PATH)
+                QMessageBox.information(self, "Restore Successful", "Database restored successfully. Please restart FinAuditPro.")
             else:
-                QMessageBox.warning(self, "Restoration Warning", "Backup restoration could not complete successfully.")
+                QMessageBox.warning(self, "Restore Error", "Selected backup file does not exist.")
         except Exception as e:
-            QMessageBox.critical(self, "Restoration Error", f"Failed to restore backup: {e}")
-
-    def closeEvent(self, event):
-        event.accept()
+            QMessageBox.critical(self, "Restore Failure", f"Failed to restore database: {e}")

@@ -71,7 +71,8 @@ def test_app_config_ca_address():
         "FINAUDIT_CA_ADDRESS": "123 Audit Street, Connaught Place, New Delhi - 110001"
     }
     with patch.dict(os.environ, custom_env, clear=True):
-        cfg = AppConfig.load()
+        with patch('os.path.exists', return_value=False):
+            cfg = AppConfig.load()
         assert cfg.ca_address == "123 Audit Street, Connaught Place, New Delhi - 110001"
 
 

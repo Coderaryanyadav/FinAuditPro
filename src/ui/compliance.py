@@ -57,25 +57,25 @@ class ComplianceWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: #f5f5f7;")
+        self.setStyleSheet("background-color: #0f172a;")
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # 1. Action Bar — Apple Header
+        # 1. Action Bar — Header
         header = QFrame()
         header.setFixedHeight(68)
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e5e5ea;")
+        header.setStyleSheet("background-color: #1e293b; border-bottom: 1px solid #334155;")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 0, 24, 0)
         
         title_v = QVBoxLayout()
         title_v.setSpacing(2)
         title = QLabel("Statutory Compliance Matrix & Checklist Engine")
-        title.setStyleSheet("font-size: 20px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.4px; border: none;")
+        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #f8fafc; letter-spacing: -0.4px; border: none; background: transparent;")
         subtitle = QLabel("Companies Act 2013 CARO 2020 (21 Clauses) & Tax Audit Form 3CD (44 Clauses)")
-        subtitle.setStyleSheet("font-size: 12px; color: #6e6e73; border: none;")
+        subtitle.setStyleSheet("font-size: 12px; color: #94a3b8; border: none; background: transparent;")
         title_v.addWidget(title)
         title_v.addWidget(subtitle)
         h_layout.addLayout(title_v)

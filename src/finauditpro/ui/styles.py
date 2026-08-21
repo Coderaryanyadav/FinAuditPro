@@ -90,7 +90,7 @@ QLabel#userAvatar {
 QLabel#userName { font-size: 12px; font-weight: 700; color: #0F172A; border: none; }
 QLabel#userRole { font-size: 11px; color: #64748B; border: none; }
 
-/* Nav buttons with blue indicator bar */
+/* Nav buttons with thin blue left indicator */
 QPushButton#navButton {
     background-color: transparent;
     color: #475569;
@@ -139,7 +139,7 @@ QLabel#globalShortcutBadge {
     border-radius: 4px; padding: 2px 6px;
 }
 
-/* Active Engagement Context Selector */
+/* Active Engagement Context Selector Dropdown */
 QComboBox#clientSelectorCombo {
     border: 1px solid #CBD5E1;
     border-radius: 8px;

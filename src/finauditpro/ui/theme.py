@@ -169,6 +169,7 @@ class MetricCard(QFrame):
         value: str,
         subtitle: str = "",
         accent_color: str = "#2563EB",
+        action_text: str = "",
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
@@ -191,12 +192,22 @@ class MetricCard(QFrame):
         self.title_lbl.setStyleSheet("font-size: 10px; font-weight: 800; color: #64748B; border: none; background: transparent; letter-spacing: 0.6px;")
         self.value_lbl = QLabel(value)
         self.value_lbl.setStyleSheet("font-size: 26px; font-weight: 800; color: #0F172A; border: none; background: transparent; letter-spacing: -0.6px;")
+
+        sub_row = QHBoxLayout()
+        sub_row.setContentsMargins(0, 0, 0, 0)
         self.sub_lbl = QLabel(subtitle)
         self.sub_lbl.setStyleSheet("font-size: 11px; color: #94A3B8; border: none; background: transparent;")
+        sub_row.addWidget(self.sub_lbl)
+
+        if action_text:
+            sub_row.addStretch()
+            self.act_lbl = QLabel(action_text)
+            self.act_lbl.setStyleSheet("font-size: 11px; font-weight: 700; color: #2563EB; border: none; background: transparent;")
+            sub_row.addWidget(self.act_lbl)
 
         layout.addWidget(self.title_lbl)
         layout.addWidget(self.value_lbl)
-        layout.addWidget(self.sub_lbl)
+        layout.addLayout(sub_row)
 
     def set_value(self, val: str) -> None:
         self.value_lbl.setText(val)

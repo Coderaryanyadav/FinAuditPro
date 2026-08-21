@@ -116,6 +116,14 @@ class DocumentView(QWidget):
         layout.addWidget(self.table_card)
         layout.addStretch(1)
 
+    def set_active_engagement(self, engagement: Any) -> None:
+        if hasattr(engagement, "id"):
+            self.set_engagement(engagement.id)
+        elif engagement:
+            self.set_engagement(str(engagement))
+        else:
+            self.set_engagement(None)
+
     def set_engagement(self, engagement_id: str | None) -> None:
         self.current_engagement_id = engagement_id
         if engagement_id:
@@ -125,6 +133,7 @@ class DocumentView(QWidget):
             self.header.title_lbl.setText("Documents (Select Engagement)")
             self.header.action_btn.setEnabled(False)
         self.refresh()
+
 
     def refresh(self) -> None:
         if not self.current_engagement_id:

@@ -25,7 +25,8 @@ from finauditpro.application.services.financial_service import FinancialService
 from finauditpro.domain.entities import Engagement
 from finauditpro.domain.financial_entities import FinancialDataset
 from finauditpro.ui.dialogs.import_dataset_dialog import ImportDatasetDialog
-from finauditpro.ui.theme import CardWidget, EmptyStateWidget, PageHeader
+from finauditpro.ui.theme import CardWidget, EmptyStateWidget, PageHeader, format_inr
+
 
 
 class FinancialDataView(QWidget):
@@ -168,10 +169,13 @@ class FinancialDataView(QWidget):
         layout.addWidget(self.records_card)
         layout.addStretch(1)
 
-    def set_engagement(self, engagement_id: str | None) -> None:
-        if engagement_id:
+    def set_engagement(self, engagement: Any) -> None:
+        if isinstance(engagement, Engagement):
+            self.current_engagement = engagement
+            self.header.action_btn.setEnabled(True)
+        elif engagement:
             try:
-                self.current_engagement = self.engagement_service.get_engagement(engagement_id)
+                self.current_engagement = self.engagement_service.get_engagement(str(engagement))
                 self.header.action_btn.setEnabled(True)
             except Exception:
                 self.current_engagement = None
@@ -180,6 +184,8 @@ class FinancialDataView(QWidget):
             self.current_engagement = None
             self.header.action_btn.setEnabled(False)
         self.refresh()
+
+    set_active_engagement = set_engagement
 
     def refresh(self) -> None:
         if not self.current_engagement or not self.financial_service:
@@ -197,15 +203,8 @@ class FinancialDataView(QWidget):
             self._show_empty_state()
         else:
             for ds in datasets:
-                cat_val = (
-                    ds.dataset_type.value
-                    if hasattr(ds.dataset_type, "value")
-                    else str(ds.dataset_type)
-                )
-                self.dataset_combo.addItem(
-                    f"{ds.dataset_name} ({ds.valid_rows} rows · {cat_val})", ds.id
-                )
-
+                cat_val = ds.dataset_type.value if hasattr(ds.dataset_type, "value") else str(ds.dataset_type)
+                self.dataset_combo.addItem(f"{ds.dataset_name} ({ds.valid_rows} rows · {cat_val})", ds.id)
             self.dataset_combo.setCurrentIndex(0)
             self.current_dataset = datasets[0]
             self.run_analytics_btn.setEnabled(True)
@@ -246,11 +245,16 @@ class FinancialDataView(QWidget):
             self.records_table.setItem(row, 1, QTableWidgetItem(str(rec.get("date", "—"))))
             self.records_table.setItem(row, 2, QTableWidgetItem(str(rec.get("voucher_no", "—"))))
             self.records_table.setItem(row, 3, QTableWidgetItem(str(rec.get("account_name", "—"))))
-            self.records_table.setItem(row, 4, QTableWidgetItem(str(rec.get("debit", "—"))))
-            self.records_table.setItem(row, 5, QTableWidgetItem(str(rec.get("credit", "—"))))
+            dr_item = QTableWidgetItem(format_inr(rec.get("debit", 0)))
+            dr_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            self.records_table.setItem(row, 4, dr_item)
+            cr_item = QTableWidgetItem(format_inr(rec.get("credit", 0)))
+            cr_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            self.records_table.setItem(row, 5, cr_item)
             self.records_table.setItem(row, 6, QTableWidgetItem(str(rec.get("narration", "—"))))
 
         self.records_table.setFixedHeight(min(300, max(1, len(records[:200])) * 36 + 32))
+
 
     def _load_exceptions(self) -> None:
         if not self.current_dataset or not self.financial_service:

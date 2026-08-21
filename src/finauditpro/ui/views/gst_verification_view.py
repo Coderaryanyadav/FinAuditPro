@@ -1,8 +1,4 @@
-"""
-GST Reconciliation & ITC Verification Workspace View for FinAuditPro.
-Compare purchase register entries against GSTR-2B and audit statutory ITC claims.
-"""
-
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QHeaderView,
@@ -14,7 +10,7 @@ from PySide6.QtWidgets import (
 )
 
 from finauditpro.domain.entities import Engagement
-from finauditpro.ui.theme import CardWidget, EmptyStateWidget, MetricCard, PageHeader
+from finauditpro.ui.theme import CardWidget, EmptyStateWidget, MetricCard, PageHeader, format_inr
 
 
 class GSTVerificationView(QWidget):
@@ -26,9 +22,16 @@ class GSTVerificationView(QWidget):
         self._invoices: list[tuple] = []
         self._init_ui()
 
-    def set_active_engagement(self, engagement: Engagement | None) -> None:
-        self.current_engagement = engagement
+    def set_active_engagement(self, engagement: Any) -> None:
+        if isinstance(engagement, Engagement):
+            self.current_engagement = engagement
+        elif engagement:
+            self.current_engagement = engagement
+        else:
+            self.current_engagement = None
         self.load_data()
+
+    set_engagement = set_active_engagement
 
     def _init_ui(self) -> None:
         main_layout = QVBoxLayout(self)
@@ -145,14 +148,16 @@ class GSTVerificationView(QWidget):
             else:
                 mismatch_cnt += 1
 
-            self.table.setItem(idx, 0, QTableWidgetItem(row[0]))
-            self.table.setItem(idx, 1, QTableWidgetItem(row[1]))
-            self.table.setItem(idx, 2, QTableWidgetItem(row[2]))
-            self.table.setItem(idx, 3, QTableWidgetItem(row[3]))
-            self.table.setItem(idx, 4, QTableWidgetItem(f"₹ {row[4]:,.2f}"))
-            self.table.setItem(idx, 5, QTableWidgetItem(f"₹ {row[5]:,.2f}"))
-            self.table.setItem(idx, 6, QTableWidgetItem(f"₹ {row[6]:,.2f}"))
-            self.table.setItem(idx, 7, QTableWidgetItem(f"₹ {row[7]:,.2f}"))
+            self.table.setItem(idx, 0, QTableWidgetItem(str(row[0])))
+            self.table.setItem(idx, 1, QTableWidgetItem(str(row[1])))
+            self.table.setItem(idx, 2, QTableWidgetItem(str(row[2])))
+            self.table.setItem(idx, 3, QTableWidgetItem(str(row[3])))
+            
+            for c_idx, val in [(4, row[4]), (5, row[5]), (6, row[6]), (7, row[7])]:
+                it = QTableWidgetItem(format_inr(val))
+                it.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                self.table.setItem(idx, c_idx, it)
+
             self.table.setItem(idx, 8, QTableWidgetItem(f"● {row[8]}"))
 
         self.table.setFixedHeight(max(1, len(self._invoices)) * 36 + 32)
@@ -160,3 +165,4 @@ class GSTVerificationView(QWidget):
         self.card_matched.set_value(str(matched_cnt))
         self.card_mismatch.set_value(str(mismatch_cnt))
         self.card_ineligible.set_value(str(ineligible_cnt))
+

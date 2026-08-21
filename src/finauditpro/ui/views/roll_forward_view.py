@@ -17,7 +17,8 @@ from PySide6.QtWidgets import (
 
 from finauditpro.application.roll_forward_dtos import ConfirmTieOutDTO
 from finauditpro.application.services.roll_forward_service import RollForwardService
-from finauditpro.ui.theme import CardWidget, EmptyStateWidget, PageHeader
+from finauditpro.ui.theme import CardWidget, EmptyStateWidget, PageHeader, format_inr
+from PySide6.QtCore import Qt
 
 
 class RollForwardView(QWidget):
@@ -54,7 +55,7 @@ class RollForwardView(QWidget):
             "font-size: 13px; font-weight: 600; color: #0F172A; border: none; background: transparent;"
         )
         self.disclaimer_label = QLabel(
-            "Notice: SA 510 opening balance tie-out checks prior closing vs current opening. Auditor confirmation is required."
+            "Notice: SA 510 opening balance tie-out checks prior closing vs current opening. Auditor judgment and confirmation required."
         )
         self.disclaimer_label.setStyleSheet(
             "font-size: 11px; color: #64748B; border: none; background: transparent;"
@@ -99,6 +100,15 @@ class RollForwardView(QWidget):
         layout.addWidget(self.table_card)
         layout.addStretch(1)
 
+    def set_active_engagement(self, engagement: Any) -> None:
+        if hasattr(engagement, "id"):
+            self.load_engagement(engagement.id)
+        elif engagement:
+            self.load_engagement(str(engagement))
+        else:
+            self.current_engagement_id = None
+            self._refresh_view()
+
     def load_engagement(self, engagement_id: str) -> None:
         self.current_engagement_id = engagement_id
         self._refresh_view()
@@ -141,13 +151,16 @@ class RollForwardView(QWidget):
             status_str = "● Tied Out" if link.is_tied_out else "● Mismatch"
             self.tieout_table.setItem(row, 0, QTableWidgetItem(link.account_code))
             self.tieout_table.setItem(row, 1, QTableWidgetItem(link.account_name))
-            self.tieout_table.setItem(row, 2, QTableWidgetItem(f"₹ {op_dr_rs:,.2f}"))
-            self.tieout_table.setItem(row, 3, QTableWidgetItem(f"₹ {op_cr_rs:,.2f}"))
-            self.tieout_table.setItem(row, 4, QTableWidgetItem(f"₹ {cl_dr_rs:,.2f}"))
-            self.tieout_table.setItem(row, 5, QTableWidgetItem(f"₹ {cl_cr_rs:,.2f}"))
+            
+            for c_idx, val in [(2, op_dr_rs), (3, op_cr_rs), (4, cl_dr_rs), (5, cl_cr_rs)]:
+                it = QTableWidgetItem(format_inr(val))
+                it.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                self.tieout_table.setItem(row, c_idx, it)
+
             self.tieout_table.setItem(row, 6, QTableWidgetItem(status_str))
 
         self.tieout_table.setFixedHeight(max(1, len(links)) * 36 + 32)
+
 
     def _confirm_tie_out(self) -> None:
         if not self.current_engagement_id:

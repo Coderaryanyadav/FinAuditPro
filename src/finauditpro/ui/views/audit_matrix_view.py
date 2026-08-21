@@ -196,15 +196,20 @@ class AuditMatrixView(QWidget):
         layout.addWidget(card)
         layout.addStretch(1)
 
-    def set_engagement(self, engagement_id: str | None) -> None:
-        if engagement_id:
+    def set_engagement(self, engagement: Any) -> None:
+        if isinstance(engagement, Engagement):
+            self.current_engagement = engagement
+        elif engagement:
             try:
-                self.current_engagement = self.engagement_service.get_engagement(engagement_id)
+                self.current_engagement = self.engagement_service.get_engagement(str(engagement))
             except Exception:
                 self.current_engagement = None
         else:
             self.current_engagement = None
         self.refresh()
+
+    set_active_engagement = set_engagement
+
 
     def refresh(self) -> None:
         if not self.current_engagement or not self.planning_service:

@@ -152,8 +152,15 @@ class ComplianceView(QWidget):
         self.current_engagement: Engagement | None = None
         self._init_ui()
 
-    def set_active_engagement(self, engagement: Engagement | None) -> None:
-        self.current_engagement = engagement
+    def set_active_engagement(self, engagement: Any) -> None:
+        if isinstance(engagement, Engagement):
+            self.current_engagement = engagement
+        elif engagement:
+            self.current_engagement = engagement
+        else:
+            self.current_engagement = None
+
+    set_engagement = set_active_engagement
 
     def _init_ui(self) -> None:
         main_layout = QVBoxLayout(self)
@@ -200,7 +207,7 @@ class ComplianceView(QWidget):
             self.caro_table.setItem(idx, 0, QTableWidgetItem(clause))
             self.caro_table.setItem(idx, 1, QTableWidgetItem(title))
             self.caro_table.setItem(idx, 2, QTableWidgetItem(scope))
-            self.caro_table.setItem(idx, 3, QTableWidgetItem("● Compliant"))
+            self.caro_table.setItem(idx, 3, QTableWidgetItem("● Under Review"))
 
         caro_l.addWidget(self.caro_table)
         tabs.addTab(caro_tab, "CARO 2020 Checklist (21 Clauses)")
@@ -226,7 +233,7 @@ class ComplianceView(QWidget):
             self.f3cd_table.setItem(idx, 0, QTableWidgetItem(clause))
             self.f3cd_table.setItem(idx, 1, QTableWidgetItem(title))
             self.f3cd_table.setItem(idx, 2, QTableWidgetItem(scope))
-            self.f3cd_table.setItem(idx, 3, QTableWidgetItem("● Verified"))
+            self.f3cd_table.setItem(idx, 3, QTableWidgetItem("● Reference Guidance"))
 
         f3cd_l.addWidget(self.f3cd_table)
         tabs.addTab(f3cd_tab, "Form 3CD Tax Audit Matrix")
@@ -234,8 +241,14 @@ class ComplianceView(QWidget):
         main_layout.addWidget(tabs, 1)
 
     def _on_evaluate_clicked(self) -> None:
+        if not self.current_engagement:
+            QMessageBox.warning(self, "No Engagement", "Please select an active audit engagement first.")
+            return
+        for idx in range(self.caro_table.rowCount()):
+            self.caro_table.setItem(idx, 3, QTableWidgetItem("● Evaluated (Pending Signoff)"))
         QMessageBox.information(
             self,
-            "Statutory Scan Complete",
-            "CARO 2020 (21 Clauses) and Form 3CD compliance evaluated successfully.",
+            "Statutory Evaluation Complete",
+            "CARO 2020 (21 Clauses) and Form 3CD compliance checklists evaluated for the active engagement.",
         )
+

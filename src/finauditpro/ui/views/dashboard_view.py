@@ -283,44 +283,27 @@ class DashboardView(QWidget):
                 self.engagement_selected.emit(eng_id)
 
     def refresh_dashboard(self) -> None:
-        if not self.current_firm:
-            clients = (
-                self.client_service.list_all_clients()
-                if hasattr(self.client_service, "list_all_clients")
-                else []
-            )
-        else:
-            clients = self.client_service.list_clients_for_firm(self.current_firm.id)
-
+        clients = self.client_service.list_clients_for_firm(self.current_firm.id) if self.current_firm else (self.client_service.list_all_clients() if hasattr(self.client_service, "list_all_clients") else [])
         self.card_clients.set_value(str(len(clients)))
-
         all_engagements: list[Engagement] = []
         for c in clients:
-            engs = self.engagement_service.list_engagements_for_client(c.id)
-            all_engagements.extend(engs)
+            all_engagements.extend(self.engagement_service.list_engagements_for_client(c.id))
 
-        completed_cnt = sum(
-            1 for e in all_engagements if str(getattr(e, "status", "")).lower() == "completed"
-        )
+        completed_cnt = sum(1 for e in all_engagements if str(getattr(e, "status", "")).lower() in ("completed", "signed off", "locked"))
         self.card_completed.set_value(str(completed_cnt))
 
         if all_engagements:
             e_active = all_engagements[0]
             c_name = next((c.name for c in clients if c.id == e_active.client_id), "—")
-            audit_t = (
-                e_active.audit_type.value
-                if hasattr(e_active.audit_type, "value")
-                else str(e_active.audit_type)
-            )
-            status_v = (
-                e_active.status.value if hasattr(e_active.status, "value") else str(e_active.status)
-            )
+            audit_t = e_active.audit_type.value if hasattr(e_active.audit_type, "value") else str(e_active.audit_type)
+            status_v = e_active.status.value if hasattr(e_active.status, "value") else str(e_active.status)
             self.lbl_context_text.setText(f"{c_name} · FY {e_active.financial_year}")
             self.lbl_audit_type.setText(audit_t)
             self.status_badge.setText(status_v)
         else:
-            self.lbl_context_text.setText("No active engagement")
-            self.lbl_audit_type.setText("")
+            self.lbl_context_text.setText("No active engagement — Ready for setup")
+            self.lbl_audit_type.setText("Statutory Audit")
+            self.status_badge.setText("Setup")
 
         self.table_projects.setRowCount(0)
         client_map = {c.id: c.name for c in clients}
@@ -328,11 +311,8 @@ class DashboardView(QWidget):
         for idx, eng in enumerate(all_engagements[:10]):
             self.table_projects.insertRow(idx)
             c_name = client_map.get(eng.client_id, "—")
-            audit_t = (
-                eng.audit_type.value if hasattr(eng.audit_type, "value") else str(eng.audit_type)
-            )
+            audit_t = eng.audit_type.value if hasattr(eng.audit_type, "value") else str(eng.audit_type)
             status_val = eng.status.value if hasattr(eng.status, "value") else str(eng.status)
-
             c_item = QTableWidgetItem(c_name)
             c_item.setData(Qt.ItemDataRole.UserRole, eng.id)
 
@@ -341,7 +321,7 @@ class DashboardView(QWidget):
                 QTableWidgetItem(f"FY {eng.financial_year}"),
                 QTableWidgetItem(audit_t),
                 QTableWidgetItem(f"● {status_val}"),
-                QTableWidgetItem("● Low"),
+                QTableWidgetItem("● Normal"),
                 QTableWidgetItem("Open →"),
             ]
             for col, item in enumerate(items):
@@ -353,4 +333,5 @@ class DashboardView(QWidget):
 
     def _on_go_clients_clicked(self) -> None:
         self.navigate_to_clients.emit()
+
 

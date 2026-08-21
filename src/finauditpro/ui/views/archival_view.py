@@ -182,9 +182,19 @@ class ArchivalView(QWidget):
         layout.addWidget(self.table_card)
         layout.addStretch(1)
 
+    def set_active_engagement(self, engagement: Any) -> None:
+        if hasattr(engagement, "id"):
+            self.load_engagement(engagement.id)
+        elif engagement:
+            self.load_engagement(str(engagement))
+        else:
+            self.current_engagement_id = None
+            self._refresh_view()
+
     def load_engagement(self, engagement_id: str) -> None:
         self.current_engagement_id = engagement_id
         self._refresh_view()
+
 
     def _refresh_view(self) -> None:
         if not self.current_engagement_id:

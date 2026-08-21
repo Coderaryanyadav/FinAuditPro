@@ -1,17 +1,36 @@
 """
-FinAuditPro Enterprise — Design System Tokens & Theme Manager
-Single source of truth for visual tokens, typography, badges, and empty states.
+FinAuditPro Enterprise — Design System Tokens, Theme Manager & UI Kit
+Single source of truth for visual tokens, typography, badges, INR currency formatting, and empty/loading states.
 """
 
+from typing import Any
 from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtWidgets import (
-    QFrame,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
+    QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget,
 )
+
+
+def format_inr(val: Any) -> str:
+    """Format numeric values according to Indian numbering system (e.g. ₹1,25,000.00)."""
+    try:
+        if val is None or val == "": return "₹0.00"
+        if isinstance(val, str): val = float(val.replace("₹", "").replace(",", "").strip() or 0)
+        neg = val < 0
+        s = f"{abs(float(val)):.2f}"
+        int_part, dec_part = s.split(".")
+        if len(int_part) <= 3:
+            res = int_part
+        else:
+            last3, rest = int_part[-3:], int_part[:-3]
+            chunks = []
+            while len(rest) > 2:
+                chunks.insert(0, rest[-2:])
+                rest = rest[:-2]
+            if rest: chunks.insert(0, rest)
+            res = ",".join(chunks) + "," + last3
+        return f"{'-' if neg else ''}₹{res}.{dec_part}"
+    except Exception:
+        return f"₹{val}"
 
 
 class LightColors:
@@ -52,12 +71,10 @@ class ThemeManager(QObject):
         return cls._instance
 
     @property
-    def is_dark(self) -> bool:
-        return self._is_dark
+    def is_dark(self) -> bool: return self._is_dark
 
     @property
-    def tokens(self):
-        return DarkColors if self._is_dark else LightColors
+    def tokens(self): return DarkColors if self._is_dark else LightColors
 
     def set_dark_mode(self, enabled: bool):
         if self._is_dark != enabled:
@@ -66,8 +83,7 @@ class ThemeManager(QObject):
             Colors = DarkColors if enabled else LightColors
             self.theme_changed.emit(enabled)
 
-    def toggle_theme(self):
-        self.set_dark_mode(not self._is_dark)
+    def toggle_theme(self): self.set_dark_mode(not self._is_dark)
 
 
 class CardWidget(QFrame):
@@ -75,11 +91,9 @@ class CardWidget(QFrame):
         super().__init__(parent)
         self.setObjectName("contentCard")
         self.setStyleSheet("QFrame#contentCard { background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; }")
-
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 14, 16, 14)
         layout.setSpacing(8)
-
         if title:
             h_row = QHBoxLayout()
             h_lbl = QLabel(title)
@@ -87,7 +101,6 @@ class CardWidget(QFrame):
             h_row.addWidget(h_lbl)
             h_row.addStretch()
             layout.addLayout(h_row)
-
         self.content_widget = QWidget()
         self.content_widget.setStyleSheet("background: transparent; border: none;")
         self.content_layout = QVBoxLayout(self.content_widget)
@@ -102,29 +115,24 @@ class MetricCard(QFrame):
         self.setObjectName("metricCard")
         self.setFixedHeight(88)
         self.setStyleSheet(f"QFrame#metricCard {{ background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; border-top: 2px solid {accent_color}; }}")
-
         layout = QVBoxLayout(self)
         layout.setContentsMargins(14, 10, 14, 10)
         layout.setSpacing(2)
-
         self.title_lbl = QLabel(title)
         self.title_lbl.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748B; border: none; background: transparent; letter-spacing: 0.5px;")
         self.value_lbl = QLabel(value)
         self.value_lbl.setStyleSheet("font-size: 26px; font-weight: 800; color: #0F172A; border: none; background: transparent; letter-spacing: -0.6px;")
-
         sub_row = QHBoxLayout()
         sub_row.setContentsMargins(0, 0, 0, 0)
         self.sub_lbl = QLabel(subtitle)
         self.sub_lbl.setStyleSheet("font-size: 11px; color: #94A3B8; border: none; background: transparent;")
         sub_row.addWidget(self.sub_lbl)
-
         if action_text:
             sub_row.addStretch()
             self.act_lbl = QLabel(action_text)
             self.act_lbl.setStyleSheet("font-size: 11px; font-weight: 600; color: #2563EB; border: none; background: transparent;")
             self.act_lbl.setCursor(Qt.CursorShape.PointingHandCursor)
             sub_row.addWidget(self.act_lbl)
-
         layout.addWidget(self.title_lbl)
         layout.addWidget(self.value_lbl)
         layout.addLayout(sub_row)
@@ -151,11 +159,11 @@ class StatusBadge(QLabel):
         st = status_type.lower()
         if st in ("success", "completed", "signed off", "matched", "ready", "indexed", "compliant", "verified", "tied out"):
             style = "color: #15803D; background: #DCFCE7; border: 1px solid #BBF7D0;"
-        elif st in ("warning", "in progress", "open", "medium", "rate mismatch", "mismatch", "unconfirmed"):
+        elif st in ("warning", "in progress", "open", "medium", "rate mismatch", "mismatch", "unconfirmed", "under review"):
             style = "color: #B45309; background: #FEF3C7; border: 1px solid #FDE68A;"
-        elif st in ("danger", "high", "critical", "failed", "quarantined", "missing in 2b", "ineligible"):
+        elif st in ("danger", "high", "critical", "failed", "quarantined", "missing in 2b", "ineligible", "difference"):
             style = "color: #B91C1C; background: #FEE2E2; border: 1px solid #FECACA;"
-        elif st in ("info", "planning", "draft", "low"):
+        elif st in ("info", "planning", "draft", "low", "prepared"):
             style = "color: #1D4ED8; background: #DBEAFE; border: 1px solid #BFDBFE;"
         else:
             style = "color: #475569; background: #F1F5F9; border: 1px solid #E2E8F0;"
@@ -166,50 +174,78 @@ class RiskBadge(QLabel):
     def __init__(self, risk_level: str, parent: QWidget | None = None) -> None:
         super().__init__(f"● {risk_level}", parent)
         rl = risk_level.lower()
-        if "critical" in rl or "high" in rl:
-            st = "color: #DC2626; background: #FEE2E2; border: 1px solid #FECACA;"
-        elif "medium" in rl or "moderate" in rl:
-            st = "color: #D97706; background: #FEF3C7; border: 1px solid #FDE68A;"
-        elif "low" in rl:
-            st = "color: #15803D; background: #DCFCE7; border: 1px solid #BBF7D0;"
-        else:
-            st = "color: #64748B; background: #F1F5F9; border: 1px solid #E2E8F0;"
+        if "critical" in rl or "high" in rl: st = "color: #DC2626; background: #FEE2E2; border: 1px solid #FECACA;"
+        elif "medium" in rl or "moderate" in rl: st = "color: #D97706; background: #FEF3C7; border: 1px solid #FDE68A;"
+        elif "low" in rl: st = "color: #15803D; background: #DCFCE7; border: 1px solid #BBF7D0;"
+        else: st = "color: #64748B; background: #F1F5F9; border: 1px solid #E2E8F0;"
         self.setStyleSheet(f"font-size: 11px; font-weight: 600; border-radius: 4px; padding: 2px 8px; {st}")
 
 
 class EmptyStateWidget(QFrame):
-    def __init__(self, title: str, description: str, action_text: str = "", action_callback: object = None, parent: QWidget | None = None) -> None:
+    def __init__(self, title: str, description: str, action_text: str = "", action_callback: object = None, glyph: str = "◇", parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setObjectName("emptyStateWidget")
         self.setStyleSheet("QFrame#emptyStateWidget { background-color: #FFFFFF; border: 1px dashed #CBD5E1; border-radius: 8px; }")
-
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(32, 40, 32, 40)
-        layout.setSpacing(10)
+        layout.setContentsMargins(32, 36, 32, 36)
+        layout.setSpacing(8)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        glyph = QLabel("◇")
-        glyph.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        glyph.setStyleSheet("font-size: 24px; color: #94A3B8; background: #F1F5F9; border-radius: 20px; width: 40px; height: 40px;")
-        layout.addWidget(glyph, alignment=Qt.AlignmentFlag.AlignCenter)
-
+        g_lbl = QLabel(glyph)
+        g_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        g_lbl.setStyleSheet("font-size: 22px; color: #94A3B8; background: #F1F5F9; border-radius: 18px; width: 36px; height: 36px;")
+        layout.addWidget(g_lbl, alignment=Qt.AlignmentFlag.AlignCenter)
         t_lbl = QLabel(title)
         t_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         t_lbl.setStyleSheet("font-size: 15px; font-weight: 700; color: #0F172A; border: none; background: transparent;")
         layout.addWidget(t_lbl)
-
         d_lbl = QLabel(description)
         d_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         d_lbl.setWordWrap(True)
         d_lbl.setStyleSheet("font-size: 12px; color: #64748B; max-width: 440px; border: none; background: transparent; line-height: 1.4;")
         layout.addWidget(d_lbl, alignment=Qt.AlignmentFlag.AlignCenter)
-
         if action_text and action_callback:
             btn = QPushButton(action_text)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 8px 18px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
+            btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
             btn.clicked.connect(action_callback)
-            layout.addSpacing(6)
+            layout.addSpacing(4)
+            layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+
+class LoadingStateWidget(QFrame):
+    def __init__(self, message: str = "Loading audit records...", parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(24, 32, 24, 32)
+        layout.setSpacing(6)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lbl = QLabel("⏳")
+        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lbl.setStyleSheet("font-size: 20px;")
+        msg = QLabel(message)
+        msg.setStyleSheet("font-size: 13px; font-weight: 600; color: #64748B;")
+        layout.addWidget(lbl, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(msg, alignment=Qt.AlignmentFlag.AlignCenter)
+
+
+class ErrorStateWidget(QFrame):
+    def __init__(self, title: str = "Unable to load data", message: str = "Local audit database could not be queried. No changes were made.", retry_callback: object = None, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(24, 32, 24, 32)
+        layout.setSpacing(8)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        t_lbl = QLabel(f"⚠️ {title}")
+        t_lbl.setStyleSheet("font-size: 14px; font-weight: 700; color: #DC2626;")
+        m_lbl = QLabel(message)
+        m_lbl.setWordWrap(True)
+        m_lbl.setStyleSheet("font-size: 12px; color: #64748B; max-width: 420px;")
+        layout.addWidget(t_lbl, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(m_lbl, alignment=Qt.AlignmentFlag.AlignCenter)
+        if retry_callback:
+            btn = QPushButton("Retry")
+            btn.setStyleSheet("background-color: #DC2626; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 6px 14px;")
+            btn.clicked.connect(retry_callback)
             layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
 
@@ -217,26 +253,20 @@ class PageHeader(QFrame):
     def __init__(self, title: str, subtitle: str = "", action_text: str = "", action_callback: object = None, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setStyleSheet("background: transparent; border: none;")
-
         h_layout = QHBoxLayout(self)
         h_layout.setContentsMargins(0, 0, 0, 0)
         h_layout.setSpacing(12)
-
         left_v = QVBoxLayout()
         left_v.setSpacing(2)
-
         self.title_lbl = QLabel(title)
         self.title_lbl.setStyleSheet("font-size: 20px; font-weight: 700; color: #0F172A; letter-spacing: -0.4px; border: none; background: transparent;")
         left_v.addWidget(self.title_lbl)
-
         if subtitle:
             self.subtitle_lbl = QLabel(subtitle)
             self.subtitle_lbl.setStyleSheet("font-size: 12px; color: #64748B; border: none; background: transparent;")
             left_v.addWidget(self.subtitle_lbl)
-
         h_layout.addLayout(left_v)
         h_layout.addStretch()
-
         if action_text and action_callback:
             self.action_btn = QPushButton(action_text)
             self.action_btn.setObjectName("primaryButton")

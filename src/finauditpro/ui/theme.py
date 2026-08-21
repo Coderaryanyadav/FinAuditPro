@@ -209,3 +209,23 @@ class MetricCard(QFrame):
 
     def set_value(self, val: str) -> None:
         self.value_lbl.setText(val)
+
+
+class Fonts:
+    FAMILY      = "'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif"
+    FAMILY_MONO = "'SF Mono', 'Menlo', 'Consolas', monospace"
+
+
+class StatusBadge(QLabel):
+    """Pill badge for status indication."""
+
+    def __init__(self, text: str, status_type: str = "info", parent: QWidget | None = None) -> None:
+        super().__init__(text, parent)
+        styles = {
+            "success": "color: #34C759; background: rgba(52, 199, 89, 0.12); border: 1px solid rgba(52, 199, 89, 0.25);",
+            "warning": "color: #FF9F0A; background: rgba(255, 159, 10, 0.12); border: 1px solid rgba(255, 159, 10, 0.25);",
+            "danger": "color: #FF3B30; background: rgba(255, 59, 48, 0.12); border: 1px solid rgba(255, 59, 48, 0.25);",
+            "info": "color: #007AFF; background: rgba(0, 122, 255, 0.12); border: 1px solid rgba(0, 122, 255, 0.25);",
+        }
+        st = styles.get(status_type, styles["info"])
+        self.setStyleSheet(f"font-size: 11px; font-weight: 700; border-radius: 6px; padding: 3px 8px; {st}")

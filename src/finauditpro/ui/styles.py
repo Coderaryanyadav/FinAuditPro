@@ -11,7 +11,7 @@ from PySide6.QtWidgets import QFrame, QGraphicsDropShadowEffect, QHBoxLayout, QL
 GLOBAL_QSS = """
 /* ── BASE RESET ─────────────────────────────────────────────────────────── */
 * {
-    font-family: "-apple-system", "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    font-family: 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
     color: #1D1D1F;
     outline: none;
 }

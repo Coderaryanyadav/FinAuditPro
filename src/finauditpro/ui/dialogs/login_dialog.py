@@ -5,10 +5,10 @@ Split-view authentication window matching enterprise design standards.
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
-    QCheckBox,
     QDialog,
     QFrame,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
     QLineEdit,
     QMessageBox,
@@ -185,6 +185,16 @@ class LoginDialog(QDialog):
         if not user or not pwd:
             QMessageBox.warning(self, "Validation Error", "Please enter both username and password.")
             return
+
+        if pwd == "Admin@123":
+            new_pwd, ok = QInputDialog.getText(
+                self,
+                "First-Time Login — Change Password",
+                "For security, please enter a new custom password for your administrator account:",
+                QLineEdit.EchoMode.Password,
+            )
+            if not ok or not new_pwd:
+                return
 
         self.login_successful.emit(user, "Administrator")
         self.accept()

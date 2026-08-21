@@ -1,291 +1,211 @@
-"""UI Theme, styling tokens, and reusable Qt components for FinAuditPro."""
-
-from typing import Any
-
-from PySide6.QtWidgets import QFrame, QLabel, QVBoxLayout, QWidget
-
-
-class Colors:
-    DARK_BG = "#0f1117"
-    DARK_SURFACE = "#181b22"
-    DARK_SURFACE_ALT = "#222732"
-    BORDER = "#2a303c"
-    BORDER_SUBTLE = "#1e2430"
-    PRIMARY = "#0284c7"
-    PRIMARY_HOVER = "#0369a1"
-    ACCENT = "#38bdf8"
-    SUCCESS = "#10b981"
-    WARNING = "#f59e0b"
-    DANGER = "#ef4444"
-    RISK_LOW = "#38bdf8"
-    RISK_MEDIUM = "#f59e0b"
-    RISK_HIGH = "#f97316"
-    RISK_CRITICAL = "#ef4444"
-    TEXT_PRIMARY = "#f8fafc"
-    TEXT_SECONDARY = "#94a3b8"
-    TEXT_MUTED = "#64748b"
-
-
-DARK_STYLESHEET = """
-QMainWindow {
-    background-color: #0f1117;
-}
-
-QWidget {
-    font-family: "-apple-system", "BlinkMacSystemFont", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 13px;
-    color: #f8fafc;
-}
-
-QDialog {
-    background-color: #181b22;
-    border: 1px solid #2a303c;
-    border-radius: 8px;
-}
-
-QFrame {
-    background-color: transparent;
-    color: #f8fafc;
-}
-
-QGroupBox {
-    background-color: #181b22;
-    border: 1px solid #2a303c;
-    border-radius: 8px;
-    margin-top: 12px;
-    padding-top: 12px;
-    font-weight: 700;
-    color: #f8fafc;
-}
-
-QGroupBox::title {
-    subcontrol-origin: margin;
-    subcontrol-position: top left;
-    padding: 0 6px;
-    color: #38bdf8;
-}
-
-/* Sidebar Navigation */
-#Sidebar {
-    background-color: #12141a;
-    border-right: 1px solid #2a303c;
-    min-width: 230px;
-    max-width: 230px;
-}
-
-#Sidebar QPushButton {
-    background-color: transparent;
-    color: #94a3b8;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 12px;
-    text-align: left;
-    font-weight: 500;
-    font-size: 13px;
-}
-
-#Sidebar QPushButton:hover {
-    background-color: #1c202b;
-    color: #f8fafc;
-}
-
-#Sidebar QPushButton:checked {
-    background-color: #0284c7;
-    color: #ffffff;
-    font-weight: 600;
-}
-
-/* Header Context Bar */
-#HeaderContextBar {
-    background-color: #181b22;
-    border-bottom: 1px solid #2a303c;
-    padding: 8px 16px;
-}
-
-#HeaderTitle {
-    font-size: 15px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    color: #38bdf8;
-}
-
-#HeaderContextLabel {
-    font-size: 12px;
-    font-weight: 500;
-    color: #94a3b8;
-}
-
-/* Buttons */
-QPushButton {
-    background-color: #0284c7;
-    color: #ffffff;
-    border: none;
-    border-radius: 6px;
-    padding: 7px 14px;
-    font-weight: 600;
-}
-
-QPushButton:hover {
-    background-color: #0369a1;
-}
-
-QPushButton:pressed {
-    background-color: #075985;
-}
-
-QPushButton#SecondaryButton {
-    background-color: #1e2430;
-    color: #f8fafc;
-    border: 1px solid #2a303c;
-}
-
-QPushButton#SecondaryButton:hover {
-    background-color: #2a303c;
-}
-
-/* Inputs & Form Controls */
-QLineEdit, QTextEdit, QComboBox {
-    background-color: #0f1117;
-    color: #f8fafc;
-    border: 1px solid #2a303c;
-    border-radius: 6px;
-    padding: 6px 10px;
-}
-
-QLineEdit:focus, QTextEdit:focus, QComboBox:focus {
-    border: 1px solid #38bdf8;
-}
-
-/* Tables */
-QTableWidget {
-    background-color: #14171f;
-    gridline-color: #222732;
-    border: 1px solid #2a303c;
-    border-radius: 6px;
-    color: #f8fafc;
-    selection-background-color: #0284c7;
-    selection-color: #ffffff;
-}
-
-QHeaderView::section {
-    background-color: #181b22;
-    color: #94a3b8;
-    padding: 8px;
-    border: none;
-    border-bottom: 1px solid #2a303c;
-    font-weight: 600;
-    font-size: 12px;
-}
-
-/* ScrollBars */
-QScrollBar:vertical {
-    background-color: #0f1117;
-    width: 8px;
-    margin: 0px;
-}
-
-QScrollBar::handle:vertical {
-    background-color: #2a303c;
-    border-radius: 4px;
-    min-height: 20px;
-}
-
-QScrollBar::handle:vertical:hover {
-    background-color: #64748b;
-}
-
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-    height: 0px;
-}
 """
+FinAuditPro Enterprise — Design System Tokens & Theme Manager
+Single source of truth for visual tokens. Light mode default, full dark mode support.
+"""
+
+from PySide6.QtCore import QObject, Signal
+from PySide6.QtGui import QColor
+from PySide6.QtWidgets import QFrame, QGraphicsDropShadowEffect, QHBoxLayout, QLabel, QVBoxLayout, QWidget
+
+
+class LightColors:
+    """Apple macOS Light mode semantic design tokens."""
+    BG_BASE     = "#F5F5F7"
+    BG_SURFACE  = "#FFFFFF"
+    BG_ELEVATED = "#FFFFFF"
+    BG_SUBTLE   = "#F2F2F7"
+    BG_HOVER    = "#E5E5EA"
+
+    BORDER_DEFAULT = "#E5E5EA"
+    BORDER_STRONG  = "#D2D2D7"
+    BORDER_FOCUS   = "#007AFF"
+
+    TEXT_PRIMARY     = "#1D1D1F"
+    TEXT_SECONDARY   = "#6E6E73"
+    TEXT_MUTED       = "#86868B"
+    TEXT_DISABLED    = "#C7C7CC"
+    TEXT_PLACEHOLDER = "#AEAEB2"
+
+    ACCENT         = "#007AFF"
+    ACCENT_HOVER   = "#0062CC"
+    ACCENT_PRESSED = "#004999"
+    ACCENT_SUBTLE  = "rgba(0, 122, 255, 0.1)"
+    ACCENT_BORDER  = "rgba(0, 122, 255, 0.25)"
+
+    SUCCESS        = "#34C759"
+    SUCCESS_SUBTLE = "rgba(52, 199, 89, 0.1)"
+    SUCCESS_BORDER = "rgba(52, 199, 89, 0.25)"
+
+    WARNING        = "#FF9F0A"
+    WARNING_SUBTLE = "rgba(255, 159, 10, 0.1)"
+    WARNING_BORDER = "rgba(255, 159, 10, 0.25)"
+
+    DANGER         = "#FF3B30"
+    DANGER_SUBTLE  = "rgba(255, 59, 48, 0.1)"
+    DANGER_BORDER  = "rgba(255, 59, 48, 0.25)"
+
+    INFO           = "#5856D6"
+    INFO_SUBTLE    = "rgba(88, 86, 214, 0.1)"
+    INFO_BORDER    = "rgba(88, 86, 214, 0.25)"
+
+    NAV_BG          = "#F5F5F7"
+    NAV_BORDER      = "#E5E5EA"
+    NAV_TEXT        = "#6E6E73"
+    NAV_TEXT_ACTIVE = "#007AFF"
+    NAV_ACTIVE_BG   = "rgba(0, 122, 255, 0.12)"
+    NAV_HOVER_BG    = "rgba(0, 0, 0, 0.04)"
+    NAV_ACCENT_DOT  = "#007AFF"
+
+
+class DarkColors:
+    """Apple macOS Dark mode semantic design tokens."""
+    BG_BASE     = "#1E1E1E"
+    BG_SURFACE  = "#2D2D2F"
+    BG_ELEVATED = "#3A3A3C"
+    BG_SUBTLE   = "#2C2C2E"
+    BG_HOVER    = "#3A3A3C"
+
+    BORDER_DEFAULT = "#38383A"
+    BORDER_STRONG  = "#48484A"
+    BORDER_FOCUS   = "#0A84FF"
+
+    TEXT_PRIMARY     = "#FFFFFF"
+    TEXT_SECONDARY   = "#EBEBF5"
+    TEXT_MUTED       = "#8E8E93"
+    TEXT_DISABLED    = "#636366"
+    TEXT_PLACEHOLDER = "#48484A"
+
+    ACCENT         = "#0A84FF"
+    ACCENT_HOVER   = "#007AFF"
+    ACCENT_PRESSED = "#0062CC"
+    ACCENT_SUBTLE  = "rgba(10, 132, 255, 0.15)"
+    ACCENT_BORDER  = "rgba(10, 132, 255, 0.3)"
+
+    SUCCESS        = "#30D158"
+    SUCCESS_SUBTLE = "rgba(48, 209, 88, 0.15)"
+    SUCCESS_BORDER = "rgba(48, 209, 88, 0.3)"
+
+    WARNING        = "#FFD60A"
+    WARNING_SUBTLE = "rgba(255, 214, 10, 0.15)"
+    WARNING_BORDER = "rgba(255, 214, 10, 0.3)"
+
+    DANGER         = "#FF453A"
+    DANGER_SUBTLE  = "rgba(255, 69, 58, 0.15)"
+    DANGER_BORDER  = "rgba(255, 69, 58, 0.3)"
+
+    INFO           = "#5E5CE6"
+    INFO_SUBTLE    = "rgba(94, 92, 230, 0.15)"
+    INFO_BORDER    = "rgba(94, 92, 230, 0.3)"
+
+    NAV_BG          = "#1E1E1E"
+    NAV_BORDER      = "#2C2C2E"
+    NAV_TEXT        = "#8E8E93"
+    NAV_TEXT_ACTIVE = "#0A84FF"
+    NAV_ACTIVE_BG   = "rgba(10, 132, 255, 0.18)"
+    NAV_HOVER_BG    = "rgba(255, 255, 255, 0.05)"
+    NAV_ACCENT_DOT  = "#0A84FF"
+
+
+Colors = LightColors
+
+
+class ThemeManager(QObject):
+    """Singleton Theme Manager controlling global application light/dark state."""
+
+    theme_changed = Signal(bool)  # True = Dark, False = Light
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._is_dark = False
+        return cls._instance
+
+    @property
+    def is_dark(self) -> bool:
+        return self._is_dark
+
+    @property
+    def tokens(self):
+        return DarkColors if self._is_dark else LightColors
+
+    def set_dark_mode(self, enabled: bool):
+        if self._is_dark != enabled:
+            self._is_dark = enabled
+            global Colors
+            Colors = DarkColors if enabled else LightColors
+            self.theme_changed.emit(enabled)
+
+    def toggle_theme(self):
+        self.set_dark_mode(not self._is_dark)
 
 
 class CardWidget(QFrame):
-    """Reusable styled card container."""
+    """Re-usable styled card surface for content panels."""
 
-    def __init__(self, title: str = "", parent: QWidget | None = None) -> None:
+    def __init__(self, title: str | None = None, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+        self.setObjectName("contentCard")
         self.setStyleSheet("""
-            QFrame {
-                background-color: #181b22;
-                border: 1px solid #2a303c;
-                border-radius: 8px;
-                padding: 8px;
+            QFrame#contentCard {
+                background-color: #FFFFFF;
+                border: 1px solid #E5E5EA;
+                border-radius: 10px;
             }
         """)
-        self.content_layout = QVBoxLayout(self)
-        self.content_layout.setContentsMargins(14, 14, 14, 14)
-        self.content_layout.setSpacing(8)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 16, 18, 16)
+        layout.setSpacing(12)
 
         if title:
-            self.title_label = QLabel(title)
-            self.title_label.setStyleSheet(
-                "font-size: 13px; font-weight: 700; color: #f8fafc; border: none;"
-            )
-            self.content_layout.addWidget(self.title_label)
+            header_lbl = QLabel(title)
+            header_lbl.setStyleSheet("font-size: 14px; font-weight: 700; color: #1D1D1F;")
+            layout.addWidget(header_lbl)
+
+        self.content_widget = QWidget()
+        self.content_layout = QVBoxLayout(self.content_widget)
+        self.content_layout.setContentsMargins(0, 0, 0, 0)
+        self.content_layout.setSpacing(10)
+        layout.addWidget(self.content_widget)
 
 
 class MetricCard(QFrame):
-    """Card showing KPI title, primary metric, and subtitle."""
+    """Stat summary card for KPI dashboard metrics."""
 
     def __init__(
         self,
         title: str,
         value: str,
         subtitle: str = "",
-        accent_color: str = Colors.ACCENT,
+        accent_color: str = "#007AFF",
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
+        self.setObjectName("metricCard")
         self.setStyleSheet(f"""
-            QFrame {{
-                background-color: #181b22;
-                border: 1px solid #2a303c;
-                border-radius: 8px;
+            QFrame#metricCard {{
+                background-color: #FFFFFF;
+                border: 1px solid #E5E5EA;
+                border-radius: 10px;
                 border-left: 4px solid {accent_color};
-                padding: 10px;
             }}
         """)
+
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setContentsMargins(16, 14, 16, 14)
         layout.setSpacing(4)
 
-        title_lbl = QLabel(title.upper())
-        title_lbl.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748b; border: none;")
+        self.title_lbl = QLabel(title)
+        self.title_lbl.setObjectName("metricTitle")
+        self.value_lbl = QLabel(value)
+        self.value_lbl.setObjectName("metricValue")
+        self.sub_lbl = QLabel(subtitle)
+        self.sub_lbl.setStyleSheet("font-size: 11px; color: #86868B;")
 
-        self.val_lbl = QLabel(value)
-        self.val_lbl.setStyleSheet(
-            "font-size: 22px; font-weight: 800; color: #f8fafc; border: none;"
-        )
+        layout.addWidget(self.title_lbl)
+        layout.addWidget(self.value_lbl)
+        layout.addWidget(self.sub_lbl)
 
-        layout.addWidget(title_lbl)
-        layout.addWidget(self.val_lbl)
-
-        if subtitle:
-            sub_lbl = QLabel(subtitle)
-            sub_lbl.setStyleSheet("font-size: 11px; color: #94a3b8; border: none;")
-            layout.addWidget(sub_lbl)
-
-    def set_value(self, value: str) -> None:
-        self.val_lbl.setText(value)
-
-
-class StatusBadge(QLabel):
-    """Pill badge displaying status text with semantic background and border colors."""
-
-    def __init__(self, text: str, status_type: str = "info", parent: QWidget | None = None) -> None:
-        super().__init__(text, parent)
-        styles = {
-            "success": "background-color: #064e3b; color: #34d399; border: 1px solid #059669;",
-            "warning": "background-color: #78350f; color: #fbbf24; border: 1px solid #d97706;",
-            "danger": "background-color: #7f1d1d; color: #f87171; border: 1px solid #dc2626;",
-            "info": "background-color: #0c4a6e; color: #38bdf8; border: 1px solid #0284c7;",
-            "muted": "background-color: #1e293b; color: #94a3b8; border: 1px solid #334155;",
-        }
-        style = styles.get(status_type, styles["info"])
-        self.setStyleSheet(f"QLabel {{ {style} border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 600; }}")
-
-
-def apply_theme(app: Any) -> None:
-    """Apply default Qt palette and custom stylesheet."""
-    app.setStyleSheet(DARK_STYLESHEET)
+    def set_value(self, val: str) -> None:
+        self.value_lbl.setText(val)

@@ -240,6 +240,9 @@ class MainWindow(QMainWindow):
         sf_s = QLineEdit()
         sf_s.setObjectName("globalSearchInput")
         sf_s.setPlaceholderText("Search clients, findings, reports...")
+        sf_s.setReadOnly(True)
+        sf_s.setCursor(Qt.CursorShape.PointingHandCursor)
+        sf_s.mousePressEvent = lambda e: self._open_command_palette()
         sf_k = QLabel("⌘K")
         sf_k.setObjectName("globalShortcutBadge")
         sf_l.addWidget(sf_s)
@@ -384,3 +387,14 @@ class MainWindow(QMainWindow):
         if dlg.exec():
             eng = self.engagement_service.create_engagement(self.current_client.id, dlg.title, dlg.financial_year, dlg.audit_type)
             self.set_active_engagement(eng.id)
+
+    def _open_command_palette(self) -> None:
+        from finauditpro.ui.dialogs.command_palette_dialog import CommandPaletteDialog
+        dlg = CommandPaletteDialog(self)
+        dlg.action_triggered.connect(self._on_command_action)
+        dlg.exec()
+
+    def _on_command_action(self, key: str, payload: Any) -> None:
+        if key == "nav" and isinstance(payload, int):
+            if 0 <= payload < self.stack.count():
+                self.stack.setCurrentIndex(payload)

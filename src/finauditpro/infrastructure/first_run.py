@@ -43,8 +43,13 @@ def _ensure_all_schema_columns(conn) -> None:
     # 1. engagements table
     cursor.execute("PRAGMA table_info(engagements);")
     eng_cols = {row[1] for row in cursor.fetchall()}
-    if eng_cols and "prior_engagement_id" not in eng_cols:
-        conn.execute("ALTER TABLE engagements ADD COLUMN prior_engagement_id TEXT;")
+    if eng_cols:
+        if "prior_engagement_id" not in eng_cols:
+            conn.execute("ALTER TABLE engagements ADD COLUMN prior_engagement_id TEXT;")
+        if "engagement_lead_id" not in eng_cols:
+            conn.execute("ALTER TABLE engagements ADD COLUMN engagement_lead_id TEXT;")
+        if "assigned_team_json" not in eng_cols:
+            conn.execute("ALTER TABLE engagements ADD COLUMN assigned_team_json TEXT DEFAULT '[]';")
 
     # 2. evidence_links table
     cursor.execute("PRAGMA table_info(evidence_links);")
@@ -60,8 +65,11 @@ def _ensure_all_schema_columns(conn) -> None:
             conn.execute("ALTER TABLE evidence_links ADD COLUMN procedure_id TEXT;")
         if "document_id" not in ev_cols:
             conn.execute("ALTER TABLE evidence_links ADD COLUMN document_id TEXT;")
+        if "target_id" not in ev_cols:
+            conn.execute("ALTER TABLE evidence_links ADD COLUMN target_id TEXT;")
         if "page_number" not in ev_cols:
             conn.execute("ALTER TABLE evidence_links ADD COLUMN page_number INTEGER DEFAULT 1;")
+
 
     # 3. audit_findings table
     cursor.execute("PRAGMA table_info(audit_findings);")

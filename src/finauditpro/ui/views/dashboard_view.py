@@ -32,6 +32,8 @@ class DashboardView(QWidget):
 
     engagement_selected = Signal(str)
     navigate_to_clients = Signal()
+    navigate_to_engagements = Signal()
+    navigate_to_matrix = Signal()
 
     def __init__(
         self,
@@ -158,7 +160,8 @@ class DashboardView(QWidget):
         btn_go = QPushButton("Continue Setup →")
         btn_go.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_go.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 14px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
-        btn_go.clicked.connect(self._on_go_clients_clicked)
+        btn_go.clicked.connect(self._on_continue_setup_clicked)
+
 
         act_l.addLayout(act_v)
         act_l.addStretch()
@@ -182,19 +185,23 @@ class DashboardView(QWidget):
         row1.addWidget(att_card, 4)
         body_layout.addLayout(row1)
 
-
         # 3. Row 2: 4 KPI Cards
         stats = QHBoxLayout()
         stats.setSpacing(10)
         self.card_clients = MetricCard(
             "TOTAL CLIENTS", "0", "Registered clients", accent_color="#0284C7", action_text="View →"
         )
+        self.card_clients.clicked.connect(lambda: self.navigate_to_clients.emit())
+
         self.card_completed = MetricCard(
             "COMPLETED AUDITS", "0", "This financial year", accent_color="#16A34A"
         )
+
         self.card_pending = MetricCard(
             "OPEN FINDINGS", "0", "No action required", accent_color="#D97706", action_text="View →"
         )
+        self.card_pending.clicked.connect(lambda: self.navigate_to_matrix.emit())
+
         self.card_high_risk = MetricCard(
             "HIGH RISK CASES",
             "0",
@@ -202,6 +209,8 @@ class DashboardView(QWidget):
             accent_color="#DC2626",
             action_text="Review →",
         )
+        self.card_high_risk.clicked.connect(lambda: self.navigate_to_matrix.emit())
+
         stats.addWidget(self.card_clients)
         stats.addWidget(self.card_completed)
         stats.addWidget(self.card_pending)
@@ -210,6 +219,7 @@ class DashboardView(QWidget):
 
         # 4. Row 3: Audit Progress + Risk Exposure
         row3 = QHBoxLayout()
+
         row3.setSpacing(12)
 
         trend_card = CardWidget("AUDIT PROGRESS")
@@ -282,6 +292,15 @@ class DashboardView(QWidget):
             eng_id = name_item.data(Qt.ItemDataRole.UserRole)
             if eng_id:
                 self.engagement_selected.emit(eng_id)
+                self.navigate_to_matrix.emit()
+
+    def _on_continue_setup_clicked(self) -> None:
+        if self.current_engagement:
+            self.navigate_to_matrix.emit()
+        elif self.current_client:
+            self.navigate_to_engagements.emit()
+        else:
+            self.navigate_to_clients.emit()
 
     def refresh_dashboard(self) -> None:
         clients = self.client_service.list_clients_for_firm(self.current_firm.id) if self.current_firm else (self.client_service.list_all_clients() if hasattr(self.client_service, "list_all_clients") else [])
@@ -332,7 +351,5 @@ class DashboardView(QWidget):
         row_cnt = max(1, len(all_engagements[:10]))
         self.table_projects.setFixedHeight(row_cnt * 36 + 32)
 
-    def _on_go_clients_clicked(self) -> None:
-        self.navigate_to_clients.emit()
 
 

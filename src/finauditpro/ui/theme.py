@@ -116,11 +116,15 @@ class CardWidget(QFrame):
 
 
 class MetricCard(QFrame):
+    clicked = Signal()
+
     def __init__(self, title: str, value: str, subtitle: str = "", accent_color: str = "#2563EB", action_text: str = "", parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setObjectName("metricCard")
         self.setFixedHeight(88)
         self.setStyleSheet(f"QFrame#metricCard {{ background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; border-top: 2px solid {accent_color}; }}")
+        if action_text:
+            self.setCursor(Qt.CursorShape.PointingHandCursor)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(14, 10, 14, 10)
         layout.setSpacing(2)
@@ -143,8 +147,13 @@ class MetricCard(QFrame):
         layout.addWidget(self.value_lbl)
         layout.addLayout(sub_row)
 
+    def mousePressEvent(self, event) -> None:
+        super().mousePressEvent(event)
+        self.clicked.emit()
+
     def set_value(self, val: str) -> None:
         self.value_lbl.setText(val)
+
 
 
 class Fonts:

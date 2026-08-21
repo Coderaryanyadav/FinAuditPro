@@ -225,7 +225,10 @@ class MainWindow(QMainWindow):
         self.stack = QStackedWidget()
         self.view_dashboard = DashboardView(self.firm_service, self.client_service, self.engagement_service)
         self.view_dashboard.navigate_to_clients.connect(lambda: self.btn_clients.click())
+        self.view_dashboard.navigate_to_engagements.connect(lambda: self.btn_engagements.click())
+        self.view_dashboard.navigate_to_matrix.connect(lambda: self.btn_matrix.click())
         self.view_dashboard.engagement_selected.connect(self.set_active_engagement)
+
         self.view_firms = FirmView(self.firm_service)
         self.view_firms.firm_selected.connect(self.set_active_firm)
         self.view_firms.firm_changed.connect(self._on_firms_changed)

@@ -1,6 +1,6 @@
 """
 FinAuditPro Enterprise — Design System Tokens & Theme Manager
-Single source of truth for visual tokens. Light mode default, full dark mode support.
+Single source of truth for visual tokens, typography, and status badges.
 """
 
 from PySide6.QtCore import QObject, Signal
@@ -9,101 +9,85 @@ from PySide6.QtWidgets import QFrame, QGraphicsDropShadowEffect, QHBoxLayout, QL
 
 
 class LightColors:
-    """Apple macOS Light mode semantic design tokens."""
-    BG_BASE     = "#F5F5F7"
+    """Apple macOS / Linear Light mode semantic design tokens."""
+    BG_BASE     = "#F8FAFC"
     BG_SURFACE  = "#FFFFFF"
     BG_ELEVATED = "#FFFFFF"
-    BG_SUBTLE   = "#F2F2F7"
-    BG_HOVER    = "#E5E5EA"
+    BG_SUBTLE   = "#F1F5F9"
+    BG_HOVER    = "#E2E8F0"
 
-    BORDER_DEFAULT = "#E5E5EA"
-    BORDER_STRONG  = "#D2D2D7"
-    BORDER_FOCUS   = "#007AFF"
+    BORDER_DEFAULT = "#E2E8F0"
+    BORDER_STRONG  = "#CBD5E1"
+    BORDER_FOCUS   = "#2563EB"
 
-    TEXT_PRIMARY     = "#1D1D1F"
-    TEXT_SECONDARY   = "#6E6E73"
-    TEXT_MUTED       = "#86868B"
-    TEXT_DISABLED    = "#C7C7CC"
-    TEXT_PLACEHOLDER = "#AEAEB2"
+    TEXT_PRIMARY     = "#0F172A"
+    TEXT_SECONDARY   = "#475569"
+    TEXT_MUTED       = "#64748B"
+    TEXT_DISABLED    = "#94A3B8"
 
-    ACCENT         = "#007AFF"
-    ACCENT_HOVER   = "#0062CC"
-    ACCENT_PRESSED = "#004999"
-    ACCENT_SUBTLE  = "rgba(0, 122, 255, 0.1)"
-    ACCENT_BORDER  = "rgba(0, 122, 255, 0.25)"
+    ACCENT         = "#2563EB"
+    ACCENT_HOVER   = "#1D4ED8"
+    ACCENT_SUBTLE  = "rgba(37, 99, 235, 0.1)"
+    ACCENT_BORDER  = "rgba(37, 99, 235, 0.25)"
 
-    SUCCESS        = "#34C759"
-    SUCCESS_SUBTLE = "rgba(52, 199, 89, 0.1)"
-    SUCCESS_BORDER = "rgba(52, 199, 89, 0.25)"
+    SUCCESS        = "#16A34A"
+    SUCCESS_SUBTLE = "rgba(22, 163, 74, 0.1)"
 
-    WARNING        = "#FF9F0A"
-    WARNING_SUBTLE = "rgba(255, 159, 10, 0.1)"
-    WARNING_BORDER = "rgba(255, 159, 10, 0.25)"
+    WARNING        = "#D97706"
+    WARNING_SUBTLE = "rgba(217, 119, 6, 0.1)"
 
-    DANGER         = "#FF3B30"
-    DANGER_SUBTLE  = "rgba(255, 59, 48, 0.1)"
-    DANGER_BORDER  = "rgba(255, 59, 48, 0.25)"
+    DANGER         = "#DC2626"
+    DANGER_SUBTLE  = "rgba(220, 38, 38, 0.1)"
 
-    INFO           = "#5856D6"
-    INFO_SUBTLE    = "rgba(88, 86, 214, 0.1)"
-    INFO_BORDER    = "rgba(88, 86, 214, 0.25)"
+    INFO           = "#4F46E5"
+    INFO_SUBTLE    = "rgba(79, 70, 229, 0.1)"
 
-    NAV_BG          = "#F5F5F7"
-    NAV_BORDER      = "#E5E5EA"
-    NAV_TEXT        = "#6E6E73"
-    NAV_TEXT_ACTIVE = "#007AFF"
-    NAV_ACTIVE_BG   = "rgba(0, 122, 255, 0.12)"
-    NAV_HOVER_BG    = "rgba(0, 0, 0, 0.04)"
-    NAV_ACCENT_DOT  = "#007AFF"
+    NAV_BG          = "#FFFFFF"
+    NAV_BORDER      = "#E2E8F0"
+    NAV_TEXT        = "#475569"
+    NAV_TEXT_ACTIVE = "#2563EB"
+    NAV_ACTIVE_BG   = "#EFF6FF"
 
 
 class DarkColors:
     """Apple macOS Dark mode semantic design tokens."""
-    BG_BASE     = "#1E1E1E"
-    BG_SURFACE  = "#2D2D2F"
-    BG_ELEVATED = "#3A3A3C"
-    BG_SUBTLE   = "#2C2C2E"
-    BG_HOVER    = "#3A3A3C"
+    BG_BASE     = "#0F172A"
+    BG_SURFACE  = "#1E293B"
+    BG_ELEVATED = "#334155"
+    BG_SUBTLE   = "#1E293B"
+    BG_HOVER    = "#334155"
 
-    BORDER_DEFAULT = "#38383A"
-    BORDER_STRONG  = "#48484A"
-    BORDER_FOCUS   = "#0A84FF"
+    BORDER_DEFAULT = "#334155"
+    BORDER_STRONG  = "#475569"
+    BORDER_FOCUS   = "#3B82F6"
 
-    TEXT_PRIMARY     = "#FFFFFF"
-    TEXT_SECONDARY   = "#EBEBF5"
-    TEXT_MUTED       = "#8E8E93"
-    TEXT_DISABLED    = "#636366"
-    TEXT_PLACEHOLDER = "#48484A"
+    TEXT_PRIMARY     = "#F8FAFC"
+    TEXT_SECONDARY   = "#CBD5E1"
+    TEXT_MUTED       = "#94A3B8"
+    TEXT_DISABLED    = "#64748B"
 
-    ACCENT         = "#0A84FF"
-    ACCENT_HOVER   = "#007AFF"
-    ACCENT_PRESSED = "#0062CC"
-    ACCENT_SUBTLE  = "rgba(10, 132, 255, 0.15)"
-    ACCENT_BORDER  = "rgba(10, 132, 255, 0.3)"
+    ACCENT         = "#3B82F6"
+    ACCENT_HOVER   = "#2563EB"
+    ACCENT_SUBTLE  = "rgba(59, 130, 246, 0.15)"
+    ACCENT_BORDER  = "rgba(59, 130, 246, 0.3)"
 
-    SUCCESS        = "#30D158"
-    SUCCESS_SUBTLE = "rgba(48, 209, 88, 0.15)"
-    SUCCESS_BORDER = "rgba(48, 209, 88, 0.3)"
+    SUCCESS        = "#22C55E"
+    SUCCESS_SUBTLE = "rgba(34, 197, 94, 0.15)"
 
-    WARNING        = "#FFD60A"
-    WARNING_SUBTLE = "rgba(255, 214, 10, 0.15)"
-    WARNING_BORDER = "rgba(255, 214, 10, 0.3)"
+    WARNING        = "#F59E0B"
+    WARNING_SUBTLE = "rgba(245, 158, 11, 0.15)"
 
-    DANGER         = "#FF453A"
-    DANGER_SUBTLE  = "rgba(255, 69, 58, 0.15)"
-    DANGER_BORDER  = "rgba(255, 69, 58, 0.3)"
+    DANGER         = "#EF4444"
+    DANGER_SUBTLE  = "rgba(239, 68, 68, 0.15)"
 
-    INFO           = "#5E5CE6"
-    INFO_SUBTLE    = "rgba(94, 92, 230, 0.15)"
-    INFO_BORDER    = "rgba(94, 92, 230, 0.3)"
+    INFO           = "#6366F1"
+    INFO_SUBTLE    = "rgba(99, 102, 241, 0.15)"
 
-    NAV_BG          = "#1E1E1E"
-    NAV_BORDER      = "#2C2C2E"
-    NAV_TEXT        = "#8E8E93"
-    NAV_TEXT_ACTIVE = "#0A84FF"
-    NAV_ACTIVE_BG   = "rgba(10, 132, 255, 0.18)"
-    NAV_HOVER_BG    = "rgba(255, 255, 255, 0.05)"
-    NAV_ACCENT_DOT  = "#0A84FF"
+    NAV_BG          = "#0F172A"
+    NAV_BORDER      = "#1E293B"
+    NAV_TEXT        = "#94A3B8"
+    NAV_TEXT_ACTIVE = "#3B82F6"
+    NAV_ACTIVE_BG   = "rgba(59, 130, 246, 0.18)"
 
 
 Colors = LightColors
@@ -112,7 +96,7 @@ Colors = LightColors
 class ThemeManager(QObject):
     """Singleton Theme Manager controlling global application light/dark state."""
 
-    theme_changed = Signal(bool)  # True = Dark, False = Light
+    theme_changed = Signal(bool)
     _instance = None
 
     def __new__(cls):
@@ -141,7 +125,7 @@ class ThemeManager(QObject):
 
 
 class CardWidget(QFrame):
-    """Re-usable styled card surface for content panels."""
+    """Re-usable styled card surface with subtle divider line."""
 
     def __init__(self, title: str | None = None, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -149,60 +133,66 @@ class CardWidget(QFrame):
         self.setStyleSheet("""
             QFrame#contentCard {
                 background-color: #FFFFFF;
-                border: 1px solid #E5E5EA;
-                border-radius: 12px;
+                border: 1px solid #E2E8F0;
+                border-radius: 10px;
             }
         """)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 18, 20, 18)
-        layout.setSpacing(12)
+        layout.setContentsMargins(18, 16, 18, 16)
+        layout.setSpacing(10)
 
         if title:
+            header_row = QHBoxLayout()
             header_lbl = QLabel(title)
-            header_lbl.setStyleSheet("font-size: 13px; font-weight: 800; color: #1D1D1F; border: none; background: transparent; letter-spacing: 0.5px;")
-            layout.addWidget(header_lbl)
+            header_lbl.setStyleSheet(
+                "font-size: 12px; font-weight: 800; color: #475569; border: none; background: transparent; letter-spacing: 0.6px;"
+            )
+            header_row.addWidget(header_lbl)
+            header_row.addStretch()
+            layout.addLayout(header_row)
 
         self.content_widget = QWidget()
         self.content_widget.setStyleSheet("background: transparent; border: none;")
         self.content_layout = QVBoxLayout(self.content_widget)
         self.content_layout.setContentsMargins(0, 0, 0, 0)
-        self.content_layout.setSpacing(10)
+        self.content_layout.setSpacing(8)
         layout.addWidget(self.content_widget)
 
 
 class MetricCard(QFrame):
-    """Stat summary card for KPI dashboard metrics."""
+    """Compact KPI summary module (90px height)."""
 
     def __init__(
         self,
         title: str,
         value: str,
         subtitle: str = "",
-        accent_color: str = "#007AFF",
+        accent_color: str = "#2563EB",
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
         self.setObjectName("metricCard")
+        self.setFixedHeight(94)
         self.setStyleSheet(f"""
             QFrame#metricCard {{
                 background-color: #FFFFFF;
-                border: 1px solid #E5E5EA;
-                border-radius: 12px;
-                border-left: 4px solid {accent_color};
+                border: 1px solid #E2E8F0;
+                border-radius: 10px;
+                border-left: 3px solid {accent_color};
             }}
         """)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(18, 16, 18, 16)
-        layout.setSpacing(4)
+        layout.setContentsMargins(14, 12, 14, 12)
+        layout.setSpacing(2)
 
         self.title_lbl = QLabel(title)
-        self.title_lbl.setStyleSheet("font-size: 11px; font-weight: 800; color: #6E6E73; border: none; background: transparent; letter-spacing: 0.6px;")
+        self.title_lbl.setStyleSheet("font-size: 10px; font-weight: 800; color: #64748B; border: none; background: transparent; letter-spacing: 0.6px;")
         self.value_lbl = QLabel(value)
-        self.value_lbl.setStyleSheet("font-size: 32px; font-weight: 800; color: #1D1D1F; border: none; background: transparent; letter-spacing: -0.8px;")
+        self.value_lbl.setStyleSheet("font-size: 26px; font-weight: 800; color: #0F172A; border: none; background: transparent; letter-spacing: -0.6px;")
         self.sub_lbl = QLabel(subtitle)
-        self.sub_lbl.setStyleSheet("font-size: 11px; color: #86868B; border: none; background: transparent;")
+        self.sub_lbl.setStyleSheet("font-size: 11px; color: #94A3B8; border: none; background: transparent;")
 
         layout.addWidget(self.title_lbl)
         layout.addWidget(self.value_lbl)
@@ -218,15 +208,16 @@ class Fonts:
 
 
 class StatusBadge(QLabel):
-    """Pill badge for status indication."""
+    """Subtle semantic status badge."""
 
     def __init__(self, text: str, status_type: str = "info", parent: QWidget | None = None) -> None:
         super().__init__(text, parent)
         styles = {
-            "success": "color: #34C759; background: rgba(52, 199, 89, 0.12); border: 1px solid rgba(52, 199, 89, 0.25);",
-            "warning": "color: #FF9F0A; background: rgba(255, 159, 10, 0.12); border: 1px solid rgba(255, 159, 10, 0.25);",
-            "danger": "color: #FF3B30; background: rgba(255, 59, 48, 0.12); border: 1px solid rgba(255, 59, 48, 0.25);",
-            "info": "color: #007AFF; background: rgba(0, 122, 255, 0.12); border: 1px solid rgba(0, 122, 255, 0.25);",
+            "success": "color: #15803D; background: #DCFCE7; border: 1px solid #86EFAC;",
+            "warning": "color: #B45309; background: #FEF3C7; border: 1px solid #FDE68A;",
+            "danger": "color: #B91C1C; background: #FEE2E2; border: 1px solid #FCA5A5;",
+            "info": "color: #1D4ED8; background: #DBEAFE; border: 1px solid #93C5FD;",
+            "neutral": "color: #475569; background: #F1F5F9; border: 1px solid #E2E8F0;",
         }
-        st = styles.get(status_type, styles["info"])
-        self.setStyleSheet(f"font-size: 11px; font-weight: 700; border-radius: 6px; padding: 3px 8px; {st}")
+        st = styles.get(status_type, styles["neutral"])
+        self.setStyleSheet(f"font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 8px; {st}")

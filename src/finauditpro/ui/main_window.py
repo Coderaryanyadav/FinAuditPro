@@ -1,22 +1,15 @@
-"""Primary Desktop Application Shell Window for FinAuditPro."""
+"""
+Main Application Shell Window for FinAuditPro.
+Enterprise Audit Operating System with Sidebar Navigation, Context Header, and Stacked View Workspace.
+"""
 
+from typing import Any
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QButtonGroup,
-    QComboBox,
-    QFrame,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QMainWindow,
-    QMessageBox,
-    QPushButton,
-    QStackedWidget,
-    QVBoxLayout,
-    QWidget,
+    QButtonGroup, QComboBox, QFrame, QHBoxLayout, QLabel, QLineEdit,
+    QMainWindow, QMenu, QMessageBox, QPushButton, QStackedWidget, QVBoxLayout, QWidget,
 )
 
-from finauditpro.application.services.ai_service import AIService
 from finauditpro.application.services.audit_matrix_service import AuditMatrixService
 from finauditpro.application.services.client_service import ClientService
 from finauditpro.application.services.document_service import DocumentService
@@ -26,10 +19,7 @@ from finauditpro.application.services.firm_service import FirmService
 from finauditpro.application.services.report_service import ReportService
 from finauditpro.application.services.working_paper_service import WorkingPaperService
 from finauditpro.domain.entities import Client, Engagement, Firm
-from typing import Any
-from finauditpro.ui.dialogs.client_dialog import ClientDialog
 from finauditpro.ui.dialogs.engagement_dialog import EngagementDialog
-from finauditpro.ui.dialogs.firm_dialog import FirmDialog
 from finauditpro.ui.dialogs.login_dialog import LoginDialog
 from finauditpro.ui.styles import GLOBAL_QSS
 from finauditpro.ui.views.ai_assistant_view import AIAssistantView
@@ -50,57 +40,38 @@ from finauditpro.ui.views.working_paper_view import WorkingPaperView
 
 
 class MainWindow(QMainWindow):
-    """Main Application Window."""
+    """Main Application Shell Window for FinAuditPro Audit Command Center."""
 
     def __init__(
         self,
-        firm_service: Any = None,
-        client_service: Any = None,
-        engagement_service: Any = None,
-        document_service: Any = None,
-        financial_data_service: Any = None,
-        audit_matrix_service: Any = None,
-        working_paper_service: Any = None,
-        report_service: Any = None,
-        ai_service: Any = None,
-        archival_repo: Any = None,
-        roll_forward_repo: Any = None,
-        db_manager: Any = None,
+        firm_service: Any = None, client_service: Any = None, engagement_service: Any = None,
+        document_service: Any = None, financial_data_service: Any = None, audit_matrix_service: Any = None,
+        working_paper_service: Any = None, report_service: Any = None, ai_service: Any = None,
+        archival_repo: Any = None, roll_forward_repo: Any = None, db_manager: Any = None,
     ) -> None:
         super().__init__()
         db = firm_service if hasattr(firm_service, "session_scope") else (db_manager if hasattr(db_manager, "session_scope") else None)
 
         if db:
-            self.firm_service = FirmService(db)
-            self.client_service = ClientService(db)
-            self.engagement_service = EngagementService(db)
-            self.document_service = DocumentService(db)
-            self.financial_data_service = FinancialDataService(db)
-            self.audit_matrix_service = AuditMatrixService(db)
-            self.working_paper_service = WorkingPaperService(db)
-            self.report_service = ReportService(db)
+            self.firm_service, self.client_service = FirmService(db), ClientService(db)
+            self.engagement_service, self.document_service = EngagementService(db), DocumentService(db)
+            self.financial_data_service, self.audit_matrix_service = FinancialDataService(db), AuditMatrixService(db)
+            self.working_paper_service, self.report_service = WorkingPaperService(db), ReportService(db)
+            from finauditpro.application.services.ai_service import AIService
             self.ai_service = AIService(db)
         else:
-            self.firm_service = firm_service
-            self.client_service = client_service
-            self.engagement_service = engagement_service
-            self.document_service = document_service
-            self.financial_data_service = financial_data_service
-            self.audit_matrix_service = audit_matrix_service
-            self.working_paper_service = working_paper_service
-            self.report_service = report_service
+            self.firm_service, self.client_service = firm_service, client_service
+            self.engagement_service, self.document_service = engagement_service, document_service
+            self.financial_data_service, self.audit_matrix_service = financial_data_service, audit_matrix_service
+            self.working_paper_service, self.report_service = working_paper_service, report_service
             self.ai_service = ai_service
 
-        self.archival_repo = archival_repo
-        self.roll_forward_repo = roll_forward_repo
-        self.db_manager = db
-
-        self.current_firm: Firm | None = None
-        self.current_client: Client | None = None
-        self.current_engagement: Engagement | None = None
+        self.archival_repo, self.roll_forward_repo, self.db_manager = archival_repo, roll_forward_repo, db
+        self.current_firm, self.current_client, self.current_engagement = None, None, None
+        self.sidebar_collapsed = False
 
         self.setWindowTitle("FinAuditPro — Offline-First Audit Operating System")
-        self.resize(1400, 900)
+        self.resize(1440, 920)
         self.setStyleSheet(GLOBAL_QSS)
 
         self._init_ui()
@@ -112,8 +83,7 @@ class MainWindow(QMainWindow):
         return self.current_engagement.id if self.current_engagement else None
 
     def _show_login_flow(self) -> None:
-        login_dlg = LoginDialog(self)
-        login_dlg.exec()
+        LoginDialog(self).exec()
 
     def _init_ui(self) -> None:
         central = QWidget()
@@ -125,36 +95,44 @@ class MainWindow(QMainWindow):
         main_layout.setSpacing(0)
 
         # 1. Left Sidebar Navigation
-        sidebar = QFrame()
-        sidebar.setObjectName("dashboardSidebar")
-        sidebar.setFixedWidth(240)
-        sb_layout = QVBoxLayout(sidebar)
+        self.sidebar = QFrame()
+        self.sidebar.setObjectName("dashboardSidebar")
+        self.sidebar.setFixedWidth(230)
+        sb_layout = QVBoxLayout(self.sidebar)
         sb_layout.setContentsMargins(12, 16, 12, 16)
-        sb_layout.setSpacing(6)
+        sb_layout.setSpacing(4)
 
         logo_row = QHBoxLayout()
         logo_box = QLabel("FA")
         logo_box.setFixedSize(30, 30)
         logo_box.setAlignment(Qt.AlignmentFlag.AlignCenter)
         logo_box.setObjectName("sidebarLogoBadge")
-        logo_name = QLabel("FinAuditPro")
-        logo_name.setObjectName("sidebarAppTitle")
+        self.logo_name = QLabel("FinAuditPro")
+        self.logo_name.setObjectName("sidebarAppTitle")
+
+        self.btn_collapse = QPushButton("◀")
+        self.btn_collapse.setFixedSize(24, 24)
+        self.btn_collapse.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_collapse.setStyleSheet("QPushButton { border: none; background: transparent; color: #64748B; font-size: 10px; font-weight: 700; } QPushButton:hover { color: #0F172A; }")
+        self.btn_collapse.clicked.connect(self._toggle_sidebar)
+
         logo_row.addWidget(logo_box)
-        logo_row.addWidget(logo_name)
+        logo_row.addWidget(self.logo_name)
         logo_row.addStretch()
+        logo_row.addWidget(self.btn_collapse)
         sb_layout.addLayout(logo_row)
         sb_layout.addSpacing(10)
 
         self.btn_group = QButtonGroup(self)
         btn_defs = [
-            ("btn_dashboard", "  Dashboard"), ("btn_firms", "  Audit Firms"),
-            ("btn_clients", "  Clients"), ("btn_engagements", "  Engagements"),
-            ("btn_documents", "  Documents"), ("btn_financial_data", "  Financial Statements"),
-            ("btn_gst", "  GST Reconciliation"), ("btn_compliance", "  Statutory Compliance"),
-            ("btn_audit_matrix", "  Audit Matrix"), ("btn_working_papers", "  Working Papers"),
-            ("btn_reports", "  Reports"), ("btn_ai_assistant", "  AI Copilot"),
-            ("btn_archival", "  File Archival"), ("btn_roll_forward", "  Roll-Forward"),
-            ("btn_settings", "  Settings")
+            ("btn_dashboard", "📊  Dashboard"), ("btn_firms", "🏢  Audit Firms"),
+            ("btn_clients", "👥  Clients"), ("btn_engagements", "💼  Engagements"),
+            ("btn_documents", "📁  Documents"), ("btn_financial_data", "📈  Financial Statements"),
+            ("btn_gst", "🧮  GST Reconciliation"), ("btn_compliance", "🛡️  Statutory Compliance"),
+            ("btn_audit_matrix", "▦  Audit Matrix"), ("btn_ai_assistant", "✨  AI Copilot"),
+            ("btn_working_papers", "📑  Working Papers"), ("btn_reports", "📜  Reports"),
+            ("btn_archival", "📦  File Archival"), ("btn_roll_forward", "🔄  Roll-Forward"),
+            ("btn_settings", "⚙️  Settings")
         ]
         for idx, (attr, title) in enumerate(btn_defs):
             btn = QPushButton(title)
@@ -170,35 +148,21 @@ class MainWindow(QMainWindow):
             sb_layout.addWidget(lbl)
 
         make_section("WORKSPACE")
-        sb_layout.addWidget(self.btn_dashboard)
-        sb_layout.addWidget(self.btn_firms)
-        sb_layout.addWidget(self.btn_clients)
-        sb_layout.addWidget(self.btn_engagements)
-
+        for b in [self.btn_dashboard, self.btn_firms, self.btn_clients, self.btn_engagements]: sb_layout.addWidget(b)
         make_section("FINANCIAL")
-        sb_layout.addWidget(self.btn_documents)
-        sb_layout.addWidget(self.btn_financial_data)
-        sb_layout.addWidget(self.btn_gst)
-        sb_layout.addWidget(self.btn_compliance)
-
+        for b in [self.btn_documents, self.btn_financial_data, self.btn_gst, self.btn_compliance]: sb_layout.addWidget(b)
         make_section("ANALYSIS")
-        sb_layout.addWidget(self.btn_audit_matrix)
-        sb_layout.addWidget(self.btn_ai_assistant)
-
+        for b in [self.btn_audit_matrix, self.btn_ai_assistant]: sb_layout.addWidget(b)
         make_section("AUDIT WORKFLOW")
-        sb_layout.addWidget(self.btn_working_papers)
-        sb_layout.addWidget(self.btn_reports)
-
+        for b in [self.btn_working_papers, self.btn_reports]: sb_layout.addWidget(b)
         make_section("SYSTEM")
-        sb_layout.addWidget(self.btn_archival)
-        sb_layout.addWidget(self.btn_roll_forward)
-        sb_layout.addWidget(self.btn_settings)
-
+        for b in [self.btn_archival, self.btn_roll_forward, self.btn_settings]: sb_layout.addWidget(b)
         sb_layout.addStretch()
 
         # Profile Pill Footer
         prof_frame = QFrame()
         prof_frame.setObjectName("sidebarProfileFrame")
+        prof_frame.setCursor(Qt.CursorShape.PointingHandCursor)
         pf_l = QHBoxLayout(prof_frame)
         pf_l.setContentsMargins(4, 10, 4, 4)
         av = QLabel("AD")
@@ -207,18 +171,24 @@ class MainWindow(QMainWindow):
         av.setObjectName("userAvatar")
         u_info = QVBoxLayout()
         u_info.setSpacing(0)
-        un = QLabel("admin")
+        un, ur = QLabel("admin"), QLabel("Administrator")
         un.setObjectName("userName")
-        ur = QLabel("Administrator")
         ur.setObjectName("userRole")
         u_info.addWidget(un)
         u_info.addWidget(ur)
+
+        btn_more = QPushButton("•••")
+        btn_more.setFixedSize(22, 22)
+        btn_more.setStyleSheet("QPushButton { border: none; background: transparent; color: #64748B; font-weight: 800; } QPushButton:hover { color: #0F172A; }")
+        btn_more.clicked.connect(self._show_profile_menu)
+
         pf_l.addWidget(av)
         pf_l.addLayout(u_info)
         pf_l.addStretch()
+        pf_l.addWidget(btn_more)
         sb_layout.addWidget(prof_frame)
 
-        main_layout.addWidget(sidebar)
+        main_layout.addWidget(self.sidebar)
 
         # 2. Main Right Container
         right_container = QWidget()
@@ -226,7 +196,7 @@ class MainWindow(QMainWindow):
         rc_layout.setContentsMargins(0, 0, 0, 0)
         rc_layout.setSpacing(0)
 
-        # Top Header Bar
+        # Top Command Header Bar
         header = QFrame()
         header.setObjectName("dashboardHeader")
         header.setFixedHeight(56)
@@ -251,11 +221,11 @@ class MainWindow(QMainWindow):
 
         h_layout.addStretch()
 
-        act_lbl = QLabel("ACTIVE AUDIT:")
-        act_lbl.setStyleSheet("font-size: 11px; font-weight: 700; color: #86868B;")
+        act_lbl = QLabel("ACTIVE ENGAGEMENT:")
+        act_lbl.setStyleSheet("font-size: 10px; font-weight: 800; color: #64748B; letter-spacing: 0.6px;")
         self.eng_selector_combo = QComboBox()
         self.eng_selector_combo.setObjectName("clientSelectorCombo")
-        self.eng_selector_combo.setMinimumWidth(240)
+        self.eng_selector_combo.setMinimumWidth(260)
         self.eng_selector_combo.currentIndexChanged.connect(self._on_header_engagement_changed)
 
         btn_new_audit = QPushButton("+ New Audit")
@@ -264,7 +234,7 @@ class MainWindow(QMainWindow):
 
         h_layout.addWidget(act_lbl)
         h_layout.addWidget(self.eng_selector_combo)
-        h_layout.addSpacing(8)
+        h_layout.addSpacing(10)
         h_layout.addWidget(btn_new_audit)
 
         rc_layout.addWidget(header)
@@ -281,9 +251,9 @@ class MainWindow(QMainWindow):
         self.view_gst = GSTVerificationView()
         self.view_compliance = ComplianceView()
         self.view_audit_matrix = AuditMatrixView(self.audit_matrix_service)
+        self.view_ai_assistant = AIAssistantView(self.ai_service, self.document_service)
         self.view_working_papers = WorkingPaperView(self.engagement_service, self.working_paper_service)
         self.view_reports = ReportView(self.engagement_service, self.report_service)
-        self.view_ai_assistant = AIAssistantView(self.ai_service, self.document_service)
         self.view_archival = ArchivalView(self.db_manager)
         self.view_roll_forward = RollForwardView(self.db_manager)
         self.view_settings = SettingsView()
@@ -294,39 +264,43 @@ class MainWindow(QMainWindow):
             self.view_audit_matrix, self.view_ai_assistant, self.view_working_papers,
             self.view_reports, self.view_archival, self.view_roll_forward, self.view_settings
         ]
-        for v in views:
-            self.stack.addWidget(v)
+        for v in views: self.stack.addWidget(v)
 
         rc_layout.addWidget(self.stack, stretch=1)
         main_layout.addWidget(right_container, stretch=1)
 
         self.btn_group.idClicked.connect(self._on_nav_clicked)
 
-        # Connect entity signals
-        if hasattr(self.view_firms, "firm_selected"):
-            self.view_firms.firm_selected.connect(self.set_active_firm)
-        if hasattr(self.view_clients, "client_selected"):
-            self.view_clients.client_selected.connect(self.set_active_client)
-        if hasattr(self.view_engagements, "engagement_selected"):
-            self.view_engagements.engagement_selected.connect(self.set_active_engagement)
+        if hasattr(self.view_firms, "firm_selected"): getattr(self.view_firms, "firm_selected").connect(self.set_active_firm)
+        if hasattr(self.view_clients, "client_selected"): getattr(self.view_clients, "client_selected").connect(self.set_active_client)
+        if hasattr(self.view_engagements, "engagement_selected"): getattr(self.view_engagements, "engagement_selected").connect(self.set_active_engagement)
+
+    def _toggle_sidebar(self) -> None:
+        self.sidebar_collapsed = not self.sidebar_collapsed
+        self.sidebar.setFixedWidth(64 if self.sidebar_collapsed else 230)
+        self.logo_name.setVisible(not self.sidebar_collapsed)
+        self.btn_collapse.setText("▶" if self.sidebar_collapsed else "◀")
+
+    def _show_profile_menu(self) -> None:
+        menu = QMenu(self)
+        menu.setStyleSheet("QMenu { background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 4px; font-size: 12px; } QMenu::item:selected { background-color: #EFF6FF; color: #2563EB; }")
+        menu.addAction("👤 Profile & CA License", lambda: self.btn_settings.click())
+        menu.addAction("⚙️ System Preferences", lambda: self.btn_settings.click())
+        menu.addSeparator()
+        menu.addAction("🚪 Sign Out", self.close)
+        menu.exec(self.cursor().pos())
 
     def _auto_select_initial_engagement(self) -> None:
         try:
             firms = self.firm_service.list_firms()
-            if not firms:
-                return
-            firm = firms[0]
-            self.current_firm = firm
-            clients = self.client_service.list_clients_for_firm(firm.id)
-            if not clients:
-                return
-            client = clients[0]
-            self.current_client = client
-            engs = self.engagement_service.list_engagements_for_client(client.id)
-            if engs:
-                self.set_active_engagement(engs[0].id)
-        except Exception:
-            pass
+            if not firms: return
+            self.current_firm = firms[0]
+            clients = self.client_service.list_clients_for_firm(self.current_firm.id)
+            if not clients: return
+            self.current_client = clients[0]
+            engs = self.engagement_service.list_engagements_for_client(self.current_client.id)
+            if engs: self.set_active_engagement(engs[0].id)
+        except Exception: pass
 
     def _on_nav_clicked(self, idx: int) -> None:
         self.stack.setCurrentIndex(idx)
@@ -339,13 +313,11 @@ class MainWindow(QMainWindow):
 
     def set_active_client(self, client_id: str) -> None:
         client = self.client_service.get_client_by_id(client_id)
-        if client:
-            self.current_client = client
+        if client: self.current_client = client
 
     def set_active_engagement(self, engagement_id: str) -> None:
         eng = self.engagement_service.get_engagement_by_id(engagement_id)
-        if not eng:
-            return
+        if not eng: return
         self.current_engagement = eng
         self.current_client = self.client_service.get_client_by_id(eng.client_id)
         self.current_firm = self.firm_service.get_firm_by_id(self.current_client.firm_id) if self.current_client else None
@@ -369,13 +341,12 @@ class MainWindow(QMainWindow):
             else:
                 self.eng_selector_combo.addItem("No Engagements Created", None)
         else:
-            self.eng_selector_combo.addItem("Select Active Audit Engagement...", None)
+            self.eng_selector_combo.addItem("No Active Engagement — Select Audit...", None)
         self.eng_selector_combo.blockSignals(False)
 
     def _on_header_engagement_changed(self, idx: int) -> None:
         eng_id = self.eng_selector_combo.itemData(idx)
-        if eng_id:
-            self.set_active_engagement(eng_id)
+        if eng_id: self.set_active_engagement(eng_id)
 
     def _on_new_engagement(self) -> None:
         if not self.current_client:

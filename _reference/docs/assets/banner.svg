@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 250" width="100%" height="100%">
+  <rect width="800" height="250" fill="#0f172a" rx="16"/>
+  <text x="400" y="150" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="64" font-weight="900" fill="#f8fafc" text-anchor="middle" letter-spacing="-1">FinAuditPro</text>
+  <text x="400" y="200" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="18" font-weight="500" fill="#38bdf8" text-anchor="middle" letter-spacing="1">OFFLINE-FIRST AI-POWERED AUDIT INTELLIGENCE</text>
+  
+  <!-- Minimalist abstract temple/bank icon -->
+  <path d="M 370 35 L 430 35 L 400 15 Z" fill="#0ea5e9"/>
+  <path d="M 370 40 L 430 40 L 430 50 L 370 50 Z" fill="#0ea5e9"/>
+  <path d="M 380 55 L 390 55 L 390 75 L 380 75 Z" fill="#cbd5e1"/>
+  <path d="M 410 55 L 420 55 L 420 75 L 410 75 Z" fill="#cbd5e1"/>
+  <path d="M 370 80 L 430 80 L 430 90 L 370 90 Z" fill="#0ea5e9"/>
+</svg>

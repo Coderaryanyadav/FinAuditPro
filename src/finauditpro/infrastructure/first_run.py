@@ -1,0 +1,146 @@
+"""Application data directory initialization, Matplotlib environment setup, and startup database bootstrap."""
+
+import os
+from pathlib import Path
+
+from finauditpro.infrastructure.persistence import models  # noqa: F401
+from finauditpro.infrastructure.persistence.database import DatabaseManager
+from finauditpro.infrastructure.persistence.migration_list import get_all_migrations
+from finauditpro.infrastructure.persistence.migrations import MigrationRunner
+
+
+def get_app_data_dir() -> Path:
+    """Return root application data directory path."""
+    app_data = os.environ.get("FINAUDITPRO_DATA_DIR")
+    if app_data:
+        return Path(app_data)
+    home = Path.home()
+    return home / ".gemini" / "antigravity-ide" / "app_data"
+
+
+def bootstrap_app_data_dirs() -> tuple[Path, Path, Path, Path]:
+    """Create root data directories and configure writable MPLCONFIGDIR for Matplotlib."""
+    root_dir = get_app_data_dir()
+    db_dir = root_dir / "db"
+    docs_dir = root_dir / "documents"
+    vector_dir = root_dir / "vector_store"
+    mpl_dir = root_dir / "matplotlib"
+
+    for d in (root_dir, db_dir, docs_dir, vector_dir, mpl_dir):
+        d.mkdir(parents=True, exist_ok=True)
+
+    # Set writable MPLCONFIGDIR for Matplotlib flowables
+    os.environ["MPLCONFIGDIR"] = str(mpl_dir)
+
+    return db_dir, docs_dir, vector_dir, mpl_dir
+
+
+def _ensure_all_schema_columns(conn) -> None:
+    """Safely add any missing columns to existing SQLite tables."""
+    cursor = conn.cursor()
+
+    # 1. engagements table
+    cursor.execute("PRAGMA table_info(engagements);")
+    eng_cols = {row[1] for row in cursor.fetchall()}
+    if eng_cols and "prior_engagement_id" not in eng_cols:
+        conn.execute("ALTER TABLE engagements ADD COLUMN prior_engagement_id TEXT;")
+
+    # 2. evidence_links table
+    cursor.execute("PRAGMA table_info(evidence_links);")
+    ev_cols = {row[1] for row in cursor.fetchall()}
+    if ev_cols:
+        if "dataset_id" not in ev_cols:
+            conn.execute("ALTER TABLE evidence_links ADD COLUMN dataset_id TEXT;")
+        if "row_index" not in ev_cols:
+            conn.execute("ALTER TABLE evidence_links ADD COLUMN row_index INTEGER;")
+        if "bounding_box_json" not in ev_cols:
+            conn.execute("ALTER TABLE evidence_links ADD COLUMN bounding_box_json TEXT;")
+        if "procedure_id" not in ev_cols:
+            conn.execute("ALTER TABLE evidence_links ADD COLUMN procedure_id TEXT;")
+        if "document_id" not in ev_cols:
+            conn.execute("ALTER TABLE evidence_links ADD COLUMN document_id TEXT;")
+        if "page_number" not in ev_cols:
+            conn.execute("ALTER TABLE evidence_links ADD COLUMN page_number INTEGER DEFAULT 1;")
+
+    # 3. audit_findings table
+    cursor.execute("PRAGMA table_info(audit_findings);")
+    find_cols = {row[1] for row in cursor.fetchall()}
+    if find_cols:
+        if "is_ai_generated" not in find_cols:
+            conn.execute("ALTER TABLE audit_findings ADD COLUMN is_ai_generated INTEGER DEFAULT 0;")
+        if "source" not in find_cols:
+            conn.execute("ALTER TABLE audit_findings ADD COLUMN source TEXT DEFAULT 'manual';")
+        if "prior_engagement_finding_id" not in find_cols:
+            conn.execute("ALTER TABLE audit_findings ADD COLUMN prior_engagement_finding_id TEXT;")
+        if "procedure_id" not in find_cols:
+            conn.execute("ALTER TABLE audit_findings ADD COLUMN procedure_id TEXT;")
+        if "risk_id" not in find_cols:
+            conn.execute("ALTER TABLE audit_findings ADD COLUMN risk_id TEXT;")
+
+    conn.commit()
+
+
+def seed_demo_data_if_empty(db_manager: DatabaseManager) -> None:
+    """Populate initial demo Firm, Client, and Engagement if database is empty."""
+    from finauditpro.domain.entities import Firm, Client, Engagement, AuditTypeEnum, EngagementStatusEnum
+    from finauditpro.infrastructure.persistence.repositories import FirmRepository, ClientRepository, EngagementRepository
+
+    try:
+        with db_manager.session_scope() as session:
+            firm_repo = FirmRepository(session)
+            firms = firm_repo.list_all()
+            if not firms:
+                firm = firm_repo.add(Firm(
+                    name="Apex Statutory Auditors & Co.",
+                    registration_number="FRN-123456W",
+                    pan="ABCDE1234F",
+                    email="partner@apexauditors.in"
+                ))
+                client_repo = ClientRepository(session)
+                client = client_repo.add(Client(
+                    firm_id=firm.id,
+                    name="Reliance Enterprises Private Limited",
+                    entity_type="Private Limited Company",
+                    pan="ABCDE5678G",
+                    gstin="27ABCDE5678G1ZV"
+                ))
+                eng_repo = EngagementRepository(session)
+                eng_repo.add(Engagement(
+                    firm_id=firm.id,
+                    client_id=client.id,
+                    financial_year="2024-25",
+                    audit_type=AuditTypeEnum.STATUTORY_AUDIT,
+                    status=EngagementStatusEnum.PLANNING
+                ))
+    except Exception:
+        pass
+
+
+def initialize_database(db_file_path: str | Path | None = None) -> DatabaseManager:
+    """Initialize SQLite database, apply schema migrations, and return DatabaseManager instance."""
+    db_dir, _, _, _ = bootstrap_app_data_dirs()
+
+    if db_file_path is None:
+        db_path = db_dir / "finauditpro.db"
+    else:
+        db_path = Path(db_file_path)
+
+    db_manager = DatabaseManager(str(db_path))
+    db_manager.create_tables()
+
+    # Run DB Migrations (1 to 9)
+    runner = MigrationRunner(str(db_path))
+    runner.run_all(get_all_migrations())
+
+    # Ensure schema column completeness across all tables
+    import sqlite3
+    with sqlite3.connect(str(db_path)) as conn:
+        _ensure_all_schema_columns(conn)
+
+    # Ensure triggers are applied after migrations
+    db_manager._create_audit_triggers()
+
+    # Seed demo data if database is empty
+    seed_demo_data_if_empty(db_manager)
+
+    return db_manager

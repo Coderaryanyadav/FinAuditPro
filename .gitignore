@@ -1,0 +1,92 @@
+# ==============================================================================
+# FinAuditPro — Production Git Ignore Specification
+# Prevents accidental commits of caches, environments, local databases, secrets,
+# temporary files, and confidential client audit data.
+# ==============================================================================
+
+# Python Caches & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+.venv*/
+
+# Package Build & Distribution
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Testing & Coverage Caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# IDE & Editor Metadata
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+.claude/
+.continue/
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+
+# FinAuditPro App Data & Local Databases
+app_data/
+*.db
+*.sqlite
+*.sqlite3
+finauditpro.db
+
+# Storage Directories & Vector Store
+vector_store/
+documents/
+matplotlib/
+logs/
+*.log
+
+# PyInstaller / Distribution Bundles
+*.manifest
+*.spec.bak
+
+# Large Data & Test Outputs
+test_exports/
+tmp/
+temp/

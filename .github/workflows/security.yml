@@ -1,0 +1,33 @@
+name: Security Audit & Secret Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 1'
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Security Tools
+        run: |
+          pip install ruff bandit
+
+      - name: Run Bandit Security Analysis
+        run: |
+          bandit -r src/finauditpro -ll -ii
+
+      - name: Run Ruff Security Rules (S Prefix)
+        run: |
+          ruff check --select S src

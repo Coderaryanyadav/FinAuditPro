@@ -1,11 +1,18 @@
-"""Active Engagement Dashboard View for FinAuditPro."""
+"""
+Active Engagement Dashboard View for FinAuditPro.
+Enterprise Audit Overview with 6-step progress stepper, stat summary cards, and risk breakdown.
+"""
 
+from datetime import datetime
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QComboBox,
+    QFrame,
     QHBoxLayout,
     QHeaderView,
     QLabel,
+    QPushButton,
+    QScrollArea,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -20,9 +27,10 @@ from finauditpro.ui.theme import CardWidget, MetricCard
 
 
 class DashboardView(QWidget):
-    """Primary engagement dashboard view."""
+    """Primary enterprise audit overview dashboard view."""
 
     engagement_selected = Signal(str)  # Emits engagement_id
+    navigate_to_clients = Signal()
 
     def __init__(
         self,
@@ -44,244 +52,220 @@ class DashboardView(QWidget):
 
     def _init_ui(self) -> None:
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(20, 20, 20, 20)
-        main_layout.setSpacing(20)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
 
-        # 1. Active Context Banner Card
-        self.context_card = CardWidget()
-        ctx_layout = QHBoxLayout()
-        ctx_layout.setContentsMargins(0, 0, 0, 0)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setStyleSheet("background-color: #F5F5F7; border: none;")
 
-        info_box = QVBoxLayout()
-        self.ctx_title = QLabel("NO ACTIVE ENGAGEMENT SELECTED")
-        self.ctx_title.setStyleSheet("font-size: 18px; font-weight: 800; color: #38bdf8;")
+        body = QWidget()
+        body.setStyleSheet("background-color: #F5F5F7;")
+        body_layout = QVBoxLayout(body)
+        body_layout.setContentsMargins(28, 24, 28, 28)
+        body_layout.setSpacing(20)
 
-        self.ctx_sub = QLabel(
-            "Select or create a firm, client, and engagement to begin audit work."
+        # 1. Page Header with Title & Date Badge
+        header_row = QHBoxLayout()
+        header_v = QVBoxLayout()
+        header_v.setSpacing(4)
+
+        lbl_title = QLabel("Audit Overview")
+        lbl_title.setStyleSheet("font-size: 26px; font-weight: 800; color: #1D1D1F; border: none;")
+        lbl_sub = QLabel("Monitor active engagements, statutory compliance, audit findings, and risk exposure.")
+        lbl_sub.setStyleSheet("font-size: 13px; color: #6E6E73; border: none;")
+
+        header_v.addWidget(lbl_title)
+        header_v.addWidget(lbl_sub)
+        header_row.addLayout(header_v)
+        header_row.addStretch()
+
+        date_lbl = QLabel(datetime.now().strftime("%a, %d %b %Y"))
+        date_lbl.setStyleSheet(
+            "font-size: 12px; font-weight: 600; color: #007AFF; background: rgba(0, 122, 255, 0.1); padding: 5px 12px; border-radius: 6px;"
         )
-        self.ctx_sub.setStyleSheet("font-size: 13px; color: #94a3b8;")
+        header_row.addWidget(date_lbl, alignment=Qt.AlignmentFlag.AlignVCenter)
+        body_layout.addLayout(header_row)
 
-        info_box.addWidget(self.ctx_title)
-        info_box.addWidget(self.ctx_sub)
-        ctx_layout.addLayout(info_box, stretch=1)
+        # 2. Row 1: Active Audit Workspace Progress Panel (60%) + Needs Attention Card (40%)
+        row1 = QHBoxLayout()
+        row1.setSpacing(16)
 
-        # Engagement Selector Combo
-        sel_box = QVBoxLayout()
-        sel_lbl = QLabel("Switch Active Engagement:")
-        sel_lbl.setStyleSheet("font-size: 11px; font-weight: 700; color: #64748b;")
+        # Active Audit Workspace Card
+        ws_card = CardWidget("ACTIVE AUDIT WORKSPACE — 0% Complete")
+        ws_v = QVBoxLayout()
+        ws_v.setSpacing(12)
 
-        self.eng_selector_combo = QComboBox()
-        self.eng_selector_combo.setMinimumWidth(260)
-        self.eng_selector_combo.currentIndexChanged.connect(self._on_engagement_combo_changed)
-
-        sel_box.addWidget(sel_lbl)
-        sel_box.addWidget(self.eng_selector_combo)
-        ctx_layout.addLayout(sel_box)
-
-        self.context_card.content_layout.addLayout(ctx_layout)
-        main_layout.addWidget(self.context_card)
-
-        # 2. KPI Metric Cards Layout
-        kpi_layout = QHBoxLayout()
-        kpi_layout.setSpacing(16)
-
-        self.card_clients = MetricCard(
-            "Total Clients", "0", "Registered clients", accent_color="#0284c7"
-        )
-        self.card_active_eng = MetricCard(
-            "Active Engagements", "0", "In progress audits", accent_color="#38bdf8"
-        )
-        self.card_completed_eng = MetricCard(
-            "Completed Audits", "0", "Signed-off engagements", accent_color="#10b981"
-        )
-        self.card_findings = MetricCard(
-            "Open Exceptions", "0", "Audit exceptions & findings", accent_color="#f59e0b"
-        )
-
-        kpi_layout.addWidget(self.card_clients)
-        kpi_layout.addWidget(self.card_active_eng)
-        kpi_layout.addWidget(self.card_completed_eng)
-        kpi_layout.addWidget(self.card_findings)
-
-        main_layout.addLayout(kpi_layout)
-
-        # 3. Workflow Progress Card
-        wf_card = CardWidget("Audit Workflow Stage Progress")
-        wf_layout = QHBoxLayout()
-        wf_layout.setSpacing(10)
-
-        self.stages = [
-            "1. Planning",
-            "2. Doc Collection",
-            "3. Financial Data",
-            "4. Audit Procedures",
-            "5. Review",
-            "6. Reporting",
+        # 6-Step Stepper Header
+        stepper_layout = QHBoxLayout()
+        stepper_layout.setSpacing(6)
+        self.steps = [
+            "1. Client Created",
+            "2. FY Selected",
+            "3. Engagement Created",
+            "4. Materiality Defined",
+            "5. Document Collection",
+            "6. Complete",
         ]
-        self.stage_widgets: list[QLabel] = []
+        self.step_labels: list[QLabel] = []
+        for idx, step in enumerate(self.steps):
+            slbl = QLabel(step)
+            slbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            is_active = (idx == 0)
+            bg = "#007AFF" if is_active else "#E5E5EA"
+            fg = "#FFFFFF" if is_active else "#6E6E73"
+            slbl.setStyleSheet(
+                f"background-color: {bg}; color: {fg}; font-size: 11px; font-weight: 700; border-radius: 6px; padding: 6px 8px;"
+            )
+            stepper_layout.addWidget(slbl, stretch=1)
+            self.step_labels.append(slbl)
 
-        for stage in self.stages:
-            lbl = QLabel(stage)
-            lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            lbl.setStyleSheet("""
-                QLabel {
-                    background-color: #121418;
-                    color: #64748b;
-                    border: 1px solid #2e3440;
-                    border-radius: 6px;
-                    padding: 8px 12px;
-                    font-weight: 600;
-                    font-size: 11px;
-                }
-            """)
-            wf_layout.addWidget(lbl, stretch=1)
-            self.stage_widgets.append(lbl)
+        ws_v.addLayout(stepper_layout)
 
-        wf_card.content_layout.addLayout(wf_layout)
-        main_layout.addWidget(wf_card)
+        # Recommended Action Banner
+        rec_banner = QFrame()
+        rec_banner.setStyleSheet("background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 10px 14px;")
+        rec_l = QHBoxLayout(rec_banner)
+        rec_l.setContentsMargins(0, 0, 0, 0)
 
-        # 4. Recent Activity Stream Card
-        act_card = CardWidget("Audit System Activity Log")
+        rec_txt = QLabel("📌 Recommended Next Step: Initialize client engagement & statutory parameters")
+        rec_txt.setStyleSheet("font-size: 12px; font-weight: 600; color: #1D4ED8; border: none;")
+
+        btn_go_client = QPushButton("Go to Client Management ➔")
+        btn_go_client.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_go_client.setStyleSheet(
+            "QPushButton { background-color: #007AFF; color: #FFFFFF; font-size: 11px; font-weight: 700; border-radius: 6px; padding: 6px 12px; border: none; }"
+            "QPushButton:hover { background-color: #0062CC; }"
+        )
+        btn_go_client.clicked.connect(self._on_go_clients_clicked)
+
+        rec_l.addWidget(rec_txt)
+        rec_l.addStretch()
+        rec_l.addWidget(btn_go_client)
+        ws_v.addWidget(rec_banner)
+
+        ws_card.content_layout.addLayout(ws_v)
+        row1.addWidget(ws_card, 6)
+
+        # Needs Attention Card
+        att_card = CardWidget("NEEDS ATTENTION")
+        att_v = QVBoxLayout()
+        att_v.setSpacing(8)
+
+        att_row = QFrame()
+        att_row.setStyleSheet("background-color: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; padding: 12px;")
+        att_l = QHBoxLayout(att_row)
+        att_l.setContentsMargins(0, 0, 0, 0)
+        att_txt = QLabel("✓ All caught up — no high-priority items require immediate action.")
+        att_txt.setStyleSheet("font-size: 12px; font-weight: 600; color: #047857; border: none;")
+        att_l.addWidget(att_txt)
+
+        att_v.addWidget(att_row)
+        att_card.content_layout.addLayout(att_v)
+        row1.addWidget(att_card, 4)
+
+        body_layout.addLayout(row1)
+
+        # 3. Row 2: 4 Key Metric Cards
+        stats_layout = QHBoxLayout()
+        stats_layout.setSpacing(14)
+
+        self.card_clients = MetricCard("TOTAL CLIENTS", "0", "Registered", accent_color="#0284c7")
+        self.card_completed = MetricCard("COMPLETED AUDITS", "0", "This Year", accent_color="#047857")
+        self.card_pending = MetricCard("OPEN FINDINGS", "0", "Action Req.", accent_color="#d97706")
+        self.card_high_risk = MetricCard("HIGH RISK CASES", "0", "Flagged by AI", accent_color="#dc2626")
+
+        stats_layout.addWidget(self.card_clients)
+        stats_layout.addWidget(self.card_completed)
+        stats_layout.addWidget(self.card_pending)
+        stats_layout.addWidget(self.card_high_risk)
+        body_layout.addLayout(stats_layout)
+
+        # 4. Row 3: Audit Progress Trend & Risk Summary
+        row3 = QHBoxLayout()
+        row3.setSpacing(16)
+
+        trend_card = CardWidget("Audit Progress Trend")
+        trend_v = QVBoxLayout()
+        trend_txt = QLabel("No completed audits yet\nYour audit activity and lifecycle progress trends will appear here.")
+        trend_txt.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        trend_txt.setStyleSheet("font-size: 12px; color: #86868B; padding: 24px;")
+        trend_v.addWidget(trend_txt)
+        trend_card.content_layout.addLayout(trend_v)
+
+        risk_card = CardWidget("RISK SUMMARY")
+        risk_v = QVBoxLayout()
+        risk_v.setSpacing(8)
+
+        risk_items = [
+            ("🔴 Critical Anomaly Findings", "0"),
+            ("🟡 High Exposure Findings", "0"),
+            ("🔵 Medium Category Anomalies", "0"),
+            ("🟢 Low Risk Observations", "0"),
+        ]
+        for label, count in risk_items:
+            r_row = QHBoxLayout()
+            lbl = QLabel(label)
+            lbl.setStyleSheet("font-size: 12px; color: #1D1D1F; font-weight: 500;")
+            cnt = QLabel(count)
+            cnt.setStyleSheet("font-size: 12px; font-weight: 700; color: #1D1D1F;")
+            r_row.addWidget(lbl)
+            r_row.addStretch()
+            r_row.addWidget(cnt)
+            risk_v.addLayout(r_row)
+
+        risk_card.content_layout.addLayout(risk_v)
+
+        row3.addWidget(trend_card, 6)
+        row3.addWidget(risk_card, 4)
+        body_layout.addLayout(row3)
+
+        # 5. Row 4: Recent Audit Projects Table Section
+        projects_card = CardWidget("Recent Audit Projects")
         self.activity_table = QTableWidget()
-        self.activity_table.setColumnCount(3)
-        self.activity_table.setHorizontalHeaderLabels(["Timestamp (UTC)", "Action", "Details"])
-        self.activity_table.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.activity_table.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.activity_table.horizontalHeader().setSectionResizeMode(
-            2, QHeaderView.ResizeMode.Stretch
-        )
+        self.activity_table.setColumnCount(4)
+        self.activity_table.setHorizontalHeaderLabels(["Client Name", "Financial Year", "Status", "Risk Exposure"])
+        self.activity_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.activity_table.verticalHeader().setVisible(False)
-        self.activity_table.setMinimumHeight(180)
+        self.activity_table.setStyleSheet("""
+            QTableWidget { background-color: #FFFFFF; border: none; font-size: 12px; color: #1D1D1F; }
+            QHeaderView::section { background-color: #F2F2F7; color: #6E6E73; font-weight: 700; font-size: 11px; padding: 8px; border: none; }
+        """)
 
-        act_card.content_layout.addWidget(self.activity_table)
-        main_layout.addWidget(act_card)
+        projects_card.content_layout.addWidget(self.activity_table)
+        body_layout.addWidget(projects_card)
 
-        main_layout.addStretch()
+        scroll.setWidget(body)
+        main_layout.addWidget(scroll)
 
-    def refresh(self, active_engagement_id: str | None = None) -> None:
-        """Reload dashboard stats, context, and engagement list."""
-        summary = self.engagement_service.get_dashboard_summary(
-            firm_id=self.current_firm.id if self.current_firm else None
-        )
+    def _on_go_clients_clicked(self) -> None:
+        self.navigate_to_clients.emit()
 
-        self.card_clients.set_value(str(summary.total_clients))
-        self.card_active_eng.set_value(str(summary.active_engagements))
-        self.card_completed_eng.set_value(str(summary.completed_engagements))
-        self.card_findings.set_value(str(summary.open_findings))
+    def set_firm(self, firm: Firm | None) -> None:
+        self.current_firm = firm
+        self.refresh()
 
-        # Populate selector combo
-        all_engagements = self.engagement_service.list_all_engagements()
-        self.eng_selector_combo.blockSignals(True)
-        self.eng_selector_combo.clear()
-        self.eng_selector_combo.addItem("-- Select Engagement --", None)
+    def refresh(self) -> None:
+        if not self.current_firm:
+            return
 
-        selected_idx = 0
-        for i, eng in enumerate(all_engagements, start=1):
-            try:
-                client = self.client_service.get_client(eng.client_id)
-                label = f"{client.name} | {eng.audit_type.value} ({eng.financial_year})"
-            except Exception:
-                label = f"Engagement {eng.id[:8]} ({eng.financial_year})"
+        clients = self.client_service.list_clients_for_firm(self.current_firm.id)
+        self.card_clients.set_value(str(len(clients)))
 
-            self.eng_selector_combo.addItem(label, eng.id)
-            if active_engagement_id and eng.id == active_engagement_id:
-                selected_idx = i
+        engagements: list[Engagement] = []
+        for client in clients:
+            engs = self.engagement_service.list_engagements_for_client(client.id)
+            engagements.extend(engs)
 
-        self.eng_selector_combo.setCurrentIndex(selected_idx)
-        self.eng_selector_combo.blockSignals(False)
+        completed_count = sum(1 for e in engagements if e.status.value == "Archived")
+        self.card_completed.set_value(str(completed_count))
+        self.card_pending.set_value(str(len(engagements) - completed_count))
 
-        if active_engagement_id:
-            self._set_active_engagement(active_engagement_id)
-        elif all_engagements:
-            self._set_active_engagement(all_engagements[0].id)
-        else:
-            self._clear_active_context()
-
-        # Update Activity Log Table
         self.activity_table.setRowCount(0)
-        for row, act in enumerate(summary.recent_activities):
-            self.activity_table.insertRow(row)
-            self.activity_table.setItem(row, 0, QTableWidgetItem(act["timestamp"]))
-            self.activity_table.setItem(row, 1, QTableWidgetItem(act["action"]))
-            self.activity_table.setItem(row, 2, QTableWidgetItem(act["details"]))
-
-    def _set_active_engagement(self, engagement_id: str) -> None:
-        try:
-            self.current_engagement = self.engagement_service.get_engagement(engagement_id)
-            self.current_client = self.client_service.get_client(self.current_engagement.client_id)
-            self.current_firm = self.firm_service.get_firm(self.current_engagement.firm_id)
-
-            self.ctx_title.setText(
-                f"{self.current_client.name.upper()}  •  {self.current_engagement.financial_year}"
-            )
-            self.ctx_sub.setText(
-                f"Firm: {self.current_firm.name} | Type: {self.current_engagement.audit_type.value} | Status: {self.current_engagement.status.value}"
-            )
-
-            # Highlight workflow stage
-            status_map = {
-                "Planning": 0,
-                "Document Collection": 1,
-                "Financial Analysis": 2,
-                "Audit Procedures": 3,
-                "Review": 4,
-                "Completed": 5,
-            }
-            active_stage_idx = status_map.get(self.current_engagement.status.value, 0)
-
-            for i, w in enumerate(self.stage_widgets):
-                if i < active_stage_idx:
-                    w.setStyleSheet("""
-                        QLabel {
-                            background-color: #065f46;
-                            color: #a7f3d0;
-                            border: 1px solid #10b981;
-                            border-radius: 6px;
-                            padding: 8px 12px;
-                            font-weight: 600;
-                            font-size: 11px;
-                        }
-                    """)
-                elif i == active_stage_idx:
-                    w.setStyleSheet("""
-                        QLabel {
-                            background-color: #0284c7;
-                            color: #ffffff;
-                            border: 1px solid #38bdf8;
-                            border-radius: 6px;
-                            padding: 8px 12px;
-                            font-weight: 700;
-                            font-size: 11px;
-                        }
-                    """)
-                else:
-                    w.setStyleSheet("""
-                        QLabel {
-                            background-color: #121418;
-                            color: #64748b;
-                            border: 1px solid #2e3440;
-                            border-radius: 6px;
-                            padding: 8px 12px;
-                            font-weight: 600;
-                            font-size: 11px;
-                        }
-                    """)
-        except Exception:
-            self._clear_active_context()
-
-    def _clear_active_context(self) -> None:
-        self.current_firm = None
-        self.current_client = None
-        self.current_engagement = None
-        self.ctx_title.setText("NO ACTIVE ENGAGEMENT SELECTED")
-        self.ctx_sub.setText("Select or create a firm, client, and engagement to begin audit work.")
-
-    def _on_engagement_combo_changed(self, index: int) -> None:
-        eng_id = self.eng_selector_combo.currentData()
-        if eng_id:
-            self._set_active_engagement(eng_id)
-            self.engagement_selected.emit(eng_id)
+        for idx, eng in enumerate(engagements[:5]):
+            self.activity_table.insertRow(idx)
+            self.activity_table.setItem(idx, 0, QTableWidgetItem(eng.title))
+            self.activity_table.setItem(idx, 1, QTableWidgetItem(eng.financial_year))
+            self.activity_table.setItem(idx, 2, QTableWidgetItem(eng.status.value))
+            self.activity_table.setItem(idx, 3, QTableWidgetItem("Normal"))

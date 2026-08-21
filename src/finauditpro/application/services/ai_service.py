@@ -33,10 +33,17 @@ class AIService:
     def __init__(
         self,
         db_manager: DatabaseManager,
-        provider: LLMProvider,
-        vector_store: FAISSVectorStore,
+        provider: LLMProvider | None = None,
+        vector_store: FAISSVectorStore | None = None,
     ) -> None:
         self.db_manager = db_manager
+        if provider is None:
+            from finauditpro.infrastructure.ai.lmstudio_provider import LMStudioProvider
+            provider = LMStudioProvider()
+        if vector_store is None:
+            from pathlib import Path
+            from finauditpro.infrastructure.ai.faiss_vector_store import FAISSVectorStore
+            vector_store = FAISSVectorStore(Path.home() / ".gemini" / "antigravity-ide" / "app_data" / "vector_store")
         self.provider = provider
         self.vector_store = vector_store
 

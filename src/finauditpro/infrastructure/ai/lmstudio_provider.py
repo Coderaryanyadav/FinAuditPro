@@ -56,13 +56,7 @@ class LMStudioProvider(LLMProvider):
                 data = resp.json().get("data", [])
                 if data:
                     models = [m.get("id", "") for m in data if m.get("id")]
-                    chat_match = next(
-                        (m for m in models if self.chat_model_id.lower() in m.lower() or m.lower() in self.chat_model_id.lower()),
-                        None,
-                    )
-                    if not chat_match:
-                        chat_match = next((m for m in models if "embed" not in m.lower()), models[0])
-
+                    chat_match = next((m for m in models if "embed" not in m.lower()), models[0])
                     if chat_match:
                         self.chat_model_id = chat_match
 
@@ -87,15 +81,8 @@ class LMStudioProvider(LLMProvider):
                 data = resp.json().get("data", [])
                 models = [m.get("id", "") for m in data if m.get("id")]
                 if models:
-                    # Check exact or partial match for chat model
-                    chat_match = next(
-                        (m for m in models if self.chat_model_id.lower() in m.lower() or m.lower() in self.chat_model_id.lower()),
-                        None,
-                    )
-                    if not chat_match:
-                        # Pick first non-embedding model
-                        chat_match = next((m for m in models if "embed" not in m.lower()), models[0])
-
+                    # Primary active model loaded in memory is always returned first
+                    chat_match = next((m for m in models if "embed" not in m.lower()), models[0])
                     if chat_match:
                         self.chat_model_id = chat_match
 

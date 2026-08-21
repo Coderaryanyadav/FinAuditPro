@@ -320,8 +320,22 @@ class AIAssistantView(QWidget):
         self.qa_input.setText(prompt_str)
         self._on_ask_clicked()
 
+    def _resolve_active_engagement(self) -> Engagement | None:
+        if self.current_engagement:
+            return self.current_engagement
+        win = self.window()
+        if hasattr(win, "current_engagement") and win.current_engagement:
+            self.set_active_engagement(win.current_engagement)
+            return self.current_engagement
+        if hasattr(win, "eng_selector_combo"):
+            data = win.eng_selector_combo.currentData()
+            if data and str(data).startswith("eng:") and hasattr(win, "set_active_engagement"):
+                win.set_active_engagement(str(data)[4:])
+                return self.current_engagement
+        return None
+
     def _on_run_icai_scan(self) -> None:
-        if not self.current_engagement:
+        if not self._resolve_active_engagement():
             QMessageBox.warning(
                 self, "No Active Audit", "Please select an active audit engagement first."
             )
@@ -332,7 +346,7 @@ class AIAssistantView(QWidget):
         self._on_ask_clicked()
 
     def _on_ask_clicked(self) -> None:
-        if not self.current_engagement:
+        if not self._resolve_active_engagement():
             QMessageBox.warning(
                 self, "No Engagement", "Please select an active audit engagement first."
             )
@@ -341,6 +355,7 @@ class AIAssistantView(QWidget):
         q = self.qa_input.text().strip()
         if not q or not self.ai_service or not hasattr(self.ai_service, "query_rag"):
             return
+
 
         self.chat_display.setText("⏳ Executing RAG Query against Local LM Studio AI Model...")
         self.reasoning_display.setText("Waiting for model reasoning (<think>) tokens...")

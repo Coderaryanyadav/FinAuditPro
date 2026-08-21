@@ -76,7 +76,6 @@ class MainWindow(QMainWindow):
         self._show_login_flow()
         self._auto_select_initial_engagement()
 
-
     @property
     def active_engagement_id(self) -> str | None:
         return self.current_engagement.id if self.current_engagement else None
@@ -93,6 +92,7 @@ class MainWindow(QMainWindow):
         main_layout = QHBoxLayout(central)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
+
         # 1. Left Sidebar
         self.sidebar = QFrame()
         self.sidebar.setObjectName("dashboardSidebar")
@@ -100,7 +100,6 @@ class MainWindow(QMainWindow):
         sb_layout = QVBoxLayout(self.sidebar)
         sb_layout.setContentsMargins(12, 16, 12, 16)
         sb_layout.setSpacing(4)
-
 
         logo_row = QHBoxLayout()
         logo_box = QLabel("FA")
@@ -114,8 +113,8 @@ class MainWindow(QMainWindow):
         self.btn_collapse.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_collapse.setStyleSheet("QPushButton { border: none; background: transparent; color: #64748B; font-size: 10px; font-weight: 700; } QPushButton:hover { color: #0F172A; }")
         self.btn_collapse.clicked.connect(self._toggle_sidebar)
-        logo_row.addWidget(logo_box)
-        logo_row.addWidget(self.logo_name)
+        for w in (logo_box, self.logo_name):
+            logo_row.addWidget(w)
         logo_row.addStretch()
         logo_row.addWidget(self.btn_collapse)
         sb_layout.addLayout(logo_row)
@@ -226,15 +225,12 @@ class MainWindow(QMainWindow):
         self.view_engagements.engagement_selected.connect(self.set_active_engagement)
         self.view_documents = DocumentView(self.document_service)
         self.view_financial_data = FinancialDataView(self.financial_data_service, self.engagement_service)
-        self.view_gst = GSTVerificationView()
-        self.view_compliance = ComplianceView()
+        self.view_gst, self.view_compliance = GSTVerificationView(), ComplianceView()
         self.view_audit_matrix = AuditMatrixView(self.audit_matrix_service)
-        self.view_ai_assistant = AIAssistantView(self.ai_service, self.document_service)
+        self.view_ai_assistant = AIAssistantView(self.ai_service, self.document_service, self.engagement_service)
         self.view_working_papers = WorkingPaperView(self.engagement_service, self.working_paper_service)
         self.view_reports = ReportView(self.engagement_service, self.report_service)
-        self.view_archival = ArchivalView(self.db_manager)
-        self.view_roll_forward = RollForwardView(self.db_manager)
-        self.view_settings = SettingsView()
+        self.view_archival, self.view_roll_forward, self.view_settings = ArchivalView(self.db_manager), RollForwardView(self.db_manager), SettingsView()
 
         for v in (self.view_dashboard, self.view_firms, self.view_clients, self.view_engagements, self.view_documents, self.view_financial_data, self.view_gst, self.view_compliance, self.view_audit_matrix, self.view_ai_assistant, self.view_working_papers, self.view_reports, self.view_archival, self.view_roll_forward, self.view_settings):
             self.stack.addWidget(v)
@@ -282,22 +278,21 @@ class MainWindow(QMainWindow):
 
     def set_active_firm(self, firm_id: str) -> None:
         firm = self.firm_service.get_firm_by_id(firm_id)
-        if firm:
-            self.current_firm = firm
-            self.view_dashboard.set_firm(firm)
-            self.view_clients.set_firm(firm)
-            clients = self.client_service.list_clients_for_firm(firm.id)
-            if clients:
-                self.set_active_client(clients[0].id)
-            else:
-                self.current_client = None
-                self.current_engagement = None
-                self._update_header_combo()
+        if not firm: return
+        self.current_firm = firm
+        self.view_dashboard.set_firm(firm)
+        self.view_clients.set_firm(firm)
+        clients = self.client_service.list_clients_for_firm(firm.id)
+        eng_found = next((e for c in clients for e in self.engagement_service.list_engagements_for_client(c.id)), None)
+        if eng_found: self.set_active_engagement(eng_found.id)
+        elif clients: self.set_active_client(clients[0].id)
+        else:
+            self.current_client, self.current_engagement = None, None
+            self._update_header_combo()
 
     def set_active_client(self, client_id: str) -> None:
         client = self.client_service.get_client_by_id(client_id)
-        if not client:
-            return
+        if not client: return
         self.current_client = client
         if client.firm_id and (not self.current_firm or self.current_firm.id != client.firm_id):
             self.current_firm = self.firm_service.get_firm_by_id(client.firm_id)
@@ -305,8 +300,7 @@ class MainWindow(QMainWindow):
                 self.view_dashboard.set_firm(self.current_firm)
                 self.view_clients.set_firm(self.current_firm)
         engs = self.engagement_service.list_engagements_for_client(client.id)
-        if engs:
-            self.set_active_engagement(engs[0].id)
+        if engs: self.set_active_engagement(engs[0].id)
         else:
             self.current_engagement = None
             for v in (self.view_documents, self.view_financial_data, self.view_gst, self.view_compliance, self.view_audit_matrix, self.view_working_papers, self.view_reports, self.view_ai_assistant, self.view_archival, self.view_roll_forward):
@@ -315,13 +309,11 @@ class MainWindow(QMainWindow):
 
     def set_active_engagement(self, engagement_id: str) -> None:
         eng = self.engagement_service.get_engagement_by_id(engagement_id)
-        if not eng:
-            return
+        if not eng: return
         self.current_engagement = eng
         self.current_client = self.client_service.get_client_by_id(eng.client_id)
         self.current_firm = self.firm_service.get_firm_by_id(self.current_client.firm_id) if self.current_client else None
         self.view_dashboard.set_firm(self.current_firm)
-
         for v in (self.view_documents, self.view_financial_data, self.view_gst, self.view_compliance, self.view_audit_matrix, self.view_working_papers, self.view_reports, self.view_ai_assistant, self.view_archival, self.view_roll_forward):
             getattr(v, "set_active_engagement", lambda e: None)(eng)
         self._update_header_combo()
@@ -330,19 +322,11 @@ class MainWindow(QMainWindow):
         self.eng_selector_combo.blockSignals(True)
         self.eng_selector_combo.clear()
         firms = self.firm_service.list_firms()
-        clients = []
-        if self.current_firm:
-            clients = self.client_service.list_clients_for_firm(self.current_firm.id)
-        elif firms:
-            clients = self.client_service.list_clients_for_firm(firms[0].id)
-        if not clients and hasattr(self.client_service, "list_all_clients"):
-            clients = self.client_service.list_all_clients()
-
+        clients = self.client_service.list_clients_for_firm(self.current_firm.id) if self.current_firm else (self.client_service.list_clients_for_firm(firms[0].id) if firms else [])
+        if not clients and hasattr(self.client_service, "list_all_clients"): clients = self.client_service.list_all_clients()
         if not clients:
             self.eng_selector_combo.addItem("No Clients Registered — Select or Create Client", None)
-            self.eng_selector_combo.blockSignals(False)
-            return
-
+            self.eng_selector_combo.blockSignals(False); return
         selected_idx, item_idx = 0, 0
         for c in clients:
             engs = self.engagement_service.list_engagements_for_client(c.id)
@@ -350,41 +334,38 @@ class MainWindow(QMainWindow):
                 for e in engs:
                     audit_t = e.audit_type.value if hasattr(e.audit_type, "value") else str(e.audit_type)
                     self.eng_selector_combo.addItem(f"{c.name} · FY {e.financial_year} · {audit_t}", f"eng:{e.id}")
-                    if self.current_engagement and e.id == self.current_engagement.id:
-                        selected_idx = item_idx
+                    if self.current_engagement and e.id == self.current_engagement.id: selected_idx = item_idx
                     item_idx += 1
             else:
                 self.eng_selector_combo.addItem(f"{c.name} (No engagements created)", f"cli:{c.id}")
-                if self.current_client and c.id == self.current_client.id and not self.current_engagement:
-                    selected_idx = item_idx
+                if self.current_client and c.id == self.current_client.id and not self.current_engagement: selected_idx = item_idx
                 item_idx += 1
-
         self.eng_selector_combo.setCurrentIndex(selected_idx)
         self.eng_selector_combo.blockSignals(False)
+        if not self.current_engagement and item_idx > 0:
+            first_data = self.eng_selector_combo.itemData(selected_idx)
+            if first_data and str(first_data).startswith("eng:"):
+                eng = self.engagement_service.get_engagement_by_id(str(first_data)[4:])
+                if eng:
+                    self.current_engagement = eng
+                    for v in (self.view_documents, self.view_financial_data, self.view_gst, self.view_compliance, self.view_audit_matrix, self.view_working_papers, self.view_reports, self.view_ai_assistant, self.view_archival, self.view_roll_forward):
+                        getattr(v, "set_active_engagement", lambda e: None)(eng)
 
     def _on_header_engagement_changed(self, idx: int) -> None:
         data = self.eng_selector_combo.itemData(idx)
-        if not data:
-            return
-        if str(data).startswith("eng:"):
-            self.set_active_engagement(str(data)[4:])
-        elif str(data).startswith("cli:"):
-            self.set_active_client(str(data)[4:])
-        else:
-            self.set_active_engagement(str(data))
+        if data:
+            self.set_active_engagement(str(data)[4:]) if str(data).startswith("eng:") else (self.set_active_client(str(data)[4:]) if str(data).startswith("cli:") else self.set_active_engagement(str(data)))
 
     def _on_new_engagement(self) -> None:
         firms = self.firm_service.list_firms()
         if not firms:
             QMessageBox.warning(self, "No Firm", "Please create an Audit Firm first.")
-            self.btn_firms.click()
-            return
+            self.btn_firms.click(); return
         firm = self.current_firm or firms[0]
         clients = self.client_service.list_clients_for_firm(firm.id)
         if not clients:
             QMessageBox.warning(self, "No Client", "Please create a Client first before adding an Engagement.")
-            self.btn_clients.click()
-            return
+            self.btn_clients.click(); return
         client = self.current_client or clients[0]
         dlg = EngagementDialog(self.engagement_service, firm=firm, client=client, parent=self)
         if dlg.exec() and dlg.result_engagement:

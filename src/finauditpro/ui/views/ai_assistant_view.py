@@ -312,9 +312,15 @@ class AIAssistantView(QWidget):
         self.doc_sources_list.clear()
         if not self.current_engagement or not self.document_service:
             return
-        docs = self.document_service.list_documents(self.current_engagement.id)
-        for doc in docs:
-            self.doc_sources_list.addItem(QListWidgetItem(f"📄 {doc.original_filename}"))
+        fn = getattr(self.document_service, "list_documents_for_engagement", None) or getattr(
+            self.document_service, "list_documents", None
+        )
+        if fn:
+            docs = fn(self.current_engagement.id)
+            for doc in docs:
+                name = getattr(doc, "filename", getattr(doc, "original_filename", "Document"))
+                self.doc_sources_list.addItem(QListWidgetItem(f"📄 {name}"))
+
 
     def _on_prompt_pill_clicked(self, prompt_str: str) -> None:
         self.qa_input.setText(prompt_str)

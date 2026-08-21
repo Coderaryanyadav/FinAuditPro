@@ -51,7 +51,7 @@ class LMStudioProvider(LLMProvider):
         try:
             # 1. Native API v0 check
             v0_url = f"{self.base_url.rsplit('/v1', 1)[0]}/api/v0/models"
-            resp = httpx.get(v0_url, timeout=3.0)
+            resp = httpx.get(v0_url, timeout=0.5)
             if resp.status_code == 200:
                 data = resp.json().get("data", [])
                 if data:
@@ -79,7 +79,8 @@ class LMStudioProvider(LLMProvider):
 
         # 2. Fallback OpenAI v1 /models endpoint check
         try:
-            resp = httpx.get(f"{self.base_url}/models", timeout=3.0)
+            resp = httpx.get(f"{self.base_url}/models", timeout=0.5)
+
             if resp.status_code == 200:
                 data = resp.json().get("data", [])
                 models = [m.get("id", "") for m in data if m.get("id")]
@@ -201,7 +202,9 @@ class LMStudioProvider(LLMProvider):
     ) -> LLMResponse:
         """Execute chat completion request with optional schema validation and token streaming."""
         # Auto-probe live server to sync model ID identifier
-        self.available()
+        status = self.available()
+        if not status.is_server_up:
+            raise RuntimeError("LM Studio server is offline or unreachable.")
 
         payload: dict[str, Any] = {
             "model": self.chat_model_id,

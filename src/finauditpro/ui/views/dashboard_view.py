@@ -6,7 +6,6 @@ Enterprise Audit Overview with 6-step progress stepper, stat summary cards, and 
 from datetime import datetime
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
-    QComboBox,
     QFrame,
     QHBoxLayout,
     QHeaderView,
@@ -50,6 +49,10 @@ class DashboardView(QWidget):
 
         self._init_ui()
 
+    def set_firm(self, firm: Firm | None) -> None:
+        self.current_firm = firm
+        self.refresh_dashboard()
+
     def _init_ui(self) -> None:
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -72,9 +75,9 @@ class DashboardView(QWidget):
         header_v.setSpacing(4)
 
         lbl_title = QLabel("Audit Overview")
-        lbl_title.setStyleSheet("font-size: 26px; font-weight: 800; color: #1D1D1F; border: none;")
+        lbl_title.setStyleSheet("font-size: 26px; font-weight: 800; color: #1D1D1F; border: none; background: transparent;")
         lbl_sub = QLabel("Monitor active engagements, statutory compliance, audit findings, and risk exposure.")
-        lbl_sub.setStyleSheet("font-size: 13px; color: #6E6E73; border: none;")
+        lbl_sub.setStyleSheet("font-size: 13px; color: #6E6E73; border: none; background: transparent;")
 
         header_v.addWidget(lbl_title)
         header_v.addWidget(lbl_sub)
@@ -83,7 +86,7 @@ class DashboardView(QWidget):
 
         date_lbl = QLabel(datetime.now().strftime("%a, %d %b %Y"))
         date_lbl.setStyleSheet(
-            "font-size: 12px; font-weight: 600; color: #007AFF; background: rgba(0, 122, 255, 0.1); padding: 5px 12px; border-radius: 6px;"
+            "font-size: 12px; font-weight: 700; color: #007AFF; background: rgba(0, 122, 255, 0.1); padding: 6px 14px; border-radius: 8px; border: none;"
         )
         header_row.addWidget(date_lbl, alignment=Qt.AlignmentFlag.AlignVCenter)
         body_layout.addLayout(header_row)
@@ -97,7 +100,6 @@ class DashboardView(QWidget):
         ws_v = QVBoxLayout()
         ws_v.setSpacing(12)
 
-        # 6-Step Stepper Header
         stepper_layout = QHBoxLayout()
         stepper_layout.setSpacing(6)
         self.steps = [
@@ -113,10 +115,10 @@ class DashboardView(QWidget):
             slbl = QLabel(step)
             slbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
             is_active = (idx == 0)
-            bg = "#007AFF" if is_active else "#E5E5EA"
+            bg = "#007AFF" if is_active else "#F2F2F7"
             fg = "#FFFFFF" if is_active else "#6E6E73"
             slbl.setStyleSheet(
-                f"background-color: {bg}; color: {fg}; font-size: 11px; font-weight: 700; border-radius: 6px; padding: 6px 8px;"
+                f"background-color: {bg}; color: {fg}; font-size: 11px; font-weight: 700; border-radius: 6px; padding: 6px 8px; border: none;"
             )
             stepper_layout.addWidget(slbl, stretch=1)
             self.step_labels.append(slbl)
@@ -130,7 +132,7 @@ class DashboardView(QWidget):
         rec_l.setContentsMargins(0, 0, 0, 0)
 
         rec_txt = QLabel("📌 Recommended Next Step: Initialize client engagement & statutory parameters")
-        rec_txt.setStyleSheet("font-size: 12px; font-weight: 600; color: #1D4ED8; border: none;")
+        rec_txt.setStyleSheet("font-size: 12px; font-weight: 600; color: #1D4ED8; border: none; background: transparent;")
 
         btn_go_client = QPushButton("Go to Client Management ➔")
         btn_go_client.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -158,7 +160,7 @@ class DashboardView(QWidget):
         att_l = QHBoxLayout(att_row)
         att_l.setContentsMargins(0, 0, 0, 0)
         att_txt = QLabel("✓ All caught up — no high-priority items require immediate action.")
-        att_txt.setStyleSheet("font-size: 12px; font-weight: 600; color: #047857; border: none;")
+        att_txt.setStyleSheet("font-size: 12px; font-weight: 600; color: #047857; border: none; background: transparent;")
         att_l.addWidget(att_txt)
 
         att_v.addWidget(att_row)
@@ -190,7 +192,7 @@ class DashboardView(QWidget):
         trend_v = QVBoxLayout()
         trend_txt = QLabel("No completed audits yet\nYour audit activity and lifecycle progress trends will appear here.")
         trend_txt.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        trend_txt.setStyleSheet("font-size: 12px; color: #86868B; padding: 24px;")
+        trend_txt.setStyleSheet("font-size: 12px; color: #86868B; padding: 24px; border: none; background: transparent;")
         trend_v.addWidget(trend_txt)
         trend_card.content_layout.addLayout(trend_v)
 
@@ -199,21 +201,29 @@ class DashboardView(QWidget):
         risk_v.setSpacing(8)
 
         risk_items = [
-            ("🔴 Critical Anomaly Findings", "0"),
-            ("🟡 High Exposure Findings", "0"),
-            ("🔵 Medium Category Anomalies", "0"),
-            ("🟢 Low Risk Observations", "0"),
+            ("🔴 Critical Anomaly Findings", "0", "#DC2626"),
+            ("🟡 High Exposure Findings", "0", "#D97706"),
+            ("🔵 Medium Category Anomalies", "0", "#2563EB"),
+            ("🟢 Low Risk Observations", "0", "#16A34A"),
         ]
-        for label, count in risk_items:
-            r_row = QHBoxLayout()
-            lbl = QLabel(label)
-            lbl.setStyleSheet("font-size: 12px; color: #1D1D1F; font-weight: 500;")
-            cnt = QLabel(count)
-            cnt.setStyleSheet("font-size: 12px; font-weight: 700; color: #1D1D1F;")
-            r_row.addWidget(lbl)
-            r_row.addStretch()
-            r_row.addWidget(cnt)
-            risk_v.addLayout(r_row)
+        self.risk_labels: dict[str, QLabel] = {}
+        for label_text, count_str, color_hex in risk_items:
+            r_frame = QFrame()
+            r_frame.setStyleSheet("border-bottom: 1px solid #F1F5F9; background: transparent;")
+            r_layout = QHBoxLayout(r_frame)
+            r_layout.setContentsMargins(4, 6, 4, 6)
+
+            lbl_name = QLabel(label_text)
+            lbl_name.setStyleSheet("font-size: 12px; font-weight: 600; color: #1E293B; border: none; background: transparent;")
+
+            lbl_val = QLabel(count_str)
+            lbl_val.setStyleSheet(f"font-size: 13px; font-weight: 800; color: {color_hex}; border: none; background: transparent;")
+
+            r_layout.addWidget(lbl_name)
+            r_layout.addStretch()
+            r_layout.addWidget(lbl_val)
+            risk_v.addWidget(r_frame)
+            self.risk_labels[label_text] = lbl_val
 
         risk_card.content_layout.addLayout(risk_v)
 
@@ -221,51 +231,69 @@ class DashboardView(QWidget):
         row3.addWidget(risk_card, 4)
         body_layout.addLayout(row3)
 
-        # 5. Row 4: Recent Audit Projects Table Section
-        projects_card = CardWidget("Recent Audit Projects")
-        self.activity_table = QTableWidget()
-        self.activity_table.setColumnCount(4)
-        self.activity_table.setHorizontalHeaderLabels(["Client Name", "Financial Year", "Status", "Risk Exposure"])
-        self.activity_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        self.activity_table.verticalHeader().setVisible(False)
-        self.activity_table.setStyleSheet("""
-            QTableWidget { background-color: #FFFFFF; border: none; font-size: 12px; color: #1D1D1F; }
-            QHeaderView::section { background-color: #F2F2F7; color: #6E6E73; font-weight: 700; font-size: 11px; padding: 8px; border: none; }
+        # 5. Row 4: Recent Audit Projects Table Card
+        table_card = CardWidget("Recent Audit Projects")
+        self.table_projects = QTableWidget()
+        self.table_projects.setColumnCount(4)
+        self.table_projects.setHorizontalHeaderLabels(["Client Name", "Financial Year", "Status", "Risk Exposure"])
+        self.table_projects.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.table_projects.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)
+        self.table_projects.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Fixed)
+        self.table_projects.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Fixed)
+        self.table_projects.setColumnWidth(1, 140)
+        self.table_projects.setColumnWidth(2, 140)
+        self.table_projects.setColumnWidth(3, 140)
+        self.table_projects.setMinimumHeight(220)
+        self.table_projects.setStyleSheet("""
+            QTableWidget { background-color: #FFFFFF; border: none; gridline-color: #F2F2F7; }
+            QHeaderView::section { background-color: #F8FAFC; color: #64748B; font-size: 11px; font-weight: 800; border: none; border-bottom: 1px solid #E2E8F0; padding: 8px 12px; }
         """)
 
-        projects_card.content_layout.addWidget(self.activity_table)
-        body_layout.addWidget(projects_card)
+        table_card.content_layout.addWidget(self.table_projects)
+        body_layout.addWidget(table_card)
 
         scroll.setWidget(body)
         main_layout.addWidget(scroll)
 
-    def _on_go_clients_clicked(self) -> None:
-        self.navigate_to_clients.emit()
+        self.refresh_dashboard()
 
-    def set_firm(self, firm: Firm | None) -> None:
-        self.current_firm = firm
-        self.refresh()
-
-    def refresh(self) -> None:
+    def refresh_dashboard(self) -> None:
         if not self.current_firm:
-            return
+            clients = self.client_service.list_clients() if self.client_service else []
+        else:
+            clients = self.client_service.list_clients_for_firm(self.current_firm.id)
 
-        clients = self.client_service.list_clients_for_firm(self.current_firm.id)
         self.card_clients.set_value(str(len(clients)))
 
-        engagements: list[Engagement] = []
-        for client in clients:
-            engs = self.engagement_service.list_engagements_for_client(client.id)
-            engagements.extend(engs)
+        all_engagements: list[Engagement] = []
+        for c in clients:
+            engs = self.engagement_service.list_engagements_for_client(c.id)
+            all_engagements.extend(engs)
 
-        completed_count = sum(1 for e in engagements if e.status.value == "Archived")
-        self.card_completed.set_value(str(completed_count))
-        self.card_pending.set_value(str(len(engagements) - completed_count))
+        completed_cnt = sum(1 for e in all_engagements if str(getattr(e, "status", "")).lower() == "completed")
+        self.card_completed.set_value(str(completed_cnt))
 
-        self.activity_table.setRowCount(0)
-        for idx, eng in enumerate(engagements[:5]):
-            self.activity_table.insertRow(idx)
-            self.activity_table.setItem(idx, 0, QTableWidgetItem(eng.title))
-            self.activity_table.setItem(idx, 1, QTableWidgetItem(eng.financial_year))
-            self.activity_table.setItem(idx, 2, QTableWidgetItem(eng.status.value))
-            self.activity_table.setItem(idx, 3, QTableWidgetItem("Normal"))
+        self.table_projects.setRowCount(0)
+        client_map = {c.id: c.name for c in clients}
+
+        for idx, eng in enumerate(all_engagements[:10]):
+            self.table_projects.insertRow(idx)
+            c_name = client_map.get(eng.client_id, "Unknown Client")
+            item_name = QTableWidgetItem(c_name)
+            item_fy = QTableWidgetItem(eng.financial_year)
+            status_val = eng.status.value if hasattr(eng.status, "value") else str(eng.status)
+            item_status = QTableWidgetItem(status_val)
+            item_risk = QTableWidgetItem("Low Exposure")
+
+            item_name.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+            item_fy.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+            item_status.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+            item_risk.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+
+            self.table_projects.setItem(idx, 0, item_name)
+            self.table_projects.setItem(idx, 1, item_fy)
+            self.table_projects.setItem(idx, 2, item_status)
+            self.table_projects.setItem(idx, 3, item_risk)
+
+    def _on_go_clients_clicked(self) -> None:
+        self.navigate_to_clients.emit()

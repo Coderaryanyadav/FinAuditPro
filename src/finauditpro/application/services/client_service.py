@@ -68,6 +68,8 @@ class ClientService:
             repo = ClientRepository(session)
             return repo.list_all()
 
+    list_clients = list_all_clients
+
     def update_client(self, client_id: str, dto: UpdateClientDTO) -> Client:
         with self.db_manager.session_scope() as session:
             repo = ClientRepository(session)

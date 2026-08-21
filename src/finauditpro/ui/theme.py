@@ -150,20 +150,21 @@ class CardWidget(QFrame):
             QFrame#contentCard {
                 background-color: #FFFFFF;
                 border: 1px solid #E5E5EA;
-                border-radius: 10px;
+                border-radius: 12px;
             }
         """)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(18, 16, 18, 16)
+        layout.setContentsMargins(20, 18, 20, 18)
         layout.setSpacing(12)
 
         if title:
             header_lbl = QLabel(title)
-            header_lbl.setStyleSheet("font-size: 14px; font-weight: 700; color: #1D1D1F;")
+            header_lbl.setStyleSheet("font-size: 13px; font-weight: 800; color: #1D1D1F; border: none; background: transparent; letter-spacing: 0.5px;")
             layout.addWidget(header_lbl)
 
         self.content_widget = QWidget()
+        self.content_widget.setStyleSheet("background: transparent; border: none;")
         self.content_layout = QVBoxLayout(self.content_widget)
         self.content_layout.setContentsMargins(0, 0, 0, 0)
         self.content_layout.setSpacing(10)
@@ -187,21 +188,21 @@ class MetricCard(QFrame):
             QFrame#metricCard {{
                 background-color: #FFFFFF;
                 border: 1px solid #E5E5EA;
-                border-radius: 10px;
+                border-radius: 12px;
                 border-left: 4px solid {accent_color};
             }}
         """)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(16, 14, 16, 14)
+        layout.setContentsMargins(18, 16, 18, 16)
         layout.setSpacing(4)
 
         self.title_lbl = QLabel(title)
-        self.title_lbl.setObjectName("metricTitle")
+        self.title_lbl.setStyleSheet("font-size: 11px; font-weight: 800; color: #6E6E73; border: none; background: transparent; letter-spacing: 0.6px;")
         self.value_lbl = QLabel(value)
-        self.value_lbl.setObjectName("metricValue")
+        self.value_lbl.setStyleSheet("font-size: 32px; font-weight: 800; color: #1D1D1F; border: none; background: transparent; letter-spacing: -0.8px;")
         self.sub_lbl = QLabel(subtitle)
-        self.sub_lbl.setStyleSheet("font-size: 11px; color: #86868B;")
+        self.sub_lbl.setStyleSheet("font-size: 11px; color: #86868B; border: none; background: transparent;")
 
         layout.addWidget(self.title_lbl)
         layout.addWidget(self.value_lbl)

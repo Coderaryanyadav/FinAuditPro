@@ -351,16 +351,8 @@ class MainWindow(QMainWindow):
         self.current_firm = self.firm_service.get_firm_by_id(self.current_client.firm_id) if self.current_client else None
 
         self.view_dashboard.set_firm(self.current_firm)
-        subviews = [
-            self.view_documents, self.view_financial_data, self.view_gst, self.view_compliance,
-            self.view_audit_matrix, self.view_working_papers, self.view_reports,
-            self.view_ai_assistant, self.view_archival, self.view_roll_forward
-        ]
-        for v in subviews:
-            try:
-                v.set_active_engagement(eng)
-            except Exception:
-                pass
+        for v in [self.view_documents, self.view_financial_data, self.view_gst, self.view_compliance, self.view_audit_matrix, self.view_working_papers, self.view_reports, self.view_ai_assistant, self.view_archival, self.view_roll_forward]:
+            getattr(v, "set_active_engagement", lambda e: None)(eng)
         self._update_header_combo()
 
     def _update_header_combo(self) -> None:
@@ -368,10 +360,16 @@ class MainWindow(QMainWindow):
         self.eng_selector_combo.clear()
         if self.current_client:
             engs = self.engagement_service.list_engagements_for_client(self.current_client.id)
-            for idx, e in enumerate(engs):
-                self.eng_selector_combo.addItem(f"{e.title} ({e.financial_year})", e.id)
-                if self.current_engagement and e.id == self.current_engagement.id:
-                    self.eng_selector_combo.setCurrentIndex(idx)
+            if engs:
+                for idx, e in enumerate(engs):
+                    audit_t = e.audit_type.value if hasattr(e.audit_type, "value") else str(e.audit_type)
+                    self.eng_selector_combo.addItem(f"🏢 {self.current_client.name} — FY {e.financial_year} ({audit_t})", e.id)
+                    if self.current_engagement and e.id == self.current_engagement.id:
+                        self.eng_selector_combo.setCurrentIndex(idx)
+            else:
+                self.eng_selector_combo.addItem("No Engagements Created", None)
+        else:
+            self.eng_selector_combo.addItem("Select Active Audit Engagement...", None)
         self.eng_selector_combo.blockSignals(False)
 
     def _on_header_engagement_changed(self, idx: int) -> None:
@@ -391,10 +389,5 @@ class MainWindow(QMainWindow):
     def _open_command_palette(self) -> None:
         from finauditpro.ui.dialogs.command_palette_dialog import CommandPaletteDialog
         dlg = CommandPaletteDialog(self)
-        dlg.action_triggered.connect(self._on_command_action)
+        dlg.action_triggered.connect(lambda k, p: self.stack.setCurrentIndex(p) if k == "nav" and 0 <= p < self.stack.count() else None)
         dlg.exec()
-
-    def _on_command_action(self, key: str, payload: Any) -> None:
-        if key == "nav" and isinstance(payload, int):
-            if 0 <= payload < self.stack.count():
-                self.stack.setCurrentIndex(payload)

@@ -47,6 +47,9 @@ class FirmService:
                 raise EntityNotFoundError("Firm", firm_id)
             return firm
 
+    get_firm_by_id = get_firm
+
+
     def list_firms(self) -> list[Firm]:
         with self.db_manager.session_scope() as session:
             repo = FirmRepository(session)

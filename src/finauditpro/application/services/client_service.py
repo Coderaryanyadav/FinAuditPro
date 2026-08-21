@@ -58,6 +58,9 @@ class ClientService:
                 raise EntityNotFoundError("Client", client_id)
             return client
 
+    get_client_by_id = get_client
+
+
     def list_clients_for_firm(self, firm_id: str) -> list[Client]:
         with self.db_manager.session_scope() as session:
             repo = ClientRepository(session)

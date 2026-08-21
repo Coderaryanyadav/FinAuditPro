@@ -39,11 +39,16 @@ class AIService:
         self.db_manager = db_manager
         if provider is None:
             from finauditpro.infrastructure.ai.lmstudio_provider import LMStudioProvider
+
             provider = LMStudioProvider()
         if vector_store is None:
             from pathlib import Path
+
             from finauditpro.infrastructure.ai.faiss_vector_store import FAISSVectorStore
-            vector_store = FAISSVectorStore(Path.home() / ".gemini" / "antigravity-ide" / "app_data" / "vector_store")
+
+            vector_store = FAISSVectorStore(
+                Path.home() / ".gemini" / "antigravity-ide" / "app_data" / "vector_store"
+            )
         self.provider = provider
         self.vector_store = vector_store
 
@@ -70,7 +75,9 @@ class AIService:
             documents = doc_repo.list_for_engagement(engagement_id)
 
             # Delete existing chunks for engagement
-            session.query(DocumentChunkModel).filter(DocumentChunkModel.engagement_id == engagement_id).delete()
+            session.query(DocumentChunkModel).filter(
+                DocumentChunkModel.engagement_id == engagement_id
+            ).delete()
             session.flush()
 
             chunks_to_insert: list[DocumentChunkModel] = []
@@ -96,13 +103,15 @@ class AIService:
                                 char_start=start,
                                 char_end=end,
                                 chunk_text=chunk_txt,
-                                embedding_model_id=status.embedding_model_id if status.embedding_model_loaded else None,
+                                embedding_model_id=status.embedding_model_id
+                                if status.embedding_model_loaded
+                                else None,
                             )
                             chunks_to_insert.append(chunk_model)
                             session.add(chunk_model)
                         if end >= text_len:
                             break
-                        start += (chunk_size - chunk_overlap)
+                        start += chunk_size - chunk_overlap
 
             session.flush()
 
@@ -150,7 +159,11 @@ class AIService:
                 results = self.vector_store.search(engagement_id, query_vec, top_k=top_k)
                 if results:
                     with self.db_manager.session_scope() as session:
-                        chunk_models = session.query(DocumentChunkModel).filter(DocumentChunkModel.engagement_id == engagement_id).all()
+                        chunk_models = (
+                            session.query(DocumentChunkModel)
+                            .filter(DocumentChunkModel.engagement_id == engagement_id)
+                            .all()
+                        )
                         chunk_map = {c.id: c for c in chunk_models}
                         doc_repo = DocumentRepository(session)
 
@@ -160,14 +173,16 @@ class AIService:
                             if 0 <= idx < len(all_chunks_list):
                                 c = all_chunks_list[idx]
                                 doc = doc_repo.get_by_id(c.document_id)
-                                retrieved.append({
-                                    "chunk_id": c.id,
-                                    "document_id": c.document_id,
-                                    "title": doc.filename if doc else "Document",
-                                    "page_number": c.page_number,
-                                    "chunk_text": c.chunk_text,
-                                    "score": score,
-                                })
+                                retrieved.append(
+                                    {
+                                        "chunk_id": c.id,
+                                        "document_id": c.document_id,
+                                        "title": doc.filename if doc else "Document",
+                                        "page_number": c.page_number,
+                                        "chunk_text": c.chunk_text,
+                                        "score": score,
+                                    }
+                                )
                         if retrieved:
                             return retrieved, True, False
             except Exception:
@@ -179,14 +194,16 @@ class AIService:
             page_results = doc_repo.search_pages(engagement_id, query)
             fts_chunks: list[dict[str, Any]] = []
             for doc, page in page_results[:top_k]:
-                fts_chunks.append({
-                    "chunk_id": f"fts_{page.id}",
-                    "document_id": doc.id,
-                    "title": doc.filename,
-                    "page_number": page.page_number,
-                    "chunk_text": page.extracted_text or "",
-                    "score": 1.0,
-                })
+                fts_chunks.append(
+                    {
+                        "chunk_id": f"fts_{page.id}",
+                        "document_id": doc.id,
+                        "title": doc.filename,
+                        "page_number": page.page_number,
+                        "chunk_text": page.extracted_text or "",
+                        "score": 1.0,
+                    }
+                )
             return fts_chunks, False, True
 
     def query_rag(

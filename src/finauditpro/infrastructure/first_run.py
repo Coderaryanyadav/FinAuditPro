@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+import sqlite3
 
 from finauditpro.infrastructure.persistence import models  # noqa: F401
 from finauditpro.infrastructure.persistence.database import DatabaseManager
@@ -80,42 +81,6 @@ def _ensure_all_schema_columns(conn) -> None:
     conn.commit()
 
 
-def seed_demo_data_if_empty(db_manager: DatabaseManager) -> None:
-    """Populate initial demo Firm, Client, and Engagement if database is empty."""
-    from finauditpro.domain.entities import Firm, Client, Engagement, AuditTypeEnum, EngagementStatusEnum
-    from finauditpro.infrastructure.persistence.repositories import FirmRepository, ClientRepository, EngagementRepository
-
-    try:
-        with db_manager.session_scope() as session:
-            firm_repo = FirmRepository(session)
-            firms = firm_repo.list_all()
-            if not firms:
-                firm = firm_repo.add(Firm(
-                    name="Apex Statutory Auditors & Co.",
-                    registration_number="FRN-123456W",
-                    pan="ABCDE1234F",
-                    email="partner@apexauditors.in"
-                ))
-                client_repo = ClientRepository(session)
-                client = client_repo.add(Client(
-                    firm_id=firm.id,
-                    name="Reliance Enterprises Private Limited",
-                    entity_type="Private Limited Company",
-                    pan="ABCDE5678G",
-                    gstin="27ABCDE5678G1ZV"
-                ))
-                eng_repo = EngagementRepository(session)
-                eng_repo.add(Engagement(
-                    firm_id=firm.id,
-                    client_id=client.id,
-                    financial_year="2024-25",
-                    audit_type=AuditTypeEnum.STATUTORY_AUDIT,
-                    status=EngagementStatusEnum.PLANNING
-                ))
-    except Exception:
-        pass
-
-
 def initialize_database(db_file_path: str | Path | None = None) -> DatabaseManager:
     """Initialize SQLite database, apply schema migrations, and return DatabaseManager instance."""
     db_dir, _, _, _ = bootstrap_app_data_dirs()
@@ -133,14 +98,10 @@ def initialize_database(db_file_path: str | Path | None = None) -> DatabaseManag
     runner.run_all(get_all_migrations())
 
     # Ensure schema column completeness across all tables
-    import sqlite3
     with sqlite3.connect(str(db_path)) as conn:
         _ensure_all_schema_columns(conn)
 
     # Ensure triggers are applied after migrations
     db_manager._create_audit_triggers()
-
-    # Seed demo data if database is empty
-    seed_demo_data_if_empty(db_manager)
 
     return db_manager

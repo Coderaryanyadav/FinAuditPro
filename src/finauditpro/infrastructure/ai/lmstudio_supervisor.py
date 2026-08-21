@@ -1,12 +1,12 @@
 """LM Studio background server supervisor and process management for FinAuditPro local AI."""
 
+import json
 import os
 import shutil
 import subprocess
 import sys
 import time
 import urllib.request
-import json
 from pathlib import Path
 from typing import Any
 
@@ -22,7 +22,9 @@ class LMStudioSupervisor:
         return f"http://{host}:{port}"
 
     @classmethod
-    def is_server_online(cls, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT, timeout: float = 1.5) -> bool:
+    def is_server_online(
+        cls, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT, timeout: float = 1.5
+    ) -> bool:
         """Probe local LM Studio HTTP REST API endpoint /v1/models."""
         url = f"{cls.get_base_url(host, port)}/v1/models"
         try:
@@ -71,7 +73,9 @@ class LMStudioSupervisor:
         return None
 
     @classmethod
-    def start_server_background(cls, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT, wait_timeout: float = 6.0) -> bool:
+    def start_server_background(
+        cls, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT, wait_timeout: float = 6.0
+    ) -> bool:
         """Attempt to spawn `lms server start` background process daemon."""
         if cls.is_server_online(host, port):
             return True
@@ -82,14 +86,22 @@ class LMStudioSupervisor:
             mac_app = Path("/Applications/LM Studio.app")
             if mac_app.exists() and sys.platform == "darwin":
                 try:
-                    subprocess.Popen(["open", "-a", "LM Studio"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    subprocess.Popen(
+                        ["open", "-a", "LM Studio"],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                    )
                 except Exception:
                     return False
             else:
                 return False
         else:
             try:
-                subprocess.Popen([str(cli_bin), "server", "start", "--port", str(port)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.Popen(
+                    [str(cli_bin), "server", "start", "--port", str(port)],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
             except Exception:
                 return False
 
@@ -110,7 +122,12 @@ class LMStudioSupervisor:
             return False
 
         try:
-            res = subprocess.run([str(cli_bin), "load", model_query], capture_output=True, text=True, timeout=wait_timeout)
+            res = subprocess.run(
+                [str(cli_bin), "load", model_query],
+                capture_output=True,
+                text=True,
+                timeout=wait_timeout,
+            )
             return res.returncode == 0
         except Exception:
             return False

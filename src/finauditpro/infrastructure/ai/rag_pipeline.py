@@ -63,7 +63,9 @@ class LocalVectorStore:
 class RAGPipeline:
     """RAG pipeline managing document chunking, embedding, indexing, and retrieval."""
 
-    def __init__(self, provider: BaseAIProvider, vector_store: LocalVectorStore | None = None) -> None:
+    def __init__(
+        self, provider: BaseAIProvider, vector_store: LocalVectorStore | None = None
+    ) -> None:
         self.provider = provider
         self.vector_store = vector_store or LocalVectorStore()
 

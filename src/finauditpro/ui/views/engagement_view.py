@@ -1,12 +1,16 @@
-"""Engagement management view."""
+"""
+Engagement Management Workspace View for FinAuditPro.
+Enterprise directory with audit lifecycle filters, status badges, and responsive empty states.
+"""
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
+    QComboBox,
     QHBoxLayout,
     QHeaderView,
     QLabel,
+    QLineEdit,
     QMessageBox,
-    QPushButton,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -16,15 +20,15 @@ from PySide6.QtWidgets import (
 from finauditpro.application.services.client_service import ClientService
 from finauditpro.application.services.engagement_service import EngagementService
 from finauditpro.application.services.firm_service import FirmService
-from finauditpro.domain.entities import Client, Firm
+from finauditpro.domain.entities import Client, Engagement, Firm
 from finauditpro.ui.dialogs.engagement_dialog import EngagementDialog
-from finauditpro.ui.theme import CardWidget
+from finauditpro.ui.theme import CardWidget, EmptyStateWidget, PageHeader
 
 
 class EngagementView(QWidget):
-    """View listing audit engagements with create/edit/activate controls."""
+    """View listing audit engagements with filters, status badges, and create/edit controls."""
 
-    engagement_changed = Signal(str)  # Emits active engagement id
+    engagement_changed = Signal(str)
 
     def __init__(
         self,
@@ -39,83 +43,180 @@ class EngagementView(QWidget):
         self.engagement_service = engagement_service
         self.current_firm: Firm | None = None
         self.current_client: Client | None = None
+        self._all_engagements: list[Engagement] = []
+        self._client_map: dict[str, str] = {}
 
         self._init_ui()
 
     def _init_ui(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(16)
+        layout.setContentsMargins(24, 20, 24, 24)
+        layout.setSpacing(14)
 
-        header_layout = QHBoxLayout()
-        self.title_label = QLabel("Audit Engagements")
-        self.title_label.setStyleSheet("font-size: 18px; font-weight: 800; color: #f8fafc;")
+        # 1. Page Header
+        self.header = PageHeader(
+            title="Audit Engagements",
+            subtitle="Manage audit engagements, financial years, teams, and workflow status.",
+            action_text="+ Create Engagement",
+            action_callback=self._create_engagement,
+        )
+        self.add_btn = self.header.action_btn
+        layout.addWidget(self.header)
 
-        self.add_btn = QPushButton("+ Create Engagement")
-        self.add_btn.clicked.connect(self._create_engagement)
+        # 2. Search & Filter Row
+        filter_card = CardWidget()
+        f_layout = QHBoxLayout()
+        f_layout.setContentsMargins(0, 0, 0, 0)
+        f_layout.setSpacing(10)
 
-        header_layout.addWidget(self.title_label)
-        header_layout.addStretch()
-        header_layout.addWidget(self.add_btn)
+        s_lbl = QLabel("Search:")
+        s_lbl.setStyleSheet(
+            "font-size: 11px; font-weight: 700; color: #64748B; letter-spacing: 0.5px;"
+        )
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText(
+            "Search engagements by client name, FY, or audit type..."
+        )
+        self.search_input.setStyleSheet(
+            "QLineEdit { border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px 10px; font-size: 12px; background: #FFFFFF; }"
+            "QLineEdit:focus { border-color: #2563EB; }"
+        )
+        self.search_input.textChanged.connect(self._apply_filters)
 
-        layout.addLayout(header_layout)
+        type_lbl = QLabel("Type:")
+        type_lbl.setStyleSheet(
+            "font-size: 11px; font-weight: 700; color: #64748B; letter-spacing: 0.5px;"
+        )
+        self.type_combo = QComboBox()
+        self.type_combo.addItems(
+            ["All Types", "Statutory Audit", "Tax Audit", "Internal Audit", "GST Audit"]
+        )
+        self.type_combo.currentIndexChanged.connect(self._apply_filters)
 
-        card = CardWidget()
+        status_lbl = QLabel("Status:")
+        status_lbl.setStyleSheet(
+            "font-size: 11px; font-weight: 700; color: #64748B; letter-spacing: 0.5px;"
+        )
+        self.status_combo = QComboBox()
+        self.status_combo.addItems(
+            ["All Statuses", "Planning", "In Progress", "Review", "Completed", "Archived"]
+        )
+        self.status_combo.currentIndexChanged.connect(self._apply_filters)
+
+        f_layout.addWidget(s_lbl)
+        f_layout.addWidget(self.search_input, stretch=1)
+        f_layout.addWidget(type_lbl)
+        f_layout.addWidget(self.type_combo)
+        f_layout.addWidget(status_lbl)
+        f_layout.addWidget(self.status_combo)
+        filter_card.content_layout.addLayout(f_layout)
+        layout.addWidget(filter_card)
+
+        # 3. Table Card & Empty State
+        self.table_card = CardWidget("AUDIT ENGAGEMENTS")
         self.table = QTableWidget()
-        self.table.setColumnCount(6)
+        self.table.setColumnCount(7)
         self.table.setHorizontalHeaderLabels(
             [
-                "Client Name",
-                "Financial Year",
-                "Audit Type",
-                "Workflow Status",
-                "Assigned Team",
-                "Created Date",
+                "CLIENT",
+                "FINANCIAL YEAR",
+                "AUDIT TYPE",
+                "STATUS",
+                "ASSIGNED TEAM",
+                "CREATED DATE",
+                "ACTION",
             ]
         )
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.table.horizontalHeader().setSectionResizeMode(
-            2, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.table.horizontalHeader().setSectionResizeMode(
-            3, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.table.horizontalHeader().setSectionResizeMode(
-            4, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.table.horizontalHeader().setSectionResizeMode(
-            5, QHeaderView.ResizeMode.ResizeToContents
-        )
+        for c in range(1, 7):
+            self.table.horizontalHeader().setSectionResizeMode(
+                c, QHeaderView.ResizeMode.ResizeToContents
+            )
         self.table.verticalHeader().setVisible(False)
+        self.table.setAlternatingRowColors(True)
+        self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.doubleClicked.connect(self._on_double_click)
 
-        card.content_layout.addWidget(self.table)
-        layout.addWidget(card)
+        self.empty_state = EmptyStateWidget(
+            title="No audit engagements found",
+            description="Create an engagement to begin the audit lifecycle, materiality assessment, risk register, and working papers.",
+            action_text="+ Create Engagement",
+            action_callback=self._create_engagement,
+        )
+
+        self.table_card.content_layout.addWidget(self.table)
+        self.table_card.content_layout.addWidget(self.empty_state)
+        layout.addWidget(self.table_card)
+        layout.addStretch(1)
+
+        self.refresh()
 
     def refresh(self) -> None:
-        engagements = self.engagement_service.list_all_engagements()
+        self._all_engagements = self.engagement_service.list_all_engagements()
+        clients = (
+            self.client_service.list_all_clients()
+            if hasattr(self.client_service, "list_all_clients")
+            else []
+        )
+        self._client_map = {c.id: c.name for c in clients}
+        self._apply_filters()
 
+    def _apply_filters(self) -> None:
+        q = self.search_input.text().strip().lower()
+        sel_type = self.type_combo.currentText()
+        sel_status = self.status_combo.currentText()
+
+        filtered = []
+        for eng in self._all_engagements:
+            c_name = self._client_map.get(eng.client_id, "Unknown Client")
+            audit_t = (
+                eng.audit_type.value if hasattr(eng.audit_type, "value") else str(eng.audit_type)
+            )
+            status_v = eng.status.value if hasattr(eng.status, "value") else str(eng.status)
+
+            if q and (
+                q not in c_name.lower()
+                and q not in eng.financial_year.lower()
+                and q not in audit_t.lower()
+            ):
+                continue
+            if sel_type != "All Types" and sel_type.lower() not in audit_t.lower():
+                continue
+            if sel_status != "All Statuses" and sel_status.lower() not in status_v.lower():
+                continue
+            filtered.append(eng)
+
+        if not filtered:
+            self.table.setVisible(False)
+            self.empty_state.setVisible(True)
+            return
+
+        self.table.setVisible(True)
+        self.empty_state.setVisible(False)
         self.table.setRowCount(0)
-        for row, eng in enumerate(engagements):
-            self.table.insertRow(row)
-            try:
-                client = self.client_service.get_client(eng.client_id)
-                client_name = client.name
-            except Exception:
-                client_name = "Unknown Client"
 
-            item_name = QTableWidgetItem(client_name)
+        for row, eng in enumerate(filtered):
+            self.table.insertRow(row)
+            c_name = self._client_map.get(eng.client_id, "Unknown Client")
+            audit_t = (
+                eng.audit_type.value if hasattr(eng.audit_type, "value") else str(eng.audit_type)
+            )
+            status_val = eng.status.value if hasattr(eng.status, "value") else str(eng.status)
+
+            item_name = QTableWidgetItem(c_name)
             item_name.setData(Qt.ItemDataRole.UserRole, eng.id)
 
             self.table.setItem(row, 0, item_name)
-            self.table.setItem(row, 1, QTableWidgetItem(eng.financial_year))
-            self.table.setItem(row, 2, QTableWidgetItem(eng.audit_type.value))
-            self.table.setItem(row, 3, QTableWidgetItem(eng.status.value))
-            self.table.setItem(row, 4, QTableWidgetItem(", ".join(eng.assigned_team)))
+            self.table.setItem(row, 1, QTableWidgetItem(f"FY {eng.financial_year}"))
+            self.table.setItem(row, 2, QTableWidgetItem(audit_t))
+            self.table.setItem(row, 3, QTableWidgetItem(f"● {status_val}"))
+            self.table.setItem(
+                row, 4, QTableWidgetItem(", ".join(eng.assigned_team) or "Unassigned")
+            )
             self.table.setItem(row, 5, QTableWidgetItem(eng.created_at.strftime("%Y-%m-%d")))
+            self.table.setItem(row, 6, QTableWidgetItem("Open →"))
+
+        self.table.setFixedHeight(max(1, len(filtered)) * 36 + 32)
 
     def _create_engagement(self) -> None:
         firms = self.firm_service.list_firms()
@@ -148,7 +249,6 @@ class EngagementView(QWidget):
                     eng = self.engagement_service.get_engagement(eng_id)
                     client = self.client_service.get_client(eng.client_id)
                     firm = self.firm_service.get_firm(eng.firm_id)
-
                     dialog = EngagementDialog(
                         self.engagement_service,
                         firm=firm,

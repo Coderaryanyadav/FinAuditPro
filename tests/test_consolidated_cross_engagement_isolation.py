@@ -45,8 +45,12 @@ def setup_consolidated_isolation(tmp_path):
     client_a = client_svc.create_client(CreateClientDTO(firm_id=firm.id, name="Client Alpha"))
     client_b = client_svc.create_client(CreateClientDTO(firm_id=firm.id, name="Client Beta"))
 
-    eng_a = eng_svc.create_engagement(CreateEngagementDTO(firm_id=firm.id, client_id=client_a.id, financial_year="2025-26"))
-    eng_b = eng_svc.create_engagement(CreateEngagementDTO(firm_id=firm.id, client_id=client_b.id, financial_year="2025-26"))
+    eng_a = eng_svc.create_engagement(
+        CreateEngagementDTO(firm_id=firm.id, client_id=client_a.id, financial_year="2025-26")
+    )
+    eng_b = eng_svc.create_engagement(
+        CreateEngagementDTO(firm_id=firm.id, client_id=client_b.id, financial_year="2025-26")
+    )
 
     doc_svc = DocumentService(db_manager)
     fin_svc = FinancialDataService(db_manager)
@@ -57,14 +61,20 @@ def setup_consolidated_isolation(tmp_path):
     return eng_a, eng_b, doc_svc, fin_svc, planning_svc, wp_svc, report_svc, tmp_path
 
 
-def test_consolidated_cross_engagement_isolation_all_subsystems(setup_consolidated_isolation) -> None:
+def test_consolidated_cross_engagement_isolation_all_subsystems(
+    setup_consolidated_isolation,
+) -> None:
     """Consolidated test asserting Engagement A data never leaks into Engagement B across all 7 subsystems."""
-    eng_a, eng_b, doc_svc, fin_svc, planning_svc, wp_svc, report_svc, tmp_path = setup_consolidated_isolation
+    eng_a, eng_b, doc_svc, fin_svc, planning_svc, wp_svc, report_svc, tmp_path = (
+        setup_consolidated_isolation
+    )
 
     # 1. Documents (M2)
     fake_pdf = tmp_path / "alpha_doc.pdf"
     fake_pdf.write_bytes(b"%PDF-1.4 Fake Alpha Document Content")
-    doc_svc.upload_and_process_document(UploadDocumentDTO(engagement_id=eng_a.id, file_path=str(fake_pdf)))
+    doc_svc.upload_and_process_document(
+        UploadDocumentDTO(engagement_id=eng_a.id, file_path=str(fake_pdf))
+    )
 
     docs_b = doc_svc.list_documents_for_engagement(eng_b.id)
     assert len(docs_b) == 0
@@ -73,8 +83,30 @@ def test_consolidated_cross_engagement_isolation_all_subsystems(setup_consolidat
     csv_file = tmp_path / "alpha_gl.csv"
     with open(csv_file, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["Date", "Voucher Type", "Voucher No", "Account Code", "Account Name", "Debit", "Credit", "Narration"])
-        writer.writerow(["2025-10-01", "Payment", "VCH-001", "1001", "Alpha Cash", 1000.0, 0.0, "Alpha Cash Payment"])
+        writer.writerow(
+            [
+                "Date",
+                "Voucher Type",
+                "Voucher No",
+                "Account Code",
+                "Account Name",
+                "Debit",
+                "Credit",
+                "Narration",
+            ]
+        )
+        writer.writerow(
+            [
+                "2025-10-01",
+                "Payment",
+                "VCH-001",
+                "1001",
+                "Alpha Cash",
+                1000.0,
+                0.0,
+                "Alpha Cash Payment",
+            ]
+        )
 
     ds = fin_svc.import_financial_dataset(
         ImportDatasetDTO(

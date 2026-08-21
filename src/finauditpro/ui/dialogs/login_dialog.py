@@ -75,7 +75,9 @@ class LoginDialog(QDialog):
         sub = QLabel(
             "Automated working papers, AI-assisted analytics,\nCARO 2020 & GST reconciliation — all offline, all local."
         )
-        sub.setStyleSheet("font-size: 13px; color: #94a3b8; border: none; background: transparent; line-height: 1.5;")
+        sub.setStyleSheet(
+            "font-size: 13px; color: #94a3b8; border: none; background: transparent; line-height: 1.5;"
+        )
         sub.setWordWrap(True)
         ll.addWidget(sub)
         ll.addStretch(2)
@@ -89,10 +91,14 @@ class LoginDialog(QDialog):
         for f in features:
             row = QHBoxLayout()
             dot = QLabel("✓")
-            dot.setStyleSheet("font-size: 13px; color: #38BDF8; font-weight: 700; border: none; background: transparent;")
+            dot.setStyleSheet(
+                "font-size: 13px; color: #38BDF8; font-weight: 700; border: none; background: transparent;"
+            )
             dot.setFixedWidth(20)
             tx = QLabel(f)
-            tx.setStyleSheet("font-size: 13px; color: #CBD5E1; font-weight: 400; border: none; background: transparent;")
+            tx.setStyleSheet(
+                "font-size: 13px; color: #CBD5E1; font-weight: 400; border: none; background: transparent;"
+            )
             row.addWidget(dot)
             row.addWidget(tx)
             row.addStretch()
@@ -122,9 +128,13 @@ class LoginDialog(QDialog):
         fl.setSpacing(0)
 
         form_title = QLabel("Sign in to FinAuditPro")
-        form_title.setStyleSheet("font-size: 18px; font-weight: 700; color: #111827; border: none; background: transparent;")
+        form_title.setStyleSheet(
+            "font-size: 18px; font-weight: 700; color: #111827; border: none; background: transparent;"
+        )
         form_sub = QLabel("Enter your credentials to access the workspace.")
-        form_sub.setStyleSheet("font-size: 12px; color: #6B7280; margin-top: 4px; border: none; background: transparent;")
+        form_sub.setStyleSheet(
+            "font-size: 12px; color: #6B7280; margin-top: 4px; border: none; background: transparent;"
+        )
 
         fl.addWidget(form_title)
         fl.addWidget(form_sub)
@@ -132,7 +142,9 @@ class LoginDialog(QDialog):
 
         # Inputs
         lbl_e = QLabel("Email / Username")
-        lbl_e.setStyleSheet("font-size: 11px; font-weight: 600; color: #374151; margin-bottom: 4px; border: none; background: transparent;")
+        lbl_e.setStyleSheet(
+            "font-size: 11px; font-weight: 600; color: #374151; margin-bottom: 4px; border: none; background: transparent;"
+        )
         self.input_user = QLineEdit("admin@finauditpro.com")
         self.input_user.setStyleSheet(
             "QLineEdit { border: 1.5px solid #D1D5DB; border-radius: 6px; padding: 10px 14px; background: #FFFFFF; color: #111827; font-size: 13px; }"
@@ -140,7 +152,9 @@ class LoginDialog(QDialog):
         )
 
         lbl_p = QLabel("Password")
-        lbl_p.setStyleSheet("font-size: 11px; font-weight: 600; color: #374151; margin-top: 14px; margin-bottom: 4px; border: none; background: transparent;")
+        lbl_p.setStyleSheet(
+            "font-size: 11px; font-weight: 600; color: #374151; margin-top: 14px; margin-bottom: 4px; border: none; background: transparent;"
+        )
         self.input_pass = QLineEdit("Admin@123")
         self.input_pass.setEchoMode(QLineEdit.EchoMode.Password)
         self.input_pass.setStyleSheet(
@@ -167,9 +181,13 @@ class LoginDialog(QDialog):
         fl.addWidget(self.btn_submit)
         fl.addSpacing(16)
 
-        hint = QLabel("🔒 Fully offline · No data leaves your machine\nDefault login: admin@finauditpro.com / Admin@123")
+        hint = QLabel(
+            "🔒 Fully offline · No data leaves your machine\nDefault login: admin@finauditpro.com / Admin@123"
+        )
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        hint.setStyleSheet("font-size: 11px; color: #64748b; line-height: 1.4; border: none; background: transparent;")
+        hint.setStyleSheet(
+            "font-size: 11px; color: #64748b; line-height: 1.4; border: none; background: transparent;"
+        )
         fl.addWidget(hint)
 
         rl.addWidget(form)
@@ -182,7 +200,9 @@ class LoginDialog(QDialog):
         pwd = self.input_pass.text().strip()
 
         if not user or not pwd:
-            QMessageBox.warning(self, "Validation Error", "Please enter both username and password.")
+            QMessageBox.warning(
+                self, "Validation Error", "Please enter both username and password."
+            )
             return
 
         self.login_successful.emit(user, "Administrator")

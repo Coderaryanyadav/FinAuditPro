@@ -61,7 +61,10 @@ class LMStudioProvider(LLMProvider):
                         self.chat_model_id = chat_match
 
                     chat_loaded = len(models) > 0
-                    embed_loaded = any("embed" in m.lower() or "nomic" in m.lower() for m in models) or self.embedding_model_id in models
+                    embed_loaded = (
+                        any("embed" in m.lower() or "nomic" in m.lower() for m in models)
+                        or self.embedding_model_id in models
+                    )
 
                     return ProviderStatus(
                         is_server_up=True,
@@ -87,7 +90,10 @@ class LMStudioProvider(LLMProvider):
                         self.chat_model_id = chat_match
 
                     chat_present = len(models) > 0
-                    embed_present = any("embed" in m.lower() or "nomic" in m.lower() for m in models) or self.embedding_model_id in models
+                    embed_present = (
+                        any("embed" in m.lower() or "nomic" in m.lower() for m in models)
+                        or self.embedding_model_id in models
+                    )
 
                     return ProviderStatus(
                         is_server_up=True,
@@ -139,7 +145,9 @@ class LMStudioProvider(LLMProvider):
             with httpx.Client(timeout=self.timeout_seconds) as client:
                 with client.stream("POST", url, json=payload) as response:
                     if response.status_code != 200:
-                        raise RuntimeError(f"LM Studio API returned HTTP {response.status_code}: {response.read().decode('utf-8')}")
+                        raise RuntimeError(
+                            f"LM Studio API returned HTTP {response.status_code}: {response.read().decode('utf-8')}"
+                        )
 
                     for line in response.iter_lines():
                         if not line:
@@ -273,7 +281,9 @@ class LMStudioProvider(LLMProvider):
         with httpx.Client(timeout=30.0) as client:
             resp = client.post(url, json=payload)
             if resp.status_code != 200:
-                raise RuntimeError(f"LM Studio Embeddings API error HTTP {resp.status_code}: {resp.text}")
+                raise RuntimeError(
+                    f"LM Studio Embeddings API error HTTP {resp.status_code}: {resp.text}"
+                )
 
             data = resp.json().get("data", [])
             embeddings: list[list[float]] = []

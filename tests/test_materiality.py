@@ -39,15 +39,15 @@ def test_sa320_materiality_calculations(setup_services) -> None:
         engagement_id=eng.id,
         benchmark_type=BenchmarkTypeEnum.REVENUE,
         benchmark_amount=50000000.0,  # INR 5 Crore Revenue
-        overall_percentage=1.0,       # 1%
+        overall_percentage=1.0,  # 1%
         performance_percentage=75.0,  # 75% of overall
-        trivial_percentage=5.0,       # 5% of overall
+        trivial_percentage=5.0,  # 5% of overall
     )
 
     mat = mat_svc.calculate_and_save_materiality(dto)
-    assert mat.overall_materiality == 500000.0        # INR 5 Lakh
-    assert mat.performance_materiality == 375000.0   # INR 3.75 Lakh
-    assert mat.clearly_trivial_threshold == 25000.0   # INR 25 Thousand
+    assert mat.overall_materiality == 500000.0  # INR 5 Lakh
+    assert mat.performance_materiality == 375000.0  # INR 3.75 Lakh
+    assert mat.clearly_trivial_threshold == 25000.0  # INR 25 Thousand
     assert mat.version == 1
 
     # Retrieve latest

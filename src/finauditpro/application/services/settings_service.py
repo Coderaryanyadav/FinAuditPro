@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+
 from pydantic import BaseModel, Field
 
 from finauditpro.infrastructure.first_run import get_app_data_dir

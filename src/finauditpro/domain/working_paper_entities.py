@@ -58,16 +58,56 @@ DEFAULT_WORKING_PAPER_INDEX_GUIDANCE = {
 
 
 LEGAL_WP_TRANSITIONS: dict[WorkingPaperStatusEnum, set[WorkingPaperStatusEnum]] = {
-    WorkingPaperStatusEnum.DRAFT: {WorkingPaperStatusEnum.IN_PREPARATION, WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW, WorkingPaperStatusEnum.REVIEWED, WorkingPaperStatusEnum.SIGNED_OFF},
-    WorkingPaperStatusEnum.IN_PREPARATION: {WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW, WorkingPaperStatusEnum.DRAFT, WorkingPaperStatusEnum.REVIEWED, WorkingPaperStatusEnum.SIGNED_OFF},
-    WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW: {WorkingPaperStatusEnum.UNDER_REVIEW, WorkingPaperStatusEnum.REVIEW_NOTES_OPEN, WorkingPaperStatusEnum.REVIEWED, WorkingPaperStatusEnum.SIGNED_OFF},
-    WorkingPaperStatusEnum.UNDER_REVIEW: {WorkingPaperStatusEnum.REVIEW_NOTES_OPEN, WorkingPaperStatusEnum.REVIEWED, WorkingPaperStatusEnum.SIGNED_OFF},
-    WorkingPaperStatusEnum.REVIEW_NOTES_OPEN: {WorkingPaperStatusEnum.REWORKING, WorkingPaperStatusEnum.UNDER_REVIEW},
-    WorkingPaperStatusEnum.REWORKING: {WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW, WorkingPaperStatusEnum.UNDER_REVIEW, WorkingPaperStatusEnum.REVIEWED, WorkingPaperStatusEnum.SIGNED_OFF},
-    WorkingPaperStatusEnum.REVIEWED: {WorkingPaperStatusEnum.SIGNED_OFF, WorkingPaperStatusEnum.UNDER_REVIEW, WorkingPaperStatusEnum.LOCKED},
-    WorkingPaperStatusEnum.SIGNED_OFF: {WorkingPaperStatusEnum.LOCKED, WorkingPaperStatusEnum.REOPENED},
+    WorkingPaperStatusEnum.DRAFT: {
+        WorkingPaperStatusEnum.IN_PREPARATION,
+        WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW,
+        WorkingPaperStatusEnum.REVIEWED,
+        WorkingPaperStatusEnum.SIGNED_OFF,
+    },
+    WorkingPaperStatusEnum.IN_PREPARATION: {
+        WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW,
+        WorkingPaperStatusEnum.DRAFT,
+        WorkingPaperStatusEnum.REVIEWED,
+        WorkingPaperStatusEnum.SIGNED_OFF,
+    },
+    WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW: {
+        WorkingPaperStatusEnum.UNDER_REVIEW,
+        WorkingPaperStatusEnum.REVIEW_NOTES_OPEN,
+        WorkingPaperStatusEnum.REVIEWED,
+        WorkingPaperStatusEnum.SIGNED_OFF,
+    },
+    WorkingPaperStatusEnum.UNDER_REVIEW: {
+        WorkingPaperStatusEnum.REVIEW_NOTES_OPEN,
+        WorkingPaperStatusEnum.REVIEWED,
+        WorkingPaperStatusEnum.SIGNED_OFF,
+    },
+    WorkingPaperStatusEnum.REVIEW_NOTES_OPEN: {
+        WorkingPaperStatusEnum.REWORKING,
+        WorkingPaperStatusEnum.UNDER_REVIEW,
+    },
+    WorkingPaperStatusEnum.REWORKING: {
+        WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW,
+        WorkingPaperStatusEnum.UNDER_REVIEW,
+        WorkingPaperStatusEnum.REVIEWED,
+        WorkingPaperStatusEnum.SIGNED_OFF,
+    },
+    WorkingPaperStatusEnum.REVIEWED: {
+        WorkingPaperStatusEnum.SIGNED_OFF,
+        WorkingPaperStatusEnum.UNDER_REVIEW,
+        WorkingPaperStatusEnum.LOCKED,
+    },
+    WorkingPaperStatusEnum.SIGNED_OFF: {
+        WorkingPaperStatusEnum.LOCKED,
+        WorkingPaperStatusEnum.REOPENED,
+    },
     WorkingPaperStatusEnum.LOCKED: {WorkingPaperStatusEnum.REOPENED},
-    WorkingPaperStatusEnum.REOPENED: {WorkingPaperStatusEnum.IN_PREPARATION, WorkingPaperStatusEnum.UNDER_REVIEW, WorkingPaperStatusEnum.DRAFT, WorkingPaperStatusEnum.REVIEWED, WorkingPaperStatusEnum.SIGNED_OFF},
+    WorkingPaperStatusEnum.REOPENED: {
+        WorkingPaperStatusEnum.IN_PREPARATION,
+        WorkingPaperStatusEnum.UNDER_REVIEW,
+        WorkingPaperStatusEnum.DRAFT,
+        WorkingPaperStatusEnum.REVIEWED,
+        WorkingPaperStatusEnum.SIGNED_OFF,
+    },
 }
 
 
@@ -142,9 +182,7 @@ class WorkingPaper(DomainBaseModel):
     def transition_to(self, new_status: WorkingPaperStatusEnum) -> None:
         allowed = LEGAL_WP_TRANSITIONS.get(self.status, set())
         if new_status not in allowed:
-            raise InvalidStateTransitionError(
-                "WorkingPaper", self.status.value, new_status.value
-            )
+            raise InvalidStateTransitionError("WorkingPaper", self.status.value, new_status.value)
         self.status = new_status
         if new_status in (WorkingPaperStatusEnum.SIGNED_OFF, WorkingPaperStatusEnum.LOCKED):
             self.is_locked = True

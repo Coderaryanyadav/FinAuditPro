@@ -34,9 +34,20 @@ def setup_traceability(tmp_path):
     planning_svc = AuditPlanningService(db_manager)
     traceability_svc = TraceabilityService(db_manager)
 
-    firm = firm_svc.create_firm(CreateFirmDTO(name="Traceability Firm", firm_registration_number="FRN-888888"))
-    client = client_svc.create_client(CreateClientDTO(firm_id=firm.id, name="Traceability Enterprise", gstin="27AAACU9603R1ZN"))
-    eng = eng_svc.create_engagement(CreateEngagementDTO(firm_id=firm.id, client_id=client.id, financial_year="2025-26", lead_auditor="Lead Auditor"))
+    firm = firm_svc.create_firm(
+        CreateFirmDTO(name="Traceability Firm", firm_registration_number="FRN-888888")
+    )
+    client = client_svc.create_client(
+        CreateClientDTO(firm_id=firm.id, name="Traceability Enterprise", gstin="27AAACU9603R1ZN")
+    )
+    eng = eng_svc.create_engagement(
+        CreateEngagementDTO(
+            firm_id=firm.id,
+            client_id=client.id,
+            financial_year="2025-26",
+            lead_auditor="Lead Auditor",
+        )
+    )
 
     return eng, planning_svc, traceability_svc
 

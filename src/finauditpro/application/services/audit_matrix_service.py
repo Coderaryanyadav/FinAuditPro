@@ -38,7 +38,9 @@ class AuditMatrixService:
             if not eng_repo.get_by_id(dto.engagement_id):
                 raise EntityNotFoundError("Engagement", dto.engagement_id)
 
-        assertions_list = getattr(dto, "assertions", None) or ([dto.assertion] if hasattr(dto, "assertion") else [AssertionEnum.COMPLETENESS])
+        assertions_list = getattr(dto, "assertions", None) or (
+            [dto.assertion] if hasattr(dto, "assertion") else [AssertionEnum.COMPLETENESS]
+        )
 
         risk = AuditRisk(
             engagement_id=dto.engagement_id,
@@ -81,8 +83,12 @@ class AuditMatrixService:
             if not eng_repo.get_by_id(dto.engagement_id):
                 raise EntityNotFoundError("Engagement", dto.engagement_id)
 
-        linked_risks = getattr(dto, "linked_risk_ids", None) or ([dto.risk_id] if getattr(dto, "risk_id", None) else [])
-        assertions_list = getattr(dto, "assertions", None) or ([dto.assertion] if hasattr(dto, "assertion") else [AssertionEnum.COMPLETENESS])
+        linked_risks = getattr(dto, "linked_risk_ids", None) or (
+            [dto.risk_id] if getattr(dto, "risk_id", None) else []
+        )
+        assertions_list = getattr(dto, "assertions", None) or (
+            [dto.assertion] if hasattr(dto, "assertion") else [AssertionEnum.COMPLETENESS]
+        )
 
         proc = AuditProcedure(
             engagement_id=dto.engagement_id,
@@ -161,7 +167,15 @@ class AuditMatrixService:
             saved_finding = repo.add_finding(finding)
 
             audit_repo = AuditEventRepository(session)
-            amt_display = saved_finding.monetary_amount.formatted if hasattr(saved_finding.monetary_amount, "formatted") else (f"INR {saved_finding.monetary_amount:,.2f}" if saved_finding.monetary_amount is not None else "INR 0.00")
+            amt_display = (
+                saved_finding.monetary_amount.formatted
+                if hasattr(saved_finding.monetary_amount, "formatted")
+                else (
+                    f"INR {saved_finding.monetary_amount:,.2f}"
+                    if saved_finding.monetary_amount is not None
+                    else "INR 0.00"
+                )
+            )
             audit_repo.add(
                 AuditEvent(
                     engagement_id=dto.engagement_id,

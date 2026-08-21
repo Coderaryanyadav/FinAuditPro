@@ -110,7 +110,11 @@ class AuditMatrixRepository:
         )
 
     def _to_finding_entity(self, model: AuditFindingModel) -> AuditFinding:
-        source_val = model.source if model.source in FindingSourceEnum._value2member_map_ else FindingSourceEnum.MANUAL
+        source_val = (
+            model.source
+            if model.source in FindingSourceEnum._value2member_map_
+            else FindingSourceEnum.MANUAL
+        )
         return AuditFinding(
             id=model.id,
             engagement_id=model.engagement_id,
@@ -122,7 +126,9 @@ class AuditMatrixRepository:
             severity=RiskSeverityEnum(model.severity),
             amount_paise=model.amount_paise,
             affected_account=model.affected_account,
-            assertion=AssertionEnum(model.assertion) if model.assertion in AssertionEnum._value2member_map_ else AssertionEnum.ACCURACY,
+            assertion=AssertionEnum(model.assertion)
+            if model.assertion in AssertionEnum._value2member_map_
+            else AssertionEnum.ACCURACY,
             recommendation=model.recommendation,
             status=FindingStatusEnum(model.status),
             preparer=model.preparer,
@@ -294,7 +300,9 @@ class AuditMatrixRepository:
             status=finding.status.value,
             preparer=finding.preparer,
             reviewer=finding.reviewer,
-            source=finding.source.value if hasattr(finding.source, "value") else str(finding.source),
+            source=finding.source.value
+            if hasattr(finding.source, "value")
+            else str(finding.source),
             is_ai_generated=finding.is_ai_generated,
             prior_engagement_finding_id=finding.prior_engagement_finding_id,
             created_at=finding.created_at,

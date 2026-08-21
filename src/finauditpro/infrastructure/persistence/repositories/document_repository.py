@@ -48,10 +48,14 @@ class DocumentRepository:
             status=DocumentStatusEnum(model.status),
             failed_stage=model.failed_stage,
             failure_reason=model.failure_reason,
-            machine_category=DocumentCategoryEnum(model.machine_category) if model.machine_category else None,
+            machine_category=DocumentCategoryEnum(model.machine_category)
+            if model.machine_category
+            else None,
             category_confidence=model.category_confidence,
             category_evidence=evidence_list,
-            human_category=DocumentCategoryEnum(model.human_category) if model.human_category else None,
+            human_category=DocumentCategoryEnum(model.human_category)
+            if model.human_category
+            else None,
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
@@ -91,7 +95,9 @@ class DocumentRepository:
             document_id=page.document_id,
             page_number=page.page_number,
             extracted_text=page.extracted_text,
-            text_source=page.text_source.value if hasattr(page.text_source, "value") else str(page.text_source),
+            text_source=page.text_source.value
+            if hasattr(page.text_source, "value")
+            else str(page.text_source),
             ocr_applied=page.ocr_applied,
             confidence_score=conf,
             layout_json=page.layout_json,
@@ -119,7 +125,9 @@ class DocumentRepository:
         self.session.add_all(models)
         self.session.flush()
 
-    def index_pages_fts(self, engagement_id: str, document_id: str, pages: list[DocumentPage]) -> None:
+    def index_pages_fts(
+        self, engagement_id: str, document_id: str, pages: list[DocumentPage]
+    ) -> None:
         """Insert page texts into SQLite FTS5 virtual table for engagement-isolated search."""
         for p in pages:
             if p.extracted_text and p.extracted_text.strip():
@@ -176,7 +184,9 @@ class DocumentRepository:
                 document_id=m.document_id,
                 page_number=m.page_number,
                 extracted_text=m.extracted_text,
-                text_source=TextSourceEnum(m.text_source) if m.text_source in TextSourceEnum._value2member_map_ else TextSourceEnum.BORN_DIGITAL,
+                text_source=TextSourceEnum(m.text_source)
+                if m.text_source in TextSourceEnum._value2member_map_
+                else TextSourceEnum.BORN_DIGITAL,
                 ocr_applied=m.ocr_applied,
                 confidence_score=m.confidence_score,
                 layout_json=m.layout_json,
@@ -200,6 +210,7 @@ class DocumentRepository:
             return []
 
         import re
+
         words = re.findall(r"\w+", query)
         if not words:
             return []
@@ -213,7 +224,9 @@ class DocumentRepository:
         """)
 
         try:
-            rows = self.session.execute(fts_sql, {"eng_id": engagement_id, "match_query": match_expr}).fetchall()
+            rows = self.session.execute(
+                fts_sql, {"eng_id": engagement_id, "match_query": match_expr}
+            ).fetchall()
         except Exception:
             rows = []
 

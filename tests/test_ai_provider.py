@@ -13,7 +13,9 @@ class DummyFindingSchema(BaseModel):
 def test_strip_reasoning_blocks() -> None:
     """Verify stripping of <think>...</think> reasoning blocks from DeepSeek-R1 responses."""
     # 1. Closed think block
-    raw_1 = "<think>\nThinking about audit rules...\nChecking SA 320...\n</think>\nFinal Audit Answer."
+    raw_1 = (
+        "<think>\nThinking about audit rules...\nChecking SA 320...\n</think>\nFinal Audit Answer."
+    )
     content_1, reasoning_1 = LMStudioProvider.strip_reasoning(raw_1)
     assert content_1 == "Final Audit Answer."
     assert reasoning_1 == "Thinking about audit rules...\nChecking SA 320..."

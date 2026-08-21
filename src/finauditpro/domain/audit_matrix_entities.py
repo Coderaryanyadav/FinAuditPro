@@ -60,7 +60,9 @@ class DomainBaseModel(BaseModel):
     model_config = ConfigDict(frozen=False, arbitrary_types_allowed=True)
 
 
-def derive_qualitative_romm(inherent: RiskSeverityEnum, control: RiskSeverityEnum) -> RiskSeverityEnum:
+def derive_qualitative_romm(
+    inherent: RiskSeverityEnum, control: RiskSeverityEnum
+) -> RiskSeverityEnum:
     """Qualitative 3x3 matrix mapping (Inherent Risk x Control Risk) -> Derived RoMM."""
     if inherent == RiskSeverityEnum.HIGH or control == RiskSeverityEnum.HIGH:
         return RiskSeverityEnum.HIGH

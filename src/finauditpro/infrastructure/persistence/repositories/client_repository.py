@@ -53,7 +53,11 @@ class ClientRepository:
         return self._to_entity(model) if model else None
 
     def list_by_firm(self, firm_id: str) -> list[Client]:
-        stmt = select(ClientModel).where(ClientModel.firm_id == firm_id).order_by(ClientModel.name.asc())
+        stmt = (
+            select(ClientModel)
+            .where(ClientModel.firm_id == firm_id)
+            .order_by(ClientModel.name.asc())
+        )
         models = self.session.scalars(stmt).all()
         return [self._to_entity(m) for m in models]
 

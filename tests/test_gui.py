@@ -30,7 +30,9 @@ def db_manager(tmp_path) -> DatabaseManager:
 
 
 @pytest.mark.gui
-def test_main_window_initialization_and_rendering(qapp: QApplication, db_manager: DatabaseManager) -> None:
+def test_main_window_initialization_and_rendering(
+    qapp: QApplication, db_manager: DatabaseManager
+) -> None:
     # Seed DB with initial data
     firm_service = FirmService(db_manager)
     client_service = ClientService(db_manager)

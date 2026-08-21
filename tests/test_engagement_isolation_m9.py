@@ -37,22 +37,57 @@ def setup_isolation_m9_env(tmp_path):
     client_a = client_svc.create_client(CreateClientDTO(firm_id=firm.id, name="Client A"))
     client_b = client_svc.create_client(CreateClientDTO(firm_id=firm.id, name="Client B"))
 
-    eng_a = eng_svc.create_engagement(CreateEngagementDTO(firm_id=firm.id, client_id=client_a.id, financial_year="2025-26"))
-    eng_b = eng_svc.create_engagement(CreateEngagementDTO(firm_id=firm.id, client_id=client_b.id, financial_year="2025-26"))
+    eng_a = eng_svc.create_engagement(
+        CreateEngagementDTO(firm_id=firm.id, client_id=client_a.id, financial_year="2025-26")
+    )
+    eng_b = eng_svc.create_engagement(
+        CreateEngagementDTO(firm_id=firm.id, client_id=client_b.id, financial_year="2025-26")
+    )
 
     wp_svc = WorkingPaperService(db_manager)
     report_svc = ReportService(db_manager)
     arch_svc = ArchivalService(db_manager, storage_dir=str(tmp_path / "storage"))
 
     # Prepare eng_a
-    wp_a = wp_svc.create_working_paper(CreateWorkingPaperDTO(engagement_id=eng_a.id, index_reference="WP-A", title="WP Alpha", area="Tax", preparer_id="Auditor A"))
-    wp_svc.sign_off_working_paper(SignOffDTO(working_paper_id=wp_a.id, level=SignOffLevelEnum.FINAL_SIGN_OFF, user_id="Partner A", user_role="Partner"))
+    wp_a = wp_svc.create_working_paper(
+        CreateWorkingPaperDTO(
+            engagement_id=eng_a.id,
+            index_reference="WP-A",
+            title="WP Alpha",
+            area="Tax",
+            preparer_id="Auditor A",
+        )
+    )
+    wp_svc.sign_off_working_paper(
+        SignOffDTO(
+            working_paper_id=wp_a.id,
+            level=SignOffLevelEnum.FINAL_SIGN_OFF,
+            user_id="Partner A",
+            user_role="Partner",
+        )
+    )
 
     tpls = report_svc.list_templates()
-    rep_a = report_svc.generate_report(GenerateReportDTO(engagement_id=eng_a.id, template_id=tpls[0].id, title="Report Alpha", generated_by="Auditor A"))
-    report_svc.approve_report(ApproveReportDTO(report_id=rep_a.id, approved_by="Partner A", approver_role="Partner"))
+    rep_a = report_svc.generate_report(
+        GenerateReportDTO(
+            engagement_id=eng_a.id,
+            template_id=tpls[0].id,
+            title="Report Alpha",
+            generated_by="Auditor A",
+        )
+    )
+    report_svc.approve_report(
+        ApproveReportDTO(report_id=rep_a.id, approved_by="Partner A", approver_role="Partner")
+    )
 
-    arch_svc.freeze_and_seal_engagement(FreezeAndSealDTO(engagement_id=eng_a.id, sealed_by="Partner A", report_date="2026-03-31", output_dir=str(tmp_path / "archives")))
+    arch_svc.freeze_and_seal_engagement(
+        FreezeAndSealDTO(
+            engagement_id=eng_a.id,
+            sealed_by="Partner A",
+            report_date="2026-03-31",
+            output_dir=str(tmp_path / "archives"),
+        )
+    )
 
     return eng_a, eng_b, arch_svc, db_manager
 

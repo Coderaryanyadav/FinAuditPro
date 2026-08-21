@@ -18,4 +18,6 @@ def test_no_fraud_terminology_in_codebase() -> None:
             if "fraud" in lowered and "prohibited" not in lowered and "# ignore" not in lowered:
                 violations.append((py_file.name, i, line.strip()))
 
-    assert len(violations) == 0, f"Found {len(violations)} prohibited 'fraud' terminology occurrences: {violations}"
+    assert len(violations) == 0, (
+        f"Found {len(violations)} prohibited 'fraud' terminology occurrences: {violations}"
+    )

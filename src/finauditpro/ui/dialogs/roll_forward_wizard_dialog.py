@@ -6,7 +6,6 @@ from PySide6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QFormLayout,
-    QHBoxLayout,
     QLabel,
     QLineEdit,
     QMessageBox,
@@ -29,7 +28,10 @@ class RollForwardWorkerThread(QThread):
     def run(self) -> None:
         try:
             new_eng = self.service.roll_forward_engagement(self.dto)
-            self.finished_signal.emit(True, f"Successfully created new engagement for FY {new_eng.financial_year}!\nEngagement ID: {new_eng.id}")
+            self.finished_signal.emit(
+                True,
+                f"Successfully created new engagement for FY {new_eng.financial_year}!\nEngagement ID: {new_eng.id}",
+            )
         except Exception as ex:
             self.finished_signal.emit(False, str(ex))
 
@@ -37,7 +39,13 @@ class RollForwardWorkerThread(QThread):
 class RollForwardWizardDialog(QDialog):
     """Wizard guiding auditors through multi-year roll-forward options and draft creation."""
 
-    def __init__(self, roll_forward_service: RollForwardService, source_engagement_id: str, source_fy: str, parent=None) -> None:
+    def __init__(
+        self,
+        roll_forward_service: RollForwardService,
+        source_engagement_id: str,
+        source_fy: str,
+        parent=None,
+    ) -> None:
         super().__init__(parent)
         self.roll_forward_service = roll_forward_service
         self.source_engagement_id = source_engagement_id
@@ -58,7 +66,9 @@ class RollForwardWizardDialog(QDialog):
             "Re-usable items are carried as DRAFTS marked for review. Prior conclusions and sign-offs are NEVER carried.</i>"
         )
         notice.setWordWrap(True)
-        notice.setStyleSheet("color: #2b6cb0; background-color: #ebf8ff; padding: 6px; border-radius: 4px;")
+        notice.setStyleSheet(
+            "color: #2b6cb0; background-color: #ebf8ff; padding: 6px; border-radius: 4px;"
+        )
         layout.addWidget(notice)
 
         form = QFormLayout()
@@ -84,7 +94,9 @@ class RollForwardWizardDialog(QDialog):
         self.chk_risks.setChecked(True)
         layout.addWidget(self.chk_risks)
 
-        self.chk_materiality = QCheckBox("Materiality Benchmark Methodology (M4) — method carried, amounts zeroed")
+        self.chk_materiality = QCheckBox(
+            "Materiality Benchmark Methodology (M4) — method carried, amounts zeroed"
+        )
         self.chk_materiality.setChecked(True)
         layout.addWidget(self.chk_materiality)
 
@@ -92,11 +104,15 @@ class RollForwardWizardDialog(QDialog):
         self.chk_procedures.setChecked(True)
         layout.addWidget(self.chk_procedures)
 
-        self.chk_findings = QCheckBox("Carried-Forward Findings (M4/M5) — preserving AI badges & citations")
+        self.chk_findings = QCheckBox(
+            "Carried-Forward Findings (M4/M5) — preserving AI badges & citations"
+        )
         self.chk_findings.setChecked(True)
         layout.addWidget(self.chk_findings)
 
-        self.chk_opening_balances = QCheckBox("SA 510 Opening Balances — link to prior audited closing balances")
+        self.chk_opening_balances = QCheckBox(
+            "SA 510 Opening Balances — link to prior audited closing balances"
+        )
         self.chk_opening_balances.setChecked(True)
         layout.addWidget(self.chk_opening_balances)
 
@@ -104,7 +120,9 @@ class RollForwardWizardDialog(QDialog):
         self.progress_bar.setVisible(False)
         layout.addWidget(self.progress_bar)
 
-        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        self.button_box = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
         self.button_box.button(QDialogButtonBox.StandardButton.Ok).setText("Execute Roll-Forward")
         self.button_box.accepted.connect(self._on_execute_clicked)
         self.button_box.rejected.connect(self.reject)
@@ -115,7 +133,9 @@ class RollForwardWizardDialog(QDialog):
         auditor = self.auditor_input.text().strip()
 
         if not target_fy or not auditor:
-            QMessageBox.warning(self, "Validation Error", "Please provide Target Financial Year and Auditor Name.")
+            QMessageBox.warning(
+                self, "Validation Error", "Please provide Target Financial Year and Auditor Name."
+            )
             return
 
         dto = ExecuteRollForwardDTO(

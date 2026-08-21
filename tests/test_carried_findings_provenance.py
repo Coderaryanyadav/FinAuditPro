@@ -1,18 +1,27 @@
 """Unit tests for carried-forward audit findings provenance and M5 AI badge preservation."""
 
 import pytest
+
 from finauditpro.application.archival_dtos import FreezeAndSealDTO
 from finauditpro.application.report_dtos import ApproveReportDTO, GenerateReportDTO
 from finauditpro.application.roll_forward_dtos import ExecuteRollForwardDTO
 from finauditpro.application.services.archival_service import ArchivalService
 from finauditpro.application.services.client_service import ClientService, CreateClientDTO
-from finauditpro.application.services.engagement_service import CreateEngagementDTO, EngagementService
+from finauditpro.application.services.engagement_service import (
+    CreateEngagementDTO,
+    EngagementService,
+)
 from finauditpro.application.services.firm_service import CreateFirmDTO, FirmService
 from finauditpro.application.services.report_service import ReportService
 from finauditpro.application.services.roll_forward_service import RollForwardService
 from finauditpro.application.services.working_paper_service import WorkingPaperService
 from finauditpro.application.working_paper_dtos import CreateWorkingPaperDTO, SignOffDTO
-from finauditpro.domain.audit_matrix_entities import AuditFinding, FindingSourceEnum, FindingStatusEnum, RiskSeverityEnum
+from finauditpro.domain.audit_matrix_entities import (
+    AuditFinding,
+    FindingSourceEnum,
+    FindingStatusEnum,
+    RiskSeverityEnum,
+)
 from finauditpro.domain.working_paper_entities import SignOffLevelEnum
 from finauditpro.infrastructure.persistence.database import DatabaseManager
 from finauditpro.infrastructure.persistence.migration_list import get_all_migrations
@@ -85,7 +94,9 @@ def setup_findings_env(tmp_path):
             generated_by="Auditor",
         )
     )
-    report_svc.approve_report(ApproveReportDTO(report_id=rep.id, approved_by="Audit Partner", approver_role="Partner"))
+    report_svc.approve_report(
+        ApproveReportDTO(report_id=rep.id, approved_by="Audit Partner", approver_role="Partner")
+    )
 
     arch_svc.freeze_and_seal_engagement(
         FreezeAndSealDTO(

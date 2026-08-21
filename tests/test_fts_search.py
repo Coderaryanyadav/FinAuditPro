@@ -43,11 +43,17 @@ def test_fts5_cross_engagement_search_isolation(setup_search_services, tmp_path)
 
     # Create document file for Engagement A
     doc_a_file = tmp_path / "tax_eng_a.txt"
-    doc_a_file.write_text("Tax Return FY 2025-26. Section 80C Deduction: INR 1,50,000 for Engagement A.", encoding="utf-8")
+    doc_a_file.write_text(
+        "Tax Return FY 2025-26. Section 80C Deduction: INR 1,50,000 for Engagement A.",
+        encoding="utf-8",
+    )
 
     # Create document file for Engagement B
     doc_b_file = tmp_path / "tax_eng_b.txt"
-    doc_b_file.write_text("Tax Return FY 2024-25. Section 80C Deduction: INR 1,50,000 for Engagement B.", encoding="utf-8")
+    doc_b_file.write_text(
+        "Tax Return FY 2024-25. Section 80C Deduction: INR 1,50,000 for Engagement B.",
+        encoding="utf-8",
+    )
 
     # Upload Document A to Engagement A
     doc_a = doc_svc.upload_and_process_document(

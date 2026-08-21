@@ -16,12 +16,20 @@ class AuditEventRepository:
         self.session = session
 
     def add(self, event: AuditEvent) -> AuditEvent:
-        stmt = select(AuditEventModel).order_by(AuditEventModel.timestamp.desc(), AuditEventModel.id.desc()).limit(1)
+        stmt = (
+            select(AuditEventModel)
+            .order_by(AuditEventModel.timestamp.desc(), AuditEventModel.id.desc())
+            .limit(1)
+        )
         last_model = self.session.scalars(stmt).first()
-        prev_hash = last_model.entry_hash if (last_model and last_model.entry_hash) else "GENESIS_HASH"
+        prev_hash = (
+            last_model.entry_hash if (last_model and last_model.entry_hash) else "GENESIS_HASH"
+        )
 
         ts_str = event.timestamp.strftime("%Y-%m-%dT%H:%M:%S")
-        raw_payload = f"{event.id}:{ts_str}:{event.actor}:{event.action}:{event.details or ''}:{prev_hash}"
+        raw_payload = (
+            f"{event.id}:{ts_str}:{event.actor}:{event.action}:{event.details or ''}:{prev_hash}"
+        )
         entry_hash = hashlib.sha256(raw_payload.encode("utf-8")).hexdigest()
 
         model = AuditEventModel(
@@ -49,7 +57,9 @@ class AuditEventRepository:
 
     def verify_chain(self) -> bool:
         """Verify SHA-256 hash chain integrity across all stored audit events."""
-        stmt = select(AuditEventModel).order_by(AuditEventModel.timestamp.asc(), AuditEventModel.id.asc())
+        stmt = select(AuditEventModel).order_by(
+            AuditEventModel.timestamp.asc(), AuditEventModel.id.asc()
+        )
         models = self.session.scalars(stmt).all()
         expected_prev = "GENESIS_HASH"
 

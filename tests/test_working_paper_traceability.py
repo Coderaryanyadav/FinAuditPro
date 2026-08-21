@@ -106,6 +106,7 @@ def test_working_paper_traceability_graph_resolution(setup_traceability_wp) -> N
         from finauditpro.infrastructure.persistence.repositories.working_paper_repository import (
             WorkingPaperRepository,
         )
+
         repo = WorkingPaperRepository(session)
         repo.add_link("link-find-1", wp.id, "finding", finding.id)
 

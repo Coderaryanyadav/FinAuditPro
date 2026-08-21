@@ -32,7 +32,9 @@ class SelfCheckDialog(QDialog):
 
         self.table = QTableWidget()
         self.table.setColumnCount(4)
-        self.table.setHorizontalHeaderLabels(["Prerequisite Name", "Status", "Probe Message", "Actionable Remediation"])
+        self.table.setHorizontalHeaderLabels(
+            ["Prerequisite Name", "Status", "Probe Message", "Actionable Remediation"]
+        )
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         layout.addWidget(self.table)
 

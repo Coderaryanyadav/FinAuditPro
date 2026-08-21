@@ -52,7 +52,9 @@ def test_sanitize_export_cell() -> None:
 
 
 def test_import_real_trial_balance_fixture() -> None:
-    fixture_path = Path("tests/fixtures/AuditPro_Input_Client_Trial_Balance_Sample_V1.0_04Jan2026.xlsx")
+    fixture_path = Path(
+        "tests/fixtures/AuditPro_Input_Client_Trial_Balance_Sample_V1.0_04Jan2026.xlsx"
+    )
     if not fixture_path.is_file():
         pytest.skip("Fixture file not found.")
 
@@ -78,7 +80,9 @@ def test_import_real_trial_balance_fixture() -> None:
 
 
 def test_import_real_general_ledger_fixture() -> None:
-    fixture_path = Path("tests/fixtures/AuditPro_Input_General_Ledger_Extract_Sample_V1.0_04Jan2026.xlsx")
+    fixture_path = Path(
+        "tests/fixtures/AuditPro_Input_General_Ledger_Extract_Sample_V1.0_04Jan2026.xlsx"
+    )
     if not fixture_path.is_file():
         pytest.skip("Fixture file not found.")
 

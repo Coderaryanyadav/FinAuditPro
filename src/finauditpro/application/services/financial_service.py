@@ -110,7 +110,10 @@ class FinancialService:
 
             if dto.dataset_type == DatasetTypeEnum.TRIAL_BALANCE:
                 repo.add_trial_balance_lines(imp_res.valid_rows)
-            elif dto.dataset_type in (DatasetTypeEnum.GENERAL_LEDGER, DatasetTypeEnum.JOURNAL_ENTRIES):
+            elif dto.dataset_type in (
+                DatasetTypeEnum.GENERAL_LEDGER,
+                DatasetTypeEnum.JOURNAL_ENTRIES,
+            ):
                 repo.add_ledger_entries(imp_res.valid_rows)
             elif dto.dataset_type == DatasetTypeEnum.BANK_STATEMENT:
                 repo.add_bank_transactions(imp_res.valid_rows)
@@ -198,16 +201,28 @@ class FinancialService:
                 lines = repo.get_trial_balance_lines(dataset_id)
                 res1 = DeterministicAnalyticsEngine.check_trial_balance_balances(dataset_id, lines)
                 all_exceptions.extend(res1.exceptions)
-            elif ds.dataset_type in (DatasetTypeEnum.GENERAL_LEDGER, DatasetTypeEnum.JOURNAL_ENTRIES):
+            elif ds.dataset_type in (
+                DatasetTypeEnum.GENERAL_LEDGER,
+                DatasetTypeEnum.JOURNAL_ENTRIES,
+            ):
                 entries = repo.get_ledger_entries(dataset_id)
                 res1 = DeterministicAnalyticsEngine.detect_duplicates(dataset_id, entries)
-                res2 = DeterministicAnalyticsEngine.detect_large_amount_outliers(dataset_id, entries)
+                res2 = DeterministicAnalyticsEngine.detect_large_amount_outliers(
+                    dataset_id, entries
+                )
                 res3 = DeterministicAnalyticsEngine.detect_round_number_amounts(dataset_id, entries)
                 res4 = DeterministicAnalyticsEngine.detect_weekend_postings(dataset_id, entries)
                 res5 = DeterministicAnalyticsEngine.detect_sequence_gaps(dataset_id, entries)
                 res6 = DeterministicAnalyticsEngine.check_benford_law(dataset_id, entries)
 
-                all_exceptions.extend(res1.exceptions + res2.exceptions + res3.exceptions + res4.exceptions + res5.exceptions + res6.exceptions)
+                all_exceptions.extend(
+                    res1.exceptions
+                    + res2.exceptions
+                    + res3.exceptions
+                    + res4.exceptions
+                    + res5.exceptions
+                    + res6.exceptions
+                )
             elif ds.dataset_type == DatasetTypeEnum.BANK_STATEMENT:
                 txns = repo.get_bank_transactions(dataset_id)
                 res1 = DeterministicAnalyticsEngine.check_bank_balance_continuity(dataset_id, txns)
@@ -236,13 +251,16 @@ class FinancialService:
             repo = FinancialDataRepository(session)
             return repo.list_exceptions_by_dataset(dataset_id)
 
-    def promote_exception_to_finding(self, exception_id: str, preparer: str = "Senior Auditor") -> Finding:
+    def promote_exception_to_finding(
+        self, exception_id: str, preparer: str = "Senior Auditor"
+    ) -> Finding:
         """Promote an accepted analytics exception into a formal Finding linked via EvidenceLink."""
         with self.db_manager.session_scope() as session:
             repo = FinancialDataRepository(session)
 
             # Find exception item
             from finauditpro.infrastructure.persistence.models import ExceptionItemModel
+
             exc_model = session.get(ExceptionItemModel, exception_id)
             if not exc_model:
                 raise EntityNotFoundError("Exception Item", exception_id)

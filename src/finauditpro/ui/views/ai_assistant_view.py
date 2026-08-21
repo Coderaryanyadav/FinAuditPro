@@ -7,6 +7,7 @@ Column 3: Audit Findings & Evidence Cards Inspector
 """
 
 from typing import Any
+
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import (
     QFrame,
@@ -25,17 +26,33 @@ from PySide6.QtWidgets import (
 )
 
 from finauditpro.domain.entities import Engagement
+from finauditpro.ui.theme import CardWidget
 
 PROMPT_LIBRARY = [
-    ("📦 CARO 2020 Inventory", "Analyze uploaded inventory sheets and physical verification records under CARO 2020 Clause (ii)."),
-    ("🤝 Sec 188 Related Party", "Check for related party transactions under Section 188 of Companies Act 2013."),
-    ("💰 Sec 185/186 Loans", "Review loan agreements, inter-corporate deposits, and guarantees for Section 185/186 statutory ceiling compliance."),
-    ("📈 SA 240 Revenue Anomaly", "Scan sales registers and invoices for SA 240 revenue cut-off anomalies or round-tripping."),
-    ("📑 Form 3CD Clause 44", "Break down expenditure split between GST registered and non-registered entities under Clause 44 of Form 3CD."),
-    ("⚖️ SA 500 Audit Evidence", "Perform substantive verification on supporting vouchers and check compliance with ICAI SA 500 standards."),
+    ("CARO 2020 Inventory", "Analyze uploaded inventory sheets under CARO 2020 Clause (ii)."),
+    (
+        "Sec 188 Related Party",
+        "Check for related party transactions under Section 188 of Companies Act 2013.",
+    ),
+    ("Sec 185/186 Loans", "Review loan agreements and guarantees for Section 185/186 compliance."),
+    ("SA 240 Revenue Anomaly", "Scan sales registers for SA 240 revenue cut-off anomalies."),
+    (
+        "Form 3CD Clause 44",
+        "Break down expenditure split between GST registered and non-registered entities.",
+    ),
+    (
+        "SA 500 Audit Evidence",
+        "Perform substantive verification on supporting vouchers per SA 500.",
+    ),
 ]
 
-QUICK_PILLS = ["Revenue Anomalies", "Vendor Balances", "GST 2B Discrepancies", "Inventory Discrepancies >10%", "Sec 188 Compliance"]
+QUICK_PILLS = [
+    "Revenue Anomalies",
+    "Vendor Balances",
+    "GST 2B Discrepancies",
+    "Inventory >10%",
+    "Sec 188",
+]
 
 
 class AIWorkerThread(QThread):
@@ -58,12 +75,7 @@ class AIAssistantView(QWidget):
     """Enterprise 3-Column AI Investigation Copilot Workspace Widget."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        parent = None
-        for a in args:
-            if isinstance(a, QWidget):
-                parent = a
-                break
-
+        parent = next((a for a in args if isinstance(a, QWidget)), None)
         super().__init__(parent)
 
         self.ai_service = None
@@ -71,7 +83,7 @@ class AIAssistantView(QWidget):
         self.engagement_service = None
 
         for a in args:
-            if hasattr(a, "get_engagement") or hasattr(a, "get_engagement_by_id") or hasattr(a, "create_engagement"):
+            if hasattr(a, "get_engagement") or hasattr(a, "create_engagement"):
                 self.engagement_service = a
             elif hasattr(a, "query_rag") or hasattr(a, "check_status"):
                 self.ai_service = a
@@ -92,7 +104,9 @@ class AIAssistantView(QWidget):
             return
         if hasattr(self, "engagement_service") and self.engagement_service:
             try:
-                fn = getattr(self.engagement_service, "get_engagement", None) or getattr(self.engagement_service, "get_engagement_by_id", None)
+                fn = getattr(self.engagement_service, "get_engagement", None) or getattr(
+                    self.engagement_service, "get_engagement_by_id", None
+                )
                 if fn:
                     eng = fn(str(engagement_id))
                     if eng:
@@ -109,114 +123,101 @@ class AIAssistantView(QWidget):
 
     def refresh_provider_status(self) -> None:
         if not self.ai_service or not hasattr(self.ai_service, "check_status"):
-            self.lbl_chat_status.setText("● Rule Engine Fallback Active")
-            self.lbl_chat_status.setStyleSheet("font-size: 11px; font-weight: 800; color: #d97706; background: #fef3c7; padding: 4px 12px; border-radius: 10px;")
+            self.lbl_chat_status.setText("● Offline Rule Engine Active")
+            self.lbl_chat_status.setStyleSheet("font-size: 11px; font-weight: 700; color: #D97706;")
             return
 
         try:
             status = self.ai_service.check_status()
             if status and getattr(status, "chat_model_loaded", False):
-                self.lbl_chat_status.setText("● Local AI RAG Active (Connected)")
-                self.lbl_chat_status.setStyleSheet("font-size: 11px; font-weight: 800; color: #047857; background: #dcfce7; padding: 4px 12px; border-radius: 10px;")
+                self.lbl_chat_status.setText("● Local AI RAG Connected")
+                self.lbl_chat_status.setStyleSheet(
+                    "font-size: 11px; font-weight: 700; color: #15803D;"
+                )
                 return
         except Exception:
             pass
 
-        self.lbl_chat_status.setText("● Rule Engine Fallback Active")
-        self.lbl_chat_status.setStyleSheet("font-size: 11px; font-weight: 800; color: #d97706; background: #fef3c7; padding: 4px 12px; border-radius: 10px;")
+        self.lbl_chat_status.setText("● Offline Rule Engine Active")
+        self.lbl_chat_status.setStyleSheet("font-size: 11px; font-weight: 700; color: #D97706;")
 
     def _init_ui(self) -> None:
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
+        main_layout.setContentsMargins(24, 20, 24, 24)
+        main_layout.setSpacing(14)
 
         # 1. Header Bar
-        header = QFrame()
-        header.setFixedHeight(64)
-        header.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e1e8f4;")
-        h_layout = QHBoxLayout(header)
-        h_layout.setContentsMargins(24, 0, 24, 0)
+        hdr_frame = QFrame()
+        hdr_frame.setStyleSheet("background: transparent; border: none;")
+        hdr_layout = QHBoxLayout(hdr_frame)
+        hdr_layout.setContentsMargins(0, 0, 0, 0)
 
-        title_v = QVBoxLayout()
-        title_v.setSpacing(2)
-        title = QLabel("AI Audit Analysis Workspace")
-        title.setStyleSheet("font-size: 18px; font-weight: 800; color: #0f172a; border: none;")
-        subtitle = QLabel("AI-powered RAG evidence scanner, anomaly detection, and ICAI statutory compliance copilot.")
-        subtitle.setStyleSheet("font-size: 12px; color: #64748b; border: none;")
-        title_v.addWidget(title)
-        title_v.addWidget(subtitle)
-        h_layout.addLayout(title_v)
-        h_layout.addStretch()
+        left_v = QVBoxLayout()
+        left_v.setSpacing(2)
+        title = QLabel("AI Copilot & Investigation")
+        title.setStyleSheet(
+            "font-size: 20px; font-weight: 700; color: #0F172A; letter-spacing: -0.4px; border: none; background: transparent;"
+        )
+        subtitle = QLabel(
+            "Local offline LLM RAG engine, ICAI audit prompt library, and anomaly detection."
+        )
+        subtitle.setStyleSheet(
+            "font-size: 12px; color: #64748B; border: none; background: transparent;"
+        )
+        left_v.addWidget(title)
+        left_v.addWidget(subtitle)
+        hdr_layout.addLayout(left_v)
+        hdr_layout.addStretch()
 
         self.lbl_chat_status = QLabel("● Checking Engine...")
-        self.lbl_chat_status.setStyleSheet("font-size: 11px; font-weight: 800; color: #64748b;")
-        h_layout.addWidget(self.lbl_chat_status)
+        self.lbl_chat_status.setStyleSheet("font-size: 11px; font-weight: 700; color: #64748B;")
+        hdr_layout.addWidget(self.lbl_chat_status)
 
         btn_scan = QPushButton("⚡ Run ICAI Audit Scan")
         btn_scan.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_scan.setStyleSheet("background-color: #0284c7; color: #ffffff; font-size: 12px; font-weight: 700; border-radius: 6px; padding: 7px 16px; border: none;")
+        btn_scan.setStyleSheet(
+            "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }"
+        )
         btn_scan.clicked.connect(self._on_run_icai_scan)
-        h_layout.addSpacing(12)
-        h_layout.addWidget(btn_scan)
+        hdr_layout.addWidget(btn_scan)
+        main_layout.addWidget(hdr_frame)
 
-        main_layout.addWidget(header)
-
-        # 2. Metric Strip
-        strip = QFrame()
-        strip.setFixedHeight(54)
-        strip.setStyleSheet("background-color: #ffffff; border-bottom: 1px solid #e1e8f4;")
-        s_layout = QHBoxLayout(strip)
-        s_layout.setContentsMargins(24, 0, 24, 0)
-        s_layout.setSpacing(16)
-
-        self.lbl_total_findings = self._create_metric_badge("TOTAL FINDINGS", "0", "#0284c7", "#e0f2fe")
-        self.lbl_high_risk = self._create_metric_badge("CRITICAL / HIGH", "0", "#dc2626", "#fee2e2")
-        self.lbl_med_risk = self._create_metric_badge("MEDIUM RISK", "0", "#d97706", "#fef3c7")
-        self.lbl_unresolved = self._create_metric_badge("UNRESOLVED", "0", "#dc2626", "#fee2e2")
-        self.lbl_sources = self._create_metric_badge("EVIDENCE SOURCES", "0", "#047857", "#dcfce7")
-
-        for b in [self.lbl_total_findings, self.lbl_high_risk, self.lbl_med_risk, self.lbl_unresolved, self.lbl_sources]:
-            s_layout.addWidget(b)
-        s_layout.addStretch()
-        main_layout.addWidget(strip)
-
-        # 3. 3-Column Splitter
+        # 2. 3-Column Splitter
         splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.setStyleSheet("QSplitter::handle { background-color: #e1e8f4; }")
+        splitter.setStyleSheet("QSplitter::handle { background-color: #E2E8F0; width: 1px; }")
 
-        # Column 1
-        col1 = QFrame()
-        col1.setStyleSheet("background-color: #ffffff; border-right: 1px solid #e1e8f4;")
-        c1_layout = QVBoxLayout(col1)
-        c1_layout.setContentsMargins(16, 16, 16, 16)
-        c1_layout.setSpacing(10)
-
-        c1_title = QLabel("📄 AUDIT EVIDENCE SOURCES")
-        c1_title.setStyleSheet("font-size: 11px; font-weight: 800; color: #0f172a; letter-spacing: 0.8px;")
-        c1_layout.addWidget(c1_title)
+        # Column 1: Evidence Sources & Prompts
+        col1 = CardWidget("EVIDENCE & PROMPTS")
+        c1_layout = col1.content_layout
 
         self.doc_sources_list = QListWidget()
-        self.doc_sources_list.setStyleSheet("QListWidget { border: 1px solid #e1e8f4; border-radius: 8px; background-color: #ffffff; }")
+        self.doc_sources_list.setStyleSheet(
+            "QListWidget { border: 1px solid #E2E8F0; border-radius: 6px; background-color: #F8FAFC; }"
+        )
         c1_layout.addWidget(self.doc_sources_list, 1)
 
-        c1_prompts_title = QLabel("ICAI AUDIT PROMPT LIBRARY")
-        c1_prompts_title.setStyleSheet("font-size: 11px; font-weight: 800; color: #0f172a; letter-spacing: 0.8px; margin-top: 6px;")
-        c1_layout.addWidget(c1_prompts_title)
+        p_lbl = QLabel("ICAI PROMPT LIBRARY")
+        p_lbl.setStyleSheet(
+            "font-size: 10px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; margin-top: 4px;"
+        )
+        c1_layout.addWidget(p_lbl)
 
         prompt_scroll = QScrollArea()
         prompt_scroll.setWidgetResizable(True)
         prompt_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        prompt_scroll.setFixedHeight(210)
+        prompt_scroll.setFixedHeight(160)
         prompt_widget = QWidget()
         pw_layout = QVBoxLayout(prompt_widget)
         pw_layout.setContentsMargins(0, 0, 0, 0)
-        pw_layout.setSpacing(6)
+        pw_layout.setSpacing(4)
 
         for title_str, prompt_str in PROMPT_LIBRARY:
             btn = QPushButton(title_str)
             btn.setToolTip(prompt_str)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            btn.setStyleSheet("QPushButton { background-color: #f8fafc; color: #0284c7; font-size: 11px; font-weight: 600; border: 1px solid #bae6fd; border-radius: 6px; padding: 7px 10px; text-align: left; }")
+            btn.setStyleSheet(
+                "QPushButton { background-color: #F8FAFC; color: #2563EB; font-size: 11px; font-weight: 600; border: 1px solid #BFDBFE; border-radius: 4px; padding: 5px 8px; text-align: left; }"
+            )
             btn.clicked.connect(lambda checked=False, p=prompt_str: self._on_prompt_pill_clicked(p))
             pw_layout.addWidget(btn)
 
@@ -224,101 +225,93 @@ class AIAssistantView(QWidget):
         c1_layout.addWidget(prompt_scroll)
         splitter.addWidget(col1)
 
-        # Column 2
-        col2 = QFrame()
-        col2.setStyleSheet("background-color: #ffffff; border-right: 1px solid #e1e8f4;")
-        c2_layout = QVBoxLayout(col2)
-        c2_layout.setContentsMargins(16, 16, 16, 16)
-        c2_layout.setSpacing(10)
-
-        c2_title = QLabel("🤖 AI AUDIT INVESTIGATION COPILOT")
-        c2_title.setStyleSheet("font-size: 11px; font-weight: 800; color: #0f172a; letter-spacing: 0.8px;")
-        c2_layout.addWidget(c2_title)
+        # Column 2: Chat & Reasoning
+        col2 = CardWidget("INVESTIGATION COPILOT")
+        c2_layout = col2.content_layout
 
         self.chat_display = QTextEdit()
         self.chat_display.setReadOnly(True)
-        self.chat_display.setPlaceholderText("FinAuditPro AI Copilot\n\nWelcome to AI Audit Analysis. Select an evidence document from the left, run an ICAI prompt, or ask any question about the client's financial records.")
-        self.chat_display.setStyleSheet("QTextEdit { border: 1px solid #e1e8f4; border-radius: 8px; background-color: #f8fafc; padding: 12px; font-size: 13px; color: #0f172a; }")
+        self.chat_display.setPlaceholderText(
+            "FinAuditPro AI Copilot\n\nAsk questions about financial evidence, verify statutory CARO 2020 clauses, or analyze trial balance anomalies."
+        )
+        self.chat_display.setStyleSheet(
+            "QTextEdit { border: 1px solid #E2E8F0; border-radius: 6px; background-color: #F8FAFC; padding: 10px; font-size: 13px; color: #0F172A; }"
+        )
         c2_layout.addWidget(self.chat_display, 1)
 
         self.reasoning_display = QTextEdit()
         self.reasoning_display.setReadOnly(True)
-        self.reasoning_display.setMaximumHeight(80)
-        self.reasoning_display.setPlaceholderText("Model reasoning (<think>) tokens...")
-        self.reasoning_display.setStyleSheet("QTextEdit { border: 1px solid #fde68a; border-radius: 6px; background-color: #fffbeb; padding: 6px; font-size: 11px; color: #92400e; }")
+        self.reasoning_display.setMaximumHeight(65)
+        self.reasoning_display.setPlaceholderText("Model reasoning tokens (<think>)...")
+        self.reasoning_display.setStyleSheet(
+            "QTextEdit { border: 1px solid #FDE68A; border-radius: 4px; background-color: #FFFBEB; padding: 4px; font-size: 11px; color: #92400E; }"
+        )
         c2_layout.addWidget(self.reasoning_display)
 
         pills_row = QHBoxLayout()
-        pills_row.setSpacing(6)
+        pills_row.setSpacing(4)
         for pill in QUICK_PILLS:
             pbtn = QPushButton(pill)
             pbtn.setCursor(Qt.CursorShape.PointingHandCursor)
-            pbtn.setStyleSheet("QPushButton { background-color: #f1f5f9; color: #0284c7; font-size: 10px; font-weight: 600; border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 8px; }")
-            pbtn.clicked.connect(lambda checked=False, p=pill: self._on_prompt_pill_clicked(f"Analyze {p} in financial records."))
+            pbtn.setStyleSheet(
+                "QPushButton { background-color: #F1F5F9; color: #2563EB; font-size: 10px; font-weight: 600; border: 1px solid #E2E8F0; border-radius: 4px; padding: 2px 6px; }"
+            )
+            pbtn.clicked.connect(
+                lambda checked=False, p=pill: self._on_prompt_pill_clicked(
+                    f"Analyze {p} in financial records."
+                )
+            )
             pills_row.addWidget(pbtn)
         pills_row.addStretch()
         c2_layout.addLayout(pills_row)
 
         input_row = QHBoxLayout()
+        input_row.setSpacing(8)
         self.qa_input = QLineEdit()
-        self.qa_input.setPlaceholderText("Ask AI Copilot about financial evidence, SA 500 compliance, or GST anomalies...")
-        self.qa_input.setStyleSheet("QLineEdit { border: 1px solid #cbd5e1; border-radius: 6px; padding: 9px 12px; font-size: 13px; color: #0f172a; background: #ffffff; }")
+        self.qa_input.setPlaceholderText(
+            "Ask AI Copilot about evidence, SA 500 compliance, or GST anomalies..."
+        )
+        self.qa_input.setStyleSheet(
+            "QLineEdit { border: 1px solid #CBD5E1; border-radius: 6px; padding: 7px 10px; font-size: 12px; background: #FFFFFF; }"
+        )
         self.qa_input.returnPressed.connect(self._on_ask_clicked)
 
-        btn_send = QPushButton("Send Prompt ➔")
+        btn_send = QPushButton("Send →")
         btn_send.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_send.setStyleSheet("QPushButton { background-color: #0284c7; color: #ffffff; font-size: 12px; font-weight: 700; border-radius: 6px; padding: 9px 16px; border: none; }")
+        btn_send.setStyleSheet(
+            "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 14px; border: none; }"
+        )
         btn_send.clicked.connect(self._on_ask_clicked)
 
         input_row.addWidget(self.qa_input, 1)
         input_row.addWidget(btn_send)
         c2_layout.addLayout(input_row)
-
         splitter.addWidget(col2)
 
-        # Column 3
-        col3 = QFrame()
-        col3.setStyleSheet("background-color: #ffffff;")
-        c3_layout = QVBoxLayout(col3)
-        c3_layout.setContentsMargins(16, 16, 16, 16)
-        c3_layout.setSpacing(10)
-
-        c3_title = QLabel("🔍 AUDIT FINDINGS & EVIDENCE")
-        c3_title.setStyleSheet("font-size: 11px; font-weight: 800; color: #0f172a; letter-spacing: 0.8px;")
-        c3_layout.addWidget(c3_title)
+        # Column 3: Findings & Evidence
+        col3 = CardWidget("FINDINGS & EVIDENCE")
+        c3_layout = col3.content_layout
 
         self.findings_display = QTextEdit()
         self.findings_display.setReadOnly(True)
-        self.findings_display.setPlaceholderText("No Anomalies Flagged\n\nExecute prompts or run ICAI scan to trigger AI evidence analysis.")
-        self.findings_display.setStyleSheet("QTextEdit { border: 1px solid #e1e8f4; border-radius: 8px; background-color: #ffffff; padding: 12px; font-size: 12px; color: #334155; }")
+        self.findings_display.setPlaceholderText(
+            "No anomalies flagged.\n\nExecute prompts or run an ICAI scan to generate evidence references."
+        )
+        self.findings_display.setStyleSheet(
+            "QTextEdit { border: 1px solid #E2E8F0; border-radius: 6px; background-color: #FFFFFF; padding: 10px; font-size: 12px; color: #334155; }"
+        )
         c3_layout.addWidget(self.findings_display, 1)
-
         splitter.addWidget(col3)
-        splitter.setSizes([260, 480, 320])
+
+        splitter.setSizes([240, 460, 300])
         main_layout.addWidget(splitter, 1)
 
         self.refresh_provider_status()
-
-    def _create_metric_badge(self, title: str, val: str, fg: str, bg: str) -> QFrame:
-        f = QFrame()
-        f.setStyleSheet(f"background-color: {bg}; border-radius: 6px; padding: 4px 12px;")
-        l = QHBoxLayout(f)
-        l.setContentsMargins(0, 0, 0, 0)
-        l.setSpacing(8)
-
-        t = QLabel(title)
-        t.setStyleSheet(f"font-size: 10px; font-weight: 800; color: {fg};")
-        v = QLabel(val)
-        v.setStyleSheet(f"font-size: 14px; font-weight: 800; color: {fg};")
-        l.addWidget(t)
-        l.addWidget(v)
-        return f
 
     def _load_evidence_documents(self) -> None:
         self.doc_sources_list.clear()
         if not self.current_engagement or not self.document_service:
             return
-
         docs = self.document_service.list_documents(self.current_engagement.id)
         for doc in docs:
             self.doc_sources_list.addItem(QListWidgetItem(f"📄 {doc.original_filename}"))
@@ -329,15 +322,20 @@ class AIAssistantView(QWidget):
 
     def _on_run_icai_scan(self) -> None:
         if not self.current_engagement:
-            QMessageBox.warning(self, "No Active Audit", "Please select an active audit engagement first.")
+            QMessageBox.warning(
+                self, "No Active Audit", "Please select an active audit engagement first."
+            )
             return
-
-        self.qa_input.setText("Perform full ICAI statutory audit scan (CARO 2020, Sec 188, SA 240) on uploaded documents.")
+        self.qa_input.setText(
+            "Perform full ICAI statutory audit scan (CARO 2020, Sec 188, SA 240) on uploaded documents."
+        )
         self._on_ask_clicked()
 
     def _on_ask_clicked(self) -> None:
         if not self.current_engagement:
-            QMessageBox.warning(self, "No Engagement", "Please select an active audit engagement first.")
+            QMessageBox.warning(
+                self, "No Engagement", "Please select an active audit engagement first."
+            )
             return
 
         q = self.qa_input.text().strip()
@@ -358,10 +356,9 @@ class AIAssistantView(QWidget):
 
     def _on_ask_done(self, res) -> None:
         self.chat_display.setText(res.response_text)
-        if getattr(res, "reasoning_text", None):
-            self.reasoning_display.setText(res.reasoning_text)
-        else:
-            self.reasoning_display.setText("No reasoning (<think>) tokens generated.")
+        self.reasoning_display.setText(
+            getattr(res, "reasoning_text", "") or "No reasoning (<think>) tokens generated."
+        )
 
         if getattr(res, "retrieved_chunks", None):
             findings_text = "=== RETRIEVED EVIDENCE CHUNKS ===\n\n"

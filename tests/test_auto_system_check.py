@@ -1,6 +1,7 @@
 """Automated test verifying the system check diagnostic script and auto-bootstrap launcher."""
 
 from scripts.automated_system_check import run_system_check
+
 from finauditpro.infrastructure.first_run import bootstrap_app_data_dirs, initialize_database
 
 

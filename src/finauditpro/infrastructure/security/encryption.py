@@ -82,4 +82,3 @@ def decrypt_sensitive_string(cipher_text: str | None) -> str | None:
     except Exception:
         # Fallback if plaintext or key rotated
         return cipher_text
-

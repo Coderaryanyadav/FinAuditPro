@@ -18,6 +18,7 @@ from finauditpro.domain.value_objects import Money
 
 class FinancialImportError(Exception):
     """Raised when dataset file reading or column mapping validation fails."""
+
     pass
 
 
@@ -60,6 +61,7 @@ def parse_indian_date(val: Any) -> str | None:
     for fmt in ("%d-%m-%Y", "%d/%m/%Y", "%Y-%m-%d", "%Y/%m/%d", "%d.%m.%Y", "%d-%b-%Y", "%d %b %Y"):
         try:
             from datetime import datetime
+
             dt = datetime.strptime(s_val, fmt)
             return dt.strftime("%Y-%m-%d")
         except ValueError:
@@ -67,6 +69,7 @@ def parse_indian_date(val: Any) -> str | None:
 
     try:
         from dateutil import parser
+
         dt = parser.parse(s_val, dayfirst=True)
         return dt.strftime("%Y-%m-%d")
     except Exception:
@@ -102,6 +105,7 @@ class FinancialImporter:
 
         if ext in (".xlsx", ".xls"):
             import openpyxl  # type: ignore
+
             wb = openpyxl.load_workbook(file_path, data_only=True)
             sheet = wb.active
             iter_rows = sheet.iter_rows(values_only=True)
@@ -116,7 +120,9 @@ class FinancialImporter:
                 if not any(row_tuple):
                     continue
                 row_dict = {
-                    headers[i]: str(row_tuple[i]).strip() if i < len(row_tuple) and row_tuple[i] is not None else ""
+                    headers[i]: str(row_tuple[i]).strip()
+                    if i < len(row_tuple) and row_tuple[i] is not None
+                    else ""
                     for i in range(len(headers))
                 }
                 rows.append(row_dict)
@@ -166,7 +172,14 @@ class FinancialImporter:
                 acc_name = r.get(col_code, "").strip()
 
             if not acc_name:
-                errors.append(RowError(row_no=idx, column_name="account_name", raw_value="", error_reason="Missing Account Name"))
+                errors.append(
+                    RowError(
+                        row_no=idx,
+                        column_name="account_name",
+                        raw_value="",
+                        error_reason="Missing Account Name",
+                    )
+                )
                 continue
 
             try:
@@ -194,7 +207,11 @@ class FinancialImporter:
                     )
                 )
             except ValueError as val_ex:
-                errors.append(RowError(row_no=idx, column_name="amount", raw_value=str(r), error_reason=str(val_ex)))
+                errors.append(
+                    RowError(
+                        row_no=idx, column_name="amount", raw_value=str(r), error_reason=str(val_ex)
+                    )
+                )
 
         return ImportResult(total_rows=len(rows), valid_rows=valid_lines, errors=errors)
 
@@ -222,7 +239,14 @@ class FinancialImporter:
                 try:
                     dt_str = parse_indian_date(r.get(col_date))
                 except ValueError as dt_ex:
-                    errors.append(RowError(row_no=idx, column_name="date", raw_value=str(r.get(col_date)), error_reason=str(dt_ex)))
+                    errors.append(
+                        RowError(
+                            row_no=idx,
+                            column_name="date",
+                            raw_value=str(r.get(col_date)),
+                            error_reason=str(dt_ex),
+                        )
+                    )
                     continue
 
             try:
@@ -250,7 +274,11 @@ class FinancialImporter:
                     )
                 )
             except ValueError as val_ex:
-                errors.append(RowError(row_no=idx, column_name="amount", raw_value=str(r), error_reason=str(val_ex)))
+                errors.append(
+                    RowError(
+                        row_no=idx, column_name="amount", raw_value=str(r), error_reason=str(val_ex)
+                    )
+                )
 
         return ImportResult(total_rows=len(rows), valid_rows=valid_entries, errors=errors)
 
@@ -276,7 +304,14 @@ class FinancialImporter:
                 try:
                     dt_str = parse_indian_date(r.get(col_date))
                 except ValueError as dt_ex:
-                    errors.append(RowError(row_no=idx, column_name="date", raw_value=str(r.get(col_date)), error_reason=str(dt_ex)))
+                    errors.append(
+                        RowError(
+                            row_no=idx,
+                            column_name="date",
+                            raw_value=str(r.get(col_date)),
+                            error_reason=str(dt_ex),
+                        )
+                    )
                     continue
 
             val_dt_str = None
@@ -309,6 +344,10 @@ class FinancialImporter:
                     )
                 )
             except ValueError as val_ex:
-                errors.append(RowError(row_no=idx, column_name="amount", raw_value=str(r), error_reason=str(val_ex)))
+                errors.append(
+                    RowError(
+                        row_no=idx, column_name="amount", raw_value=str(r), error_reason=str(val_ex)
+                    )
+                )
 
         return ImportResult(total_rows=len(rows), valid_rows=valid_txns, errors=errors)

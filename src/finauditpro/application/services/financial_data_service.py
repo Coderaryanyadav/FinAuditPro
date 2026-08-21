@@ -45,7 +45,9 @@ class FinancialDataService:
                 for _ in range(10):
                     try:
                         row = next(reader)
-                        preview_rows.append({headers[i]: row[i] for i in range(min(len(headers), len(row)))})
+                        preview_rows.append(
+                            {headers[i]: row[i] for i in range(min(len(headers), len(row)))}
+                        )
                     except StopIteration:
                         break
         elif ext in (".xlsx", ".xls"):
@@ -57,7 +59,10 @@ class FinancialDataService:
                 iter_rows = sheet.iter_rows(values_only=True)
                 try:
                     raw_headers = next(iter_rows)
-                    headers = [str(h) if h is not None else f"Column_{i+1}" for i, h in enumerate(raw_headers)]
+                    headers = [
+                        str(h) if h is not None else f"Column_{i + 1}"
+                        for i, h in enumerate(raw_headers)
+                    ]
                     for _ in range(10):
                         row = next(iter_rows)
                         row_dict = {
@@ -112,7 +117,10 @@ class FinancialDataService:
             sheet = wb.active
             iter_rows = sheet.iter_rows(values_only=True)
             try:
-                raw_h = [str(h) if h is not None else f"Column_{i+1}" for i, h in enumerate(next(iter_rows))]
+                raw_h = [
+                    str(h) if h is not None else f"Column_{i + 1}"
+                    for i, h in enumerate(next(iter_rows))
+                ]
                 for r in iter_rows:
                     row_dict = {
                         raw_h[i]: str(r[i]) if i < len(r) and r[i] is not None else ""
@@ -138,6 +146,7 @@ class FinancialDataService:
         dataset_id = str(uuid4())
 
         for idx, row in enumerate(raw_rows, start=1):
+
             def _get_float(key: str | None, target_row: dict[str, str]) -> float:
                 if not key or key not in target_row:
                     return 0.0

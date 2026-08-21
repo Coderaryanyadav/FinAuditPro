@@ -164,7 +164,9 @@ class MockLocalAIProvider(BaseAIProvider):
                 f"The attached document evidence confirms compliance with accounting principles and statutory rules."
             ),
             citations=citations,
-            risk_severity="High" if any("risk" in c.excerpt.lower() for c in citations) else "Medium",
+            risk_severity="High"
+            if any("risk" in c.excerpt.lower() for c in citations)
+            else "Medium",
             recommended_procedure="Perform substantive verification of supporting voucher documentation.",
             confidence_score=0.92,
             is_ai_generated=True,

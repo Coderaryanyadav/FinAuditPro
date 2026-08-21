@@ -37,7 +37,6 @@ class FinancialDataRepository:
         self.session = session
 
     def _to_dataset_entity(self, model: FinancialDatasetModel) -> FinancialDataset:
-        errs = []
         return FinancialDataset(
             id=model.id,
             engagement_id=model.engagement_id,
@@ -51,7 +50,7 @@ class FinancialDataRepository:
             row_count=model.row_count,
             error_rows=0,
             column_mappings=model.column_mappings,
-            errors=errs,
+            errors=[],
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
@@ -100,19 +99,13 @@ class FinancialDataRepository:
         self.add_ledger_entries(entries)
 
     def list_datasets_by_engagement(self, engagement_id: str) -> list[FinancialDataset]:
-        stmt = (
-            select(FinancialDatasetModel)
-            .where(FinancialDatasetModel.engagement_id == engagement_id)
-            .order_by(FinancialDatasetModel.created_at.desc())
-        )
-        models = self.session.scalars(stmt).all()
-        return [self._to_dataset_entity(m) for m in models]
+        stmt = select(FinancialDatasetModel).where(FinancialDatasetModel.engagement_id == engagement_id).order_by(FinancialDatasetModel.created_at.desc())
+        return [self._to_dataset_entity(m) for m in self.session.scalars(stmt).all()]
 
     def get_datasets_by_engagement(self, engagement_id: str) -> list[FinancialDataset]:
         return self.list_datasets_by_engagement(engagement_id)
 
     def get_records_by_dataset(self, dataset_id: str) -> list[FinancialRecord]:
-        entries = self.get_ledger_entries(dataset_id)
         return [
             FinancialRecord(
                 id=e.id,
@@ -127,15 +120,13 @@ class FinancialDataRepository:
                 amount=(e.debit_paise - e.credit_paise) / 100.0,
                 narration=e.narration,
             )
-            for e in entries
+            for e in self.get_ledger_entries(dataset_id)
         ]
 
     def get_dataset_records(self, dataset_id: str) -> list[FinancialRecord]:
         return self.get_records_by_dataset(dataset_id)
 
-    def add_analytics_result(
-        self, result: Any, anomalies: list[Any]
-    ) -> Any:
+    def add_analytics_result(self, result: Any, anomalies: list[Any]) -> Any:
         exc_items = [
             ExceptionItem(
                 analysis_run_id=getattr(result, "id", str(uuid4())),
@@ -144,7 +135,7 @@ class FinancialDataRepository:
                 severity=getattr(a, "severity", "Medium"),
                 title=f"Anomaly at Row {getattr(a, 'row_index', 1)}",
                 description=getattr(a, "rationale", ""),
-                implicated_rows=[getattr(a, "row_index", 1)],
+                implicated_rows=[getattr(a, 'row_index', 1)],
                 computed_evidence=getattr(a, "rationale", ""),
             )
             for a in anomalies
@@ -153,11 +144,9 @@ class FinancialDataRepository:
         return result
 
     def list_flagged_anomalies_for_engagement(self, engagement_id: str) -> list[Any]:
-        datasets = self.list_datasets_by_engagement(engagement_id)
         anomalies = []
-        for ds in datasets:
-            excs = self.list_exceptions_by_dataset(ds.id)
-            for e in excs:
+        for ds in self.list_datasets_by_engagement(engagement_id):
+            for e in self.list_exceptions_by_dataset(ds.id):
                 anomalies.append(
                     FlaggedAnomaly(
                         analytics_result_id=e.analysis_run_id,
@@ -198,7 +187,6 @@ class FinancialDataRepository:
 
     def get_ledger_entries(self, dataset_id: str) -> list[LedgerEntry]:
         stmt = select(LedgerEntryModel).where(LedgerEntryModel.dataset_id == dataset_id).order_by(LedgerEntryModel.source_row_no.asc())
-        models = self.session.scalars(stmt).all()
         return [
             LedgerEntry(
                 id=m.id,
@@ -216,7 +204,7 @@ class FinancialDataRepository:
                 created_by_raw=m.created_by_raw,
                 raw_values=json.loads(m.raw_values_json) if m.raw_values_json else {},
             )
-            for m in models
+            for m in self.session.scalars(stmt).all()
         ]
 
     def add_trial_balance_lines(self, lines: list[TrialBalanceLine]) -> None:
@@ -243,7 +231,6 @@ class FinancialDataRepository:
 
     def get_trial_balance_lines(self, dataset_id: str) -> list[TrialBalanceLine]:
         stmt = select(TrialBalanceLineModel).where(TrialBalanceLineModel.dataset_id == dataset_id).order_by(TrialBalanceLineModel.source_row_no.asc())
-        models = self.session.scalars(stmt).all()
         return [
             TrialBalanceLine(
                 id=m.id,
@@ -260,7 +247,7 @@ class FinancialDataRepository:
                 closing_cr_paise=m.closing_cr_paise,
                 raw_values=json.loads(m.raw_values_json) if m.raw_values_json else {},
             )
-            for m in models
+            for m in self.session.scalars(stmt).all()
         ]
 
     def add_bank_transactions(self, txns: list[BankTransaction]) -> None:
@@ -286,7 +273,6 @@ class FinancialDataRepository:
 
     def get_bank_transactions(self, dataset_id: str) -> list[BankTransaction]:
         stmt = select(BankTransactionModel).where(BankTransactionModel.dataset_id == dataset_id).order_by(BankTransactionModel.source_row_no.asc())
-        models = self.session.scalars(stmt).all()
         return [
             BankTransaction(
                 id=m.id,
@@ -302,7 +288,7 @@ class FinancialDataRepository:
                 reference=m.reference,
                 raw_values=json.loads(m.raw_values_json) if m.raw_values_json else {},
             )
-            for m in models
+            for m in self.session.scalars(stmt).all()
         ]
 
     def add_exceptions(self, exceptions: list[ExceptionItem]) -> None:
@@ -329,7 +315,6 @@ class FinancialDataRepository:
 
     def list_exceptions_by_dataset(self, dataset_id: str) -> list[ExceptionItem]:
         stmt = select(ExceptionItemModel).where(ExceptionItemModel.dataset_id == dataset_id).order_by(ExceptionItemModel.created_at.desc())
-        models = self.session.scalars(stmt).all()
         return [
             ExceptionItem(
                 id=m.id,
@@ -346,7 +331,7 @@ class FinancialDataRepository:
                 created_at=m.created_at,
                 updated_at=m.updated_at,
             )
-            for m in models
+            for m in self.session.scalars(stmt).all()
         ]
 
     def add_finding(self, finding: Finding) -> Finding:
@@ -373,7 +358,6 @@ class FinancialDataRepository:
 
     def list_findings_by_engagement(self, engagement_id: str) -> list[Finding]:
         stmt = select(FindingModel).where(FindingModel.engagement_id == engagement_id).order_by(FindingModel.created_at.desc())
-        models = self.session.scalars(stmt).all()
         return [
             Finding(
                 id=m.id,
@@ -392,5 +376,5 @@ class FinancialDataRepository:
                 created_at=m.created_at,
                 updated_at=m.updated_at,
             )
-            for m in models
+            for m in self.session.scalars(stmt).all()
         ]

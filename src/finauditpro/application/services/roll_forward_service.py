@@ -1,25 +1,22 @@
 """Application service managing multi-year audit roll-forward, SA 510 opening balance tie-out, and carried findings provenance."""
 
-from datetime import timezone
-from uuid import uuid4
-
 from finauditpro.application.roll_forward_dtos import ConfirmTieOutDTO, ExecuteRollForwardDTO
-from finauditpro.application.services.engagement_service import CreateEngagementDTO, EngagementService
+from finauditpro.application.services.engagement_service import (
+    CreateEngagementDTO,
+    EngagementService,
+)
 from finauditpro.domain.audit_matrix_entities import (
-    AssertionEnum,
     AuditFinding,
     AuditProcedure,
     AuditRisk,
-    BenchmarkTypeEnum,
-    FindingSourceEnum,
     FindingStatusEnum,
     MaterialityAssessment,
     ProcedureStatusEnum,
     RiskSeverityEnum,
 )
 from finauditpro.domain.clock import utc_now
-from finauditpro.domain.entities import AuditEvent, Engagement, EngagementStatusEnum
-from finauditpro.domain.exceptions import EntityNotFoundError, PermissionDeniedError, ValidationError
+from finauditpro.domain.entities import AuditEvent, Engagement
+from finauditpro.domain.exceptions import EntityNotFoundError, ValidationError
 from finauditpro.domain.roll_forward_entities import (
     OpeningBalanceLink,
     RollForwardRecord,
@@ -55,7 +52,9 @@ class RollForwardService:
                 raise EntityNotFoundError("Source Engagement", dto.source_engagement_id)
 
             if source_eng.status.value not in ("Archived", "Completed"):
-                raise ValidationError("Roll-forward can only be executed from a closed or archived prior-year engagement.")
+                raise ValidationError(
+                    "Roll-forward can only be executed from a closed or archived prior-year engagement."
+                )
 
         # Create New Engagement for Next FY for SAME CLIENT
         new_eng = self.engagement_service.create_engagement(
@@ -80,7 +79,12 @@ class RollForwardService:
             if dto.carry_permanent_documents:
                 doc_repo = DocumentRepository(session)
                 docs = doc_repo.list_by_engagement(dto.source_engagement_id)
-                perm_docs = [d for d in docs if "PERMANENT" in d.document_category.value.upper() or d.document_category.value == "General"]
+                perm_docs = [
+                    d
+                    for d in docs
+                    if "PERMANENT" in d.document_category.value.upper()
+                    or d.document_category.value == "General"
+                ]
                 if perm_docs:
                     items_carried.append(f"{len(perm_docs)} Permanent File Document Reference(s)")
 
@@ -148,7 +152,11 @@ class RollForwardService:
             # 5. Carry Open / Carried Findings (Preserving M5 AI Badges & Citations)
             if dto.carry_findings:
                 source_findings = matrix_repo.list_findings_for_engagement(dto.source_engagement_id)
-                carried = [f for f in source_findings if f.status in (FindingStatusEnum.OPEN, FindingStatusEnum.UNDER_REVIEW)]
+                carried = [
+                    f
+                    for f in source_findings
+                    if f.status in (FindingStatusEnum.OPEN, FindingStatusEnum.UNDER_REVIEW)
+                ]
                 for f in carried:
                     carried_finding = AuditFinding(
                         engagement_id=new_eng.id,
@@ -217,7 +225,9 @@ class RollForwardService:
 
         return new_eng
 
-    def get_opening_balance_tie_out(self, engagement_id: str) -> tuple[TieOutSummary, list[OpeningBalanceLink]]:
+    def get_opening_balance_tie_out(
+        self, engagement_id: str
+    ) -> tuple[TieOutSummary, list[OpeningBalanceLink]]:
         """Fetch opening balance links and compute SA 510 tie-out summary."""
         with self.db_manager.session_scope() as session:
             repo = RollForwardRepository(session)

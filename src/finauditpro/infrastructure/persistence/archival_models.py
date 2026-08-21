@@ -12,7 +12,9 @@ class EngagementArchiveModel(Base):
     __tablename__ = "engagement_archives"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    engagement_id: Mapped[str] = mapped_column(String, ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False)
+    engagement_id: Mapped[str] = mapped_column(
+        String, ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False
+    )
     archive_path: Mapped[str] = mapped_column(Text, nullable=False)
     manifest_hash: Mapped[str] = mapped_column(String, nullable=False)
     sealed_content_hash: Mapped[str] = mapped_column(String, nullable=False)
@@ -45,8 +47,12 @@ class ArchiveReopenRecordModel(Base):
     __tablename__ = "archive_reopen_records"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    engagement_id: Mapped[str] = mapped_column(String, ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False)
+    engagement_id: Mapped[str] = mapped_column(
+        String, ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False
+    )
     reopened_by: Mapped[str] = mapped_column(String, nullable=False)
     reason: Mapped[str] = mapped_column(Text, nullable=False)
-    prior_archive_id: Mapped[str] = mapped_column(String, ForeignKey("engagement_archives.id", ondelete="RESTRICT"), nullable=False)
+    prior_archive_id: Mapped[str] = mapped_column(
+        String, ForeignKey("engagement_archives.id", ondelete="RESTRICT"), nullable=False
+    )
     created_at: Mapped[str] = mapped_column(String, nullable=False)

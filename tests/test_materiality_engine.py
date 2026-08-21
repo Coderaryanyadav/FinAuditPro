@@ -1,6 +1,5 @@
 """Tests for SA 320 Materiality Calculation Engine & Version Retention."""
 
-
 from finauditpro.domain.audit_matrix_entities import BenchmarkTypeEnum
 from finauditpro.domain.materiality_engine import BENCHMARK_GUIDANCE_OPTIONS, MaterialityEngine
 
@@ -24,7 +23,10 @@ def test_sa320_materiality_paise_precision() -> None:
 
     assert assessment.overall_materiality.formatted == "₹5,00,000.00"
     assert assessment.performance_materiality.formatted == "₹3,75,000.00"
-    assert assessment.clearly_trivial_threshold.formatted == "₹25,00,000.00" or assessment.clearly_trivial_threshold.formatted == "₹25,000.00"
+    assert (
+        assessment.clearly_trivial_threshold.formatted == "₹25,00,000.00"
+        or assessment.clearly_trivial_threshold.formatted == "₹25,000.00"
+    )
 
 
 def test_materiality_reproducibility() -> None:
@@ -73,6 +75,14 @@ def test_threshold_classification() -> None:
     )
 
     assert MaterialityEngine.classify_monetary_amount(10000, assessment) == "Clearly Trivial"
-    assert MaterialityEngine.classify_monetary_amount(600000, assessment) == "Requires Auditor Review"
-    assert MaterialityEngine.classify_monetary_amount(8000000, assessment) == "Above Performance Materiality"
-    assert MaterialityEngine.classify_monetary_amount(12000000, assessment) == "Above Overall Materiality"
+    assert (
+        MaterialityEngine.classify_monetary_amount(600000, assessment) == "Requires Auditor Review"
+    )
+    assert (
+        MaterialityEngine.classify_monetary_amount(8000000, assessment)
+        == "Above Performance Materiality"
+    )
+    assert (
+        MaterialityEngine.classify_monetary_amount(12000000, assessment)
+        == "Above Overall Materiality"
+    )

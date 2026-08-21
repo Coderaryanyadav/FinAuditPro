@@ -1,6 +1,7 @@
 """Pure domain entities and SA 510 tie-out math for multi-year audit roll-forward."""
 
 from uuid import uuid4
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from finauditpro.domain.clock import utc_now

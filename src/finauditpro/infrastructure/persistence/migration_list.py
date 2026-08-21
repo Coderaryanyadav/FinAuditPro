@@ -1,6 +1,5 @@
 """Registry of versioned schema migrations for FinAuditPro."""
 
-
 MIGRATION_001_SQL = """
 CREATE TABLE IF NOT EXISTS schema_migrations (
     version INTEGER PRIMARY KEY,
@@ -287,6 +286,8 @@ CREATE TABLE IF NOT EXISTS ai_runs (
 );
 """
 
+import sqlite3
+
 from finauditpro.infrastructure.persistence.migration_sqls import (
     MIGRATION_006_SQL,
     MIGRATION_007_SQL,
@@ -294,8 +295,6 @@ from finauditpro.infrastructure.persistence.migration_sqls import (
     MIGRATION_009_SQL,
 )
 
-
-import sqlite3
 
 def migration_009_fn(conn: sqlite3.Connection) -> None:
     cursor = conn.cursor()

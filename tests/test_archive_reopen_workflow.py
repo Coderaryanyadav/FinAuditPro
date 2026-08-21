@@ -75,7 +75,9 @@ def setup_reopen_env(tmp_path):
             generated_by="Auditor",
         )
     )
-    report_svc.approve_report(ApproveReportDTO(report_id=rep.id, approved_by="Audit Partner", approver_role="Partner"))
+    report_svc.approve_report(
+        ApproveReportDTO(report_id=rep.id, approved_by="Audit Partner", approver_role="Partner")
+    )
 
     archive = arch_svc.freeze_and_seal_engagement(
         FreezeAndSealDTO(

@@ -24,7 +24,9 @@ from finauditpro.infrastructure.persistence.repositories.financial_data_reposito
 )
 from finauditpro.infrastructure.persistence.repositories.firm_repository import FirmRepository
 from finauditpro.infrastructure.persistence.repositories.report_repository import ReportRepository
-from finauditpro.infrastructure.persistence.repositories.roll_forward_repository import RollForwardRepository
+from finauditpro.infrastructure.persistence.repositories.roll_forward_repository import (
+    RollForwardRepository,
+)
 from finauditpro.infrastructure.persistence.repositories.working_paper_repository import (
     WorkingPaperRepository,
 )

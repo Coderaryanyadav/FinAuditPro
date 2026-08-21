@@ -15,18 +15,32 @@ class UserSession:
 
 _ROLE_PERMISSIONS: dict[RoleEnum, set[str]] = {
     RoleEnum.PARTNER: {
-        "firm:create", "firm:edit", "client:create", "client:edit", "engagement:create",
-        "engagement:edit", "engagement:delete", "engagement:signoff", "audit:review",
+        "firm:create",
+        "firm:edit",
+        "client:create",
+        "client:edit",
+        "engagement:create",
+        "engagement:edit",
+        "engagement:delete",
+        "engagement:signoff",
+        "audit:review",
     },
     RoleEnum.MANAGER: {
-        "client:create", "client:edit", "engagement:create", "engagement:edit",
-        "audit:review", "audit:edit",
+        "client:create",
+        "client:edit",
+        "engagement:create",
+        "engagement:edit",
+        "audit:review",
+        "audit:edit",
     },
     RoleEnum.SENIOR: {
-        "engagement:edit", "audit:edit", "document:upload",
+        "engagement:edit",
+        "audit:edit",
+        "document:upload",
     },
     RoleEnum.ASSOCIATE: {
-        "audit:view", "document:upload",
+        "audit:view",
+        "document:upload",
     },
 }
 
@@ -47,7 +61,11 @@ class RBACManager:
     def require_permission(self, permission: str) -> None:
         """Raise PermissionDeniedError if session is missing or role is unprivileged."""
         if not self.check_permission(permission):
-            role_name = self.current_session.role.value if self.current_session else "None (Unauthenticated)"
+            role_name = (
+                self.current_session.role.value
+                if self.current_session
+                else "None (Unauthenticated)"
+            )
             raise PermissionDeniedError(
                 f"Permission denied for action '{permission}'. Current active role: {role_name}."
             )

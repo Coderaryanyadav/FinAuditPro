@@ -31,8 +31,12 @@ def setup_isolation_env(tmp_path):
     client_a = client_svc.create_client(CreateClientDTO(firm_id=firm.id, name="Client Alpha M7"))
     client_b = client_svc.create_client(CreateClientDTO(firm_id=firm.id, name="Client Beta M7"))
 
-    eng_a = eng_svc.create_engagement(CreateEngagementDTO(firm_id=firm.id, client_id=client_a.id, financial_year="2025-26"))
-    eng_b = eng_svc.create_engagement(CreateEngagementDTO(firm_id=firm.id, client_id=client_b.id, financial_year="2025-26"))
+    eng_a = eng_svc.create_engagement(
+        CreateEngagementDTO(firm_id=firm.id, client_id=client_a.id, financial_year="2025-26")
+    )
+    eng_b = eng_svc.create_engagement(
+        CreateEngagementDTO(firm_id=firm.id, client_id=client_b.id, financial_year="2025-26")
+    )
 
     report_svc = ReportService(db_manager)
     return eng_a, eng_b, report_svc

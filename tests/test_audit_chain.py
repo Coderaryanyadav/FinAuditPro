@@ -18,7 +18,9 @@ def test_hash_chaining_and_verification(tmp_path) -> None:
 
         ev1 = repo.add(AuditEvent(actor="Auditor 1", action="Created Firm", details="Firm A"))
         ev2 = repo.add(AuditEvent(actor="Auditor 1", action="Created Client", details="Client X"))
-        ev3 = repo.add(AuditEvent(actor="Auditor 2", action="Created Engagement", details="FY 2025-26"))
+        ev3 = repo.add(
+            AuditEvent(actor="Auditor 2", action="Created Engagement", details="FY 2025-26")
+        )
 
         assert ev1.previous_hash == "GENESIS_HASH"
         assert ev2.previous_hash == ev1.entry_hash
@@ -41,7 +43,9 @@ def test_db_triggers_reject_update_and_delete(tmp_path) -> None:
     # Try updating audit event directly via raw SQL
     with pytest.raises(Exception) as excinfo:
         with manager.engine.begin() as conn:
-            conn.execute(text("UPDATE audit_events SET actor = 'Hacker' WHERE id = :id"), {"id": event_id})
+            conn.execute(
+                text("UPDATE audit_events SET actor = 'Hacker' WHERE id = :id"), {"id": event_id}
+            )
     assert "append-only" in str(excinfo.value).lower()
 
     # Try deleting audit event directly via raw SQL

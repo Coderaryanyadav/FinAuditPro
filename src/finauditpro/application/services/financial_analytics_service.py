@@ -54,7 +54,9 @@ class FinancialAnalyticsService:
             output = DeterministicAnalyticsEngine.find_duplicates(record_dicts)
         elif dto.analysis_type == AnalyticsTypeEnum.HIGH_VALUE_ANOMALY:
             threshold = dto.threshold if dto.threshold is not None else 500000.0
-            output = DeterministicAnalyticsEngine.find_large_amounts(record_dicts, threshold=threshold)
+            output = DeterministicAnalyticsEngine.find_large_amounts(
+                record_dicts, threshold=threshold
+            )
         elif dto.analysis_type == AnalyticsTypeEnum.ROUND_NUMBER_CHECK:
             output = DeterministicAnalyticsEngine.find_round_numbers(record_dicts)
         elif dto.analysis_type == AnalyticsTypeEnum.WEEKEND_POSTING_CHECK:

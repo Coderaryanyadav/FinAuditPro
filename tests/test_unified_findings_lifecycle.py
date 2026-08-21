@@ -39,9 +39,20 @@ def setup_services(db_manager: DatabaseManager):
     eng_svc = EngagementService(db_manager)
     planning_svc = AuditPlanningService(db_manager)
 
-    firm = firm_svc.create_firm(CreateFirmDTO(name="Test CA Firm", firm_registration_number="FRN-999999"))
-    client = client_svc.create_client(CreateClientDTO(firm_id=firm.id, name="Test Enterprise Ltd", gstin="27AABCU9603R1ZN"))
-    eng = eng_svc.create_engagement(CreateEngagementDTO(firm_id=firm.id, client_id=client.id, financial_year="2025-26", lead_auditor="Lead Auditor"))
+    firm = firm_svc.create_firm(
+        CreateFirmDTO(name="Test CA Firm", firm_registration_number="FRN-999999")
+    )
+    client = client_svc.create_client(
+        CreateClientDTO(firm_id=firm.id, name="Test Enterprise Ltd", gstin="27AABCU9603R1ZN")
+    )
+    eng = eng_svc.create_engagement(
+        CreateEngagementDTO(
+            firm_id=firm.id,
+            client_id=client.id,
+            financial_year="2025-26",
+            lead_auditor="Lead Auditor",
+        )
+    )
 
     return eng, planning_svc
 
@@ -111,7 +122,11 @@ def test_finding_status_lifecycle_transitions(setup_services) -> None:
 
     # Legal: OPEN -> UNDER_REVIEW
     updated = planning_svc.update_finding_status(
-        UpdateFindingStatusDTO(finding_id=finding.id, new_status=FindingStatusEnum.UNDER_REVIEW, reviewer="Senior Partner")
+        UpdateFindingStatusDTO(
+            finding_id=finding.id,
+            new_status=FindingStatusEnum.UNDER_REVIEW,
+            reviewer="Senior Partner",
+        )
     )
     assert updated.status == FindingStatusEnum.UNDER_REVIEW
     assert updated.reviewer == "Senior Partner"

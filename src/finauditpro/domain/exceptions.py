@@ -22,9 +22,7 @@ class DuplicateEntityError(DomainError):
     """Raised when attempting to create an entity that already exists."""
 
     def __init__(self, entity_type: str, field_name: str, field_value: str) -> None:
-        super().__init__(
-            f"{entity_type} with {field_name} '{field_value}' already exists."
-        )
+        super().__init__(f"{entity_type} with {field_name} '{field_value}' already exists.")
         self.entity_type = entity_type
         self.field_name = field_name
         self.field_value = field_value
@@ -49,7 +47,9 @@ class InvalidStateTransitionError(DomainError):
     """Raised when an illegal status state transition is attempted."""
 
     def __init__(self, entity_type: str, current_state: str, target_state: str) -> None:
-        super().__init__(f"Cannot transition {entity_type} from '{current_state}' to '{target_state}'.")
+        super().__init__(
+            f"Cannot transition {entity_type} from '{current_state}' to '{target_state}'."
+        )
         self.entity_type = entity_type
         self.current_state = current_state
         self.target_state = target_state

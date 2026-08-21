@@ -20,7 +20,9 @@ from PySide6.QtWidgets import (
 class CommandItemWidget(QWidget):
     """Clean command row with category, label, and keyboard shortcut badge."""
 
-    def __init__(self, title: str, category: str, shortcut: str | None = None, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, title: str, category: str, shortcut: str | None = None, parent: QWidget | None = None
+    ) -> None:
         super().__init__(parent)
         layout = QHBoxLayout(self)
         layout.setContentsMargins(12, 8, 12, 8)
@@ -126,18 +128,90 @@ class CommandPaletteDialog(QDialog):
 
     def _register_default_commands(self) -> None:
         self._all_commands = [
-            {"title": "Go to Dashboard Overview", "category": "Navigation", "shortcut": "Alt+1", "key": "nav", "payload": 0},
-            {"title": "Go to Audit Firms Management", "category": "Navigation", "shortcut": "Alt+2", "key": "nav", "payload": 1},
-            {"title": "Go to Client Management", "category": "Navigation", "shortcut": "Alt+3", "key": "nav", "payload": 2},
-            {"title": "Go to Engagement Manager", "category": "Navigation", "shortcut": "Alt+4", "key": "nav", "payload": 3},
-            {"title": "Go to Document Intelligence Vault", "category": "Navigation", "shortcut": "Alt+5", "key": "nav", "payload": 4},
-            {"title": "Go to Financial Statements", "category": "Navigation", "shortcut": "Alt+6", "key": "nav", "payload": 5},
-            {"title": "Go to GST Reconciliation & 2B Match", "category": "Navigation", "shortcut": "Alt+7", "key": "nav", "payload": 6},
-            {"title": "Go to Statutory Compliance Matrix", "category": "Navigation", "shortcut": "Alt+8", "key": "nav", "payload": 7},
-            {"title": "Go to AI Audit Analysis Copilot", "category": "Navigation", "shortcut": "Alt+9", "key": "nav", "payload": 9},
-            {"title": "Go to SA 230 Working Papers", "category": "Navigation", "shortcut": "", "key": "nav", "payload": 10},
-            {"title": "Go to Independent Audit Reports", "category": "Navigation", "shortcut": "", "key": "nav", "payload": 11},
-            {"title": "Go to System Settings & CA Profile", "category": "Navigation", "shortcut": "Ctrl+,", "key": "nav", "payload": 14},
+            {
+                "title": "Go to Dashboard Overview",
+                "category": "Navigation",
+                "shortcut": "Alt+1",
+                "key": "nav",
+                "payload": 0,
+            },
+            {
+                "title": "Go to Audit Firms Management",
+                "category": "Navigation",
+                "shortcut": "Alt+2",
+                "key": "nav",
+                "payload": 1,
+            },
+            {
+                "title": "Go to Client Management",
+                "category": "Navigation",
+                "shortcut": "Alt+3",
+                "key": "nav",
+                "payload": 2,
+            },
+            {
+                "title": "Go to Engagement Manager",
+                "category": "Navigation",
+                "shortcut": "Alt+4",
+                "key": "nav",
+                "payload": 3,
+            },
+            {
+                "title": "Go to Document Intelligence Vault",
+                "category": "Navigation",
+                "shortcut": "Alt+5",
+                "key": "nav",
+                "payload": 4,
+            },
+            {
+                "title": "Go to Financial Statements",
+                "category": "Navigation",
+                "shortcut": "Alt+6",
+                "key": "nav",
+                "payload": 5,
+            },
+            {
+                "title": "Go to GST Reconciliation & 2B Match",
+                "category": "Navigation",
+                "shortcut": "Alt+7",
+                "key": "nav",
+                "payload": 6,
+            },
+            {
+                "title": "Go to Statutory Compliance Matrix",
+                "category": "Navigation",
+                "shortcut": "Alt+8",
+                "key": "nav",
+                "payload": 7,
+            },
+            {
+                "title": "Go to AI Audit Analysis Copilot",
+                "category": "Navigation",
+                "shortcut": "Alt+9",
+                "key": "nav",
+                "payload": 9,
+            },
+            {
+                "title": "Go to SA 230 Working Papers",
+                "category": "Navigation",
+                "shortcut": "",
+                "key": "nav",
+                "payload": 10,
+            },
+            {
+                "title": "Go to Independent Audit Reports",
+                "category": "Navigation",
+                "shortcut": "",
+                "key": "nav",
+                "payload": 11,
+            },
+            {
+                "title": "Go to System Settings & CA Profile",
+                "category": "Navigation",
+                "shortcut": "Ctrl+,",
+                "key": "nav",
+                "payload": 14,
+            },
         ]
 
     def _populate_list(self, commands: list[dict]) -> None:
@@ -160,7 +234,8 @@ class CommandPaletteDialog(QDialog):
 
         query = text.lower().strip()
         filtered = [
-            c for c in self._all_commands
+            c
+            for c in self._all_commands
             if query in c["title"].lower() or query in c["category"].lower()
         ]
         self._populate_list(filtered)

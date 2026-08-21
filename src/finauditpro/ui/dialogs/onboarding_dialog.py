@@ -37,13 +37,17 @@ class OnboardingDialog(QDialog):
             "All audit documentation, financial records, and vector search indices remain securely on this device."
         )
         notice.setWordWrap(True)
-        notice.setStyleSheet("color: #276749; background-color: #f0fff4; padding: 8px; border-radius: 4px; border: 1px solid #9ae6b4;")
+        notice.setStyleSheet(
+            "color: #276749; background-color: #f0fff4; padding: 8px; border-radius: 4px; border: 1px solid #9ae6b4;"
+        )
         layout.addWidget(notice)
 
         form = QFormLayout()
 
         self.firm_name_input = QLineEdit()
-        self.firm_name_input.setPlaceholderText("e.g. M/s Sharma & Associates, Chartered Accountants")
+        self.firm_name_input.setPlaceholderText(
+            "e.g. M/s Sharma & Associates, Chartered Accountants"
+        )
         form.addRow("Audit Firm Name:", self.firm_name_input)
 
         self.icai_number_input = QLineEdit()
@@ -70,12 +74,18 @@ class OnboardingDialog(QDialog):
         partner = self.partner_name_input.text().strip()
 
         if not firm_name or not partner:
-            QMessageBox.warning(self, "Validation Error", "Firm Name and Senior Partner Name are required.")
+            QMessageBox.warning(
+                self, "Validation Error", "Firm Name and Senior Partner Name are required."
+            )
             return
 
         try:
             self.firm_service.create_firm(CreateFirmDTO(name=firm_name))
-            QMessageBox.information(self, "Setup Complete", f"Workspace initialized for '{firm_name}'. Welcome, {partner}!")
+            QMessageBox.information(
+                self,
+                "Setup Complete",
+                f"Workspace initialized for '{firm_name}'. Welcome, {partner}!",
+            )
             self.accept()
         except Exception as ex:
             QMessageBox.critical(self, "Setup Failed", str(ex))

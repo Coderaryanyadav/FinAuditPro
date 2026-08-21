@@ -1,10 +1,11 @@
-"""System Settings & Environment Diagnostics Workspace View."""
+"""
+System Settings & Environment Diagnostics Workspace View for FinAuditPro.
+Manages LM Studio endpoints, cloud AI posture, and platform diagnostics.
+"""
 
-from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QCheckBox,
     QFormLayout,
-    QFrame,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -16,7 +17,7 @@ from PySide6.QtWidgets import (
 
 from finauditpro.application.services.settings_service import AppSettings, SettingsService
 from finauditpro.ui.dialogs.self_check_dialog import SelfCheckDialog
-from finauditpro.ui.theme import CardWidget
+from finauditpro.ui.theme import CardWidget, PageHeader
 from finauditpro.version import get_build_info
 
 
@@ -30,55 +31,81 @@ class SettingsView(QWidget):
 
     def _init_ui(self) -> None:
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(24, 20, 24, 24)
+        layout.setSpacing(14)
 
-        header_layout = QHBoxLayout()
-        header_layout.addWidget(QLabel("<h2>System Settings & Platform Configuration</h2>"))
-        header_layout.addStretch()
+        # 1. Page Header
+        self.header = PageHeader(
+            title="Settings & System Diagnostics",
+            subtitle="Local AI engine endpoints, cloud opt-in security posture, and runtime environment diagnostics.",
+            action_text="📋 Run Diagnostics",
+            action_callback=self._open_self_check,
+        )
+        layout.addWidget(self.header)
 
-        self.self_check_btn = QPushButton("📋 Run System Diagnostics")
-        self.self_check_btn.setStyleSheet("background-color: #2b6cb0; color: white; font-weight: bold; padding: 6px 12px;")
-        self.self_check_btn.clicked.connect(self._open_self_check)
-        header_layout.addWidget(self.self_check_btn)
-
-        layout.addLayout(header_layout)
-
-        # Build Version Metadata Card
+        # 2. Build Version Metadata Card
         build_info = get_build_info()
-        info_card = CardWidget("Application Build & Environment Diagnostics")
-        info_card.content_layout.addWidget(QLabel(f"<b>Application Name:</b> {build_info['app_name']} v{build_info['version']}"))
-        info_card.content_layout.addWidget(QLabel(f"<b>Python Version:</b> {build_info['python_version']} | <b>Architecture:</b> {build_info['arch']}"))
-        info_card.content_layout.addWidget(QLabel(f"<b>Platform:</b> {build_info['platform']} | <b>Offline Isolated:</b> {build_info['offline_isolated']}"))
+        info_card = CardWidget("APPLICATION BUILD & RUNTIME DIAGNOSTICS")
+        info_l = QVBoxLayout()
+        info_l.setSpacing(6)
+
+        info_l.addWidget(
+            QLabel(f"<b>Application:</b> {build_info['app_name']} v{build_info['version']}")
+        )
+        info_l.addWidget(
+            QLabel(
+                f"<b>Python Version:</b> {build_info['python_version']} · <b>Architecture:</b> {build_info['arch']}"
+            )
+        )
+        info_l.addWidget(
+            QLabel(
+                f"<b>Platform:</b> {build_info['platform']} · <b>Offline Isolated:</b> {build_info['offline_isolated']}"
+            )
+        )
+        info_card.content_layout.addLayout(info_l)
         layout.addWidget(info_card)
 
-        # Configuration Form Card
-        config_card = CardWidget("Local AI & LLM Provider Configuration")
+        # 3. Local AI Configuration Form Card
+        config_card = CardWidget("LOCAL AI & LLM PROVIDER CONFIGURATION")
         form = QFormLayout()
         form.setSpacing(10)
 
         self.endpoint_input = QLineEdit()
+        self.endpoint_input.setPlaceholderText("http://localhost:1234/v1")
         form.addRow("LM Studio Base URL:", self.endpoint_input)
 
         self.llm_input = QLineEdit()
+        self.llm_input.setPlaceholderText("e.g. qwen2.5-coder-7b-instruct")
         form.addRow("LLM Model Name:", self.llm_input)
 
         self.embed_input = QLineEdit()
+        self.embed_input.setPlaceholderText("e.g. text-embedding-nomic-embed-text-v1.5")
         form.addRow("Embedding Model Name:", self.embed_input)
 
-        self.cloud_optout_chk = QCheckBox("Enable External Cloud AI (Default: OFF / Disabled)")
-        form.addRow("Cloud AI Opt-In Posture:", self.cloud_optout_chk)
+        self.cloud_optout_chk = QCheckBox(
+            "Enable External Cloud AI (Default: OFF / Fully Isolated)"
+        )
+        form.addRow("Cloud AI Posture:", self.cloud_optout_chk)
 
         config_card.content_layout.addLayout(form)
         layout.addWidget(config_card)
 
-        # Bottom Button Bar
+        # 4. Save Button
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
-        save_btn = QPushButton("💾 Save Configuration Settings")
-        save_btn.setStyleSheet("background-color: #0284c7; color: white; font-weight: bold; padding: 9px 20px; font-size: 13px;")
+        save_btn = QPushButton("Save Configuration")
+        save_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2563EB; color: #FFFFFF;
+                font-size: 12px; font-weight: 600;
+                border-radius: 6px; padding: 8px 20px; border: none;
+            }
+            QPushButton:hover { background-color: #1D4ED8; }
+        """)
         save_btn.clicked.connect(self._save_settings)
         btn_layout.addWidget(save_btn)
         layout.addLayout(btn_layout)
-        layout.addStretch()
+        layout.addStretch(1)
 
         self._load_settings()
 
@@ -97,8 +124,9 @@ class SettingsView(QWidget):
             allow_cloud_ai=self.cloud_optout_chk.isChecked(),
         )
         self.settings_service.update_settings(settings)
-        QMessageBox.information(self, "Settings Saved", "Application configuration settings saved successfully.")
+        QMessageBox.information(
+            self, "Settings Saved", "Application configuration settings saved successfully."
+        )
 
     def _open_self_check(self) -> None:
-        dlg = SelfCheckDialog(self)
-        dlg.exec()
+        SelfCheckDialog(self).exec()

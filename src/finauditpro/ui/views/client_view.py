@@ -1,12 +1,16 @@
-"""Client management view."""
+"""
+Client Directory & Entity Management Workspace View for FinAuditPro.
+Enterprise client directory with search, entity filters, and responsive empty states.
+"""
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
+    QComboBox,
     QHBoxLayout,
     QHeaderView,
     QLabel,
+    QLineEdit,
     QMessageBox,
-    QPushButton,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -15,13 +19,13 @@ from PySide6.QtWidgets import (
 
 from finauditpro.application.services.client_service import ClientService
 from finauditpro.application.services.firm_service import FirmService
-from finauditpro.domain.entities import Firm
+from finauditpro.domain.entities import Client, Firm
 from finauditpro.ui.dialogs.client_dialog import ClientDialog
-from finauditpro.ui.theme import CardWidget
+from finauditpro.ui.theme import CardWidget, EmptyStateWidget, PageHeader
 
 
 class ClientView(QWidget):
-    """View listing clients for an audit firm with create/edit controls."""
+    """View listing clients for an audit firm with search, filters, and create/edit controls."""
 
     client_changed = Signal()
 
@@ -35,82 +39,177 @@ class ClientView(QWidget):
         self.firm_service = firm_service
         self.client_service = client_service
         self.current_firm: Firm | None = None
+        self._all_clients: list[Client] = []
 
         self._init_ui()
 
     def _init_ui(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(16)
+        layout.setContentsMargins(24, 20, 24, 24)
+        layout.setSpacing(14)
 
-        header_layout = QHBoxLayout()
-        self.title_label = QLabel("Client Directory")
-        self.title_label.setStyleSheet("font-size: 18px; font-weight: 800; color: #f8fafc;")
+        # 1. Page Header
+        self.header = PageHeader(
+            title="Clients",
+            subtitle="Manage client entities, statutory registrations, and contact relationships.",
+            action_text="+ Create New Client",
+            action_callback=self._create_client,
+        )
+        self.add_btn = self.header.action_btn
+        layout.addWidget(self.header)
 
-        self.add_btn = QPushButton("+ Create New Client")
-        self.add_btn.clicked.connect(self._create_client)
+        # 2. Search & Entity Filter Row
+        filter_card = CardWidget()
+        f_layout = QHBoxLayout()
+        f_layout.setContentsMargins(0, 0, 0, 0)
+        f_layout.setSpacing(10)
 
-        header_layout.addWidget(self.title_label)
-        header_layout.addStretch()
-        header_layout.addWidget(self.add_btn)
+        s_lbl = QLabel("Search:")
+        s_lbl.setStyleSheet(
+            "font-size: 11px; font-weight: 700; color: #64748B; letter-spacing: 0.5px;"
+        )
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Search clients by name, PAN, GSTIN, or industry...")
+        self.search_input.setStyleSheet(
+            "QLineEdit { border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px 10px; font-size: 12px; background: #FFFFFF; }"
+            "QLineEdit:focus { border-color: #2563EB; }"
+        )
+        self.search_input.textChanged.connect(self._apply_filters)
 
-        layout.addLayout(header_layout)
+        type_lbl = QLabel("Entity:")
+        type_lbl.setStyleSheet(
+            "font-size: 11px; font-weight: 700; color: #64748B; letter-spacing: 0.5px;"
+        )
+        self.type_combo = QComboBox()
+        self.type_combo.addItems(
+            [
+                "All Entities",
+                "Private Limited",
+                "Public Limited",
+                "LLP",
+                "Partnership",
+                "Proprietorship",
+            ]
+        )
+        self.type_combo.currentIndexChanged.connect(self._apply_filters)
 
-        card = CardWidget()
+        f_layout.addWidget(s_lbl)
+        f_layout.addWidget(self.search_input, stretch=1)
+        f_layout.addWidget(type_lbl)
+        f_layout.addWidget(self.type_combo)
+        filter_card.content_layout.addLayout(f_layout)
+        layout.addWidget(filter_card)
+
+        # 3. Table Card & Empty State
+        self.table_card = CardWidget("CLIENT DIRECTORY")
         self.table = QTableWidget()
-        self.table.setColumnCount(6)
+        self.table.setColumnCount(7)
         self.table.setHorizontalHeaderLabels(
-            ["Client Legal Name", "Entity Type", "PAN", "GSTIN", "Industry", "Contact Person"]
+            [
+                "CLIENT LEGAL NAME",
+                "ENTITY TYPE",
+                "PAN",
+                "GSTIN",
+                "INDUSTRY",
+                "CONTACT PERSON",
+                "STATUS",
+            ]
         )
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.table.horizontalHeader().setSectionResizeMode(
-            2, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.table.horizontalHeader().setSectionResizeMode(
-            3, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.table.horizontalHeader().setSectionResizeMode(
-            4, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.table.horizontalHeader().setSectionResizeMode(
-            5, QHeaderView.ResizeMode.ResizeToContents
-        )
+        for c in range(1, 7):
+            self.table.horizontalHeader().setSectionResizeMode(
+                c, QHeaderView.ResizeMode.ResizeToContents
+            )
         self.table.verticalHeader().setVisible(False)
+        self.table.setAlternatingRowColors(True)
+        self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.doubleClicked.connect(self._on_double_click)
 
-        card.content_layout.addWidget(self.table)
-        layout.addWidget(card)
+        self.empty_state = EmptyStateWidget(
+            title="No clients registered yet",
+            description="Create your first client record to begin an audit engagement and analyze statutory records.",
+            action_text="+ Create Client",
+            action_callback=self._create_client,
+        )
+
+        self.table_card.content_layout.addWidget(self.table)
+        self.table_card.content_layout.addWidget(self.empty_state)
+        layout.addWidget(self.table_card)
+        layout.addStretch(1)
+
+        self.refresh()
 
     def set_firm(self, firm: Firm | None) -> None:
         self.current_firm = firm
         if firm:
-            self.title_label.setText(f"Client Directory ({firm.name})")
-            self.add_btn.setEnabled(True)
+            self.header.title_lbl.setText(f"Clients — {firm.name}")
+            self.header.action_btn.setEnabled(True)
         else:
-            self.title_label.setText("Client Directory (Select a Firm First)")
-            self.add_btn.setEnabled(False)
+            self.header.title_lbl.setText("Clients")
+            self.header.action_btn.setEnabled(True)
         self.refresh()
 
     def refresh(self) -> None:
         if not self.current_firm:
-            clients = self.client_service.list_all_clients()
+            self._all_clients = (
+                self.client_service.list_all_clients()
+                if hasattr(self.client_service, "list_all_clients")
+                else []
+            )
         else:
-            clients = self.client_service.list_clients_for_firm(self.current_firm.id)
+            self._all_clients = self.client_service.list_clients_for_firm(self.current_firm.id)
+        self._apply_filters()
 
+    def _apply_filters(self) -> None:
+        q = self.search_input.text().strip().lower()
+        sel_type = self.type_combo.currentText()
+
+        filtered = []
+        for c in self._all_clients:
+            if q and (
+                q not in c.name.lower()
+                and (not c.pan or q not in c.pan.lower())
+                and (not c.gstin or q not in c.gstin.lower())
+            ):
+                continue
+            if sel_type != "All Entities":
+                ent_val = (
+                    c.entity_type.value if hasattr(c.entity_type, "value") else str(c.entity_type)
+                )
+                if sel_type.lower() not in ent_val.lower():
+                    continue
+            filtered.append(c)
+
+        if not filtered:
+            self.table.setVisible(False)
+            self.empty_state.setVisible(True)
+            return
+
+        self.table.setVisible(True)
+        self.empty_state.setVisible(False)
         self.table.setRowCount(0)
-        for row, client in enumerate(clients):
+
+        for row, client in enumerate(filtered):
             self.table.insertRow(row)
             item_name = QTableWidgetItem(client.name)
             item_name.setData(Qt.ItemDataRole.UserRole, client.id)
             self.table.setItem(row, 0, item_name)
-            self.table.setItem(row, 1, QTableWidgetItem(client.entity_type.value))
-            self.table.setItem(row, 2, QTableWidgetItem(client.pan or "-"))
-            self.table.setItem(row, 3, QTableWidgetItem(client.gstin or "-"))
-            self.table.setItem(row, 4, QTableWidgetItem(client.industry or "-"))
-            self.table.setItem(row, 5, QTableWidgetItem(client.contact_person or "-"))
+            self.table.setItem(
+                row,
+                1,
+                QTableWidgetItem(
+                    client.entity_type.value
+                    if hasattr(client.entity_type, "value")
+                    else str(client.entity_type)
+                ),
+            )
+            self.table.setItem(row, 2, QTableWidgetItem(client.pan or "—"))
+            self.table.setItem(row, 3, QTableWidgetItem(client.gstin or "—"))
+            self.table.setItem(row, 4, QTableWidgetItem(client.industry or "—"))
+            self.table.setItem(row, 5, QTableWidgetItem(client.contact_person or "—"))
+            self.table.setItem(row, 6, QTableWidgetItem("● Active"))
+
+        self.table.setFixedHeight(max(1, len(filtered)) * 36 + 32)
 
     def _create_client(self) -> None:
         if not self.current_firm:

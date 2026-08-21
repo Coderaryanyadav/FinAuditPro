@@ -1,7 +1,7 @@
 """Unit tests for SA 510 opening balance tie-out math in paise, mismatch detection, and auditor confirmation."""
 
 import pytest
-from finauditpro.application.roll_forward_dtos import ConfirmTieOutDTO
+
 from finauditpro.domain.roll_forward_entities import OpeningBalanceLink, calculate_opening_tie_out
 from finauditpro.infrastructure.persistence.database import DatabaseManager
 from finauditpro.infrastructure.persistence.migration_list import get_all_migrations
@@ -79,9 +79,12 @@ def test_confirm_opening_balance_tie_out_persistence(setup_tieout_env) -> None:
     """Verify auditor confirmation updates database records and flags auditor verification."""
     db_manager = setup_tieout_env
 
-    from finauditpro.application.services.firm_service import FirmService, CreateFirmDTO
     from finauditpro.application.services.client_service import ClientService, CreateClientDTO
-    from finauditpro.application.services.engagement_service import EngagementService, CreateEngagementDTO
+    from finauditpro.application.services.engagement_service import (
+        CreateEngagementDTO,
+        EngagementService,
+    )
+    from finauditpro.application.services.firm_service import CreateFirmDTO, FirmService
 
     firm_svc = FirmService(db_manager)
     client_svc = ClientService(db_manager)
@@ -89,8 +92,12 @@ def test_confirm_opening_balance_tie_out_persistence(setup_tieout_env) -> None:
 
     firm = firm_svc.create_firm(CreateFirmDTO(name="TieOut Firm"))
     client = client_svc.create_client(CreateClientDTO(firm_id=firm.id, name="TieOut Client"))
-    eng_prior = eng_svc.create_engagement(CreateEngagementDTO(firm_id=firm.id, client_id=client.id, financial_year="2024-25"))
-    eng_confirm = eng_svc.create_engagement(CreateEngagementDTO(firm_id=firm.id, client_id=client.id, financial_year="2025-26"))
+    eng_prior = eng_svc.create_engagement(
+        CreateEngagementDTO(firm_id=firm.id, client_id=client.id, financial_year="2024-25")
+    )
+    eng_confirm = eng_svc.create_engagement(
+        CreateEngagementDTO(firm_id=firm.id, client_id=client.id, financial_year="2025-26")
+    )
 
     link = OpeningBalanceLink(
         engagement_id=eng_confirm.id,

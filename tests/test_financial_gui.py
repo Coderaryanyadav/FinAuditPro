@@ -33,7 +33,9 @@ def db_manager(tmp_path) -> DatabaseManager:
 
 
 @pytest.mark.gui
-def test_financial_data_view_rendering(qapp: QApplication, db_manager: DatabaseManager, tmp_path) -> None:
+def test_financial_data_view_rendering(
+    qapp: QApplication, db_manager: DatabaseManager, tmp_path
+) -> None:
     firm_svc = FirmService(db_manager)
     client_svc = ClientService(db_manager)
     eng_svc = EngagementService(db_manager)

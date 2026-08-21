@@ -12,8 +12,12 @@ class RollForwardRecordModel(Base):
     __tablename__ = "roll_forward_records"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    new_engagement_id: Mapped[str] = mapped_column(String, ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False)
-    source_engagement_id: Mapped[str] = mapped_column(String, ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False)
+    new_engagement_id: Mapped[str] = mapped_column(
+        String, ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False
+    )
+    source_engagement_id: Mapped[str] = mapped_column(
+        String, ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False
+    )
     source_fy: Mapped[str] = mapped_column(String, nullable=False)
     items_carried_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
     performed_by: Mapped[str] = mapped_column(String, nullable=False)
@@ -26,8 +30,12 @@ class OpeningBalanceLinkModel(Base):
     __tablename__ = "opening_balance_links"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    engagement_id: Mapped[str] = mapped_column(String, ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False)
-    source_engagement_id: Mapped[str] = mapped_column(String, ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False)
+    engagement_id: Mapped[str] = mapped_column(
+        String, ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False
+    )
+    source_engagement_id: Mapped[str] = mapped_column(
+        String, ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False
+    )
     account_code: Mapped[str] = mapped_column(String, nullable=False)
     account_name: Mapped[str] = mapped_column(String, nullable=False)
     opening_dr_paise: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

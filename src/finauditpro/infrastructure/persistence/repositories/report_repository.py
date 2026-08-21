@@ -132,7 +132,11 @@ class ReportRepository:
         )
 
     def list_for_engagement(self, engagement_id: str) -> list[Report]:
-        stmt = select(ReportModel).where(ReportModel.engagement_id == engagement_id).order_by(ReportModel.created_at.desc())
+        stmt = (
+            select(ReportModel)
+            .where(ReportModel.engagement_id == engagement_id)
+            .order_by(ReportModel.created_at.desc())
+        )
         models = self.session.scalars(stmt).all()
         return [
             Report(

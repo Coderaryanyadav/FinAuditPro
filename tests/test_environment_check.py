@@ -1,6 +1,5 @@
 """Unit tests for launch-time environment prerequisite probes."""
 
-import pytest
 from finauditpro.infrastructure.environment_check import EnvironmentChecker
 
 

@@ -1,7 +1,6 @@
 """Database configuration and session management for SQLite persistence."""
 
 import os
-import sys
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
@@ -91,24 +90,38 @@ class DatabaseManager:
                 if "row_index" not in ev_cols:
                     conn.execute(text("ALTER TABLE evidence_links ADD COLUMN row_index INTEGER;"))
                 if "bounding_box_json" not in ev_cols:
-                    conn.execute(text("ALTER TABLE evidence_links ADD COLUMN bounding_box_json TEXT;"))
+                    conn.execute(
+                        text("ALTER TABLE evidence_links ADD COLUMN bounding_box_json TEXT;")
+                    )
                 if "procedure_id" not in ev_cols:
                     conn.execute(text("ALTER TABLE evidence_links ADD COLUMN procedure_id TEXT;"))
                 if "document_id" not in ev_cols:
                     conn.execute(text("ALTER TABLE evidence_links ADD COLUMN document_id TEXT;"))
                 if "page_number" not in ev_cols:
-                    conn.execute(text("ALTER TABLE evidence_links ADD COLUMN page_number INTEGER DEFAULT 1;"))
+                    conn.execute(
+                        text("ALTER TABLE evidence_links ADD COLUMN page_number INTEGER DEFAULT 1;")
+                    )
 
             # 3. audit_findings table
             res = conn.execute(text("PRAGMA table_info(audit_findings);")).fetchall()
             find_cols = {row[1] for row in res}
             if find_cols:
                 if "is_ai_generated" not in find_cols:
-                    conn.execute(text("ALTER TABLE audit_findings ADD COLUMN is_ai_generated INTEGER DEFAULT 0;"))
+                    conn.execute(
+                        text(
+                            "ALTER TABLE audit_findings ADD COLUMN is_ai_generated INTEGER DEFAULT 0;"
+                        )
+                    )
                 if "source" not in find_cols:
-                    conn.execute(text("ALTER TABLE audit_findings ADD COLUMN source TEXT DEFAULT 'manual';"))
+                    conn.execute(
+                        text("ALTER TABLE audit_findings ADD COLUMN source TEXT DEFAULT 'manual';")
+                    )
                 if "prior_engagement_finding_id" not in find_cols:
-                    conn.execute(text("ALTER TABLE audit_findings ADD COLUMN prior_engagement_finding_id TEXT;"))
+                    conn.execute(
+                        text(
+                            "ALTER TABLE audit_findings ADD COLUMN prior_engagement_finding_id TEXT;"
+                        )
+                    )
                 if "procedure_id" not in find_cols:
                     conn.execute(text("ALTER TABLE audit_findings ADD COLUMN procedure_id TEXT;"))
                 if "risk_id" not in find_cols:
@@ -134,7 +147,9 @@ class DatabaseManager:
         """Create SQLite triggers rejecting UPDATE and DELETE on audit_events table if present."""
         with self.engine.begin() as conn:
             # Check if audit_events table exists
-            res = conn.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name='audit_events'")).fetchone()
+            res = conn.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table' AND name='audit_events'")
+            ).fetchone()
             if not res:
                 return
             conn.execute(

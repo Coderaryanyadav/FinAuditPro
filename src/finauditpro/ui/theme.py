@@ -1,101 +1,47 @@
 """
 FinAuditPro Enterprise — Design System Tokens & Theme Manager
-Single source of truth for visual tokens, typography, and status badges.
+Single source of truth for visual tokens, typography, badges, and empty states.
 """
 
-from PySide6.QtCore import QObject, Signal
-from PySide6.QtGui import QColor
-from PySide6.QtWidgets import QFrame, QGraphicsDropShadowEffect, QHBoxLayout, QLabel, QVBoxLayout, QWidget
+from PySide6.QtCore import QObject, Qt, Signal
+from PySide6.QtWidgets import (
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class LightColors:
-    """Apple macOS / Linear Light mode semantic design tokens."""
-    BG_BASE     = "#F8FAFC"
-    BG_SURFACE  = "#FFFFFF"
-    BG_ELEVATED = "#FFFFFF"
-    BG_SUBTLE   = "#F1F5F9"
-    BG_HOVER    = "#E2E8F0"
-
-    BORDER_DEFAULT = "#E2E8F0"
-    BORDER_STRONG  = "#CBD5E1"
-    BORDER_FOCUS   = "#2563EB"
-
-    TEXT_PRIMARY     = "#0F172A"
-    TEXT_SECONDARY   = "#475569"
-    TEXT_MUTED       = "#64748B"
-    TEXT_DISABLED    = "#94A3B8"
-
-    ACCENT         = "#2563EB"
-    ACCENT_HOVER   = "#1D4ED8"
-    ACCENT_SUBTLE  = "rgba(37, 99, 235, 0.1)"
-    ACCENT_BORDER  = "rgba(37, 99, 235, 0.25)"
-
-    SUCCESS        = "#16A34A"
-    SUCCESS_SUBTLE = "rgba(22, 163, 74, 0.1)"
-
-    WARNING        = "#D97706"
-    WARNING_SUBTLE = "rgba(217, 119, 6, 0.1)"
-
-    DANGER         = "#DC2626"
-    DANGER_SUBTLE  = "rgba(220, 38, 38, 0.1)"
-
-    INFO           = "#4F46E5"
-    INFO_SUBTLE    = "rgba(79, 70, 229, 0.1)"
-
-    NAV_BG          = "#FFFFFF"
-    NAV_BORDER      = "#E2E8F0"
-    NAV_TEXT        = "#475569"
-    NAV_TEXT_ACTIVE = "#2563EB"
-    NAV_ACTIVE_BG   = "#EFF6FF"
+    BG_BASE, BG_SURFACE, BG_ELEVATED, BG_SUBTLE, BG_HOVER = "#F8FAFC", "#FFFFFF", "#FFFFFF", "#F1F5F9", "#E2E8F0"
+    BORDER_DEFAULT, BORDER_STRONG, BORDER_FOCUS = "#E2E8F0", "#CBD5E1", "#2563EB"
+    TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED, TEXT_DISABLED = "#0F172A", "#475569", "#64748B", "#94A3B8"
+    ACCENT, ACCENT_HOVER, ACCENT_SUBTLE, ACCENT_BORDER = "#2563EB", "#1D4ED8", "rgba(37, 99, 235, 0.1)", "rgba(37, 99, 235, 0.25)"
+    SUCCESS, SUCCESS_SUBTLE = "#16A34A", "rgba(22, 163, 74, 0.1)"
+    WARNING, WARNING_SUBTLE = "#D97706", "rgba(217, 119, 6, 0.1)"
+    DANGER, DANGER_SUBTLE = "#DC2626", "rgba(220, 38, 38, 0.1)"
+    INFO, INFO_SUBTLE = "#4F46E5", "rgba(79, 70, 229, 0.1)"
+    NAV_BG, NAV_BORDER, NAV_TEXT, NAV_TEXT_ACTIVE, NAV_ACTIVE_BG = "#FFFFFF", "#E2E8F0", "#475569", "#2563EB", "#EFF6FF"
 
 
 class DarkColors:
-    """Apple macOS Dark mode semantic design tokens."""
-    BG_BASE     = "#0F172A"
-    BG_SURFACE  = "#1E293B"
-    BG_ELEVATED = "#334155"
-    BG_SUBTLE   = "#1E293B"
-    BG_HOVER    = "#334155"
-
-    BORDER_DEFAULT = "#334155"
-    BORDER_STRONG  = "#475569"
-    BORDER_FOCUS   = "#3B82F6"
-
-    TEXT_PRIMARY     = "#F8FAFC"
-    TEXT_SECONDARY   = "#CBD5E1"
-    TEXT_MUTED       = "#94A3B8"
-    TEXT_DISABLED    = "#64748B"
-
-    ACCENT         = "#3B82F6"
-    ACCENT_HOVER   = "#2563EB"
-    ACCENT_SUBTLE  = "rgba(59, 130, 246, 0.15)"
-    ACCENT_BORDER  = "rgba(59, 130, 246, 0.3)"
-
-    SUCCESS        = "#22C55E"
-    SUCCESS_SUBTLE = "rgba(34, 197, 94, 0.15)"
-
-    WARNING        = "#F59E0B"
-    WARNING_SUBTLE = "rgba(245, 158, 11, 0.15)"
-
-    DANGER         = "#EF4444"
-    DANGER_SUBTLE  = "rgba(239, 68, 68, 0.15)"
-
-    INFO           = "#6366F1"
-    INFO_SUBTLE    = "rgba(99, 102, 241, 0.15)"
-
-    NAV_BG          = "#0F172A"
-    NAV_BORDER      = "#1E293B"
-    NAV_TEXT        = "#94A3B8"
-    NAV_TEXT_ACTIVE = "#3B82F6"
-    NAV_ACTIVE_BG   = "rgba(59, 130, 246, 0.18)"
+    BG_BASE, BG_SURFACE, BG_ELEVATED, BG_SUBTLE, BG_HOVER = "#0F172A", "#1E293B", "#334155", "#1E293B", "#334155"
+    BORDER_DEFAULT, BORDER_STRONG, BORDER_FOCUS = "#334155", "#475569", "#3B82F6"
+    TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED, TEXT_DISABLED = "#F8FAFC", "#CBD5E1", "#94A3B8", "#64748B"
+    ACCENT, ACCENT_HOVER, ACCENT_SUBTLE, ACCENT_BORDER = "#3B82F6", "#2563EB", "rgba(59, 130, 246, 0.15)", "rgba(59, 130, 246, 0.3)"
+    SUCCESS, SUCCESS_SUBTLE = "#22C55E", "rgba(34, 197, 94, 0.15)"
+    WARNING, WARNING_SUBTLE = "#F59E0B", "rgba(245, 158, 11, 0.15)"
+    DANGER, DANGER_SUBTLE = "#EF4444", "rgba(239, 68, 68, 0.15)"
+    INFO, INFO_SUBTLE = "#6366F1", "rgba(99, 102, 241, 0.15)"
+    NAV_BG, NAV_BORDER, NAV_TEXT, NAV_TEXT_ACTIVE, NAV_ACTIVE_BG = "#0F172A", "#1E293B", "#94A3B8", "#3B82F6", "rgba(59, 130, 246, 0.18)"
 
 
 Colors = LightColors
 
 
 class ThemeManager(QObject):
-    """Singleton Theme Manager controlling global application light/dark state."""
-
     theme_changed = Signal(bool)
     _instance = None
 
@@ -125,71 +71,44 @@ class ThemeManager(QObject):
 
 
 class CardWidget(QFrame):
-    """Re-usable styled card surface with subtle divider line."""
-
     def __init__(self, title: str | None = None, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setObjectName("contentCard")
-        self.setStyleSheet("""
-            QFrame#contentCard {
-                background-color: #FFFFFF;
-                border: 1px solid #E2E8F0;
-                border-radius: 10px;
-            }
-        """)
+        self.setStyleSheet("QFrame#contentCard { background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; }")
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(18, 16, 18, 16)
-        layout.setSpacing(10)
+        layout.setContentsMargins(16, 14, 16, 14)
+        layout.setSpacing(8)
 
         if title:
-            header_row = QHBoxLayout()
-            header_lbl = QLabel(title)
-            header_lbl.setStyleSheet(
-                "font-size: 12px; font-weight: 800; color: #475569; border: none; background: transparent; letter-spacing: 0.6px;"
-            )
-            header_row.addWidget(header_lbl)
-            header_row.addStretch()
-            layout.addLayout(header_row)
+            h_row = QHBoxLayout()
+            h_lbl = QLabel(title)
+            h_lbl.setStyleSheet("font-size: 11px; font-weight: 700; color: #64748B; border: none; background: transparent; letter-spacing: 0.5px;")
+            h_row.addWidget(h_lbl)
+            h_row.addStretch()
+            layout.addLayout(h_row)
 
         self.content_widget = QWidget()
         self.content_widget.setStyleSheet("background: transparent; border: none;")
         self.content_layout = QVBoxLayout(self.content_widget)
         self.content_layout.setContentsMargins(0, 0, 0, 0)
-        self.content_layout.setSpacing(8)
+        self.content_layout.setSpacing(6)
         layout.addWidget(self.content_widget)
 
 
 class MetricCard(QFrame):
-    """Compact KPI summary module (90px height)."""
-
-    def __init__(
-        self,
-        title: str,
-        value: str,
-        subtitle: str = "",
-        accent_color: str = "#2563EB",
-        action_text: str = "",
-        parent: QWidget | None = None,
-    ) -> None:
+    def __init__(self, title: str, value: str, subtitle: str = "", accent_color: str = "#2563EB", action_text: str = "", parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setObjectName("metricCard")
-        self.setFixedHeight(94)
-        self.setStyleSheet(f"""
-            QFrame#metricCard {{
-                background-color: #FFFFFF;
-                border: 1px solid #E2E8F0;
-                border-radius: 10px;
-                border-left: 3px solid {accent_color};
-            }}
-        """)
+        self.setFixedHeight(88)
+        self.setStyleSheet(f"QFrame#metricCard {{ background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; border-top: 2px solid {accent_color}; }}")
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(14, 12, 14, 12)
+        layout.setContentsMargins(14, 10, 14, 10)
         layout.setSpacing(2)
 
         self.title_lbl = QLabel(title)
-        self.title_lbl.setStyleSheet("font-size: 10px; font-weight: 800; color: #64748B; border: none; background: transparent; letter-spacing: 0.6px;")
+        self.title_lbl.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748B; border: none; background: transparent; letter-spacing: 0.5px;")
         self.value_lbl = QLabel(value)
         self.value_lbl.setStyleSheet("font-size: 26px; font-weight: 800; color: #0F172A; border: none; background: transparent; letter-spacing: -0.6px;")
 
@@ -202,7 +121,8 @@ class MetricCard(QFrame):
         if action_text:
             sub_row.addStretch()
             self.act_lbl = QLabel(action_text)
-            self.act_lbl.setStyleSheet("font-size: 11px; font-weight: 700; color: #2563EB; border: none; background: transparent;")
+            self.act_lbl.setStyleSheet("font-size: 11px; font-weight: 600; color: #2563EB; border: none; background: transparent;")
+            self.act_lbl.setCursor(Qt.CursorShape.PointingHandCursor)
             sub_row.addWidget(self.act_lbl)
 
         layout.addWidget(self.title_lbl)
@@ -214,21 +134,113 @@ class MetricCard(QFrame):
 
 
 class Fonts:
-    FAMILY      = "'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif"
+    FAMILY = "'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif"
     FAMILY_MONO = "'SF Mono', 'Menlo', 'Consolas', monospace"
 
 
 class StatusBadge(QLabel):
-    """Subtle semantic status badge."""
-
     def __init__(self, text: str, status_type: str = "info", parent: QWidget | None = None) -> None:
         super().__init__(text, parent)
-        styles = {
-            "success": "color: #15803D; background: #DCFCE7; border: 1px solid #86EFAC;",
-            "warning": "color: #B45309; background: #FEF3C7; border: 1px solid #FDE68A;",
-            "danger": "color: #B91C1C; background: #FEE2E2; border: 1px solid #FCA5A5;",
-            "info": "color: #1D4ED8; background: #DBEAFE; border: 1px solid #93C5FD;",
-            "neutral": "color: #475569; background: #F1F5F9; border: 1px solid #E2E8F0;",
-        }
-        st = styles.get(status_type, styles["neutral"])
-        self.setStyleSheet(f"font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 8px; {st}")
+        self._update_style(status_type)
+
+    def set_status(self, text: str, status_type: str = "info") -> None:
+        self.setText(text)
+        self._update_style(status_type)
+
+    def _update_style(self, status_type: str) -> None:
+        st = status_type.lower()
+        if st in ("success", "completed", "signed off", "matched", "ready", "indexed", "compliant", "verified", "tied out"):
+            style = "color: #15803D; background: #DCFCE7; border: 1px solid #BBF7D0;"
+        elif st in ("warning", "in progress", "open", "medium", "rate mismatch", "mismatch", "unconfirmed"):
+            style = "color: #B45309; background: #FEF3C7; border: 1px solid #FDE68A;"
+        elif st in ("danger", "high", "critical", "failed", "quarantined", "missing in 2b", "ineligible"):
+            style = "color: #B91C1C; background: #FEE2E2; border: 1px solid #FECACA;"
+        elif st in ("info", "planning", "draft", "low"):
+            style = "color: #1D4ED8; background: #DBEAFE; border: 1px solid #BFDBFE;"
+        else:
+            style = "color: #475569; background: #F1F5F9; border: 1px solid #E2E8F0;"
+        self.setStyleSheet(f"font-size: 11px; font-weight: 600; border-radius: 4px; padding: 2px 8px; {style}")
+
+
+class RiskBadge(QLabel):
+    def __init__(self, risk_level: str, parent: QWidget | None = None) -> None:
+        super().__init__(f"● {risk_level}", parent)
+        rl = risk_level.lower()
+        if "critical" in rl or "high" in rl:
+            st = "color: #DC2626; background: #FEE2E2; border: 1px solid #FECACA;"
+        elif "medium" in rl or "moderate" in rl:
+            st = "color: #D97706; background: #FEF3C7; border: 1px solid #FDE68A;"
+        elif "low" in rl:
+            st = "color: #15803D; background: #DCFCE7; border: 1px solid #BBF7D0;"
+        else:
+            st = "color: #64748B; background: #F1F5F9; border: 1px solid #E2E8F0;"
+        self.setStyleSheet(f"font-size: 11px; font-weight: 600; border-radius: 4px; padding: 2px 8px; {st}")
+
+
+class EmptyStateWidget(QFrame):
+    def __init__(self, title: str, description: str, action_text: str = "", action_callback: object = None, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setObjectName("emptyStateWidget")
+        self.setStyleSheet("QFrame#emptyStateWidget { background-color: #FFFFFF; border: 1px dashed #CBD5E1; border-radius: 8px; }")
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(32, 40, 32, 40)
+        layout.setSpacing(10)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        glyph = QLabel("◇")
+        glyph.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        glyph.setStyleSheet("font-size: 24px; color: #94A3B8; background: #F1F5F9; border-radius: 20px; width: 40px; height: 40px;")
+        layout.addWidget(glyph, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        t_lbl = QLabel(title)
+        t_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        t_lbl.setStyleSheet("font-size: 15px; font-weight: 700; color: #0F172A; border: none; background: transparent;")
+        layout.addWidget(t_lbl)
+
+        d_lbl = QLabel(description)
+        d_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        d_lbl.setWordWrap(True)
+        d_lbl.setStyleSheet("font-size: 12px; color: #64748B; max-width: 440px; border: none; background: transparent; line-height: 1.4;")
+        layout.addWidget(d_lbl, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        if action_text and action_callback:
+            btn = QPushButton(action_text)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 8px 18px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
+            btn.clicked.connect(action_callback)
+            layout.addSpacing(6)
+            layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+
+class PageHeader(QFrame):
+    def __init__(self, title: str, subtitle: str = "", action_text: str = "", action_callback: object = None, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setStyleSheet("background: transparent; border: none;")
+
+        h_layout = QHBoxLayout(self)
+        h_layout.setContentsMargins(0, 0, 0, 0)
+        h_layout.setSpacing(12)
+
+        left_v = QVBoxLayout()
+        left_v.setSpacing(2)
+
+        self.title_lbl = QLabel(title)
+        self.title_lbl.setStyleSheet("font-size: 20px; font-weight: 700; color: #0F172A; letter-spacing: -0.4px; border: none; background: transparent;")
+        left_v.addWidget(self.title_lbl)
+
+        if subtitle:
+            self.subtitle_lbl = QLabel(subtitle)
+            self.subtitle_lbl.setStyleSheet("font-size: 12px; color: #64748B; border: none; background: transparent;")
+            left_v.addWidget(self.subtitle_lbl)
+
+        h_layout.addLayout(left_v)
+        h_layout.addStretch()
+
+        if action_text and action_callback:
+            self.action_btn = QPushButton(action_text)
+            self.action_btn.setObjectName("primaryButton")
+            self.action_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            self.action_btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
+            self.action_btn.clicked.connect(action_callback)
+            h_layout.addWidget(self.action_btn, alignment=Qt.AlignmentFlag.AlignVCenter)

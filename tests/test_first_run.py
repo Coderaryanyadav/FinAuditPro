@@ -1,8 +1,7 @@
 """Unit tests for first-run app data directory bootstrap, Matplotlib setup, and DB initialization."""
 
 import os
-from pathlib import Path
-import pytest
+
 from finauditpro.infrastructure.first_run import bootstrap_app_data_dirs, initialize_database
 from finauditpro.version import get_build_info
 
@@ -37,5 +36,7 @@ def test_initialize_database_runs_all_migrations(tmp_path) -> None:
 
     with db_manager.session_scope() as session:
         # Check that migration history table exists and has 9 entries
-        res = session.execute(__import__("sqlalchemy").text("SELECT COUNT(*) FROM schema_migrations")).scalar()
+        res = session.execute(
+            __import__("sqlalchemy").text("SELECT COUNT(*) FROM schema_migrations")
+        ).scalar()
         assert res == 9

@@ -13,9 +13,13 @@ from finauditpro.ui.main_window import MainWindow
 
 def main() -> None:
     """Initialize persistence and launch desktop GUI application."""
-    parser = argparse.ArgumentParser(description="FinAuditPro — Offline-First Audit Operating System")
+    parser = argparse.ArgumentParser(
+        description="FinAuditPro — Offline-First Audit Operating System"
+    )
     parser.add_argument("--db-path", type=str, default=None, help="Path to SQLite database file")
-    parser.add_argument("--headless", action="store_true", help="Initialize DB and exit without launching GUI")
+    parser.add_argument(
+        "--headless", action="store_true", help="Initialize DB and exit without launching GUI"
+    )
     args = parser.parse_args()
 
     db_path = Path(args.db_path) if args.db_path else get_default_db_path()

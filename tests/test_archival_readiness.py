@@ -99,4 +99,6 @@ def test_readiness_check_fails_with_open_review_note(setup_readiness_env) -> Non
 
     readiness = arch_svc.run_readiness_check(eng.id)
     assert readiness.has_hard_failures is True
-    assert any("Open Review Notes" in item.item_name and not item.is_passed for item in readiness.items)
+    assert any(
+        "Open Review Notes" in item.item_name and not item.is_passed for item in readiness.items
+    )

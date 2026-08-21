@@ -111,7 +111,9 @@ class ArchivalRepository:
         return self._to_retention_entity(model)
 
     def get_active_retention_config(self) -> RetentionConfig | None:
-        stmt = select(RetentionConfigModel).order_by(RetentionConfigModel.created_at.desc()).limit(1)
+        stmt = (
+            select(RetentionConfigModel).order_by(RetentionConfigModel.created_at.desc()).limit(1)
+        )
         model = self.session.scalars(stmt).first()
         return self._to_retention_entity(model) if model else None
 

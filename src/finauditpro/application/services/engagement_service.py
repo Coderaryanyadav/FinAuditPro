@@ -129,9 +129,13 @@ class EngagementService:
                 engagements = engagement_repo.list_all()
 
             active_eng = sum(
-                1 for e in engagements if e.status not in (EngagementStatusEnum.COMPLETED, EngagementStatusEnum.ARCHIVED)
+                1
+                for e in engagements
+                if e.status not in (EngagementStatusEnum.COMPLETED, EngagementStatusEnum.ARCHIVED)
             )
-            completed_eng = sum(1 for e in engagements if e.status == EngagementStatusEnum.COMPLETED)
+            completed_eng = sum(
+                1 for e in engagements if e.status == EngagementStatusEnum.COMPLETED
+            )
 
             # Count actual open findings across relevant engagements
             open_findings_count = 0
@@ -171,4 +175,3 @@ class EngagementService:
                 open_findings=open_findings_count,
                 recent_activities=activities,
             )
-

@@ -8,11 +8,19 @@ from finauditpro.domain.audit_matrix_entities import BenchmarkTypeEnum, Material
 class BenchmarkOption:
     """Benchmark guidance option carrying source and non-statutory disclaimer."""
 
-    def __init__(self, benchmark_type: BenchmarkTypeEnum, default_overall_pct: float, source: str, description: str):
+    def __init__(
+        self,
+        benchmark_type: BenchmarkTypeEnum,
+        default_overall_pct: float,
+        source: str,
+        description: str,
+    ):
         self.benchmark_type = benchmark_type
         self.default_overall_pct = default_overall_pct
         self.source = source
-        self.is_verified_statutory = False  # Always False: percentages are professional judgement, not hardcoded law
+        self.is_verified_statutory = (
+            False  # Always False: percentages are professional judgement, not hardcoded law
+        )
         self.description = description
 
 

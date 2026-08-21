@@ -1,12 +1,16 @@
 """Unit tests for multi-year audit roll-forward lifecycle, draft creation, and archive immutability."""
 
 import pytest
+
 from finauditpro.application.archival_dtos import FreezeAndSealDTO
 from finauditpro.application.report_dtos import ApproveReportDTO, GenerateReportDTO
 from finauditpro.application.roll_forward_dtos import ExecuteRollForwardDTO
 from finauditpro.application.services.archival_service import ArchivalService
 from finauditpro.application.services.client_service import ClientService, CreateClientDTO
-from finauditpro.application.services.engagement_service import CreateEngagementDTO, EngagementService
+from finauditpro.application.services.engagement_service import (
+    CreateEngagementDTO,
+    EngagementService,
+)
 from finauditpro.application.services.firm_service import CreateFirmDTO, FirmService
 from finauditpro.application.services.report_service import ReportService
 from finauditpro.application.services.roll_forward_service import RollForwardService
@@ -71,7 +75,9 @@ def setup_rf_env(tmp_path):
             generated_by="Auditor",
         )
     )
-    report_svc.approve_report(ApproveReportDTO(report_id=rep.id, approved_by="Audit Partner", approver_role="Partner"))
+    report_svc.approve_report(
+        ApproveReportDTO(report_id=rep.id, approved_by="Audit Partner", approver_role="Partner")
+    )
 
     archive = arch_svc.freeze_and_seal_engagement(
         FreezeAndSealDTO(
@@ -100,7 +106,9 @@ def test_roll_forward_creates_new_engagement_and_preserves_archive(setup_rf_env)
     )
 
     archive_hash_after = calculate_sha256(archive.archive_path)
-    assert archive_hash_before == archive_hash_after, "Sealed prior archive hash mutated after roll-forward!"
+    assert archive_hash_before == archive_hash_after, (
+        "Sealed prior archive hash mutated after roll-forward!"
+    )
 
     assert new_eng.id != source_eng.id
     assert new_eng.financial_year == "2025-26"

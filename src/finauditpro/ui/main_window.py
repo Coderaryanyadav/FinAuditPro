@@ -6,8 +6,19 @@ Enterprise Audit Operating System with Sidebar Navigation, Context Header, and S
 from typing import Any
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QButtonGroup, QComboBox, QFrame, QHBoxLayout, QLabel, QLineEdit,
-    QMainWindow, QMenu, QMessageBox, QPushButton, QStackedWidget, QVBoxLayout, QWidget,
+    QButtonGroup,
+    QComboBox,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMenu,
+    QMessageBox,
+    QPushButton,
+    QStackedWidget,
+    QVBoxLayout,
+    QWidget,
 )
 
 from finauditpro.application.services.audit_matrix_service import AuditMatrixService
@@ -18,7 +29,6 @@ from finauditpro.application.services.financial_data_service import FinancialDat
 from finauditpro.application.services.firm_service import FirmService
 from finauditpro.application.services.report_service import ReportService
 from finauditpro.application.services.working_paper_service import WorkingPaperService
-from finauditpro.domain.entities import Client, Engagement, Firm
 from finauditpro.ui.dialogs.engagement_dialog import EngagementDialog
 from finauditpro.ui.dialogs.login_dialog import LoginDialog
 from finauditpro.ui.styles import GLOBAL_QSS
@@ -38,20 +48,31 @@ from finauditpro.ui.views.roll_forward_view import RollForwardView
 from finauditpro.ui.views.settings_view import SettingsView
 from finauditpro.ui.views.working_paper_view import WorkingPaperView
 
+NAV_ITEMS = [
+    ("btn_dashboard", "Dashboard", "WORKSPACE"),
+    ("btn_firms", "Audit Firms", "WORKSPACE"),
+    ("btn_clients", "Clients", "WORKSPACE"),
+    ("btn_engagements", "Engagements", "WORKSPACE"),
+    ("btn_documents", "Documents", "FINANCIAL"),
+    ("btn_financial_data", "Financial Statements", "FINANCIAL"),
+    ("btn_gst", "GST Reconciliation", "FINANCIAL"),
+    ("btn_compliance", "Statutory Compliance", "FINANCIAL"),
+    ("btn_audit_matrix", "Audit Matrix", "ANALYSIS"),
+    ("btn_ai_assistant", "AI Copilot", "ANALYSIS"),
+    ("btn_working_papers", "Working Papers", "AUDIT WORKFLOW"),
+    ("btn_reports", "Reports", "AUDIT WORKFLOW"),
+    ("btn_archival", "File Archival", "SYSTEM"),
+    ("btn_roll_forward", "Roll-Forward", "SYSTEM"),
+    ("btn_settings", "Settings", "SYSTEM"),
+]
+
 
 class MainWindow(QMainWindow):
     """Main Application Shell Window for FinAuditPro Audit Command Center."""
 
-    def __init__(
-        self,
-        firm_service: Any = None, client_service: Any = None, engagement_service: Any = None,
-        document_service: Any = None, financial_data_service: Any = None, audit_matrix_service: Any = None,
-        working_paper_service: Any = None, report_service: Any = None, ai_service: Any = None,
-        archival_repo: Any = None, roll_forward_repo: Any = None, db_manager: Any = None,
-    ) -> None:
+    def __init__(self, firm_service: Any = None, client_service: Any = None, engagement_service: Any = None, document_service: Any = None, financial_data_service: Any = None, audit_matrix_service: Any = None, working_paper_service: Any = None, report_service: Any = None, ai_service: Any = None, archival_repo: Any = None, roll_forward_repo: Any = None, db_manager: Any = None) -> None:
         super().__init__()
         db = firm_service if hasattr(firm_service, "session_scope") else (db_manager if hasattr(db_manager, "session_scope") else None)
-
         if db:
             self.firm_service, self.client_service = FirmService(db), ClientService(db)
             self.engagement_service, self.document_service = EngagementService(db), DocumentService(db)
@@ -94,7 +115,7 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
-        # 1. Left Sidebar Navigation
+        # 1. Left Sidebar
         self.sidebar = QFrame()
         self.sidebar.setObjectName("dashboardSidebar")
         self.sidebar.setFixedWidth(230)
@@ -124,45 +145,24 @@ class MainWindow(QMainWindow):
         sb_layout.addSpacing(10)
 
         self.btn_group = QButtonGroup(self)
-        btn_defs = [
-            ("btn_dashboard", "📊  Dashboard"), ("btn_firms", "🏢  Audit Firms"),
-            ("btn_clients", "👥  Clients"), ("btn_engagements", "💼  Engagements"),
-            ("btn_documents", "📁  Documents"), ("btn_financial_data", "📈  Financial Statements"),
-            ("btn_gst", "🧮  GST Reconciliation"), ("btn_compliance", "🛡️  Statutory Compliance"),
-            ("btn_audit_matrix", "▦  Audit Matrix"), ("btn_ai_assistant", "✨  AI Copilot"),
-            ("btn_working_papers", "📑  Working Papers"), ("btn_reports", "📜  Reports"),
-            ("btn_archival", "📦  File Archival"), ("btn_roll_forward", "🔄  Roll-Forward"),
-            ("btn_settings", "⚙️  Settings")
-        ]
-        for idx, (attr, title) in enumerate(btn_defs):
+        current_section = None
+        for idx, (attr, title, sec) in enumerate(NAV_ITEMS):
+            if sec != current_section:
+                current_section = sec
+                lbl = QLabel(sec)
+                lbl.setObjectName("sidebarSectionLabel")
+                sb_layout.addWidget(lbl)
             btn = QPushButton(title)
             btn.setObjectName("navButton")
             btn.setCheckable(True)
             setattr(self, attr, btn)
             self.btn_group.addButton(btn, idx)
+            sb_layout.addWidget(btn)
         self.btn_dashboard.setChecked(True)
-
-        def make_section(txt: str):
-            lbl = QLabel(txt)
-            lbl.setObjectName("sidebarSectionLabel")
-            sb_layout.addWidget(lbl)
-
-        make_section("WORKSPACE")
-        for b in [self.btn_dashboard, self.btn_firms, self.btn_clients, self.btn_engagements]: sb_layout.addWidget(b)
-        make_section("FINANCIAL")
-        for b in [self.btn_documents, self.btn_financial_data, self.btn_gst, self.btn_compliance]: sb_layout.addWidget(b)
-        make_section("ANALYSIS")
-        for b in [self.btn_audit_matrix, self.btn_ai_assistant]: sb_layout.addWidget(b)
-        make_section("AUDIT WORKFLOW")
-        for b in [self.btn_working_papers, self.btn_reports]: sb_layout.addWidget(b)
-        make_section("SYSTEM")
-        for b in [self.btn_archival, self.btn_roll_forward, self.btn_settings]: sb_layout.addWidget(b)
         sb_layout.addStretch()
 
-        # Profile Pill Footer
         prof_frame = QFrame()
         prof_frame.setObjectName("sidebarProfileFrame")
-        prof_frame.setCursor(Qt.CursorShape.PointingHandCursor)
         pf_l = QHBoxLayout(prof_frame)
         pf_l.setContentsMargins(4, 10, 4, 4)
         av = QLabel("AD")
@@ -187,16 +187,14 @@ class MainWindow(QMainWindow):
         pf_l.addStretch()
         pf_l.addWidget(btn_more)
         sb_layout.addWidget(prof_frame)
-
         main_layout.addWidget(self.sidebar)
 
-        # 2. Main Right Container
+        # 2. Main Workspace Right Container
         right_container = QWidget()
         rc_layout = QVBoxLayout(right_container)
         rc_layout.setContentsMargins(0, 0, 0, 0)
         rc_layout.setSpacing(0)
 
-        # Top Command Header Bar
         header = QFrame()
         header.setObjectName("dashboardHeader")
         header.setFixedHeight(56)
@@ -218,11 +216,10 @@ class MainWindow(QMainWindow):
         sf_l.addWidget(sf_s)
         sf_l.addWidget(sf_k)
         h_layout.addWidget(search_frame)
-
         h_layout.addStretch()
 
-        act_lbl = QLabel("ACTIVE ENGAGEMENT:")
-        act_lbl.setStyleSheet("font-size: 10px; font-weight: 800; color: #64748B; letter-spacing: 0.6px;")
+        act_lbl = QLabel("ENGAGEMENT")
+        act_lbl.setStyleSheet("font-size: 10px; font-weight: 700; color: #94A3B8; letter-spacing: 0.5px;")
         self.eng_selector_combo = QComboBox()
         self.eng_selector_combo.setObjectName("clientSelectorCombo")
         self.eng_selector_combo.setMinimumWidth(260)
@@ -236,10 +233,9 @@ class MainWindow(QMainWindow):
         h_layout.addWidget(self.eng_selector_combo)
         h_layout.addSpacing(10)
         h_layout.addWidget(btn_new_audit)
-
         rc_layout.addWidget(header)
 
-        # Stacked Views
+        # 3. Stacked Views
         self.stack = QStackedWidget()
         self.view_dashboard = DashboardView(self.firm_service, self.client_service, self.engagement_service)
         self.view_dashboard.navigate_to_clients.connect(lambda: self.btn_clients.click())
@@ -262,18 +258,15 @@ class MainWindow(QMainWindow):
             self.view_dashboard, self.view_firms, self.view_clients, self.view_engagements,
             self.view_documents, self.view_financial_data, self.view_gst, self.view_compliance,
             self.view_audit_matrix, self.view_ai_assistant, self.view_working_papers,
-            self.view_reports, self.view_archival, self.view_roll_forward, self.view_settings
+            self.view_reports, self.view_archival, self.view_roll_forward, self.view_settings,
         ]
-        for v in views: self.stack.addWidget(v)
+        for v in views:
+            self.stack.addWidget(v)
 
         rc_layout.addWidget(self.stack, stretch=1)
         main_layout.addWidget(right_container, stretch=1)
 
         self.btn_group.idClicked.connect(self._on_nav_clicked)
-
-        if hasattr(self.view_firms, "firm_selected"): getattr(self.view_firms, "firm_selected").connect(self.set_active_firm)
-        if hasattr(self.view_clients, "client_selected"): getattr(self.view_clients, "client_selected").connect(self.set_active_client)
-        if hasattr(self.view_engagements, "engagement_selected"): getattr(self.view_engagements, "engagement_selected").connect(self.set_active_engagement)
 
     def _toggle_sidebar(self) -> None:
         self.sidebar_collapsed = not self.sidebar_collapsed
@@ -284,23 +277,27 @@ class MainWindow(QMainWindow):
     def _show_profile_menu(self) -> None:
         menu = QMenu(self)
         menu.setStyleSheet("QMenu { background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 4px; font-size: 12px; } QMenu::item:selected { background-color: #EFF6FF; color: #2563EB; }")
-        menu.addAction("👤 Profile & CA License", lambda: self.btn_settings.click())
-        menu.addAction("⚙️ System Preferences", lambda: self.btn_settings.click())
+        menu.addAction("Profile && CA License", lambda: self.btn_settings.click())
+        menu.addAction("System Preferences", lambda: self.btn_settings.click())
         menu.addSeparator()
-        menu.addAction("🚪 Sign Out", self.close)
+        menu.addAction("Sign Out", self.close)
         menu.exec(self.cursor().pos())
 
     def _auto_select_initial_engagement(self) -> None:
         try:
             firms = self.firm_service.list_firms()
-            if not firms: return
+            if not firms:
+                return
             self.current_firm = firms[0]
             clients = self.client_service.list_clients_for_firm(self.current_firm.id)
-            if not clients: return
+            if not clients:
+                return
             self.current_client = clients[0]
             engs = self.engagement_service.list_engagements_for_client(self.current_client.id)
-            if engs: self.set_active_engagement(engs[0].id)
-        except Exception: pass
+            if engs:
+                self.set_active_engagement(engs[0].id)
+        except Exception:
+            pass
 
     def _on_nav_clicked(self, idx: int) -> None:
         self.stack.setCurrentIndex(idx)
@@ -313,17 +310,19 @@ class MainWindow(QMainWindow):
 
     def set_active_client(self, client_id: str) -> None:
         client = self.client_service.get_client_by_id(client_id)
-        if client: self.current_client = client
+        if client:
+            self.current_client = client
 
     def set_active_engagement(self, engagement_id: str) -> None:
         eng = self.engagement_service.get_engagement_by_id(engagement_id)
-        if not eng: return
+        if not eng:
+            return
         self.current_engagement = eng
         self.current_client = self.client_service.get_client_by_id(eng.client_id)
         self.current_firm = self.firm_service.get_firm_by_id(self.current_client.firm_id) if self.current_client else None
-
         self.view_dashboard.set_firm(self.current_firm)
-        for v in [self.view_documents, self.view_financial_data, self.view_gst, self.view_compliance, self.view_audit_matrix, self.view_working_papers, self.view_reports, self.view_ai_assistant, self.view_archival, self.view_roll_forward]:
+
+        for v in (self.view_documents, self.view_financial_data, self.view_gst, self.view_compliance, self.view_audit_matrix, self.view_working_papers, self.view_reports, self.view_ai_assistant, self.view_archival, self.view_roll_forward):
             getattr(v, "set_active_engagement", lambda e: None)(eng)
         self._update_header_combo()
 
@@ -335,7 +334,7 @@ class MainWindow(QMainWindow):
             if engs:
                 for idx, e in enumerate(engs):
                     audit_t = e.audit_type.value if hasattr(e.audit_type, "value") else str(e.audit_type)
-                    self.eng_selector_combo.addItem(f"🏢 {self.current_client.name} — FY {e.financial_year} ({audit_t})", e.id)
+                    self.eng_selector_combo.addItem(f"{self.current_client.name} · FY {e.financial_year} · {audit_t}", e.id)
                     if self.current_engagement and e.id == self.current_engagement.id:
                         self.eng_selector_combo.setCurrentIndex(idx)
             else:
@@ -346,7 +345,8 @@ class MainWindow(QMainWindow):
 
     def _on_header_engagement_changed(self, idx: int) -> None:
         eng_id = self.eng_selector_combo.itemData(idx)
-        if eng_id: self.set_active_engagement(eng_id)
+        if eng_id:
+            self.set_active_engagement(eng_id)
 
     def _on_new_engagement(self) -> None:
         if not self.current_client:

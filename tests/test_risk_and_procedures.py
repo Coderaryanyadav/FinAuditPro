@@ -11,10 +11,21 @@ from finauditpro.domain.audit_matrix_entities import (
 
 def test_qualitative_romm_matrix() -> None:
     """Verify 3x3 qualitative matrix derivation for Risk of Material Misstatement."""
-    assert derive_qualitative_romm(RiskSeverityEnum.HIGH, RiskSeverityEnum.MEDIUM) == RiskSeverityEnum.HIGH
-    assert derive_qualitative_romm(RiskSeverityEnum.MEDIUM, RiskSeverityEnum.HIGH) == RiskSeverityEnum.HIGH
-    assert derive_qualitative_romm(RiskSeverityEnum.MEDIUM, RiskSeverityEnum.LOW) == RiskSeverityEnum.MEDIUM
-    assert derive_qualitative_romm(RiskSeverityEnum.LOW, RiskSeverityEnum.LOW) == RiskSeverityEnum.LOW
+    assert (
+        derive_qualitative_romm(RiskSeverityEnum.HIGH, RiskSeverityEnum.MEDIUM)
+        == RiskSeverityEnum.HIGH
+    )
+    assert (
+        derive_qualitative_romm(RiskSeverityEnum.MEDIUM, RiskSeverityEnum.HIGH)
+        == RiskSeverityEnum.HIGH
+    )
+    assert (
+        derive_qualitative_romm(RiskSeverityEnum.MEDIUM, RiskSeverityEnum.LOW)
+        == RiskSeverityEnum.MEDIUM
+    )
+    assert (
+        derive_qualitative_romm(RiskSeverityEnum.LOW, RiskSeverityEnum.LOW) == RiskSeverityEnum.LOW
+    )
 
 
 def test_risk_assertion_mapping() -> None:

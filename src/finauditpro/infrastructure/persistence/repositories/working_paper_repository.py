@@ -71,7 +71,11 @@ class WorkingPaperRepository:
         return self._to_wp_entity(model) if model else None
 
     def list_for_engagement(self, engagement_id: str) -> list[WorkingPaper]:
-        stmt = select(WorkingPaperModel).where(WorkingPaperModel.engagement_id == engagement_id).order_by(WorkingPaperModel.index_reference)
+        stmt = (
+            select(WorkingPaperModel)
+            .where(WorkingPaperModel.engagement_id == engagement_id)
+            .order_by(WorkingPaperModel.index_reference)
+        )
         models = self.session.scalars(stmt).all()
         return [self._to_wp_entity(m) for m in models]
 
@@ -90,7 +94,11 @@ class WorkingPaperRepository:
         return sec
 
     def get_sections(self, wp_id: str) -> list[WorkingPaperSection]:
-        stmt = select(WorkingPaperSectionModel).where(WorkingPaperSectionModel.working_paper_id == wp_id).order_by(WorkingPaperSectionModel.section_order)
+        stmt = (
+            select(WorkingPaperSectionModel)
+            .where(WorkingPaperSectionModel.working_paper_id == wp_id)
+            .order_by(WorkingPaperSectionModel.section_order)
+        )
         models = self.session.scalars(stmt).all()
         return [
             WorkingPaperSection(
@@ -150,7 +158,11 @@ class WorkingPaperRepository:
         return note
 
     def list_review_notes(self, wp_id: str) -> list[ReviewNote]:
-        stmt = select(ReviewNoteModel).where(ReviewNoteModel.working_paper_id == wp_id).order_by(ReviewNoteModel.created_at)
+        stmt = (
+            select(ReviewNoteModel)
+            .where(ReviewNoteModel.working_paper_id == wp_id)
+            .order_by(ReviewNoteModel.created_at)
+        )
         models = self.session.scalars(stmt).all()
         return [
             ReviewNote(
@@ -171,7 +183,16 @@ class WorkingPaperRepository:
 
     def count_open_review_notes(self, wp_id: str) -> int:
         notes = self.list_review_notes(wp_id)
-        return sum(1 for n in notes if n.status in (ReviewNoteStatusEnum.OPEN, ReviewNoteStatusEnum.RESPONDED, ReviewNoteStatusEnum.REOPENED))
+        return sum(
+            1
+            for n in notes
+            if n.status
+            in (
+                ReviewNoteStatusEnum.OPEN,
+                ReviewNoteStatusEnum.RESPONDED,
+                ReviewNoteStatusEnum.REOPENED,
+            )
+        )
 
     def add_sign_off(self, signoff: SignOffRecord) -> SignOffRecord:
         model = SignOffRecordModel(
@@ -191,7 +212,11 @@ class WorkingPaperRepository:
         return signoff
 
     def list_sign_offs(self, wp_id: str) -> list[SignOffRecord]:
-        stmt = select(SignOffRecordModel).where(SignOffRecordModel.working_paper_id == wp_id).order_by(SignOffRecordModel.created_at)
+        stmt = (
+            select(SignOffRecordModel)
+            .where(SignOffRecordModel.working_paper_id == wp_id)
+            .order_by(SignOffRecordModel.created_at)
+        )
         models = self.session.scalars(stmt).all()
         return [
             SignOffRecord(

@@ -91,7 +91,10 @@ class AuditPlanningService:
                     entity_name="MaterialityAssessment",
                     entity_id=created.id,
                     action="MATERIALITY_SET",
-                    payload={"version": created.version, "om_paise": created.overall_materiality_paise},
+                    payload={
+                        "version": created.version,
+                        "om_paise": created.overall_materiality_paise,
+                    },
                     user_id=dto.created_by,
                 )
             )
@@ -137,7 +140,10 @@ class AuditPlanningService:
                     entity_name="AuditRisk",
                     entity_id=created.id,
                     action="RISK_CREATED",
-                    payload={"risk_code": created.risk_code, "derived_romm": created.derived_romm.value},
+                    payload={
+                        "risk_code": created.risk_code,
+                        "derived_romm": created.derived_romm.value,
+                    },
                     user_id="Auditor",
                 )
             )
@@ -270,7 +276,9 @@ class AuditPlanningService:
 
             allowed_targets = VALID_FINDING_TRANSITIONS.get(current_status, set())
             if target_status not in allowed_targets and target_status != current_status:
-                raise InvalidStateTransitionError("AuditFinding", current_status.value, target_status.value)
+                raise InvalidStateTransitionError(
+                    "AuditFinding", current_status.value, target_status.value
+                )
 
             existing.status = target_status
             if dto.reviewer is not None:

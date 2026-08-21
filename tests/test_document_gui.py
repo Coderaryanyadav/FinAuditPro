@@ -46,7 +46,9 @@ def test_document_view_rendering(qapp: QApplication, db_manager: DatabaseManager
 
     doc_file = tmp_path / "gui_test_doc.txt"
     doc_file.write_text("Sample Audit Doc Content for GUI Test", encoding="utf-8")
-    doc_svc.upload_and_process_document(UploadDocumentDTO(engagement_id=eng.id, file_path=str(doc_file)))
+    doc_svc.upload_and_process_document(
+        UploadDocumentDTO(engagement_id=eng.id, file_path=str(doc_file))
+    )
 
     doc_view = DocumentView(doc_svc)
     doc_view.set_engagement(eng.id)

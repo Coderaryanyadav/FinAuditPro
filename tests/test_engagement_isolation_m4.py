@@ -32,12 +32,32 @@ def setup_isolation_env(tmp_path):
     eng_svc = EngagementService(db_manager)
     planning_svc = AuditPlanningService(db_manager)
 
-    firm = firm_svc.create_firm(CreateFirmDTO(name="Isolation Firm", firm_registration_number="FRN-777777"))
-    client_a = client_svc.create_client(CreateClientDTO(firm_id=firm.id, name="Client Alpha", gstin="27AAAAA9603R1ZN"))
-    client_b = client_svc.create_client(CreateClientDTO(firm_id=firm.id, name="Client Beta", gstin="27BBBBB9603R1ZN"))
+    firm = firm_svc.create_firm(
+        CreateFirmDTO(name="Isolation Firm", firm_registration_number="FRN-777777")
+    )
+    client_a = client_svc.create_client(
+        CreateClientDTO(firm_id=firm.id, name="Client Alpha", gstin="27AAAAA9603R1ZN")
+    )
+    client_b = client_svc.create_client(
+        CreateClientDTO(firm_id=firm.id, name="Client Beta", gstin="27BBBBB9603R1ZN")
+    )
 
-    eng_a = eng_svc.create_engagement(CreateEngagementDTO(firm_id=firm.id, client_id=client_a.id, financial_year="2025-26", lead_auditor="Auditor A"))
-    eng_b = eng_svc.create_engagement(CreateEngagementDTO(firm_id=firm.id, client_id=client_b.id, financial_year="2025-26", lead_auditor="Auditor B"))
+    eng_a = eng_svc.create_engagement(
+        CreateEngagementDTO(
+            firm_id=firm.id,
+            client_id=client_a.id,
+            financial_year="2025-26",
+            lead_auditor="Auditor A",
+        )
+    )
+    eng_b = eng_svc.create_engagement(
+        CreateEngagementDTO(
+            firm_id=firm.id,
+            client_id=client_b.id,
+            financial_year="2025-26",
+            lead_auditor="Auditor B",
+        )
+    )
 
     return eng_a, eng_b, planning_svc
 

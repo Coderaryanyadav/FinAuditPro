@@ -1,6 +1,5 @@
 """Unit tests for SettingsService persistence and cloud AI opt-out defaults."""
 
-import pytest
 from finauditpro.application.services.settings_service import AppSettings, SettingsService
 
 

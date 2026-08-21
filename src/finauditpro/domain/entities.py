@@ -60,7 +60,9 @@ def validate_pan(pan: str | None) -> str | None:
         return None
     cleaned = pan.strip().upper()
     if not _PAN_REGEX.match(cleaned):
-        raise ValidationError(f"Invalid PAN format: '{pan}'. Expected 10-character alphanumeric format (e.g. ABCDE1234F).")
+        raise ValidationError(
+            f"Invalid PAN format: '{pan}'. Expected 10-character alphanumeric format (e.g. ABCDE1234F)."
+        )
     return cleaned
 
 
@@ -69,7 +71,9 @@ def validate_gstin(gstin: str | None) -> str | None:
         return None
     cleaned = gstin.strip().upper()
     if not _GSTIN_REGEX.match(cleaned):
-        raise ValidationError(f"Invalid GSTIN format: '{gstin}'. Expected 15-character Indian GSTIN format.")
+        raise ValidationError(
+            f"Invalid GSTIN format: '{gstin}'. Expected 15-character Indian GSTIN format."
+        )
     return cleaned
 
 

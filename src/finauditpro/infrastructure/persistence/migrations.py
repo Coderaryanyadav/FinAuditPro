@@ -36,7 +36,9 @@ class MigrationRunner:
             cursor.execute("SELECT version FROM schema_migrations ORDER BY version ASC;")
             return {row[0] for row in cursor.fetchall()}
 
-    def apply_migration(self, version: int, name: str, sql_or_fn: str | Callable[[sqlite3.Connection], None]) -> bool:
+    def apply_migration(
+        self, version: int, name: str, sql_or_fn: str | Callable[[sqlite3.Connection], None]
+    ) -> bool:
         """Apply a single versioned migration in an isolated transaction."""
         applied = self.get_applied_versions()
         if version in applied:
@@ -61,7 +63,9 @@ class MigrationRunner:
                 conn.rollback()
                 raise RuntimeError(f"Migration version {version} ('{name}') failed: {ex}") from ex
 
-    def run_all(self, migrations: list[tuple[int, str, str | Callable[[sqlite3.Connection], None]]]) -> int:
+    def run_all(
+        self, migrations: list[tuple[int, str, str | Callable[[sqlite3.Connection], None]]]
+    ) -> int:
         """Run all pending migrations in version order."""
         self.init_migration_table()
         sorted_migrations = sorted(migrations, key=lambda m: m[0])

@@ -70,7 +70,9 @@ def setup_sealing_env(tmp_path):
             generated_by="Senior Auditor",
         )
     )
-    report_svc.approve_report(ApproveReportDTO(report_id=rep.id, approved_by="Audit Partner", approver_role="Partner"))
+    report_svc.approve_report(
+        ApproveReportDTO(report_id=rep.id, approved_by="Audit Partner", approver_role="Partner")
+    )
 
     return eng, arch_svc, db_manager, tmp_path
 
@@ -93,4 +95,4 @@ def test_freeze_and_seal_engagement_success(setup_sealing_env) -> None:
     assert archive.archive_path.endswith(".zip")
     assert len(archive.sealed_content_hash) == 64
     assert archive.assembly_deadline == "2026-05-30"  # +60 days
-    assert archive.retain_until.startswith("2033-")     # +7 years
+    assert archive.retain_until.startswith("2033-")  # +7 years

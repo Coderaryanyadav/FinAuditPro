@@ -55,18 +55,31 @@ def test_scale_general_ledger_performance(setup_scale_env) -> None:
     csv_file = tmp_path / "gl_scale_10k.csv"
     with open(csv_file, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["Date", "Voucher Type", "Voucher No", "Account Code", "Account Name", "Debit", "Credit", "Narration"])
+        writer.writerow(
+            [
+                "Date",
+                "Voucher Type",
+                "Voucher No",
+                "Account Code",
+                "Account Name",
+                "Debit",
+                "Credit",
+                "Narration",
+            ]
+        )
         for i in range(1, 10001):
-            writer.writerow([
-                "2025-09-15",
-                "Payment",
-                f"VCH-{i:05d}",
-                f"ACC-{(i % 50):03d}",
-                f"Vendor {(i % 50)}",
-                5000.0 if i % 2 == 0 else 0.0,
-                0.0 if i % 2 == 0 else 5000.0,
-                f"Substantive testing narration {i}",
-            ])
+            writer.writerow(
+                [
+                    "2025-09-15",
+                    "Payment",
+                    f"VCH-{i:05d}",
+                    f"ACC-{(i % 50):03d}",
+                    f"Vendor {(i % 50)}",
+                    5000.0 if i % 2 == 0 else 0.0,
+                    0.0 if i % 2 == 0 else 5000.0,
+                    f"Substantive testing narration {i}",
+                ]
+            )
 
     # 2. Import Dataset
     t0 = time.perf_counter()
@@ -84,6 +97,7 @@ def test_scale_general_ledger_performance(setup_scale_env) -> None:
     # 3. Run Analytics Pipeline
     from finauditpro.application.financial_dtos import RunAnalyticsDTO
     from finauditpro.domain.financial_entities import AnalyticsTypeEnum
+
     t2 = time.perf_counter()
     anomalies = analytics_svc.run_analysis(
         RunAnalyticsDTO(

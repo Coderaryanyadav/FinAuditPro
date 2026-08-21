@@ -1,11 +1,15 @@
 """Repository managing Roll-Forward Records and Opening Balance Link persistence."""
 
 import json
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from finauditpro.domain.roll_forward_entities import OpeningBalanceLink, RollForwardRecord
-from finauditpro.infrastructure.persistence.roll_forward_models import OpeningBalanceLinkModel, RollForwardRecordModel
+from finauditpro.infrastructure.persistence.roll_forward_models import (
+    OpeningBalanceLinkModel,
+    RollForwardRecordModel,
+)
 
 
 class RollForwardRepository:
@@ -68,7 +72,9 @@ class RollForwardRepository:
         model = self.session.scalars(stmt).first()
         return self._to_record_entity(model) if model else None
 
-    def add_opening_balance_links(self, links: list[OpeningBalanceLink]) -> list[OpeningBalanceLink]:
+    def add_opening_balance_links(
+        self, links: list[OpeningBalanceLink]
+    ) -> list[OpeningBalanceLink]:
         models = [
             OpeningBalanceLinkModel(
                 id=link.id,
@@ -101,8 +107,12 @@ class RollForwardRepository:
         models = self.session.scalars(stmt).all()
         return [self._to_link_entity(m) for m in models]
 
-    def confirm_opening_balance_tie_out(self, engagement_id: str, verified_by: str, verified_at: str) -> None:
-        stmt = select(OpeningBalanceLinkModel).where(OpeningBalanceLinkModel.engagement_id == engagement_id)
+    def confirm_opening_balance_tie_out(
+        self, engagement_id: str, verified_by: str, verified_at: str
+    ) -> None:
+        stmt = select(OpeningBalanceLinkModel).where(
+            OpeningBalanceLinkModel.engagement_id == engagement_id
+        )
         models = self.session.scalars(stmt).all()
         for m in models:
             m.is_verified_by_auditor = 1

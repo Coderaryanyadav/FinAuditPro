@@ -62,14 +62,38 @@ def setup_master_env(tmp_path):
 
 def test_master_full_chain_integration_and_traceability(setup_master_env) -> None:
     """Master full-chain test: Firm -> Client -> Engagement -> Import -> Risk -> Procedure -> Finding -> WorkingPaper -> Report -> Approval -> Hash Traceability."""
-    eng, fin_svc, planning_svc, wp_svc, report_svc, trace_svc, db_manager, tmp_path = setup_master_env
+    eng, fin_svc, planning_svc, wp_svc, report_svc, trace_svc, db_manager, tmp_path = (
+        setup_master_env
+    )
 
     # 1. Financial Import via CSV
     csv_file = tmp_path / "master_gl.csv"
     with open(csv_file, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["Date", "Voucher Type", "Voucher No", "Account Code", "Account Name", "Debit", "Credit", "Narration"])
-        writer.writerow(["2025-10-01", "Payment", "VCH-001", "5001", "Legal Fees", 500000.0, 0.0, "Legal consultation fee"])
+        writer.writerow(
+            [
+                "Date",
+                "Voucher Type",
+                "Voucher No",
+                "Account Code",
+                "Account Name",
+                "Debit",
+                "Credit",
+                "Narration",
+            ]
+        )
+        writer.writerow(
+            [
+                "2025-10-01",
+                "Payment",
+                "VCH-001",
+                "5001",
+                "Legal Fees",
+                500000.0,
+                0.0,
+                "Legal consultation fee",
+            ]
+        )
 
     ds = fin_svc.import_financial_dataset(
         ImportDatasetDTO(
@@ -159,7 +183,9 @@ def test_master_full_chain_integration_and_traceability(setup_master_env) -> Non
     assert approved.status.value == "Approved"
 
     # 6. Export XLSX with formula injection escaping
-    xlsx_path = report_svc.export_to_xlsx(ExportReportDTO(report_id=report.id, export_format=ExportFormatEnum.XLSX))
+    xlsx_path = report_svc.export_to_xlsx(
+        ExportReportDTO(report_id=report.id, export_format=ExportFormatEnum.XLSX)
+    )
     assert xlsx_path.endswith(".xlsx")
 
     # 7. Traceability Verification

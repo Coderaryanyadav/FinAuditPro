@@ -13,7 +13,9 @@ def sanitize_untrusted_content(text: str) -> str:
     sanitized = text.replace("<", "&lt;").replace(">", "&gt;")
 
     # 2. Neutralize think tokens specifically if unescaped or escaped
-    sanitized = re.sub(r"&lt;/?think&gt;", "[THINK_TOKEN_NEUTRALIZED]", sanitized, flags=re.IGNORECASE)
+    sanitized = re.sub(
+        r"&lt;/?think&gt;", "[THINK_TOKEN_NEUTRALIZED]", sanitized, flags=re.IGNORECASE
+    )
 
     # 3. Neutralize common prompt injection phrases
     injection_patterns = [
@@ -23,7 +25,9 @@ def sanitize_untrusted_content(text: str) -> str:
         r"system\s+override",
     ]
     for pattern in injection_patterns:
-        sanitized = re.sub(pattern, "[PROMPT_INJECTION_NEUTRALIZED]", sanitized, flags=re.IGNORECASE)
+        sanitized = re.sub(
+            pattern, "[PROMPT_INJECTION_NEUTRALIZED]", sanitized, flags=re.IGNORECASE
+        )
 
     return sanitized
 
@@ -55,7 +59,9 @@ class PromptEngine:
                 f"--- END CHUNK {chunk_id} ---"
             )
 
-        joined_evidence = "\n\n".join(evidence_blocks) if evidence_blocks else "NO EVIDENCE CHUNKS RETRIEVED."
+        joined_evidence = (
+            "\n\n".join(evidence_blocks) if evidence_blocks else "NO EVIDENCE CHUNKS RETRIEVED."
+        )
 
         user_content = (
             f"SYSTEM AUDIT INSTRUCTIONS:\n"
@@ -96,7 +102,9 @@ class PromptEngine:
                 f"--- END CHUNK ---"
             )
 
-        joined_evidence = "\n\n".join(evidence_blocks) if evidence_blocks else "NO EVIDENCE CHUNKS RETRIEVED."
+        joined_evidence = (
+            "\n\n".join(evidence_blocks) if evidence_blocks else "NO EVIDENCE CHUNKS RETRIEVED."
+        )
 
         user_content = (
             f"SYSTEM AUDIT INSTRUCTIONS:\n"

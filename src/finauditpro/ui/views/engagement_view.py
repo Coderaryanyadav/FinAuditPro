@@ -29,6 +29,8 @@ class EngagementView(QWidget):
     """View listing audit engagements with filters, status badges, and create/edit controls."""
 
     engagement_changed = Signal(str)
+    engagement_selected = Signal(str)
+
 
     def __init__(
         self,
@@ -135,6 +137,7 @@ class EngagementView(QWidget):
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.table.itemClicked.connect(self._on_table_click)
         self.table.doubleClicked.connect(self._on_double_click)
 
         self.empty_state = EmptyStateWidget(
@@ -150,6 +153,16 @@ class EngagementView(QWidget):
         layout.addStretch(1)
 
         self.refresh()
+
+    def _on_table_click(self, item: QTableWidgetItem) -> None:
+        row = item.row()
+        name_item = self.table.item(row, 0)
+        if name_item:
+            eng_id = name_item.data(Qt.ItemDataRole.UserRole)
+            if eng_id:
+                self.engagement_changed.emit(eng_id)
+                self.engagement_selected.emit(eng_id)
+
 
     def refresh(self) -> None:
         self._all_engagements = self.engagement_service.list_all_engagements()

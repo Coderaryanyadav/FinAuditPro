@@ -25,6 +25,7 @@ class FirmView(QWidget):
     """View listing audit firms with search, filters, and create/edit controls."""
 
     firm_changed = Signal()
+    firm_selected = Signal(str)
 
     def __init__(self, firm_service: FirmService, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -58,7 +59,7 @@ class FirmView(QWidget):
             "font-size: 11px; font-weight: 700; color: #64748B; letter-spacing: 0.5px;"
         )
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("Search by firm name, FRN, PAN, or GSTIN...")
+        self.search_input.setPlaceholderText("Search firms by name, registration (FRN), or PAN...")
         self.search_input.setStyleSheet(
             "QLineEdit { border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px 10px; font-size: 12px; background: #FFFFFF; }"
             "QLineEdit:focus { border-color: #2563EB; }"
@@ -75,7 +76,14 @@ class FirmView(QWidget):
         self.table = QTableWidget()
         self.table.setColumnCount(6)
         self.table.setHorizontalHeaderLabels(
-            ["FIRM NAME", "FRN / REG NO", "PAN", "GSTIN", "PHONE", "EMAIL"]
+            [
+                "FIRM NAME",
+                "REGISTRATION NO. (FRN)",
+                "PAN",
+                "GSTIN",
+                "PHONE",
+                "EMAIL",
+            ]
         )
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         for c in range(1, 6):
@@ -85,6 +93,7 @@ class FirmView(QWidget):
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.table.itemClicked.connect(self._on_table_click)
         self.table.doubleClicked.connect(self._on_double_click)
 
         self.empty_state = EmptyStateWidget(
@@ -100,6 +109,14 @@ class FirmView(QWidget):
         layout.addStretch(1)
 
         self.refresh()
+
+    def _on_table_click(self, item: QTableWidgetItem) -> None:
+        row = item.row()
+        name_item = self.table.item(row, 0)
+        if name_item:
+            firm_id = name_item.data(Qt.ItemDataRole.UserRole)
+            if firm_id:
+                self.firm_selected.emit(firm_id)
 
     def refresh(self) -> None:
         self._all_firms = self.firm_service.list_firms()
@@ -143,6 +160,8 @@ class FirmView(QWidget):
         if dialog.exec() == FirmDialog.DialogCode.Accepted:
             self.refresh()
             self.firm_changed.emit()
+            if dialog.result_firm:
+                self.firm_selected.emit(dialog.result_firm.id)
 
     def _on_double_click(self) -> None:
         row = self.table.currentRow()
@@ -156,5 +175,7 @@ class FirmView(QWidget):
                     if dialog.exec() == FirmDialog.DialogCode.Accepted:
                         self.refresh()
                         self.firm_changed.emit()
+                        if dialog.result_firm:
+                            self.firm_selected.emit(dialog.result_firm.id)
                 except Exception as ex:
                     QMessageBox.critical(self, "Error", f"Could not load firm: {ex}")

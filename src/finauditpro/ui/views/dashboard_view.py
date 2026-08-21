@@ -81,29 +81,19 @@ class DashboardView(QWidget):
         left_v.setSpacing(3)
 
         title_lbl = QLabel("Audit Overview")
-        title_lbl.setStyleSheet(
-            "font-size: 22px; font-weight: 700; color: #0F172A; letter-spacing: -0.4px; border: none; background: transparent;"
-        )
+        title_lbl.setStyleSheet("font-size: 22px; font-weight: 700; color: #0F172A; letter-spacing: -0.4px; border: none; background: transparent;")
 
         ctx_row = QHBoxLayout()
         ctx_row.setSpacing(8)
         self.lbl_context_text = QLabel("RELIANCE · FY 2025–26")
-        self.lbl_context_text.setStyleSheet(
-            "font-size: 13px; font-weight: 600; color: #334155; border: none; background: transparent;"
-        )
+        self.lbl_context_text.setStyleSheet("font-size: 13px; font-weight: 600; color: #334155; border: none; background: transparent;")
         self.lbl_audit_type = QLabel("Statutory Audit")
-        self.lbl_audit_type.setStyleSheet(
-            "font-size: 13px; font-weight: 500; color: #64748B; border: none; background: transparent;"
-        )
+        self.lbl_audit_type.setStyleSheet("font-size: 13px; font-weight: 500; color: #64748B; border: none; background: transparent;")
         self.status_badge = StatusBadge("Planning", "info")
         self.lbl_pct_text = QLabel("0% complete")
-        self.lbl_pct_text.setStyleSheet(
-            "font-size: 12px; font-weight: 500; color: #94A3B8; border: none; background: transparent;"
-        )
-        ctx_row.addWidget(self.lbl_context_text)
-        ctx_row.addWidget(self.lbl_audit_type)
-        ctx_row.addWidget(self.status_badge)
-        ctx_row.addWidget(self.lbl_pct_text)
+        self.lbl_pct_text.setStyleSheet("font-size: 12px; font-weight: 500; color: #94A3B8; border: none; background: transparent;")
+        for w in (self.lbl_context_text, self.lbl_audit_type, self.status_badge, self.lbl_pct_text):
+            ctx_row.addWidget(w)
         ctx_row.addStretch()
 
         left_v.addWidget(title_lbl)
@@ -112,9 +102,7 @@ class DashboardView(QWidget):
         hdr_l.addStretch()
 
         self.date_lbl = QLabel(datetime.now().strftime("%d %b %Y"))
-        self.date_lbl.setStyleSheet(
-            "font-size: 11px; font-weight: 500; color: #94A3B8; background: transparent; padding: 0; border: none;"
-        )
+        self.date_lbl.setStyleSheet("font-size: 11px; font-weight: 500; color: #94A3B8; background: transparent; border: none;")
         hdr_l.addWidget(self.date_lbl, alignment=Qt.AlignmentFlag.AlignTop)
         body_layout.addWidget(hdr)
 
@@ -122,22 +110,13 @@ class DashboardView(QWidget):
         row1 = QHBoxLayout()
         row1.setSpacing(12)
 
-        # Workflow Card
         ws_card = CardWidget("AUDIT WORKFLOW")
         ws_v = QVBoxLayout()
         ws_v.setSpacing(8)
 
-        # Connected Stepper
         stepper = QHBoxLayout()
         stepper.setSpacing(0)
-        self.steps_data = [
-            ("Client", "✓", True, False),
-            ("FY", "✓", True, False),
-            ("Engagement", "●", False, True),
-            ("Materiality", "○", False, False),
-            ("Documentation", "○", False, False),
-            ("Completion", "○", False, False),
-        ]
+        self.steps_data = [("Client", "✓", True, False), ("FY", "✓", True, False), ("Engagement", "●", False, True), ("Materiality", "○", False, False), ("Documentation", "○", False, False), ("Completion", "○", False, False)]
         self.step_widgets: list[QLabel] = []
         for i, (name, icon, is_done, is_active) in enumerate(self.steps_data):
             slbl = QLabel(f"{icon}  {name}")
@@ -146,10 +125,7 @@ class DashboardView(QWidget):
             fg = "#15803D" if is_done else ("#1D4ED8" if is_active else "#94A3B8")
             bd = "#BBF7D0" if is_done else ("#BFDBFE" if is_active else "#E2E8F0")
             fw = "600" if (is_done or is_active) else "500"
-            slbl.setStyleSheet(
-                f"background-color: {bg}; color: {fg}; font-size: 11px; font-weight: {fw};"
-                f" border: 1px solid {bd}; border-radius: 4px; padding: 5px 2px;"
-            )
+            slbl.setStyleSheet(f"background-color: {bg}; color: {fg}; font-size: 11px; font-weight: {fw}; border: 1px solid {bd}; border-radius: 4px; padding: 5px 2px;")
             stepper.addWidget(slbl, stretch=1)
             self.step_widgets.append(slbl)
 
@@ -157,80 +133,54 @@ class DashboardView(QWidget):
                 conn = QLabel("—")
                 conn.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 conn.setFixedWidth(16)
-                conn.setStyleSheet(
-                    "color: #CBD5E1; font-weight: 400; font-size: 10px; border: none; background: transparent;"
-                )
+                conn.setStyleSheet("color: #CBD5E1; font-weight: 400; font-size: 10px; border: none; background: transparent;")
                 stepper.addWidget(conn)
 
         ws_v.addLayout(stepper)
 
-        # Next Action CTA
         act_frame = QFrame()
-        act_frame.setStyleSheet(
-            "background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 8px 12px;"
-        )
+        act_frame.setStyleSheet("background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 8px 12px;")
         act_l = QHBoxLayout(act_frame)
         act_l.setContentsMargins(0, 0, 0, 0)
-
         act_v = QVBoxLayout()
         act_v.setSpacing(2)
         act_hdr = QLabel("NEXT ACTION")
-        act_hdr.setStyleSheet(
-            "font-size: 10px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; border: none; background: transparent;"
-        )
+        act_hdr.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; border: none; background: transparent;")
         act_title = QLabel("Complete engagement parameters")
-        act_title.setStyleSheet(
-            "font-size: 13px; font-weight: 600; color: #0F172A; border: none; background: transparent;"
-        )
-        act_desc = QLabel(
-            "Configure engagement details, statutory parameters, materiality and audit scope."
-        )
-        act_desc.setStyleSheet(
-            "font-size: 11px; color: #64748B; border: none; background: transparent;"
-        )
+        act_title.setStyleSheet("font-size: 13px; font-weight: 600; color: #0F172A; border: none; background: transparent;")
+        act_desc = QLabel("Configure engagement details, statutory parameters, materiality and audit scope.")
+        act_desc.setStyleSheet("font-size: 11px; color: #64748B; border: none; background: transparent;")
         act_v.addWidget(act_hdr)
         act_v.addWidget(act_title)
         act_v.addWidget(act_desc)
 
         btn_go = QPushButton("Continue Setup →")
         btn_go.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_go.setStyleSheet(
-            "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600;"
-            " border-radius: 6px; padding: 7px 14px; border: none; }"
-            "QPushButton:hover { background-color: #1D4ED8; }"
-        )
+        btn_go.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 14px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
         btn_go.clicked.connect(self._on_go_clients_clicked)
 
         act_l.addLayout(act_v)
         act_l.addStretch()
         act_l.addWidget(btn_go)
         ws_v.addWidget(act_frame)
-
         ws_card.content_layout.addLayout(ws_v)
         row1.addWidget(ws_card, 6)
 
-        # Needs Attention Card
         att_card = CardWidget("NEEDS ATTENTION")
         att_v = QVBoxLayout()
         att_v.setSpacing(4)
-
         self.att_row = QFrame()
-        self.att_row.setStyleSheet(
-            "background-color: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 6px; padding: 10px 12px;"
-        )
+        self.att_row.setStyleSheet("background-color: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 6px; padding: 10px 12px;")
         att_l = QHBoxLayout(self.att_row)
         att_l.setContentsMargins(0, 0, 0, 0)
         self.att_txt = QLabel("✓  All clear — no findings require attention")
-        self.att_txt.setStyleSheet(
-            "font-size: 12px; font-weight: 600; color: #15803D; border: none; background: transparent;"
-        )
+        self.att_txt.setStyleSheet("font-size: 12px; font-weight: 600; color: #15803D; border: none; background: transparent;")
         att_l.addWidget(self.att_txt)
-
         att_v.addWidget(self.att_row)
         att_card.content_layout.addLayout(att_v)
         row1.addWidget(att_card, 4)
-
         body_layout.addLayout(row1)
+
 
         # 3. Row 2: 4 KPI Cards
         stats = QHBoxLayout()
@@ -311,6 +261,7 @@ class DashboardView(QWidget):
         self.table_projects.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table_projects.setAlternatingRowColors(True)
         self.table_projects.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.table_projects.itemClicked.connect(self._on_table_click)
 
         table_card.content_layout.addWidget(self.table_projects)
         body_layout.addWidget(table_card)
@@ -322,6 +273,14 @@ class DashboardView(QWidget):
         main_layout.addWidget(scroll)
 
         self.refresh_dashboard()
+
+    def _on_table_click(self, item: QTableWidgetItem) -> None:
+        row = item.row()
+        name_item = self.table_projects.item(row, 0)
+        if name_item:
+            eng_id = name_item.data(Qt.ItemDataRole.UserRole)
+            if eng_id:
+                self.engagement_selected.emit(eng_id)
 
     def refresh_dashboard(self) -> None:
         if not self.current_firm:
@@ -374,8 +333,11 @@ class DashboardView(QWidget):
             )
             status_val = eng.status.value if hasattr(eng.status, "value") else str(eng.status)
 
+            c_item = QTableWidgetItem(c_name)
+            c_item.setData(Qt.ItemDataRole.UserRole, eng.id)
+
             items = [
-                QTableWidgetItem(c_name),
+                c_item,
                 QTableWidgetItem(f"FY {eng.financial_year}"),
                 QTableWidgetItem(audit_t),
                 QTableWidgetItem(f"● {status_val}"),
@@ -391,3 +353,4 @@ class DashboardView(QWidget):
 
     def _on_go_clients_clicked(self) -> None:
         self.navigate_to_clients.emit()
+

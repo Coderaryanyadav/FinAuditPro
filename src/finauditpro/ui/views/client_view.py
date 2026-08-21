@@ -28,6 +28,7 @@ class ClientView(QWidget):
     """View listing clients for an audit firm with search, filters, and create/edit controls."""
 
     client_changed = Signal()
+    client_selected = Signal(str)
 
     def __init__(
         self,
@@ -123,6 +124,7 @@ class ClientView(QWidget):
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.table.itemClicked.connect(self._on_table_click)
         self.table.doubleClicked.connect(self._on_double_click)
 
         self.empty_state = EmptyStateWidget(
@@ -138,6 +140,7 @@ class ClientView(QWidget):
         layout.addStretch(1)
 
         self.refresh()
+
 
     def set_firm(self, firm: Firm | None) -> None:
         self.current_firm = firm
@@ -211,6 +214,14 @@ class ClientView(QWidget):
 
         self.table.setFixedHeight(max(1, len(filtered)) * 36 + 32)
 
+    def _on_table_click(self, item: QTableWidgetItem) -> None:
+        row = item.row()
+        name_item = self.table.item(row, 0)
+        if name_item:
+            client_id = name_item.data(Qt.ItemDataRole.UserRole)
+            if client_id:
+                self.client_selected.emit(client_id)
+
     def _create_client(self) -> None:
         if not self.current_firm:
             firms = self.firm_service.list_firms()
@@ -225,6 +236,8 @@ class ClientView(QWidget):
         if dialog.exec() == ClientDialog.DialogCode.Accepted:
             self.refresh()
             self.client_changed.emit()
+            if dialog.result_client:
+                self.client_selected.emit(dialog.result_client.id)
 
     def _on_double_click(self) -> None:
         row = self.table.currentRow()
@@ -241,5 +254,8 @@ class ClientView(QWidget):
                     if dialog.exec() == ClientDialog.DialogCode.Accepted:
                         self.refresh()
                         self.client_changed.emit()
+                        if dialog.result_client:
+                            self.client_selected.emit(dialog.result_client.id)
                 except Exception as ex:
                     QMessageBox.critical(self, "Error", f"Could not load client: {ex}")
+

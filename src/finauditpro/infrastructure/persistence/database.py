@@ -67,6 +67,7 @@ class DatabaseManager:
 
     def create_tables(self) -> None:
         """Create all tables in database and apply append-only triggers for audit_events."""
+        import finauditpro.infrastructure.persistence.models  # noqa: F401
         Base.metadata.create_all(self.engine)
         self._ensure_columns()
         self._create_fts_tables()
@@ -75,57 +76,27 @@ class DatabaseManager:
     def _ensure_columns(self) -> None:
         """Safely add missing schema columns to pre-existing SQLite tables."""
         with self.engine.begin() as conn:
-            # 1. engagements table
-            res = conn.execute(text("PRAGMA table_info(engagements);")).fetchall()
-            eng_cols = {row[1] for row in res}
-            if eng_cols and "prior_engagement_id" not in eng_cols:
-                conn.execute(text("ALTER TABLE engagements ADD COLUMN prior_engagement_id TEXT;"))
+            for table_name, table in Base.metadata.tables.items():
+                try:
+                    res = conn.execute(text(f"PRAGMA table_info({table_name});")).fetchall()
+                    if not res:
+                        continue
+                    existing_cols = {row[1] for row in res}
+                    for col in table.columns:
+                        if col.name not in existing_cols:
+                            col_type = col.type.compile(self.engine.dialect)
+                            default_clause = ""
+                            if col.server_default is not None:
+                                default_clause = f" DEFAULT {col.server_default.arg}"
+                            elif col.default is not None and not callable(col.default.arg):
+                                val = col.default.arg
+                                default_clause = f" DEFAULT '{val}'" if isinstance(val, str) else f" DEFAULT {val}"
 
-            # 2. evidence_links table
-            res = conn.execute(text("PRAGMA table_info(evidence_links);")).fetchall()
-            ev_cols = {row[1] for row in res}
-            if ev_cols:
-                if "dataset_id" not in ev_cols:
-                    conn.execute(text("ALTER TABLE evidence_links ADD COLUMN dataset_id TEXT;"))
-                if "row_index" not in ev_cols:
-                    conn.execute(text("ALTER TABLE evidence_links ADD COLUMN row_index INTEGER;"))
-                if "bounding_box_json" not in ev_cols:
-                    conn.execute(
-                        text("ALTER TABLE evidence_links ADD COLUMN bounding_box_json TEXT;")
-                    )
-                if "procedure_id" not in ev_cols:
-                    conn.execute(text("ALTER TABLE evidence_links ADD COLUMN procedure_id TEXT;"))
-                if "document_id" not in ev_cols:
-                    conn.execute(text("ALTER TABLE evidence_links ADD COLUMN document_id TEXT;"))
-                if "page_number" not in ev_cols:
-                    conn.execute(
-                        text("ALTER TABLE evidence_links ADD COLUMN page_number INTEGER DEFAULT 1;")
-                    )
+                            stmt = f"ALTER TABLE {table_name} ADD COLUMN {col.name} {col_type}{default_clause};"
+                            conn.execute(text(stmt))
+                except Exception:
+                    pass
 
-            # 3. audit_findings table
-            res = conn.execute(text("PRAGMA table_info(audit_findings);")).fetchall()
-            find_cols = {row[1] for row in res}
-            if find_cols:
-                if "is_ai_generated" not in find_cols:
-                    conn.execute(
-                        text(
-                            "ALTER TABLE audit_findings ADD COLUMN is_ai_generated INTEGER DEFAULT 0;"
-                        )
-                    )
-                if "source" not in find_cols:
-                    conn.execute(
-                        text("ALTER TABLE audit_findings ADD COLUMN source TEXT DEFAULT 'manual';")
-                    )
-                if "prior_engagement_finding_id" not in find_cols:
-                    conn.execute(
-                        text(
-                            "ALTER TABLE audit_findings ADD COLUMN prior_engagement_finding_id TEXT;"
-                        )
-                    )
-                if "procedure_id" not in find_cols:
-                    conn.execute(text("ALTER TABLE audit_findings ADD COLUMN procedure_id TEXT;"))
-                if "risk_id" not in find_cols:
-                    conn.execute(text("ALTER TABLE audit_findings ADD COLUMN risk_id TEXT;"))
 
     def _create_fts_tables(self) -> None:
         """Create SQLite FTS5 virtual tables for document full-text search."""

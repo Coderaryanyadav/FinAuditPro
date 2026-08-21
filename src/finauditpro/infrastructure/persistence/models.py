@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from finauditpro.domain.clock import utc_now
 from finauditpro.infrastructure.persistence.database import Base
 
+
 class FirmModel(Base):
     __tablename__ = "firms"
     id: Mapped[str] = mapped_column(String(36), primary_key=True)

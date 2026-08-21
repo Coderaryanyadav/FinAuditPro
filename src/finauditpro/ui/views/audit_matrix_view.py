@@ -4,6 +4,7 @@ Planning & Execution Core: SA 320 Materiality, SA 315 Risk Register, Procedures,
 """
 
 from typing import Any
+
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QComboBox,

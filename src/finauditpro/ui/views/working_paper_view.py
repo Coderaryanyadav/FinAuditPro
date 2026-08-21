@@ -1,7 +1,9 @@
 """
 Working Papers Workspace View for FinAuditPro.
-Maker–Checker control, review notes, and cryptographic tamper verification.
+Maker-Checker control, review notes, and cryptographic tamper verification.
 """
+
+from typing import Any
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (

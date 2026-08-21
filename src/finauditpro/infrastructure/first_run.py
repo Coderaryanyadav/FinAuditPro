@@ -1,8 +1,8 @@
 """Application data directory initialization, Matplotlib environment setup, and startup database bootstrap."""
 
 import os
-from pathlib import Path
 import sqlite3
+from pathlib import Path
 
 from finauditpro.infrastructure.persistence import models  # noqa: F401
 from finauditpro.infrastructure.persistence.database import DatabaseManager

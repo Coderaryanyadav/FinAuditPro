@@ -28,7 +28,6 @@ from finauditpro.ui.dialogs.import_dataset_dialog import ImportDatasetDialog
 from finauditpro.ui.theme import CardWidget, EmptyStateWidget, PageHeader, format_inr
 
 
-
 class FinancialDataView(QWidget):
     """Primary Financial Data & Deterministic Analytics Workspace view."""
 

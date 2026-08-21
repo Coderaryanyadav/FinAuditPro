@@ -4,9 +4,15 @@ Single source of truth for visual tokens, typography, badges, INR currency forma
 """
 
 from typing import Any
+
 from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtWidgets import (
-    QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
 )
 
 

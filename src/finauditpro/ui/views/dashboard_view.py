@@ -3,8 +3,8 @@ Active Engagement Audit Command Center Dashboard View for FinAuditPro.
 Precision UI/UX Polish & Production-Grade Finish.
 """
 
-from datetime import datetime
 
+from finauditpro.domain.clock import utc_now
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QFrame,
@@ -85,7 +85,7 @@ class DashboardView(QWidget):
 
         ctx_row = QHBoxLayout()
         ctx_row.setSpacing(8)
-        self.lbl_context_text = QLabel("RELIANCE · FY 2025–26")
+        self.lbl_context_text = QLabel("AUDIT OVERVIEW - FY 2025-26")
         self.lbl_context_text.setStyleSheet("font-size: 13px; font-weight: 600; color: #334155; border: none; background: transparent;")
         self.lbl_audit_type = QLabel("Statutory Audit")
         self.lbl_audit_type.setStyleSheet("font-size: 13px; font-weight: 500; color: #64748B; border: none; background: transparent;")
@@ -101,10 +101,11 @@ class DashboardView(QWidget):
         hdr_l.addLayout(left_v)
         hdr_l.addStretch()
 
-        self.date_lbl = QLabel(datetime.now().strftime("%d %b %Y"))
+        self.date_lbl = QLabel(utc_now().strftime("%d %b %Y"))
         self.date_lbl.setStyleSheet("font-size: 11px; font-weight: 500; color: #94A3B8; background: transparent; border: none;")
         hdr_l.addWidget(self.date_lbl, alignment=Qt.AlignmentFlag.AlignTop)
         body_layout.addWidget(hdr)
+
 
         # 2. Row 1: Workflow Stepper (60%) + Needs Attention (40%)
         row1 = QHBoxLayout()

@@ -2,6 +2,7 @@
 Document Intelligence Workspace View for FinAuditPro.
 Enterprise document vault supporting FTS search, category filters, and evidence indexing.
 """
+from typing import Any
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (

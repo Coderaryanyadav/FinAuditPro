@@ -1,3 +1,5 @@
+from typing import Any
+
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -23,13 +25,12 @@ class GSTVerificationView(QWidget):
         self._init_ui()
 
     def set_active_engagement(self, engagement: Any) -> None:
-        if isinstance(engagement, Engagement):
-            self.current_engagement = engagement
-        elif engagement:
+        if isinstance(engagement, Engagement) or engagement:
             self.current_engagement = engagement
         else:
             self.current_engagement = None
         self.load_data()
+
 
     set_engagement = set_active_engagement
 
@@ -152,7 +153,7 @@ class GSTVerificationView(QWidget):
             self.table.setItem(idx, 1, QTableWidgetItem(str(row[1])))
             self.table.setItem(idx, 2, QTableWidgetItem(str(row[2])))
             self.table.setItem(idx, 3, QTableWidgetItem(str(row[3])))
-            
+
             for c_idx, val in [(4, row[4]), (5, row[5]), (6, row[6]), (7, row[7])]:
                 it = QTableWidgetItem(format_inr(val))
                 it.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)

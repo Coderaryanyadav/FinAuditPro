@@ -6,7 +6,12 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
-from finauditpro.domain.financial_entities import BankTransaction, ExceptionItem, LedgerEntry, TrialBalanceLine
+from finauditpro.domain.financial_entities import (
+    BankTransaction,
+    ExceptionItem,
+    LedgerEntry,
+    TrialBalanceLine,
+)
 from finauditpro.domain.value_objects import Money
 
 
@@ -181,7 +186,9 @@ class DeterministicAnalyticsEngine:
 
     @classmethod
     def find_weekend_transactions(cls, records: list[dict[str, Any]]) -> Any:
-        from finauditpro.infrastructure.analytics.legacy_analytics import legacy_find_weekend_transactions
+        from finauditpro.infrastructure.analytics.legacy_analytics import (
+            legacy_find_weekend_transactions,
+        )
         return legacy_find_weekend_transactions(cls, records)
 
     @classmethod

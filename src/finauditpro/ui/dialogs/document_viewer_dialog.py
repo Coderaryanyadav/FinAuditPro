@@ -23,7 +23,11 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from finauditpro.application.services.document_service import CreateEvidenceLinkDTO, DocumentDetailsDTO, DocumentService
+from finauditpro.application.services.document_service import (
+    CreateEvidenceLinkDTO,
+    DocumentDetailsDTO,
+    DocumentService,
+)
 from finauditpro.domain.document_entities import DocumentCategoryEnum
 from finauditpro.ui.theme import CardWidget
 

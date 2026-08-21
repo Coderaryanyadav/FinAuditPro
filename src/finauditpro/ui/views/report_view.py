@@ -2,6 +2,7 @@
 Primary Reporting & Export Workspace View for FinAuditPro.
 Assembly wizard, draft watermarking, and formula-injection-safe XLSX/CSV export.
 """
+from typing import Any
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (

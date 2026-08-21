@@ -5,6 +5,7 @@ Verifies prior period closing balances against current period opening balances.
 
 from typing import Any
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QHeaderView,
     QLabel,
@@ -18,7 +19,6 @@ from PySide6.QtWidgets import (
 from finauditpro.application.roll_forward_dtos import ConfirmTieOutDTO
 from finauditpro.application.services.roll_forward_service import RollForwardService
 from finauditpro.ui.theme import CardWidget, EmptyStateWidget, PageHeader, format_inr
-from PySide6.QtCore import Qt
 
 
 class RollForwardView(QWidget):
@@ -151,7 +151,7 @@ class RollForwardView(QWidget):
             status_str = "● Tied Out" if link.is_tied_out else "● Mismatch"
             self.tieout_table.setItem(row, 0, QTableWidgetItem(link.account_code))
             self.tieout_table.setItem(row, 1, QTableWidgetItem(link.account_name))
-            
+
             for c_idx, val in [(2, op_dr_rs), (3, op_cr_rs), (4, cl_dr_rs), (5, cl_cr_rs)]:
                 it = QTableWidgetItem(format_inr(val))
                 it.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)

@@ -4,13 +4,20 @@ CARO 2020 (21 Clauses) and Form 3CD (44 Clauses) verification matrix with intera
 """
 
 from typing import Any
+
 from PySide6.QtWidgets import (
-    QHBoxLayout, QHeaderView, QMessageBox, QPushButton, QTableWidget,
-    QTableWidgetItem, QTabWidget, QVBoxLayout, QWidget,
+    QHBoxLayout,
+    QHeaderView,
+    QMessageBox,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
 )
 
 from finauditpro.domain.entities import Engagement
-from finauditpro.ui.theme import CardWidget, MetricCard, PageHeader
+from finauditpro.ui.theme import MetricCard, PageHeader
 
 CARO_2020_CLAUSES = [
     ("Clause (i)", "Fixed Assets & PPE", "Maintenance of proper records of PPE and physical verification"),
@@ -58,9 +65,7 @@ class ComplianceView(QWidget):
         self._init_ui()
 
     def set_active_engagement(self, engagement: Any) -> None:
-        if isinstance(engagement, Engagement):
-            self.current_engagement = engagement
-        elif engagement:
+        if isinstance(engagement, Engagement) or engagement:
             self.current_engagement = engagement
         else:
             self.current_engagement = None

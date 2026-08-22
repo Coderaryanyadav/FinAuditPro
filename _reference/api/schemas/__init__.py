@@ -1,3 +1,0 @@
-"""
-API Schemas for FinAuditPro.
-"""

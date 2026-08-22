@@ -1,3 +1,0 @@
-"""
-FinAuditPro REST API package.
-"""

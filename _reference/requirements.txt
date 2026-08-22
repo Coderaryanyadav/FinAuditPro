@@ -20,7 +20,7 @@ uvicorn>=0.28.0
 
 # ─── Document Intelligence & Parsing ─────────────────────────────────────────
 pypdf==4.3.1
-pdfplumber==0.11.4
+pdfplumber==0.11.10
 
 # ─── Advanced OCR Engines ─────────────────────────────────────────────────────
 paddleocr>=2.7.3

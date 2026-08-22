@@ -5,10 +5,8 @@ Probes system prerequisites, database schema migrations, UI view instantiations,
 Fernet encryption, and local LM Studio REST endpoint availability.
 """
 
-import sys
 import shutil
-import urllib.request
-import json
+import sys
 from pathlib import Path
 
 # Ensure src/ is in sys.path
@@ -26,7 +24,7 @@ def run_system_check() -> int:
     py_ver = sys.version.split()[0]
     print(f"  • Python Executable: {sys.executable}")
     print(f"  • Python Version: {py_ver}")
-    
+
     tesseract_path = shutil.which("tesseract")
     if tesseract_path:
         print(f"  • Tesseract OCR Executable: PASS ({tesseract_path})")
@@ -36,7 +34,10 @@ def run_system_check() -> int:
     # 2. Infrastructure & Data Directories
     print("\n[2/6] Probing App Data Directories & Database Migrations...")
     try:
-        from finauditpro.infrastructure.first_run import bootstrap_app_data_dirs, initialize_database
+        from finauditpro.infrastructure.first_run import (
+            bootstrap_app_data_dirs,
+            initialize_database,
+        )
         db_dir, docs_dir, vector_dir, _ = bootstrap_app_data_dirs()
         db_manager = initialize_database()
         print(f"  • App Data Directory: PASS ({db_dir.parent})")
@@ -70,7 +71,10 @@ def run_system_check() -> int:
     # 4. Fernet Security & Column Encryption
     print("\n[4/6] Probing Fernet AES-128-CBC Encryption...")
     try:
-        from finauditpro.infrastructure.security.encryption import encrypt_sensitive_string, decrypt_sensitive_string
+        from finauditpro.infrastructure.security.encryption import (
+            decrypt_sensitive_string,
+            encrypt_sensitive_string,
+        )
         test_str = "FinAuditPro-Diagnostic-Secret"
         enc = encrypt_sensitive_string(test_str)
         dec = decrypt_sensitive_string(enc)
@@ -103,7 +107,7 @@ def run_system_check() -> int:
     try:
         from PySide6.QtWidgets import QApplication
         app = QApplication.instance() or QApplication([])
-        from finauditpro.ui.theme import StatusBadge, MetricCard, CardWidget
+        from finauditpro.ui.theme import MetricCard, StatusBadge
         b = StatusBadge("Test Status", "success")
         m = MetricCard("Total Assets", "₹1,00,00,000")
         print("  • PySide6 UI Tokens & Base Widgets: PASS")

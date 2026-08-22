@@ -12,9 +12,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 def main() -> None:
-    from finauditpro.infrastructure.first_run import bootstrap_app_data_dirs, initialize_database
-    from finauditpro.infrastructure.ai.lmstudio_supervisor import LMStudioSupervisor
     from finauditpro.__main__ import main as app_main
+    from finauditpro.infrastructure.ai.lmstudio_supervisor import LMStudioSupervisor
+    from finauditpro.infrastructure.first_run import bootstrap_app_data_dirs, initialize_database
 
     print("=================================================================")
     print(" FINAUDITPRO — ZERO-FRICTION SUPERVISED BACKGROUND LAUNCHER")

@@ -1,0 +1,64 @@
+name: Bug Report
+description: Report a reproducible defect or unexpected calculation behavior in FinAuditPro
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue! Please ensure you have run `python scripts/development/automated_system_check.py` to confirm prerequisite status.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: subsystem
+    attributes:
+      label: Affected Subsystem
+      options:
+        - "Engagement & Workspace Management"
+        - "Financial Data & Analytics (Benford / Duplicates)"
+        - "Document Processing & OCR"
+        - "Audit Matrix & SA 320 Materiality"
+        - "Working Papers & Maker-Checker Sign-off"
+        - "Statutory Reporting & Export"
+        - "Archival & SA 510 Roll-Forward"
+        - "Local AI Copilot & LM Studio"
+        - "Desktop UI & Theme"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Exact steps to reproduce the behavior.
+      placeholder: |
+        1. Open Client 'Alpha Ltd' -> Engagement 'FY 2024-25'
+        2. Go to 'Financial Statements' view
+        3. Click 'Import Trial Balance' and select file...
+        4. Observe calculation...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen in accordance with statutory accounting standards (e.g. SA 320 / SA 510 / CARO 2020).
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Diagnostics
+      description: Paste the output of `python scripts/development/automated_system_check.py` or specify OS/Python version.
+      render: shell
+    validations:
+      required: true

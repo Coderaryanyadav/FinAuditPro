@@ -1,0 +1,66 @@
+site_name: FinAuditPro Documentation
+site_description: Offline-First Audit Operating System for Indian Statutory Audit Practice
+site_url: https://coderaryanyadav.github.io/FinAuditPro
+repo_url: https://github.com/Coderaryanyadav/FinAuditPro
+repo_name: FinAuditPro
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: blue
+      accent: sky
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+
+nav:
+  - Overview:
+      - Documentation Map: README.md
+      - Installation & Quick Start: installation.md
+      - Architecture Specification: architecture/overview.md
+      - Database & Migrations: architecture/database.md
+  - Features & Workflows:
+      - Engagement Workspace: features/engagements.md
+      - Documents & FTS5 Search: features/documents.md
+      - Financial Data & Analytics: features/financial-data.md
+      - Working Papers & Sign-Off: features/working-papers.md
+      - Reporting & Export: features/reporting.md
+      - Archival & Roll-Forward: features/archival.md
+      - Local AI Copilot: features/ai.md
+  - Security & Compliance:
+      - Security Architecture: security/security-model.md
+      - Threat Model & Defenses: security/threat-model.md
+  - Development & QA:
+      - Developer Setup: development/setup.md
+      - Testing & Verification: development/testing.md
+      - UI Design System: design.md
+  - Operations & Reference:
+      - Configuration Reference: operations/configuration.md
+      - Troubleshooting Guide: operations/troubleshooting.md
+      - Backup & Restore: operations/backup-restore.md
+      - Architecture Decisions (ADRs): decisions.md
+      - Product Roadmap: roadmap.md
+      - Release Changelog: changelog.md
+      - Packaging Guide: packaging.md

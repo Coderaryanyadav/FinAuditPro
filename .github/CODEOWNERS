@@ -1,0 +1,14 @@
+# FinAuditPro Code Ownership Specification
+
+# Default owners for entire repository
+* @Coderaryanyadav
+
+# Strict architectural sign-off required for domain rules and calculation math
+/src/finauditpro/domain/ @Coderaryanyadav
+
+# Strict review for security, encryption, and authorization subsystems
+/src/finauditpro/application/security/ @Coderaryanyadav
+/src/finauditpro/infrastructure/security/ @Coderaryanyadav
+
+# Architecture enforcement tests
+/tests/test_architecture.py @Coderaryanyadav

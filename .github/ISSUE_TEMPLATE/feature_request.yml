@@ -1,0 +1,28 @@
+name: Feature Request
+description: Propose a new capability or audit workflow enhancement for FinAuditPro
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Audit Practice Problem
+      description: Is your feature request related to a problem or standard audit procedure? (e.g. Schedule III compliance, custom ratio analysis).
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like to see.
+    validations:
+      required: true
+
+  - type: textarea
+    id: standards
+    attributes:
+      label: Applicable Statutory / ICAI Standards
+      description: Relevant Auditing Standards (SA), Companies Act provisions, or CARO clauses.
+    validations:
+      required: false

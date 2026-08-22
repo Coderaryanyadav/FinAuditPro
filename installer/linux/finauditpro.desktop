@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=FinAuditPro
+Comment=Offline-First Statutory Audit Operating System
+Exec=finauditpro
+Icon=finauditpro
+Terminal=false
+Type=Application
+Categories=Office;Finance;Accounting;
+StartupWMClass=FinAuditPro
+MimeType=application/pdf;text/csv;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;

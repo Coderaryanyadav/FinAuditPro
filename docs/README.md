@@ -15,8 +15,7 @@ docs/
 ├── roadmap.md                         # Completed milestones and product roadmap
 │
 ├── architecture/
-│   ├── overview.md                    # 4-layer architecture, invariants & data flows
-│   └── database.md                    # SQLite WAL schema, tables & migrations 1..9
+│   └── system-architecture.md         # 4-layer DDD architecture, invariants & migrations 1..9
 │
 ├── features/
 │   ├── engagements.md                 # Firm, client & multi-year engagement management
@@ -28,16 +27,13 @@ docs/
 │   └── ai.md                          # Air-gapped local AI copilot & LM Studio RAG
 │
 ├── security/
-│   ├── security-model.md              # Fail-closed RBAC, encryption & isolation
-│   └── threat-model.md                # Threat vectors, mitigations & defense-in-depth
+│   └── security-guide.md              # Fail-closed RBAC, encryption & threat mitigations
 │
 ├── development/
-│   ├── setup.md                       # Environment setup, dependencies & tooling
-│   └── testing.md                     # Pytest suite, static typing & architecture guards
+│   └── developer-guide.md             # Developer environment setup, testing & AST guards
 │
 └── operations/
-    ├── configuration.md               # Environment variables & settings.json reference
-    ├── troubleshooting.md             # Common error resolution & diagnostic remediation
+    ├── operations-guide.md            # Environment configuration & diagnostics runbook
     └── backup-restore.md              # Encrypted backup packaging & safe atomic restore
 ```
 
@@ -45,12 +41,11 @@ docs/
 
 ## 🚀 Quick Links
 - **[Getting Started & Installation](installation.md)**
-- **[System Architecture](architecture/overview.md)**
-- **[Database Schema & Migrations](architecture/database.md)**
-- **[Security Architecture & Model](security/security-model.md)**
+- **[System & Database Architecture](architecture/system-architecture.md)**
+- **[Security Architecture & Threat Defense](security/security-guide.md)**
 - **[Architecture Decision Records](decisions.md)**
-- **[Developer Setup](development/setup.md)**
-- **[Testing Strategy](development/testing.md)**
+- **[Developer Onboarding & QA Guide](development/developer-guide.md)**
+- **[Operations & Troubleshooting Guide](operations/operations-guide.md)**
 - **[UI Design System](design.md)**
 - **[Release Notes / Changelog](../CHANGELOG.md)**
 - **[Canonical Security Policy](../SECURITY.md)**

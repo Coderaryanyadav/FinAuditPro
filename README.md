@@ -368,10 +368,10 @@ FinAuditPro/
 │   ├── design.md                  # UI/UX design tokens & visual hierarchy specification
 │   ├── decisions.md               # Architecture Decision Records (ADRs 001..005)
 │   ├── roadmap.md                 # Product milestones & future engineering goals
-│   ├── architecture/              # System architecture & database schema
+│   ├── architecture/              # System & SQLite database architecture
 │   ├── features/                  # Subsystem functional specifications
-│   ├── security/                  # Security models, RBAC & threat analysis
-│   ├── development/               # Developer setup & testing strategies
+│   ├── security/                  # Security model & threat defense guide
+│   ├── development/               # Developer onboarding & QA guide
 │   └── operations/                # Operational runbooks & troubleshooting
 │
 ├── scripts/                       # Categorized Developer & Operational Automation
@@ -380,16 +380,6 @@ FinAuditPro/
 │   ├── packaging/                 # PyInstaller bundle, Windows ISS, Linux desktop & macOS signing
 │   ├── database/                  # Database wipe & re-migration utilities
 │   └── maintenance/               # Vacuum, archive verify & retention sweeps
-│
-├── assets/                        # Static UI & Report Templates
-│   ├── icons/                     # Desktop app & UI icons
-│   ├── images/                    # Static brand graphics
-│   ├── templates/                 # PDF report templates
-│   └── resources/                 # Default statutory procedure definitions
-│
-├── data/                          # Development application data root
-│   ├── .gitkeep
-│   └── README.md
 │
 └── .github/                       # GitHub Actions CI/CD & Project Governance
     ├── CODEOWNERS                 # Architectural domain sign-off enforcement
@@ -407,19 +397,20 @@ Full documentation is available in the [`docs/`](docs/) directory:
 
 - **[Master Documentation Index](docs/README.md)**
 - **[Installation & Run Guide](docs/installation.md)**
-- **[Architecture Specification](docs/architecture/overview.md)**
-- **[Database Schema & Migrations](docs/architecture/database.md)**
-- **[Security Architecture & RBAC](docs/security/security-model.md)**
-- **[Threat Model & Countermeasures](docs/security/threat-model.md)**
+- **[System & Database Architecture](docs/architecture/system-architecture.md)**
+- **[Security Architecture & Threat Defense](docs/security/security-guide.md)**
 - **[Financial Ingestion & Analytics](docs/features/financial-data.md)**
 - **[Working Papers & Maker-Checker Sign-off](docs/features/working-papers.md)**
 - **[Statutory Reporting & Export Pipeline](docs/features/reporting.md)**
 - **[Archival & Multi-Year Roll-Forward](docs/features/archival.md)**
 - **[Local AI Subsystem & RAG Pipeline](docs/features/ai.md)**
-- **[Developer Setup](docs/development/setup.md)** & **[Testing Strategy](docs/development/testing.md)**
+- **[Developer Onboarding & QA Guide](docs/development/developer-guide.md)**
+- **[Operations & Troubleshooting Guide](docs/operations/operations-guide.md)**
 - **[Architecture Decision Records (ADRs 001..005)](docs/decisions.md)**
 - **[Product Roadmap](docs/roadmap.md)**
 - **[Release Notes / Changelog](CHANGELOG.md)**
+- **[Canonical Security Policy](SECURITY.md)**
+
 
 
 ---

@@ -31,11 +31,12 @@ from finauditpro.ui.theme import CardWidget, EmptyStateWidget
 class ReopenDialog(QDialog):
     """Dialog prompting for Partner RBAC verification and justification reason to reopen sealed engagement."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Reopen Sealed Engagement — Partner Auth Required")
         self.resize(480, 260)
         self._init_ui()
+
 
     def _init_ui(self) -> None:
         layout = QVBoxLayout(self)
@@ -82,8 +83,9 @@ class ReopenDialog(QDialog):
 class ArchivalView(QWidget):
     """Workspace view displaying retention timelines, readiness status, sealed archives, and reopen triggers."""
 
-    def __init__(self, db_manager: Any, parent=None) -> None:
+    def __init__(self, db_manager: Any, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+
         self.db_manager = db_manager
         self.archival_service = ArchivalService(db_manager)
         self.current_engagement_id: str | None = None

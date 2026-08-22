@@ -19,8 +19,6 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from finauditpro.application.services.client_service import ClientService
-from finauditpro.application.services.engagement_service import EngagementService
 from finauditpro.application.services.financial_service import FinancialService
 from finauditpro.domain.entities import Engagement
 from finauditpro.domain.financial_entities import FinancialDataset
@@ -35,12 +33,13 @@ class FinancialDataView(QWidget):
 
     def __init__(
         self,
-        client_service: ClientService,
-        engagement_service: EngagementService,
-        financial_service: FinancialService | Any = None,
+        client_service: Any = None,
+        engagement_service: Any = None,
+        financial_service: Any = None,
         financial_analytics_service: Any = None,
         parent: QWidget | None = None,
     ) -> None:
+
         if isinstance(financial_analytics_service, QWidget):
             parent_widget = financial_analytics_service
         elif isinstance(parent, QWidget):
@@ -52,12 +51,12 @@ class FinancialDataView(QWidget):
         self.client_service = client_service
         self.engagement_service = engagement_service
 
+        self.financial_service: FinancialService | None = None
         if isinstance(financial_service, FinancialService):
             self.financial_service = financial_service
         elif hasattr(financial_service, "db_manager"):
             self.financial_service = FinancialService(financial_service.db_manager)
-        else:
-            self.financial_service = None
+
 
         self.current_engagement: Engagement | None = None
         self.current_dataset: FinancialDataset | None = None

@@ -3,6 +3,8 @@ FinAuditPro Enterprise — Command Palette Overlay (⌘K)
 Keyboard-driven modal dialog for instant navigation, search, and audit actions.
 """
 
+from typing import Any
+
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QDialog,
@@ -122,8 +124,9 @@ class CommandPaletteDialog(QDialog):
         self.list_widget.itemActivated.connect(self._on_item_activated)
         c_layout.addWidget(self.list_widget)
 
-        self._all_commands: list[dict] = []
+        self._all_commands: list[dict[str, Any]] = []
         self._register_default_commands()
+
         self._populate_list(self._all_commands)
 
     def _register_default_commands(self) -> None:
@@ -214,8 +217,9 @@ class CommandPaletteDialog(QDialog):
             },
         ]
 
-    def _populate_list(self, commands: list[dict]) -> None:
+    def _populate_list(self, commands: list[dict[str, Any]]) -> None:
         self.list_widget.clear()
+
         for cmd in commands:
             item = QListWidgetItem(self.list_widget)
             item.setData(Qt.ItemDataRole.UserRole, cmd)

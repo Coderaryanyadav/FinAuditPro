@@ -71,7 +71,7 @@ def parse_indian_date(val: Any) -> str | None:
         from dateutil import parser
 
         dt = parser.parse(s_val, dayfirst=True)
-        return dt.strftime("%Y-%m-%d")
+        return str(dt.strftime("%Y-%m-%d"))
     except Exception:
         raise ValueError(f"Unparseable date value: '{val}'") from None
 
@@ -104,9 +104,10 @@ class FinancialImporter:
         headers: list[str] = []
 
         if ext in (".xlsx", ".xls"):
-            import openpyxl  # type: ignore
+            import openpyxl
 
             wb = openpyxl.load_workbook(file_path, data_only=True)
+
             sheet = wb.active
             iter_rows = sheet.iter_rows(values_only=True)
 

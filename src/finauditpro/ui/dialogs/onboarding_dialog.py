@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QMessageBox,
     QVBoxLayout,
+    QWidget,
 )
 
 from finauditpro.application.dtos import CreateFirmDTO
@@ -18,8 +19,9 @@ from finauditpro.application.services.firm_service import FirmService
 class OnboardingDialog(QDialog):
     """First-run onboarding dialog creating initial Firm and Partner profile."""
 
-    def __init__(self, firm_service: FirmService, parent=None) -> None:
+    def __init__(self, firm_service: FirmService, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+
         self.firm_service = firm_service
 
         self.setWindowTitle("Welcome to FinAuditPro — Initial Setup Wizard")

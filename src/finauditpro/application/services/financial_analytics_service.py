@@ -1,6 +1,5 @@
-"""Financial analytics application service."""
-
 import json
+from typing import cast
 
 from finauditpro.application.financial_dtos import RunAnalyticsDTO
 from finauditpro.domain.entities import AuditEvent
@@ -105,12 +104,13 @@ class FinancialAnalyticsService:
                 )
             )
 
-        return saved_result
+        return cast(AnalyticsResult, saved_result)
 
     def list_analytics_results_for_engagement(self, engagement_id: str) -> list[AnalyticsResult]:
         with self.db_manager.session_scope() as session:
             repo = FinancialDataRepository(session)
-            return repo.list_analytics_results_for_engagement(engagement_id)
+            return cast(list[AnalyticsResult], repo.list_analytics_results_for_engagement(engagement_id))
+
 
     def list_flagged_anomalies_for_engagement(self, engagement_id: str) -> list[FlaggedAnomaly]:
         with self.db_manager.session_scope() as session:

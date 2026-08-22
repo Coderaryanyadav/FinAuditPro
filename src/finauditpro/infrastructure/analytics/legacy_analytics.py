@@ -25,8 +25,9 @@ class LegacyAnomalyItem:
         self.account_name = account_name
 
 
-class LegacyAnalyticsResult(list):
+class LegacyAnalyticsResult(list[LegacyAnomalyItem]):
     def __init__(self, items: list[LegacyAnomalyItem]):
+
         super().__init__(items)
         self.anomalies = items
         self.parameters: dict[str, Any] = {}

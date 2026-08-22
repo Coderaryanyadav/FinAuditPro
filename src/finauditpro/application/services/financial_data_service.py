@@ -52,9 +52,10 @@ class FinancialDataService:
                         break
         elif ext in (".xlsx", ".xls"):
             try:
-                import openpyxl  # type: ignore[import-untyped]
+                import openpyxl
 
                 wb = openpyxl.load_workbook(path, data_only=True)
+
                 sheet = wb.active
                 iter_rows = sheet.iter_rows(values_only=True)
                 try:

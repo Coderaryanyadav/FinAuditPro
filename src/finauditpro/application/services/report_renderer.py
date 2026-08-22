@@ -25,8 +25,9 @@ from finauditpro.domain.export_sanitizer import escape_formula_injection
 from finauditpro.domain.report_entities import Report
 
 
-class WatermarkedCanvas(canvas.Canvas):
+class WatermarkedCanvas(canvas.Canvas):  # type: ignore[misc]
     """Draw a prominent watermark on draft reports."""
+
 
     def __init__(self, *args: Any, is_draft: bool = True, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)

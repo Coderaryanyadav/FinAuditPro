@@ -1,5 +1,7 @@
 """Registry of versioned schema migrations for FinAuditPro."""
 
+from typing import Any
+
 MIGRATION_001_SQL = """
 CREATE TABLE IF NOT EXISTS schema_migrations (
     version INTEGER PRIMARY KEY,

@@ -143,6 +143,12 @@ class FinancialDataRepository:
         self.add_exceptions(exc_items)
         return result
 
+    def list_analytics_results_for_engagement(self, engagement_id: str) -> list[Any]:
+        results = []
+        for ds in self.list_datasets_by_engagement(engagement_id):
+            results.extend(self.list_exceptions_by_dataset(ds.id))
+        return results
+
     def list_flagged_anomalies_for_engagement(self, engagement_id: str) -> list[Any]:
         anomalies = []
         for ds in self.list_datasets_by_engagement(engagement_id):
@@ -161,6 +167,7 @@ class FinancialDataRepository:
                     )
                 )
         return anomalies
+
 
     def add_ledger_entries(self, entries: list[LedgerEntry]) -> None:
         models = [
@@ -369,8 +376,9 @@ class FinancialDataRepository:
                 amount_paise=m.amount_paise,
                 affected_account=m.affected_account,
                 source=m.source,
-                ai_generated=m.ai_generated,
+                ai_generated=m.is_ai_generated,
                 status=m.status,
+
                 preparer=m.preparer,
                 reviewer=m.reviewer,
                 created_at=m.created_at,

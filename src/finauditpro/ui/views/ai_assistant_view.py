@@ -59,9 +59,10 @@ class AIWorkerThread(QThread):
     completed = Signal(object)
     failed = Signal(str)
 
-    def __init__(self, func) -> None:
+    def __init__(self, func: Any) -> None:
         super().__init__()
         self.func = func
+
 
     def run(self) -> None:
         try:
@@ -359,15 +360,17 @@ class AIAssistantView(QWidget):
             return
 
         q = self.qa_input.text().strip()
-        if not q or not self.ai_service or not hasattr(self.ai_service, "query_rag"):
+        if not q or not self.ai_service or not hasattr(self.ai_service, "query_rag") or not self.current_engagement:
             return
-
 
         self.chat_display.setText("⏳ Executing RAG Query against Local LM Studio AI Model...")
         self.reasoning_display.setText("Waiting for model reasoning (<think>) tokens...")
 
-        def _work():
-            return self.ai_service.query_rag(self.current_engagement.id, q)
+        eng_id = self.current_engagement.id
+        ai_svc = self.ai_service
+
+        def _work() -> Any:
+            return ai_svc.query_rag(eng_id, q)
 
         thread = AIWorkerThread(_work)
         thread.completed.connect(self._on_ask_done)
@@ -375,8 +378,9 @@ class AIAssistantView(QWidget):
         self.active_thread = thread
         thread.start()
 
-    def _on_ask_done(self, res) -> None:
+    def _on_ask_done(self, res: Any) -> None:
         self.chat_display.setText(res.response_text)
+
         self.reasoning_display.setText(
             getattr(res, "reasoning_text", "") or "No reasoning (<think>) tokens generated."
         )

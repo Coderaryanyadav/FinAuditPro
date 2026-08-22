@@ -1,10 +1,8 @@
 """Application service managing multi-year audit roll-forward, SA 510 opening balance tie-out, and carried findings provenance."""
 
+from finauditpro.application.dtos import CreateEngagementDTO
 from finauditpro.application.roll_forward_dtos import ConfirmTieOutDTO, ExecuteRollForwardDTO
-from finauditpro.application.services.engagement_service import (
-    CreateEngagementDTO,
-    EngagementService,
-)
+from finauditpro.application.services.engagement_service import EngagementService
 from finauditpro.domain.audit_matrix_entities import (
     AuditFinding,
     AuditProcedure,
@@ -142,9 +140,10 @@ class RollForwardService:
                         procedure_type=p.procedure_type,
                         instructions=p.instructions,
                         evidence_requirement=p.evidence_requirement,
-                        status=ProcedureStatusEnum.PLANNED,
+                        status=ProcedureStatusEnum.NOT_STARTED,
                         assertions=p.assertions,
                     )
+
                     matrix_repo.add_procedure(draft_proc)
                 if source_procs:
                     items_carried.append(f"{len(source_procs)} Audit Procedure Template(s)")

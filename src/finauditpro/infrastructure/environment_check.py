@@ -1,10 +1,10 @@
 """Launch-time and on-demand environment self-check probe for system prerequisites and dependencies."""
 
 import importlib.util
-import os
 import shutil
 import sys
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import httpx
 
@@ -71,8 +71,9 @@ class EnvironmentChecker:
 
     def check_tesseract_ocr(self) -> CheckItem:
         tess_path = shutil.which("tesseract")
-        if not tess_path and os.path.exists("/opt/homebrew/bin/tesseract"):
+        if not tess_path and Path("/opt/homebrew/bin/tesseract").exists():
             tess_path = "/opt/homebrew/bin/tesseract"
+
 
         if tess_path:
             return CheckItem(

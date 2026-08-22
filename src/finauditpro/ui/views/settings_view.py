@@ -24,8 +24,9 @@ from finauditpro.version import get_build_info
 class SettingsView(QWidget):
     """Workspace view managing LM Studio endpoints, cloud AI opt-outs, and diagnostics."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+
         self.settings_service = SettingsService()
         self._init_ui()
 

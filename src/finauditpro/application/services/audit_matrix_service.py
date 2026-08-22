@@ -167,16 +167,12 @@ class AuditMatrixService:
             saved_finding = repo.add_finding(finding)
 
             audit_repo = AuditEventRepository(session)
-            amt_display = (
-                saved_finding.monetary_amount.formatted
-                if hasattr(saved_finding.monetary_amount, "formatted")
-                else (
-                    f"INR {saved_finding.monetary_amount:,.2f}"
-                    if saved_finding.monetary_amount is not None
-                    else "INR 0.00"
-                )
-            )
+            if saved_finding.monetary_amount is not None:
+                amt_display = getattr(saved_finding.monetary_amount, "formatted", f"INR {saved_finding.monetary_amount}")
+            else:
+                amt_display = "INR 0.00"
             audit_repo.add(
+
                 AuditEvent(
                     engagement_id=dto.engagement_id,
                     actor=dto.preparer,

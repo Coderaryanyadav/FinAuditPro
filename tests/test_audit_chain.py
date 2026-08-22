@@ -41,11 +41,10 @@ def test_db_triggers_reject_update_and_delete(tmp_path) -> None:
         event_id = ev.id
 
     # Try updating audit event directly via raw SQL
-    with pytest.raises(Exception) as excinfo:
-        with manager.engine.begin() as conn:
-            conn.execute(
-                text("UPDATE audit_events SET actor = 'Hacker' WHERE id = :id"), {"id": event_id}
-            )
+    with pytest.raises(Exception) as excinfo, manager.engine.begin() as conn:
+        conn.execute(
+            text("UPDATE audit_events SET actor = 'Hacker' WHERE id = :id"), {"id": event_id}
+        )
     assert "append-only" in str(excinfo.value).lower()
 
     # Try deleting audit event directly via raw SQL

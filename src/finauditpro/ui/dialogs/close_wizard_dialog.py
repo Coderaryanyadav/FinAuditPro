@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QTextEdit,
     QVBoxLayout,
+    QWidget,
 )
 
 from finauditpro.application.archival_dtos import FreezeAndSealDTO, ReadinessCheckResultDTO
@@ -41,8 +42,9 @@ class SealWorkerThread(QThread):
 class CloseWizardDialog(QDialog):
     """Wizard Dialog guiding auditors through pre-archive readiness checks and engagement sealing."""
 
-    def __init__(self, archival_service: ArchivalService, engagement_id: str, parent=None) -> None:
+    def __init__(self, archival_service: ArchivalService, engagement_id: str, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+
         self.archival_service = archival_service
         self.engagement_id = engagement_id
         self.readiness_result: ReadinessCheckResultDTO | None = None

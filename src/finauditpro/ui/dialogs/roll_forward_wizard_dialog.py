@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QProgressBar,
     QVBoxLayout,
+    QWidget,
 )
 
 from finauditpro.application.roll_forward_dtos import ExecuteRollForwardDTO
@@ -44,9 +45,10 @@ class RollForwardWizardDialog(QDialog):
         roll_forward_service: RollForwardService,
         source_engagement_id: str,
         source_fy: str,
-        parent=None,
+        parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
+
         self.roll_forward_service = roll_forward_service
         self.source_engagement_id = source_engagement_id
         self.source_fy = source_fy

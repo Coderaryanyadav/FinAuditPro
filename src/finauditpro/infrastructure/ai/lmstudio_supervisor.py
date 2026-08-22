@@ -28,9 +28,9 @@ class LMStudioSupervisor:
         """Probe local LM Studio HTTP REST API endpoint /v1/models."""
         url = f"{cls.get_base_url(host, port)}/v1/models"
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "FinAuditPro-Supervisor/1.0"})
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
-                return resp.status == 200
+            req = urllib.request.Request(url, headers={"User-Agent": "FinAuditPro-Supervisor/1.0"})  # noqa: S310
+            with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
+                return bool(resp.status == 200)
         except Exception:
             return False
 
@@ -39,8 +39,9 @@ class LMStudioSupervisor:
         """Fetch list of loaded or available local AI model identifiers."""
         url = f"{cls.get_base_url(host, port)}/v1/models"
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "FinAuditPro-Supervisor/1.0"})
-            with urllib.request.urlopen(req, timeout=2.0) as resp:
+            req = urllib.request.Request(url, headers={"User-Agent": "FinAuditPro-Supervisor/1.0"})  # noqa: S310
+            with urllib.request.urlopen(req, timeout=2.0) as resp:  # noqa: S310
+
                 if resp.status == 200:
                     data = json.loads(resp.read().decode("utf-8"))
                     models = data.get("data", [])
@@ -73,10 +74,10 @@ class LMStudioSupervisor:
         return None
 
     @classmethod
-    def start_server_background(
-        cls, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT, wait_timeout: float = 6.0
+    def start_local_server(
+        cls, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT, wait_timeout: float = 12.0
     ) -> bool:
-        """Attempt to spawn `lms server start` background process daemon."""
+        """Attempt to launch LM Studio local server via CLI binary or macOS application bundle."""
         if cls.is_server_online(host, port):
             return True
 
@@ -87,7 +88,8 @@ class LMStudioSupervisor:
             if mac_app.exists() and sys.platform == "darwin":
                 try:
                     subprocess.Popen(
-                        ["open", "-a", "LM Studio"],
+                        ["/usr/bin/open", "-a", "LM Studio"],
+
                         stdout=subprocess.DEVNULL,
                         stderr=subprocess.DEVNULL,
                     )
@@ -97,7 +99,7 @@ class LMStudioSupervisor:
                 return False
         else:
             try:
-                subprocess.Popen(
+                subprocess.Popen(  # noqa: S603
                     [str(cli_bin), "server", "start", "--port", str(port)],
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
@@ -114,7 +116,10 @@ class LMStudioSupervisor:
 
         return cls.is_server_online(host, port)
 
+    start_server_background = start_local_server
+
     @classmethod
+
     def load_model_via_cli(cls, model_query: str = "deepseek", wait_timeout: float = 30.0) -> bool:
         """Automatically load model into LM Studio memory using `lms load <query>`."""
         cli_bin = cls.find_lms_cli()
@@ -122,7 +127,7 @@ class LMStudioSupervisor:
             return False
 
         try:
-            res = subprocess.run(
+            res = subprocess.run(  # noqa: S603
                 [str(cli_bin), "load", model_query],
                 capture_output=True,
                 text=True,

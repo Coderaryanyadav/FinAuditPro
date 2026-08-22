@@ -14,7 +14,7 @@ from finauditpro.domain.audit_matrix_entities import (
     FindingStatusEnum,
 )
 from finauditpro.domain.entities import AuditEvent
-from finauditpro.domain.exceptions import EntityNotFoundError, ValidationError
+from finauditpro.domain.exceptions import EntityNotFoundError
 from finauditpro.domain.prompt_engine import PromptEngine
 from finauditpro.infrastructure.ai.faiss_vector_store import FAISSVectorStore
 from finauditpro.infrastructure.persistence.ai_models import AIRunModel, DocumentChunkModel
@@ -134,10 +134,11 @@ class AIService:
 
             if embeddings and len(embeddings) == len(chunks_to_insert):
                 dim = len(embeddings[0])
-                for c_model, vec in zip(chunks_to_insert, embeddings):
+                for c_model, _vec in zip(chunks_to_insert, embeddings, strict=False):
                     c_model.dimension = dim
 
-                chunk_pairs = [(c.id, vec) for c, vec in zip(chunks_to_insert, embeddings)]
+
+                chunk_pairs = [(c.id, vec) for c, vec in zip(chunks_to_insert, embeddings, strict=False)]
                 self.vector_store.build_index(engagement_id, chunk_pairs)
             else:
                 self.vector_store.delete_index(engagement_id)
@@ -164,8 +165,8 @@ class AIService:
                             .filter(DocumentChunkModel.engagement_id == engagement_id)
                             .all()
                         )
-                        chunk_map = {c.id: c for c in chunk_models}
                         doc_repo = DocumentRepository(session)
+
 
                         retrieved: list[dict[str, Any]] = []
                         all_chunks_list = list(chunk_models)

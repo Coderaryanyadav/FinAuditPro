@@ -64,11 +64,12 @@ class FAISSVectorStore:
         scores, indices = index.search(q_arr, min(top_k, index.ntotal))
 
         results: list[tuple[int, float]] = []
-        for idx, score in zip(indices[0], scores[0]):
+        for idx, score in zip(indices[0], scores[0], strict=False):
             if idx != -1:
                 results.append((int(idx), float(score)))
 
         return results
+
 
     def delete_index(self, engagement_id: str) -> None:
         """Delete an engagement's FAISS index file."""

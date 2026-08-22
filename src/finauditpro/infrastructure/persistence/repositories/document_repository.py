@@ -171,6 +171,9 @@ class DocumentRepository:
         models = self.session.scalars(stmt).all()
         return [self._to_entity(m) for m in models]
 
+    list_for_engagement = list_by_engagement
+
+
     def get_document_pages(self, document_id: str) -> list[DocumentPage]:
         stmt = (
             select(DocumentPageModel)
@@ -194,7 +197,10 @@ class DocumentRepository:
             for m in models
         ]
 
+    get_pages = get_document_pages
+
     def update_category(self, document_id: str, category: DocumentCategoryEnum | str) -> Document:
+
         model = self.session.get(DocumentModel, document_id)
         if not model:
             raise ValueError(f"Document '{document_id}' not found.")
@@ -223,14 +229,16 @@ class DocumentRepository:
             WHERE f.engagement_id = :eng_id AND f.extracted_text MATCH :match_query;
         """)
 
+        row_tuples: list[tuple[str, str, int, str]] = []
         try:
-            rows = self.session.execute(
+            raw_rows = self.session.execute(
                 fts_sql, {"eng_id": engagement_id, "match_query": match_expr}
             ).fetchall()
+            row_tuples = [(str(r[0]), str(r[1]), int(r[2]), str(r[3])) for r in raw_rows]
         except Exception:
-            rows = []
+            row_tuples = []
 
-        if not rows:
+        if not row_tuples:
             # Fallback: query document_pages table directly for engagement
             stmt = (
                 select(DocumentPageModel)
@@ -241,11 +249,12 @@ class DocumentRepository:
                 )
             )
             page_models = self.session.scalars(stmt).all()
-            rows = [(p.document_id, p.id, p.page_number, p.extracted_text) for p in page_models]
+            row_tuples = [(p.document_id, p.id, p.page_number, p.extracted_text or "") for p in page_models]
 
         results: list[tuple[Document, DocumentPage]] = []
 
-        for doc_id, page_id, page_num, text_content in rows:
+        for doc_id, page_id, page_num, text_content in row_tuples:
+
             doc_model = self.session.get(DocumentModel, doc_id)
             if doc_model and doc_model.status != DocumentStatusEnum.DELETED.value:
                 doc = self._to_entity(doc_model)

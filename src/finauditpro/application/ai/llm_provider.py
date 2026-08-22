@@ -27,7 +27,11 @@ class LLMResponse:
 class LLMProvider(Protocol):
     """Protocol declaring abstract interface for local or remote AI providers."""
 
+    chat_model_id: str
+    embedding_model_id: str
+
     def available(self) -> ProviderStatus:
+
         """Check provider server health and loaded model status."""
         ...
 

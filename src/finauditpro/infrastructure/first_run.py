@@ -36,9 +36,10 @@ def bootstrap_app_data_dirs() -> tuple[Path, Path, Path, Path]:
     return db_dir, docs_dir, vector_dir, mpl_dir
 
 
-def _ensure_all_schema_columns(conn) -> None:
+def _ensure_all_schema_columns(conn: sqlite3.Connection) -> None:
     """Safely add any missing columns to existing SQLite tables."""
     cursor = conn.cursor()
+
 
     # 1. engagements table
     cursor.execute("PRAGMA table_info(engagements);")

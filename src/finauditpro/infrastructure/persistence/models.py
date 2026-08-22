@@ -2,7 +2,7 @@
 
 import json
 from datetime import datetime
-from typing import cast
+from typing import Any, cast
 
 from sqlalchemy import DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -62,11 +62,12 @@ class EngagementModel(Base):
     documents: Mapped[list["DocumentModel"]] = relationship("DocumentModel", back_populates="engagement", cascade="all, delete-orphan")
     financial_datasets: Mapped[list["FinancialDatasetModel"]] = relationship("FinancialDatasetModel", back_populates="engagement", cascade="all, delete-orphan")
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         team = kwargs.pop("assigned_team", None)
         super().__init__(**kwargs)
         if team is not None:
             self.assigned_team = team
+
 
     @property
     def assigned_team(self) -> list[str]:
@@ -183,11 +184,12 @@ class FinancialDatasetModel(Base):
     ledger_entries: Mapped[list["LedgerEntryModel"]] = relationship("LedgerEntryModel", back_populates="dataset", cascade="all, delete-orphan")
 
     @property
-    def column_mappings(self) -> dict:
+    def column_mappings(self) -> dict[str, Any]:
         try:
-            return cast(dict, json.loads(self.column_mappings_json))
+            return cast(dict[str, Any], json.loads(self.column_mappings_json))
         except Exception:
             return {}
+
 
 class MaterialityAssessmentModel(Base):
     __tablename__ = "materiality_assessments"

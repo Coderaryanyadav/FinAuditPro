@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
 )
 
 from finauditpro.application.services.firm_service import FirmService
+from finauditpro.domain.entities import Firm
 from finauditpro.ui.dialogs.firm_dialog import FirmDialog
 from finauditpro.ui.theme import CardWidget, EmptyStateWidget, PageHeader
 
@@ -30,8 +31,9 @@ class FirmView(QWidget):
     def __init__(self, firm_service: FirmService, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.firm_service = firm_service
-        self._all_firms = []
+        self._all_firms: list[Firm] = []
         self._init_ui()
+
 
     def _init_ui(self) -> None:
         layout = QVBoxLayout(self)

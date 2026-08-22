@@ -4,7 +4,6 @@ Precision UI/UX Polish & Production-Grade Finish.
 """
 
 
-from finauditpro.domain.clock import utc_now
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QFrame,
@@ -23,6 +22,7 @@ from PySide6.QtWidgets import (
 from finauditpro.application.services.client_service import ClientService
 from finauditpro.application.services.engagement_service import EngagementService
 from finauditpro.application.services.firm_service import FirmService
+from finauditpro.domain.clock import utc_now
 from finauditpro.domain.entities import Client, Engagement, Firm
 from finauditpro.ui.theme import CardWidget, MetricCard, StatusBadge
 

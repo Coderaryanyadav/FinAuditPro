@@ -36,10 +36,11 @@ pip install -e .
 ### Step 3: Launch FinAuditPro Application
 ```bash
 # Via Python module entrypoint:
-python main.py
+python -m finauditpro
 
 # Or via installed console script entrypoint:
 finauditpro
+
 ```
 
 ---

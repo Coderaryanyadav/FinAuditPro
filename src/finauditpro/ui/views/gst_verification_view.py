@@ -21,8 +21,9 @@ class GSTVerificationView(QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.current_engagement: Engagement | None = None
-        self._invoices: list[tuple] = []
+        self._invoices: list[tuple[Any, ...]] = []
         self._init_ui()
+
 
     def set_active_engagement(self, engagement: Any) -> None:
         if isinstance(engagement, Engagement) or engagement:

@@ -110,8 +110,8 @@ class ComplianceView(QWidget):
         self.caro_table.setColumnCount(4)
         self.caro_table.setHorizontalHeaderLabels(["CLAUSE", "TITLE", "STATUTORY SCOPE", "COMPLIANCE STATUS"])
         self.caro_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        for c in [0, 1, 3]:
-            self.caro_table.horizontalHeader().setSectionResizeMode(c, QHeaderView.ResizeMode.ResizeToContents)
+        for col_idx in [0, 1, 3]:
+            self.caro_table.horizontalHeader().setSectionResizeMode(col_idx, QHeaderView.ResizeMode.ResizeToContents)
         self.caro_table.verticalHeader().setVisible(False)
         self.caro_table.setAlternatingRowColors(True)
 
@@ -132,8 +132,9 @@ class ComplianceView(QWidget):
         self.f3cd_table.setColumnCount(4)
         self.f3cd_table.setHorizontalHeaderLabels(["CLAUSE", "TITLE", "SCOPE", "COMPLIANCE STATUS"])
         self.f3cd_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        for c in [0, 1, 3]:
-            self.f3cd_table.horizontalHeader().setSectionResizeMode(c, QHeaderView.ResizeMode.ResizeToContents)
+        for col_idx in [0, 1, 3]:
+            self.f3cd_table.horizontalHeader().setSectionResizeMode(col_idx, QHeaderView.ResizeMode.ResizeToContents)
+
         self.f3cd_table.verticalHeader().setVisible(False)
         self.f3cd_table.setAlternatingRowColors(True)
 

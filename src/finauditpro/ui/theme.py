@@ -28,7 +28,7 @@ def format_inr(val: Any) -> str:
             res = int_part
         else:
             last3, rest = int_part[-3:], int_part[:-3]
-            chunks = []
+            chunks: list[str] = []
             while len(rest) > 2:
                 chunks.insert(0, rest[-2:])
                 rest = rest[:-2]
@@ -68,28 +68,32 @@ Colors = LightColors
 
 class ThemeManager(QObject):
     theme_changed = Signal(bool)
-    _instance = None
+    _instance: Any = None
 
-    def __new__(cls):
+    def __new__(cls) -> "ThemeManager":
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._is_dark = False
-        return cls._instance
+        return cls._instance  # type: ignore[no-any-return]
 
     @property
-    def is_dark(self) -> bool: return self._is_dark
+
+    def is_dark(self) -> bool:
+        return bool(getattr(self, "_is_dark", False))
 
     @property
-    def tokens(self): return DarkColors if self._is_dark else LightColors
+    def tokens(self) -> Any:
+        return DarkColors if self.is_dark else LightColors
 
-    def set_dark_mode(self, enabled: bool):
-        if self._is_dark != enabled:
+    def set_dark_mode(self, enabled: bool) -> None:
+        if getattr(self, "_is_dark", False) != enabled:
             self._is_dark = enabled
             global Colors
-            Colors = DarkColors if enabled else LightColors
+            Colors = DarkColors if enabled else LightColors  # type: ignore[assignment]
             self.theme_changed.emit(enabled)
 
-    def toggle_theme(self): self.set_dark_mode(not self._is_dark)
+    def toggle_theme(self) -> None:
+        self.set_dark_mode(not self.is_dark)
 
 
 class CardWidget(QFrame):
@@ -147,7 +151,7 @@ class MetricCard(QFrame):
         layout.addWidget(self.value_lbl)
         layout.addLayout(sub_row)
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event: Any) -> None:
         super().mousePressEvent(event)
         self.clicked.emit()
 

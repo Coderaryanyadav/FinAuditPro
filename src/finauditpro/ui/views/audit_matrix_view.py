@@ -23,7 +23,6 @@ from PySide6.QtWidgets import (
 )
 
 from finauditpro.application.audit_planning_dtos import SetMaterialityDTO
-from finauditpro.application.services.engagement_service import EngagementService
 from finauditpro.domain.audit_matrix_entities import MaterialityAssessment
 from finauditpro.domain.entities import Engagement
 from finauditpro.domain.materiality_engine import BENCHMARK_GUIDANCE_OPTIONS
@@ -39,7 +38,8 @@ class AuditMatrixView(QWidget):
 
     matrix_changed = Signal()
 
-    def __init__(self, engagement_service: EngagementService, planning_service: Any = None, traceability_service: Any = None, parent: QWidget | None = None) -> None:
+    def __init__(self, engagement_service: Any = None, planning_service: Any = None, traceability_service: Any = None, parent: QWidget | None = None) -> None:
+
         super().__init__(parent)
         self.engagement_service = engagement_service
         is_tr_planning = hasattr(traceability_service, "list_risks_for_engagement")

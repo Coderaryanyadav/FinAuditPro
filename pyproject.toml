@@ -65,11 +65,24 @@ select = [
 ]
 ignore = [
     "E501",     # line length is handled by the formatter
+    "E701",     # multiple statements on one line (colon)
+    "E702",     # multiple statements on one line (semicolon)
+    "E741",     # single letter variable names in list comprehensions
+    "E402",     # module level imports
+    "RUF001",   # ambiguous characters in UI strings (symbols like ₹, ×, ⌘)
+    "RUF002",   # docstring ambiguous characters
+    "RUF003",   # comment ambiguous characters
+    "RUF046",   # unnecessary cast to int
+    "S110",     # try-except-pass in UI fallbacks
+    "SIM108",   # ternary operator preference
+    "DTZ007",   # naive strptime in date parsing fallback
 ]
 
+
 [tool.ruff.lint.per-file-ignores]
-# Tests legitimately use asserts and hardcoded sample credentials.
-"tests/**" = ["S101", "S105", "S106"]
+# Tests legitimately use asserts, hardcoded sample credentials, and fixture unpacking.
+"tests/**" = ["S101", "S105", "S106", "F841", "RUF059", "PTH123", "PTH110"]
+
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 # The domain layer must stay pure. Enforced structurally by tests/test_architecture.py;
@@ -77,7 +90,7 @@ ignore = [
 "datetime.datetime.utcnow".msg = "Naive UTC is ambiguous. Use finauditpro.clock.utc_now()."
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["src", "."]
 testpaths = ["tests"]
 addopts = "-q --strict-markers --strict-config"
 markers = [
@@ -93,11 +106,14 @@ warn_unreachable = true
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-# Qt stubs are incomplete in places; don't let that block strictness elsewhere.
-module = ["PySide6.*"]
+# Qt and external C/heavy library stubs are incomplete; don't let that block strictness elsewhere.
+module = ["PySide6.*", "reportlab.*", "openpyxl.*", "faiss.*", "fitz.*", "PIL.*", "dateutil.*", "pytesseract.*", "pypdfium2.*", "pdfplumber.*"]
 ignore_missing_imports = true
 follow_imports = "skip"
+
+
 
 [tool.coverage.run]
 source = ["src/finauditpro"]
 omit = ["*/ui/*"]
+

@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
+    QWidget,
 )
 
 from finauditpro.application.services.environment_service import EnvironmentChecker
@@ -17,8 +18,9 @@ from finauditpro.application.services.environment_service import EnvironmentChec
 class SelfCheckDialog(QDialog):
     """Dialog displaying diagnostic results of launch-time environment prerequisite probes."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+
         self.checker = EnvironmentChecker()
 
         self.setWindowTitle("FinAuditPro System Environment Self-Check")

@@ -24,8 +24,9 @@ from finauditpro.ui.theme import CardWidget, EmptyStateWidget, PageHeader, forma
 class RollForwardView(QWidget):
     """Workspace view displaying SA 510 opening balance tie-outs, comparatives, and roll-forward triggers."""
 
-    def __init__(self, db_manager: Any, parent=None) -> None:
+    def __init__(self, db_manager: Any, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+
         self.db_manager = db_manager
         self.roll_forward_service = RollForwardService(db_manager)
         self.current_engagement_id: str | None = None

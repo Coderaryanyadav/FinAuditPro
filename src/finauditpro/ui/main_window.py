@@ -1,7 +1,4 @@
-"""
-Main Application Shell Window for FinAuditPro.
-Enterprise Audit Operating System with Sidebar Navigation, Context Header, and Stacked View Workspace.
-"""
+"""Main Application Shell Window for FinAuditPro Enterprise Audit Operating System."""
 
 from typing import Any
 
@@ -30,6 +27,7 @@ from finauditpro.application.services.financial_data_service import FinancialDat
 from finauditpro.application.services.firm_service import FirmService
 from finauditpro.application.services.report_service import ReportService
 from finauditpro.application.services.working_paper_service import WorkingPaperService
+from finauditpro.domain.entities import Client, Engagement, Firm
 from finauditpro.ui.dialogs.engagement_dialog import EngagementDialog
 from finauditpro.ui.dialogs.login_dialog import LoginDialog
 from finauditpro.ui.styles import GLOBAL_QSS
@@ -60,6 +58,7 @@ NAV_ITEMS = [
     ("btn_settings", "Settings", "SYSTEM"),
 ]
 
+
 class MainWindow(QMainWindow):
     """Main Application Shell Window for FinAuditPro Audit Command Center."""
 
@@ -79,7 +78,10 @@ class MainWindow(QMainWindow):
             self.working_paper_service, self.report_service, self.ai_service = working_paper_service, report_service, ai_service
 
         self.archival_repo, self.roll_forward_repo, self.db_manager = archival_repo, roll_forward_repo, db
-        self.current_firm, self.current_client, self.current_engagement = None, None, None
+        self.current_firm: Firm | None = None
+        self.current_client: Client | None = None
+        self.current_engagement: Engagement | None = None
+
         self.sidebar_collapsed = False
         self.setWindowTitle("FinAuditPro — Offline-First Audit Operating System")
         self.resize(1440, 920)
@@ -196,8 +198,9 @@ class MainWindow(QMainWindow):
         sf_s.setPlaceholderText("Search clients, findings, reports...")
         sf_s.setReadOnly(True)
         sf_s.setCursor(Qt.CursorShape.PointingHandCursor)
-        sf_s.mousePressEvent = lambda e: self._open_command_palette()
+        sf_s.mousePressEvent = lambda e: self._open_command_palette()  # type: ignore[method-assign]
         sf_k = QLabel("⌘K")
+
         sf_k.setObjectName("globalShortcutBadge")
         sf_l.addWidget(sf_s)
         sf_l.addWidget(sf_k)

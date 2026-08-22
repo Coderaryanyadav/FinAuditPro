@@ -86,16 +86,20 @@ class DatabaseManager:
                         if col.name not in existing_cols:
                             col_type = col.type.compile(self.engine.dialect)
                             default_clause = ""
-                            if col.server_default is not None:
-                                default_clause = f" DEFAULT {col.server_default.arg}"
-                            elif col.default is not None and not callable(col.default.arg):
-                                val = col.default.arg
-                                default_clause = f" DEFAULT '{val}'" if isinstance(val, str) else f" DEFAULT {val}"
+                            sd = getattr(col, "server_default", None)
+                            if sd is not None and hasattr(sd, "arg"):
+                                default_clause = f" DEFAULT {sd.arg}"
+                            else:
+                                cd = getattr(col, "default", None)
+                                if cd is not None and hasattr(cd, "arg") and not callable(cd.arg):
+                                    val = cd.arg
+                                    default_clause = f" DEFAULT '{val}'" if isinstance(val, str) else f" DEFAULT {val}"
 
                             stmt = f"ALTER TABLE {table_name} ADD COLUMN {col.name} {col_type}{default_clause};"
                             conn.execute(text(stmt))
                 except Exception:
                     pass
+
 
 
     def _create_fts_tables(self) -> None:

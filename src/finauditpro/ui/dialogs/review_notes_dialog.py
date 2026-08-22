@@ -96,7 +96,7 @@ class ReviewNotesDialog(QDialog):
             if n.response_text:
                 item_text += f"\n   ➜ Response ({n.responded_by}): {n.response_text}"
             item = QListWidgetItem(item_text)
-            item.setData(Qt.UserRole, n.id)
+            item.setData(Qt.ItemDataRole.UserRole, n.id)
             self.notes_list.addItem(item)
 
     def _on_note_selected(self) -> None:
@@ -121,7 +121,7 @@ class ReviewNotesDialog(QDialog):
         curr = self.notes_list.currentItem()
         if not curr:
             return
-        note_id = curr.data(Qt.UserRole)
+        note_id = curr.data(Qt.ItemDataRole.UserRole)
         resp_txt = self.response_input.text().strip()
         if not resp_txt:
             return
@@ -140,7 +140,7 @@ class ReviewNotesDialog(QDialog):
         curr = self.notes_list.currentItem()
         if not curr:
             return
-        note_id = curr.data(Qt.UserRole)
+        note_id = curr.data(Qt.ItemDataRole.UserRole)
 
         self.wp_service.clear_review_note(
             ClearReviewNoteDTO(
@@ -149,3 +149,4 @@ class ReviewNotesDialog(QDialog):
             )
         )
         self._load_notes()
+

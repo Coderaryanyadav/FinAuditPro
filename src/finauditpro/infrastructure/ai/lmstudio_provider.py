@@ -143,29 +143,31 @@ class LMStudioProvider(LLMProvider):
         if on_token:
             payload["stream"] = True
             accumulated_chunks: list[str] = []
-            with httpx.Client(timeout=self.timeout_seconds) as client:
-                with client.stream("POST", url, json=payload) as response:
-                    if response.status_code != 200:
-                        raise RuntimeError(
-                            f"LM Studio API returned HTTP {response.status_code}: {response.read().decode('utf-8')}"
-                        )
+            with (
+                httpx.Client(timeout=self.timeout_seconds) as client,
+                client.stream("POST", url, json=payload) as response,
+            ):
+                if response.status_code != 200:
+                    raise RuntimeError(
+                        f"LM Studio API returned HTTP {response.status_code}: {response.read().decode('utf-8')}"
+                    )
 
-                    for line in response.iter_lines():
-                        if not line:
-                            continue
-                        if line.startswith("data: "):
-                            data_str = line[6:].strip()
-                            if data_str == "[DONE]":
-                                break
-                            try:
-                                chunk_json = json.loads(data_str)
-                                delta = chunk_json.get("choices", [{}])[0].get("delta", {})
-                                token = delta.get("content", "")
-                                if token:
-                                    accumulated_chunks.append(token)
-                                    on_token(token)
-                            except Exception:
-                                pass
+                for line in response.iter_lines():
+                    if not line:
+                        continue
+                    if line.startswith("data: "):
+                        data_str = line[6:].strip()
+                        if data_str == "[DONE]":
+                            break
+                        try:
+                            chunk_json = json.loads(data_str)
+                            delta = chunk_json.get("choices", [{}])[0].get("delta", {})
+                            content_piece = delta.get("content", "")
+                            if content_piece:
+                                accumulated_chunks.append(content_piece)
+                                on_token(content_piece)
+                        except Exception:
+                            pass
 
             raw_text = "".join(accumulated_chunks)
             clean_content, reasoning = self.strip_reasoning(raw_text)
@@ -224,7 +226,7 @@ class LMStudioProvider(LLMProvider):
             }
 
         try:
-            return self._execute_chat_call(payload, on_token=on_token)
+            response = self._execute_chat_call(payload, on_token=on_token)
         except Exception:
             # Fallback: try fetching models and retry with first available model ID
             avail = self.list_models()
@@ -232,8 +234,10 @@ class LMStudioProvider(LLMProvider):
                 fallback_model = next((m for m in avail if "embed" not in m.lower()), avail[0])
                 payload["model"] = fallback_model
                 self.chat_model_id = fallback_model
-                return self._execute_chat_call(payload, on_token=on_token)
-            raise
+                response = self._execute_chat_call(payload, on_token=on_token)
+            else:
+                raise
+
 
         if schema_class is not None and issubclass(schema_class, BaseModel):
             try:
@@ -248,7 +252,8 @@ class LMStudioProvider(LLMProvider):
                 return response
             except (ValidationError, Exception) as err:
                 # 1-Round Schema Repair Attempt
-                repair_messages = list(messages) + [
+                repair_messages = [
+                    *list(messages),
                     {"role": "assistant", "content": response.content},
                     {
                         "role": "user",
@@ -256,6 +261,7 @@ class LMStudioProvider(LLMProvider):
                     },
                 ]
                 repair_payload = dict(payload)
+
                 repair_payload["messages"] = repair_messages
                 repair_response = self._execute_chat_call(repair_payload, on_token=None)
 

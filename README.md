@@ -93,20 +93,18 @@ finauditpro
 ## Documentation Index
 
 - [Full Documentation Map](docs/README.md)
-- [Architecture Guide](docs/architecture.md)
-- [Database Schema & Migrations](docs/database.md)
-- [Document Processing & Evidence](docs/document-processing.md)
-- [Local AI Subsystem & RAG](docs/ai.md)
-- [Testing Strategy](docs/testing.md)
-
-- [Installation Guide](INSTALL.md)
-- [Development & Contributing](CONTRIBUTING.md)
+- [Installation Guide](docs/installation.md)
+- [Architecture Guide](docs/architecture/overview.md)
+- [Database Schema & Migrations](docs/architecture/database.md)
 - [Security Policy & Controls](SECURITY.md)
-- [Architecture Decisions (ADRs)](DECISIONS.md)
-- [Product & Engineering Roadmap](ROADMAP.md)
-- [Changelog](CHANGELOG.md)
-- [Packaging & Distribution Guide](PACKAGING.md)
-- [UI Design Specification](Design.md)
+- [Contributing & Development](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Product & Engineering Roadmap](docs/roadmap.md)
+- [Architecture Decisions (ADRs)](docs/decisions.md)
+- [Changelog](docs/changelog.md)
+- [Packaging & Distribution Guide](docs/packaging.md)
+- [UI Design Specification](docs/design.md)
+
 
 
 ---

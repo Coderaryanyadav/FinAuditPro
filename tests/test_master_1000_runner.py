@@ -1,6 +1,6 @@
 """Automated test executing the master 1000-point E2E verification runner script."""
 
-from scripts.run_1000_verifications import run_1000_verifications
+from scripts.development.run_1000_verifications import run_1000_verifications
 
 
 def test_master_1000_verifications_runner() -> None:

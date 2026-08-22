@@ -38,17 +38,19 @@ FinAuditPro enforces clean layer boundaries verified automatically by `tests/tes
 
 ## 3. Code Style & Quality Tools
 
-- **Linter & Formatter**: Ruff (`ruff check src tests`, `ruff format src tests`).
+- **Linter & Formatter**: Ruff (`ruff check src tests scripts`, `ruff format src tests scripts`).
 - **Type Checker**: MyPy (`mypy src/finauditpro`).
 - **Test Suite**: Pytest (`pytest -v tests`).
+- **Diagnostics**: `python scripts/development/automated_system_check.py`.
 
 ---
 
 ## 4. Pull Request Checklist
 
 Before submitting a PR, ensure:
-- [ ] All 121+ tests pass cleanly (`pytest -v tests`).
-- [ ] `tests/test_architecture.py` AST enforcer passes.
+- [ ] All 130+ tests pass cleanly (`pytest -v tests`).
+- [ ] `tests/test_architecture.py` AST enforcer passes (0 layer violations, $\le 400$ lines per module).
 - [ ] `tests/test_language_safety.py` passes.
 - [ ] Zero secrets, real PAN/GSTIN, or real client audit records are committed.
-- [ ] Documentation is updated for new features.
+- [ ] Documentation under `docs/` is updated for new features.
+

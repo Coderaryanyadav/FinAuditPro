@@ -1,0 +1,4722 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Offline-First Audit Operating System for Indian Statutory Audit Practice">
+      
+      
+      
+        <link rel="canonical" href="https://coderaryanyadav.github.io/FinAuditPro/design/">
+      
+      
+        <link rel="prev" href="../development/testing/">
+      
+      
+        <link rel="next" href="../operations/configuration/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>UI Design System - FinAuditPro Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="sky">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#product-context" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="FinAuditPro Documentation" class="md-header__button md-logo" aria-label="FinAuditPro Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            FinAuditPro Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              UI Design System
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="sky"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Coderaryanyadav/FinAuditPro" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    FinAuditPro
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href=".." class="md-tabs__link">
+          
+  
+  
+  Overview
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../features/engagements/" class="md-tabs__link">
+          
+  
+  
+  Features & Workflows
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../security/security-model/" class="md-tabs__link">
+          
+  
+  
+  Security & Compliance
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../development/setup/" class="md-tabs__link">
+          
+  
+  
+  Development & QA
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../operations/configuration/" class="md-tabs__link">
+          
+  
+  
+  Operations & Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="FinAuditPro Documentation" class="md-nav__button md-logo" aria-label="FinAuditPro Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    FinAuditPro Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Coderaryanyadav/FinAuditPro" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    FinAuditPro
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation & Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Specification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/database/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database & Migrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features & Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features & Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/engagements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Engagement Workspace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/documents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documents & FTS5 Search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/financial-data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Financial Data & Analytics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/working-papers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working Papers & Sign-Off
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/reporting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reporting & Export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/archival/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archival & Roll-Forward
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/ai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local AI Copilot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security & Compliance
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security & Compliance
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/security-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/threat-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Threat Model & Defenses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development & QA
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development & QA
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing & Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI Design System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations & Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations & Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operations/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operations/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operations/backup-restore/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backup & Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions (ADRs)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../packaging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Packaging Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<p>You are a senior product designer + frontend engineer specializing in premium
+enterprise SaaS applications.</p>
+<p>I am building an offline-first audit operating system called "FinAuditPro".</p>
+<p>I have already iterated on the UI several times, but the current interface still
+feels unfinished, overly sparse, and visually similar to a generic admin
+dashboard.</p>
+<p>I want you to perform a COMPLETE UI/UX refinement of the existing application.</p>
+<p>IMPORTANT:</p>
+<ul>
+<li>Do NOT rebuild the application from scratch.</li>
+<li>Do NOT change the business logic.</li>
+<li>Do NOT remove existing functionality.</li>
+<li>Do NOT break routing, state management, database/storage, forms, or existing
+  workflows.</li>
+<li>Preserve all existing features and data.</li>
+<li>Work directly with the existing frontend architecture and components.</li>
+<li>First inspect the entire project structure and understand the existing design
+  system.</li>
+<li>Then systematically improve the UI across ALL screens, not just the dashboard.</li>
+</ul>
+<h1 id="product-context">================================================== PRODUCT CONTEXT</h1>
+<p>FinAuditPro is a professional audit operating system used by auditors/accounting
+professionals.</p>
+<p>The product contains:</p>
+<p>WORKSPACE</p>
+<ul>
+<li>Dashboard</li>
+<li>Audit Firms</li>
+<li>Clients</li>
+<li>Engagements</li>
+</ul>
+<p>FINANCIAL</p>
+<ul>
+<li>Documents</li>
+<li>Financial Statements</li>
+<li>GST Reconciliation</li>
+<li>Statutory Compliance</li>
+</ul>
+<p>ANALYSIS</p>
+<ul>
+<li>Audit Matrix</li>
+<li>AI Copilot</li>
+</ul>
+<p>AUDIT WORKFLOW</p>
+<ul>
+<li>Working Papers</li>
+<li>Reports</li>
+</ul>
+<p>SYSTEM</p>
+<ul>
+<li>File Archival</li>
+<li>Roll-Forward</li>
+<li>Settings</li>
+</ul>
+<p>The application should feel like a serious professional audit platform, not a
+generic CRUD/admin panel.</p>
+<p>Design references should feel closer to:</p>
+<ul>
+<li>Linear</li>
+<li>Stripe Dashboard</li>
+<li>Vercel</li>
+<li>Notion</li>
+<li>modern enterprise accounting/audit software</li>
+<li>premium financial SaaS products</li>
+</ul>
+<p>But DO NOT blindly copy any of these products.</p>
+<h1 id="current-ui-problems">================================================== CURRENT UI PROBLEMS</h1>
+<p>The current UI has several issues visible across the application:</p>
+<ol>
+<li>EXCESSIVE EMPTY SPACE</li>
+</ol>
+<p>Pages such as:</p>
+<ul>
+<li>Audit Firms</li>
+<li>Clients</li>
+<li>Engagements</li>
+</ul>
+<p>contain a huge empty area underneath the table header.</p>
+<p>This makes the application look unfinished.</p>
+<p>Fix this.</p>
+<p>When there are no records:</p>
+<ul>
+<li>show a proper empty-state component</li>
+<li>explain what the user should do</li>
+<li>provide a primary CTA</li>
+<li>optionally show a useful illustration/icon</li>
+<li>visually center the empty state inside the content area</li>
+<li>do not leave an enormous blank white rectangle</li>
+</ul>
+<p>Example:</p>
+<p>"No audit firms yet"</p>
+<p>"Create your first audit firm to start managing clients and engagements."</p>
+<p>[ + Create Audit Firm ]</p>
+<p>Do this consistently across all empty-data pages.</p>
+<h1 id="2-tables-feel-empty-and-generic">================================================== 2. TABLES FEEL EMPTY AND GENERIC</h1>
+<p>Current tables are basically:</p>
+<h2 id="header">HEADER</h2>
+<h2 id="nothing">nothing</h2>
+<p>huge whitespace</p>
+<p>Improve the table UX.</p>
+<p>Tables should support:</p>
+<ul>
+<li>meaningful empty states</li>
+<li>hover states</li>
+<li>row interaction</li>
+<li>subtle separators</li>
+<li>proper column alignment</li>
+<li>consistent typography</li>
+<li>status badges</li>
+<li>risk badges</li>
+<li>action menus</li>
+<li>responsive behavior</li>
+<li>useful pagination when data grows</li>
+</ul>
+<p>When a table is empty, DO NOT render a giant blank table.</p>
+<p>Instead render a structured empty-state inside the table container.</p>
+<p>When there is data, make rows feel interactive.</p>
+<p>Example:</p>
+<p>RELIANCE FY 2025–26 Statutory Audit Planning Low Risk Open →</p>
+<p>Use:</p>
+<ul>
+<li>compact status badges</li>
+<li>consistent visual hierarchy</li>
+<li>subtle hover background</li>
+<li>clear primary action</li>
+</ul>
+<p>================================================== 3. CONTENT WIDTH AND DENSITY</p>
+<p>The application currently uses too much horizontal and vertical whitespace.</p>
+<p>Do not make everything cramped either.</p>
+<p>Create a professional enterprise density system.</p>
+<p>Recommended:</p>
+<p>Desktop:</p>
+<ul>
+<li>sidebar: approximately 220–240px</li>
+<li>main content: max-width around 1400–1500px</li>
+<li>comfortable horizontal padding</li>
+<li>consistent 16–24px spacing system</li>
+<li>cards with controlled padding</li>
+<li>tables that use available width efficiently</li>
+</ul>
+<p>The UI should feel information-dense enough for professional users.</p>
+<p>Auditors will spend hours inside this application.</p>
+<p>Optimize for:</p>
+<ul>
+<li>scanning</li>
+<li>comparison</li>
+<li>data entry</li>
+<li>reviewing findings</li>
+<li>navigating between audit sections</li>
+</ul>
+<p>================================================== 4. SIDEBAR</p>
+<p>The sidebar is currently functional but visually basic.</p>
+<p>Improve it significantly while keeping it simple.</p>
+<p>Requirements:</p>
+<ul>
+<li>fixed/sticky sidebar</li>
+<li>clear active navigation state</li>
+<li>section grouping</li>
+<li>subtle section labels</li>
+<li>consistent icons</li>
+<li>better vertical rhythm</li>
+<li>hover states</li>
+<li>active indicator</li>
+<li>user/account area at bottom</li>
+<li>sidebar should feel like part of the product identity</li>
+</ul>
+<p>Keep the sidebar width stable.</p>
+<p>Do NOT turn it into a flashy navigation.</p>
+<p>The design should communicate:</p>
+<p>"Professional audit workstation."</p>
+<p>Potential structure:</p>
+<p>FinAuditPro ──────────────── WORKSPACE</p>
+<p>Dashboard Audit Firms Clients Engagements</p>
+<p>FINANCIAL</p>
+<p>Documents Financial Statements GST Reconciliation Statutory Compliance</p>
+<p>ANALYSIS</p>
+<p>Audit Matrix AI Copilot</p>
+<p>AUDIT WORKFLOW</p>
+<p>Working Papers Reports</p>
+<p>SYSTEM</p>
+<p>File Archival Roll-Forward Settings</p>
+<p>The active page should have:</p>
+<ul>
+<li>subtle tinted background</li>
+<li>clear text weight</li>
+<li>small accent indicator</li>
+<li>icon emphasis</li>
+</ul>
+<p>================================================== 5. TOP BAR</p>
+<p>The top bar currently has too much unused space.</p>
+<p>Redesign it.</p>
+<p>It should contain:</p>
+<p>LEFT: global search</p>
+<p>CENTER/RIGHT: current engagement selector</p>
+<p>RIGHT: notifications if functionality exists user/account controls if
+functionality exists primary "+ New Audit" action</p>
+<p>The top bar should feel compact.</p>
+<p>Global search should look like a real command/search interface.</p>
+<p>Example:</p>
+<p>Search clients, findings, reports... ⌘ K</p>
+<p>The engagement selector should clearly communicate the current context.</p>
+<p>Example:</p>
+<p>ENGAGEMENT RELIANCE · FY 2025–26 · Statutory Audit</p>
+<p>Do not waste huge horizontal areas on empty controls.</p>
+<p>================================================== 6. DASHBOARD / AUDIT OVERVIEW</p>
+<p>The Dashboard should become the strongest page in the application.</p>
+<p>Current structure:</p>
+<p>Audit workflow Needs attention KPI cards Audit progress Risk exposure Recent
+engagements</p>
+<p>This is conceptually correct.</p>
+<p>Improve the hierarchy.</p>
+<p>Top section:</p>
+<p>AUDIT OVERVIEW</p>
+<p>RELIANCE FY 2025–26 Statutory Audit Planning 0% complete</p>
+<p>Then:</p>
+<p>[Audit Workflow Progress]</p>
+<p>Client ✓ FY ✓ Engagement ● Materiality ○ Documentation ○ Completion ○</p>
+<p>The current step should be visually obvious.</p>
+<p>Next action should be the dominant CTA.</p>
+<p>Example:</p>
+<p>NEXT ACTION Complete engagement parameters</p>
+<p>Configure engagement details, statutory parameters, materiality and audit scope.</p>
+<p>[ Continue Setup → ]</p>
+<p>Make this card feel actionable instead of decorative.</p>
+<p>================================================== 7. KPI CARDS</p>
+<p>Current cards:</p>
+<p>Total Clients Completed Audits Open Findings High Risk Cases</p>
+<p>Improve them.</p>
+<p>Each KPI should have:</p>
+<ul>
+<li>small label</li>
+<li>large number</li>
+<li>supporting text</li>
+<li>optional trend/change</li>
+<li>meaningful icon or visual accent</li>
+<li>clickable behavior when appropriate</li>
+</ul>
+<p>Example:</p>
+<p>TOTAL CLIENTS 1 Registered clients View clients →</p>
+<p>Do not overuse colors.</p>
+<p>Use color semantically:</p>
+<p>Blue = primary/information Green = healthy/completed Amber = attention Red =
+critical/high risk</p>
+<p>Avoid rainbow-card aesthetics.</p>
+<p>================================================== 8. RISK EXPOSURE</p>
+<p>The risk section currently looks too empty when everything is zero.</p>
+<p>Design a better zero state.</p>
+<p>Instead of four lines with nothing happening, communicate:</p>
+<p>✓ No risk exposure identified</p>
+<p>All current anomaly scanners are clear.</p>
+<p>Then optionally show a compact breakdown:</p>
+<p>Critical 0 High 0 Medium 0 Low 0</p>
+<p>Use restrained visual indicators.</p>
+<p>When actual findings exist, the component should automatically become more
+data-rich.</p>
+<p>================================================== 9. AUDIT PROGRESS</p>
+<p>The current "Audit Progress" section is too empty.</p>
+<p>Create a useful empty state:</p>
+<p>No completed audits yet</p>
+<p>Complete your first audit engagement to begin tracking progress over time.</p>
+<p>[ View Engagement → ]</p>
+<p>When audit data exists, this should become a real visualization.</p>
+<p>Design the component so it can later display:</p>
+<ul>
+<li>completion percentage</li>
+<li>workpaper completion</li>
+<li>findings trend</li>
+<li>engagement progress</li>
+<li>timeline</li>
+</ul>
+<p>Do not hardcode the empty-state layout in a way that makes future charts
+difficult.</p>
+<p>================================================== 10. RECENT AUDIT ENGAGEMENTS</p>
+<p>Improve this table substantially.</p>
+<p>Columns:</p>
+<p>Client Financial Year Engagement Type Status Risk Exposure Action</p>
+<p>Example:</p>
+<p>RELIANCE FY 2025–26 Statutory Audit Planning Low Risk Open →</p>
+<p>Use compact badges.</p>
+<p>Status examples:</p>
+<p>Planning In Progress Review Completed Archived</p>
+<p>Risk:</p>
+<p>Low Medium High Critical</p>
+<p>Each should have consistent semantic styling.</p>
+<p>================================================== 11. AUDIT FIRMS PAGE</p>
+<p>Current page is essentially:</p>
+<p>Create Audit Firm empty table</p>
+<p>Make this a professional management screen.</p>
+<p>Header:</p>
+<p>Audit Firms</p>
+<p>Manage audit firms and practice-level information.</p>
+<p>[ + Create Audit Firm ]</p>
+<p>Below:</p>
+<p>Search audit firms Filters Sort</p>
+<p>Then table.</p>
+<p>Columns:</p>
+<p>Firm Name FRN / Registration No. PAN GSTIN Phone Email Actions</p>
+<p>Empty state should appear inside the table.</p>
+<p>================================================== 12. CLIENTS PAGE</p>
+<p>Same improvement.</p>
+<p>Header:</p>
+<p>Clients</p>
+<p>Manage your audit clients, entities, and engagement relationships.</p>
+<p>[ + Create New Client ]</p>
+<p>Add:</p>
+<p>Search clients... Entity Type Industry Status</p>
+<p>Table:</p>
+<p>Client Legal Name Entity Type PAN GSTIN Industry Contact Person Status Actions</p>
+<p>Empty state:</p>
+<p>No clients yet</p>
+<p>Create your first client to begin an audit engagement.</p>
+<p>[ + Create Client ]</p>
+<p>================================================== 13. ENGAGEMENTS PAGE</p>
+<p>This should be one of the most important screens.</p>
+<p>Header:</p>
+<p>Audit Engagements</p>
+<p>Manage audit engagements, financial years, teams and workflow status.</p>
+<p>[ + Create Engagement ]</p>
+<p>Add filters:</p>
+<p>Search engagements Financial Year Audit Type Status Risk</p>
+<p>Table:</p>
+<p>Client Financial Year Audit Type Workflow Status Assigned Team Created Date Risk
+Action</p>
+<p>Use professional badges and row interactions.</p>
+<p>================================================== 14. CREATE FORMS</p>
+<p>Review every create/edit form.</p>
+<p>Forms should NOT look like raw HTML forms.</p>
+<p>Use:</p>
+<ul>
+<li>clear section headings</li>
+<li>field descriptions</li>
+<li>required indicators</li>
+<li>grouped fields</li>
+<li>logical sections</li>
+<li>two-column layout on desktop</li>
+<li>one-column layout on smaller screens</li>
+<li>inline validation</li>
+<li>helpful error messages</li>
+<li>sticky action footer when forms are long</li>
+</ul>
+<p>Example:</p>
+<p>CLIENT INFORMATION</p>
+<p>Legal Name * [<strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>___]</p>
+<p>Entity Type * [ Private Limited ▼ ]</p>
+<p>PAN [<strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>___]</p>
+<p>GSTIN [<strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>___]</p>
+<p>INDUSTRY</p>
+<p>Industry [<strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>___]</p>
+<p>CONTACT</p>
+<p>Contact Person [<strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>___]</p>
+<p>Email [<strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>___]</p>
+<p>Phone [<strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong>___]</p>
+<p>Footer:</p>
+<p>Cancel Create Client</p>
+<p>Primary action should be visually obvious.</p>
+<p>================================================== 15. TYPOGRAPHY</p>
+<p>Establish a real typography hierarchy.</p>
+<p>Use a modern UI font already available in the project, or a clean system font.</p>
+<p>Recommended hierarchy:</p>
+<p>Page title: 24–28px / semibold</p>
+<p>Section title: 14–16px / semibold</p>
+<p>Body: 13–14px</p>
+<p>Metadata: 11–12px</p>
+<p>Large KPI: 28–36px / semibold</p>
+<p>Avoid excessive uppercase text.</p>
+<p>Uppercase should mainly be used for:</p>
+<ul>
+<li>section labels</li>
+<li>compact metadata</li>
+<li>category labels</li>
+</ul>
+<p>Do not make entire UI feel like a spreadsheet.</p>
+<p>================================================== 16. COLOR SYSTEM</p>
+<p>Create a consistent design token system.</p>
+<p>Primary: professional blue</p>
+<p>Neutral: white very light gray border gray dark navy/charcoal text</p>
+<p>Semantic: success green warning amber danger red info blue</p>
+<p>Do NOT use saturated colors everywhere.</p>
+<p>Most of the interface should remain neutral.</p>
+<p>Color should communicate state and importance.</p>
+<p>================================================== 17. CARDS</p>
+<p>Current cards have too many visible borders and boxes.</p>
+<p>Reduce visual noise.</p>
+<p>Use:</p>
+<ul>
+<li>subtle borders</li>
+<li>very light shadows only when useful</li>
+<li>consistent radius</li>
+<li>consistent padding</li>
+</ul>
+<p>Do not put cards inside cards inside cards.</p>
+<p>Establish a clear hierarchy:</p>
+<p>Page → Section → Component</p>
+<p>not:</p>
+<p>Page → Card → Card → Card → Card</p>
+<p>================================================== 18. EMPTY STATES</p>
+<p>Create a reusable EmptyState component.</p>
+<p>It should support:</p>
+<p>icon title description primaryAction secondaryAction</p>
+<p>Example:</p>
+<p>[ icon ]</p>
+<p>No audit engagements</p>
+<p>Create an engagement to start your audit workflow.</p>
+<p>[ + Create Engagement ]</p>
+<p>Use this component everywhere.</p>
+<p>================================================== 19. STATUS BADGES</p>
+<p>Create reusable components:</p>
+<p><StatusBadge status="planning" /></p>
+<p><RiskBadge level="low" /></p>
+<p>Do not manually style these differently on every page.</p>
+<p>Statuses should have consistent visual semantics.</p>
+<p>================================================== 20. BUTTON SYSTEM</p>
+<p>Create a consistent button hierarchy.</p>
+<p>Primary: blue filled</p>
+<p>Secondary: neutral outlined</p>
+<p>Tertiary: text button</p>
+<p>Danger: red</p>
+<p>Do not make every button blue.</p>
+<p>Examples:</p>
+<p>Primary:</p>
+<ul>
+<li>Create Client</li>
+</ul>
+<p>Secondary: Export</p>
+<p>Tertiary: View details →</p>
+<p>Danger: Delete Client</p>
+<p>================================================== 21. RESPONSIVENESS</p>
+<p>Make the application responsive.</p>
+<p>Desktop should be the primary experience.</p>
+<p>Also support:</p>
+<ul>
+<li>laptop</li>
+<li>tablet</li>
+<li>smaller desktop widths</li>
+</ul>
+<p>At smaller widths:</p>
+<ul>
+<li>sidebar can collapse</li>
+<li>tables can horizontally scroll</li>
+<li>cards can stack</li>
+<li>two-column forms become one column</li>
+</ul>
+<p>Do NOT destroy desktop density to accommodate mobile.</p>
+<p>================================================== 22. ACCESSIBILITY</p>
+<p>Improve:</p>
+<ul>
+<li>keyboard navigation</li>
+<li>visible focus states</li>
+<li>semantic HTML</li>
+<li>button labels</li>
+<li>accessible form labels</li>
+<li>contrast</li>
+<li>tooltips for icon-only controls</li>
+<li>ARIA only where actually necessary</li>
+</ul>
+<p>The application should be usable without a mouse.</p>
+<p>================================================== 23. INTERACTION DESIGN</p>
+<p>Add subtle professional interactions:</p>
+<ul>
+<li>button hover</li>
+<li>row hover</li>
+<li>focus states</li>
+<li>selected states</li>
+<li>dropdown transitions</li>
+<li>modal transitions</li>
+<li>loading skeletons</li>
+<li>toast notifications</li>
+<li>confirmation dialogs for destructive actions</li>
+</ul>
+<p>Animations should be subtle.</p>
+<p>Avoid:</p>
+<ul>
+<li>excessive motion</li>
+<li>bouncing</li>
+<li>flashy gradients</li>
+<li>unnecessary animations</li>
+</ul>
+<p>================================================== 24. LOADING STATES</p>
+<p>Do not show blank screens while data loads.</p>
+<p>Create reusable skeleton components for:</p>
+<ul>
+<li>tables</li>
+<li>cards</li>
+<li>dashboard sections</li>
+<li>forms</li>
+</ul>
+<p>The application should feel responsive even when data is loading.</p>
+<p>================================================== 25. ERROR STATES</p>
+<p>Create consistent error states.</p>
+<p>Example:</p>
+<p>Unable to load clients</p>
+<p>We couldn't retrieve your client records.</p>
+<p>[ Try Again ]</p>
+<p>Errors should never appear as raw exceptions or broken layouts.</p>
+<p>================================================== 26. OFFLINE-FIRST DESIGN</p>
+<p>FinAuditPro is an OFFLINE-FIRST audit operating system.</p>
+<p>Reflect this in the UX.</p>
+<p>Where applicable, show:</p>
+<p>Offline Local changes saved Sync pending Synced Last synced: 2 min ago</p>
+<p>These states should be subtle and professional.</p>
+<p>Do not make offline status visually alarming unless there is an actual problem.</p>
+<p>================================================== 27. AUDITOR-FIRST UX</p>
+<p>This is extremely important.</p>
+<p>Design for an auditor who may use the software for several hours per day.</p>
+<p>Optimize for:</p>
+<p>FAST NAVIGATION FAST DATA ENTRY FAST REVIEW LOW COGNITIVE LOAD CLEAR AUDIT
+STATUS CLEAR NEXT ACTION EASY FINDING REVIEW EASY DOCUMENT ACCESS</p>
+<p>Every screen should answer:</p>
+<ol>
+<li>Where am I?</li>
+<li>What audit/client/engagement am I working on?</li>
+<li>What is the current status?</li>
+<li>What needs my attention?</li>
+<li>What should I do next?</li>
+</ol>
+<p>================================================== 28. DESIGN SYSTEM</p>
+<p>Before changing dozens of individual components, establish reusable design
+tokens.</p>
+<p>Create or improve:</p>
+<p>colors spacing radius typography shadows borders buttons inputs badges cards
+tables empty states alerts modals dropdowns tooltips</p>
+<p>Use these primitives throughout the application.</p>
+<p>Do not solve each page independently.</p>
+<p>================================================== 29. VERY IMPORTANT — DO NOT
+OVERDESIGN</p>
+<p>Do NOT turn this into:</p>
+<ul>
+<li>a flashy startup landing page</li>
+<li>a glassmorphism dashboard</li>
+<li>a neon interface</li>
+<li>a gradient-heavy UI</li>
+<li>a dark-mode gaming UI</li>
+<li>a giant-card dashboard</li>
+<li>a Dribbble concept that is difficult to use</li>
+</ul>
+<p>FinAuditPro should look like software professionals trust with financial and
+audit data.</p>
+<p>Think:</p>
+<p>"Bloomberg/Linear/Stripe-level information architecture"</p>
+<p>not:</p>
+<p>"AI startup dashboard".</p>
+<p>================================================== 30. FIX ALL PAGES, NOT JUST
+THE DASHBOARD</p>
+<p>After improving the dashboard, inspect every route/page.</p>
+<p>At minimum audit:</p>
+<p>/dashboard /audit-firms /clients /engagements /documents /financial-statements
+/gst-reconciliation /statutory-compliance /audit-matrix /ai-copilot
+/working-papers /reports /file-archival /roll-forward /settings</p>
+<p>For every page ask:</p>
+<ul>
+<li>Is the page hierarchy clear?</li>
+<li>Is there excessive whitespace?</li>
+<li>Is the primary action obvious?</li>
+<li>Is the empty state useful?</li>
+<li>Are tables dense enough?</li>
+<li>Are forms easy to use?</li>
+<li>Are status indicators consistent?</li>
+<li>Are spacing and typography consistent?</li>
+<li>Does this feel like the same product?</li>
+</ul>
+<p>================================================== 31. DO NOT BREAK EXISTING
+FUNCTIONALITY</p>
+<p>Before changing components:</p>
+<p>inspect the existing implementation.</p>
+<p>Preserve:</p>
+<ul>
+<li>routes</li>
+<li>event handlers</li>
+<li>state</li>
+<li>persistence</li>
+<li>database logic</li>
+<li>local storage</li>
+<li>API calls</li>
+<li>forms</li>
+<li>validation</li>
+<li>navigation</li>
+<li>existing business rules</li>
+</ul>
+<p>If a UI component needs refactoring, refactor safely.</p>
+<p>Do not replace working functionality with mock data.</p>
+<p>Do not hardcode fake records just to make the UI look populated.</p>
+<p>Empty states must remain empty when there is no data.</p>
+<p>================================================== 32. IMPLEMENTATION PROCESS</p>
+<p>Follow this process:</p>
+<p>PHASE 1 — AUDIT</p>
+<p>Inspect:</p>
+<ul>
+<li>project structure</li>
+<li>package.json</li>
+<li>routing</li>
+<li>global CSS</li>
+<li>theme</li>
+<li>components</li>
+<li>layout</li>
+<li>dashboard</li>
+<li>tables</li>
+<li>forms</li>
+<li>state management</li>
+</ul>
+<p>Identify the existing design system.</p>
+<p>PHASE 2 — DESIGN SYSTEM</p>
+<p>Create/refine reusable primitives:</p>
+<p>Button Input Select Badge Card Table EmptyState Alert Modal Dropdown Skeleton
+PageHeader SectionHeader StatusBadge RiskBadge</p>
+<p>PHASE 3 — GLOBAL LAYOUT</p>
+<p>Fix:</p>
+<p>sidebar topbar content width spacing typography responsive layout</p>
+<p>PHASE 4 — CORE PAGES</p>
+<p>Fix in this order:</p>
+<ol>
+<li>Dashboard</li>
+<li>Audit Firms</li>
+<li>Clients</li>
+<li>Engagements</li>
+</ol>
+<p>PHASE 5 — REMAINING MODULES</p>
+<p>Apply the same system to:</p>
+<p>Documents Financial Statements GST Reconciliation Statutory Compliance Audit
+Matrix AI Copilot Working Papers Reports File Archival Roll-Forward Settings</p>
+<p>PHASE 6 — QUALITY PASS</p>
+<p>Check:</p>
+<ul>
+<li>no visual inconsistencies</li>
+<li>no broken layouts</li>
+<li>no overflowing tables</li>
+<li>no dead buttons</li>
+<li>no console errors</li>
+<li>no broken routes</li>
+<li>no duplicate styles</li>
+<li>no inconsistent spacing</li>
+<li>no unnecessary blank areas</li>
+<li>no fake data</li>
+<li>no functionality regressions</li>
+</ul>
+<p>================================================== 33. IMPORTANT VISUAL TARGET</p>
+<p>The final product should feel approximately like:</p>
+<p>┌──────────────────────────────────────────────────────────────┐ │ FinAuditPro
+Search... Engagement + New │
+├──────────────┬───────────────────────────────────────────────┤ │ │ │ │
+WORKSPACE │ Audit Overview │ │ │ RELIANCE · FY 2025–26 · Statutory Audit │ │
+Dashboard │ │ │ Audit Firms │ ┌──────────────────────┐ ┌─────────────────┐ │ │
+Clients │ │ AUDIT WORKFLOW │ │ NEEDS ATTENTION │ │ │ Engagements │ │ ✓ Client │
+│ │ │ │ │ │ ✓ FY │ │ ✓ All clear │ │ │ FINANCIAL │ │ ● Engagement │ │ │ │ │
+Documents │ │ ○ Materiality │ │ │ │ │ Statements │ │ ○ Documentation │ │ │ │ │
+GST │ │ ○ Completion │ │ │ │ │ Compliance │ │ │ │ │ │ │ │ │ Next action │ │ │ │
+│ ANALYSIS │ │ Complete setup │ │ │ │ │ Audit Matrix │ │ [Continue Setup] │ │ │
+│ │ AI Copilot │ └──────────────────────┘ └─────────────────┘ │ │ │ │ │ WORKFLOW
+│ ┌───────┐ ┌───────┐ ┌───────┐ ┌───────────┐ │ │ Working │ │Clients│ │Audits │
+│Finding│ │High Risk │ │ │ Papers │ │ 1 │ │ 0 │ │ 0 │ │ 0 │ │ │ Reports │
+└───────┘ └───────┘ └───────┘ └───────────┘ │ │ │ │ │ SYSTEM │
+┌────────────────────┐ ┌──────────────────┐ │ │ Archive │ │ AUDIT PROGRESS │ │
+RISK EXPOSURE │ │ │ Roll-forward │ │ │ │ │ │ │ Settings │ │ No completed │ │ ✓
+No risk │ │ │ │ │ audits yet │ │ exposure │ │ │ │ └────────────────────┘
+└──────────────────┘ │ │ │ │ │ │ RECENT AUDIT ENGAGEMENTS │ │ │
+┌───────────────────────────────────────────┐ │ │ │ │ Client │ FY │ Type │
+Status │ Risk │ ... │ │ │ │ │ Reliance │...│ ... │Planning│Low │Open │ │ │ │
+└───────────────────────────────────────────┘ │
+└──────────────┴───────────────────────────────────────────────┘</p>
+<p>The actual implementation should be polished and modern, not literally copied
+from this ASCII layout.</p>
+<p>================================================== 34. FINAL REQUIREMENT</p>
+<p>Do not simply tell me what you would change.</p>
+<p>ACTUALLY IMPLEMENT THE CHANGES IN THE CODEBASE.</p>
+<p>After implementation:</p>
+<ol>
+<li>Run the application.</li>
+<li>Inspect the resulting UI.</li>
+<li>Check every major page.</li>
+<li>Fix visual inconsistencies you notice.</li>
+<li>Check browser console for errors.</li>
+<li>Check responsive behavior.</li>
+<li>Verify existing interactions still work.</li>
+<li>Verify existing data still appears correctly.</li>
+<li>Remove unnecessary CSS duplication.</li>
+<li>
+<p>Give me a concise summary of:</p>
+</li>
+<li>
+<p>what you changed</p>
+</li>
+<li>which components were created/refactored</li>
+<li>which pages were updated</li>
+<li>any remaining issues</li>
+</ol>
+<p>Most importantly:</p>
+<p>DO NOT STOP AFTER MAKING THE DASHBOARD LOOK BETTER.</p>
+<p>The goal is to make the ENTIRE FinAuditPro application feel like one coherent,
+premium, production-ready audit platform.</p>
+<p>PROMPT 2 : You are working on my existing FinAuditPro application.</p>
+<p>DO NOT rebuild the application from scratch. DO NOT replace the architecture
+unnecessarily. DO NOT create mock screens that only look functional.</p>
+<p>I need you to audit the ENTIRE existing codebase and fix the application so it
+behaves like a real, integrated offline-first audit operating system.</p>
+<h2 id="project-context">PROJECT CONTEXT</h2>
+<p>App name: FinAuditPro Purpose: Offline-first audit operating system for Indian
+statutory/GST/tax audit workflows.</p>
+<p>Current UI modules:</p>
+<p>WORKSPACE</p>
+<ul>
+<li>Dashboard</li>
+<li>Audit Firms</li>
+<li>Clients</li>
+<li>Engagements</li>
+</ul>
+<p>FINANCIAL</p>
+<ul>
+<li>Documents</li>
+<li>Financial Statements</li>
+<li>GST Reconciliation</li>
+<li>Statutory Compliance</li>
+</ul>
+<p>ANALYSIS</p>
+<ul>
+<li>Audit Matrix</li>
+<li>AI Copilot</li>
+</ul>
+<p>AUDIT WORKFLOW</p>
+<ul>
+<li>Working Papers</li>
+<li>Reports</li>
+</ul>
+<p>SYSTEM</p>
+<ul>
+<li>File Archival</li>
+<li>Roll-Forward</li>
+<li>Settings</li>
+</ul>
+<p>The application currently has screens that look visually complete but many areas
+are empty/static and the modules are not sufficiently connected.</p>
+<p>I want you to turn this into a genuinely functional application.</p>
+<p>==================================================</p>
+<ol>
+<li>
+<h1 id="first-audit-the-existing-codebase">FIRST: AUDIT THE EXISTING CODEBASE</h1>
+</li>
+</ol>
+<p>Before changing anything:</p>
+<ol>
+<li>Inspect the complete project structure.</li>
+<li>Identify:</li>
+<li>frontend framework</li>
+<li>backend architecture</li>
+<li>database/storage</li>
+<li>state management</li>
+<li>routing</li>
+<li>models/schemas</li>
+<li>services</li>
+<li>file handling</li>
+<li>existing business logic</li>
+<li>existing mock/demo data</li>
+<li>Find duplicated logic.</li>
+<li>Find dead components.</li>
+<li>Find buttons that do nothing.</li>
+<li>Find pages that contain hardcoded/mock data.</li>
+<li>Find forms that do not persist data.</li>
+<li>Find navigation routes that do not work correctly.</li>
+<li>Find state that is lost after refresh.</li>
+<li>Find inconsistencies between modules.</li>
+</ol>
+<p>DO NOT immediately start rewriting.</p>
+<p>First understand how the existing application works.</p>
+<p>Then make a concise internal implementation plan and execute it.</p>
+<h1 id="2-core-requirement-one-connected-data-model">================================================== 2. CORE REQUIREMENT — ONE CONNECTED DATA MODEL</h1>
+<p>All modules must operate on the same underlying audit data.</p>
+<p>The hierarchy should effectively be:</p>
+<p>Audit Firm ↓ Client ↓ Financial Year ↓ Engagement ↓ Documents / Financial
+Statements / GST / Compliance ↓ Audit Matrix ↓ Working Papers ↓ Findings /
+Evidence ↓ Reports ↓ Archive / Roll Forward</p>
+<p>Do not create isolated fake datasets for individual pages.</p>
+<p>If I create a client, it must appear in Clients and be selectable when creating
+an Engagement.</p>
+<p>If I create an Engagement, it must become the active engagement.</p>
+<p>Documents, financial data, GST reconciliation, compliance checks, audit
+procedures, findings, working papers and reports must belong to the correct
+engagement.</p>
+<h1 id="3-fix-the-dashboard">================================================== 3. FIX THE DASHBOARD</h1>
+<p>Dashboard must become a real audit control centre.</p>
+<p>It should dynamically calculate:</p>
+<ul>
+<li>Total Clients</li>
+<li>Active Engagements</li>
+<li>Completed Audits</li>
+<li>Open Findings</li>
+<li>High Risk Cases</li>
+<li>Critical Findings</li>
+<li>Pending Documentation</li>
+<li>Pending Review</li>
+<li>Overall Audit Progress</li>
+</ul>
+<p>The dashboard must NOT display hardcoded numbers.</p>
+<p>The audit lifecycle should actually work:</p>
+<p>Client → Financial Year → Engagement → Materiality → Documentation → Completion</p>
+<p>The current engagement should be selectable.</p>
+<p>"Continue Setup" must navigate to the correct next incomplete step.</p>
+<p>Progress percentage must be calculated from actual workflow completion.</p>
+<p>"Needs Attention" must dynamically detect:</p>
+<ul>
+<li>overdue items</li>
+<li>high-risk findings</li>
+<li>missing mandatory documentation</li>
+<li>unresolved exceptions</li>
+<li>pending approvals/reviews</li>
+</ul>
+<h1 id="4-audit-firms">================================================== 4. AUDIT FIRMS</h1>
+<p>Make Audit Firms fully functional.</p>
+<p>Support:</p>
+<ul>
+<li>Create</li>
+<li>Edit</li>
+<li>View</li>
+<li>Delete/archive</li>
+<li>Search</li>
+<li>Validation</li>
+</ul>
+<p>Store:</p>
+<ul>
+<li>Firm name</li>
+<li>FRN / Registration number</li>
+<li>PAN</li>
+<li>GSTIN</li>
+<li>Address</li>
+<li>Phone</li>
+<li>Email</li>
+<li>Partners</li>
+<li>Registration details</li>
+<li>Status</li>
+</ul>
+<p>Do not allow duplicate registration identifiers where inappropriate.</p>
+<h1 id="5-clients">================================================== 5. CLIENTS</h1>
+<p>Make Clients fully functional.</p>
+<p>Create a proper client form.</p>
+<p>Fields should include at minimum:</p>
+<ul>
+<li>Legal name</li>
+<li>Trade name</li>
+<li>Entity type</li>
+<li>PAN</li>
+<li>GSTIN</li>
+<li>CIN/LLP information where applicable</li>
+<li>Industry</li>
+<li>Registered address</li>
+<li>Contact person</li>
+<li>Email</li>
+<li>Phone</li>
+<li>Financial year end</li>
+<li>Status</li>
+</ul>
+<p>Add:</p>
+<ul>
+<li>search</li>
+<li>filtering</li>
+<li>sorting</li>
+<li>edit</li>
+<li>archive</li>
+<li>client detail page</li>
+</ul>
+<p>A client detail page should show:</p>
+<ul>
+<li>engagements</li>
+<li>documents</li>
+<li>financial statements</li>
+<li>GST reconciliation</li>
+<li>compliance</li>
+<li>findings</li>
+<li>reports</li>
+</ul>
+<h1 id="6-engagements">================================================== 6. ENGAGEMENTS</h1>
+<p>This is one of the most important modules.</p>
+<p>Create a real engagement workflow.</p>
+<p>Required fields:</p>
+<ul>
+<li>Client</li>
+<li>Financial year</li>
+<li>Audit type</li>
+<li>Engagement number</li>
+<li>Period</li>
+<li>Assigned team</li>
+<li>Engagement partner</li>
+<li>Manager</li>
+<li>Start date</li>
+<li>Due date</li>
+<li>Materiality</li>
+<li>Performance materiality</li>
+<li>Audit scope</li>
+<li>Status</li>
+<li>Risk classification</li>
+</ul>
+<p>Engagement statuses should include something like:</p>
+<p>Planning Fieldwork Review Completion Completed Archived</p>
+<p>Opening an engagement must establish it as the ACTIVE ENGAGEMENT throughout the
+application.</p>
+<p>Every other module must know which engagement is currently active.</p>
+<h1 id="7-document-management">================================================== 7. DOCUMENT MANAGEMENT</h1>
+<p>The Documents page must actually work.</p>
+<p>Support:</p>
+<ul>
+<li>upload documents</li>
+<li>drag/drop if practical</li>
+<li>document categories</li>
+<li>metadata</li>
+<li>file size</li>
+<li>page count</li>
+<li>SHA-256 hash</li>
+<li>upload timestamp</li>
+<li>document status</li>
+<li>search</li>
+<li>filter</li>
+<li>preview/open</li>
+<li>download/export where appropriate</li>
+<li>archive</li>
+</ul>
+<p>Document categories could include:</p>
+<ul>
+<li>Trial Balance</li>
+<li>General Ledger</li>
+<li>Bank Statements</li>
+<li>GST Returns</li>
+<li>Purchase Register</li>
+<li>Sales Register</li>
+<li>Invoices</li>
+<li>Fixed Asset Register</li>
+<li>Payroll</li>
+<li>Tax Returns</li>
+<li>Prior Year Audit Report</li>
+<li>Management Representation</li>
+<li>Other</li>
+</ul>
+<p>Documents must belong to an engagement.</p>
+<p>Calculate real SHA-256 hashes instead of fake values.</p>
+<h1 id="8-financial-statements">================================================== 8. FINANCIAL STATEMENTS</h1>
+<p>Make the Financial Statements module functional.</p>
+<p>Support importing financial datasets such as:</p>
+<p>CSV XLSX JSON</p>
+<p>Normalize imported transaction data into a consistent schema.</p>
+<p>Example:</p>
+<p>date voucher_number account_code account_name debit credit narration cost_center
+reference</p>
+<p>Validate:</p>
+<ul>
+<li>missing columns</li>
+<li>invalid dates</li>
+<li>invalid numeric values</li>
+<li>duplicate vouchers</li>
+<li>debit/credit inconsistencies</li>
+</ul>
+<p>Show:</p>
+<ul>
+<li>dataset summary</li>
+<li>row count</li>
+<li>total debits</li>
+<li>total credits</li>
+<li>account count</li>
+<li>date range</li>
+</ul>
+<p>The Normalized Dataset Rows Inspector must display REAL imported rows.</p>
+<h1 id="9-deterministic-audit-analytics">================================================== 9. DETERMINISTIC AUDIT ANALYTICS</h1>
+<p>Do NOT make audit analytics purely AI-generated.</p>
+<p>Implement deterministic rules first.</p>
+<p>Examples:</p>
+<ul>
+<li>duplicate transactions</li>
+<li>duplicate invoice numbers</li>
+<li>round-number transactions</li>
+<li>unusual journal entries</li>
+<li>weekend postings</li>
+<li>postings outside normal hours</li>
+<li>large transactions</li>
+<li>manual journal entries</li>
+<li>unusual account combinations</li>
+<li>negative balances</li>
+<li>credit/debit anomalies</li>
+<li>related-party indicators</li>
+<li>suspicious narration patterns</li>
+<li>missing supporting documents</li>
+<li>unusual GST amounts</li>
+</ul>
+<p>Every anomaly should contain:</p>
+<ul>
+<li>rule ID</li>
+<li>severity</li>
+<li>title</li>
+<li>description</li>
+<li>implicated rows</li>
+<li>computed evidence</li>
+<li>amount</li>
+<li>rationale</li>
+<li>status</li>
+</ul>
+<p>Possible severity:</p>
+<p>Critical High Medium Low Info</p>
+<p>Never claim an anomaly exists without actual computed evidence.</p>
+<h1 id="10-gst-reconciliation">================================================== 10. GST RECONCILIATION</h1>
+<p>The GST Reconciliation module must be data-driven.</p>
+<p>Support:</p>
+<p>Purchase Register vs GSTR-2B</p>
+<p>Compare using appropriate identifiers and fallback matching logic.</p>
+<p>Show:</p>
+<ul>
+<li>total invoices</li>
+<li>matched</li>
+<li>mismatched</li>
+<li>missing in 2B</li>
+<li>missing in purchase register</li>
+<li>amount mismatch</li>
+<li>GST mismatch</li>
+<li>duplicate invoices</li>
+<li>ineligible ITC</li>
+</ul>
+<p>For every mismatch show:</p>
+<ul>
+<li>invoice</li>
+<li>supplier</li>
+<li>GSTIN</li>
+<li>invoice date</li>
+<li>taxable value</li>
+<li>CGST</li>
+<li>SGST</li>
+<li>IGST</li>
+<li>expected value</li>
+<li>actual value</li>
+<li>variance</li>
+<li>reason</li>
+<li>status</li>
+</ul>
+<p>The counters at the top must be calculated from actual reconciliation results.</p>
+<h1 id="11-statutory-compliance">================================================== 11. STATUTORY COMPLIANCE</h1>
+<p>Do NOT simply show a static checklist.</p>
+<p>Build a real compliance engine.</p>
+<p>Support at minimum:</p>
+<ul>
+<li>CARO 2020</li>
+<li>Tax Audit Form 3CD</li>
+</ul>
+<p>Each clause should have:</p>
+<ul>
+<li>clause number</li>
+<li>title</li>
+<li>requirement</li>
+<li>applicability</li>
+<li>evidence required</li>
+<li>evidence attached</li>
+<li>auditor conclusion</li>
+<li>status</li>
+<li>reviewer</li>
+<li>review status</li>
+<li>notes</li>
+<li>findings</li>
+</ul>
+<p>Statuses:</p>
+<p>Not Started Applicable Not Applicable Compliant Exception Pending Evidence Under
+Review</p>
+<p>"Auto-Evaluate Compliance" must run actual deterministic checks where possible.</p>
+<p>Never mark a clause compliant simply because the button was clicked.</p>
+<p>If there isn't enough evidence, status should be something like:</p>
+<p>Pending Evidence</p>
+<h1 id="12-audit-matrix">================================================== 12. AUDIT MATRIX</h1>
+<p>Create a proper risk-based audit matrix.</p>
+<p>Dimensions:</p>
+<ul>
+<li>Audit area</li>
+<li>Assertion</li>
+<li>Risk</li>
+<li>Inherent risk</li>
+<li>Control risk</li>
+<li>Detection risk</li>
+<li>Overall risk</li>
+<li>Materiality</li>
+<li>Planned procedure</li>
+<li>Sample size</li>
+<li>Evidence</li>
+<li>Result</li>
+<li>Finding</li>
+<li>Reviewer status</li>
+</ul>
+<p>Allow users to:</p>
+<ul>
+<li>add procedures</li>
+<li>assign procedures</li>
+<li>mark procedures complete</li>
+<li>attach evidence</li>
+<li>record exceptions</li>
+<li>generate findings</li>
+</ul>
+<p>Risk should influence audit priority.</p>
+<h1 id="13-working-papers">================================================== 13. WORKING PAPERS</h1>
+<p>Working Papers must connect the entire audit workflow.</p>
+<p>Each working paper should support:</p>
+<ul>
+<li>WP number</li>
+<li>Audit area</li>
+<li>Objective</li>
+<li>Procedure</li>
+<li>Population</li>
+<li>Sample</li>
+<li>Evidence</li>
+<li>Result</li>
+<li>Conclusion</li>
+<li>Prepared by</li>
+<li>Prepared date</li>
+<li>Reviewed by</li>
+<li>Review date</li>
+<li>Review notes</li>
+<li>Status</li>
+</ul>
+<p>Statuses:</p>
+<p>Draft Prepared Review Pending Reviewed Approved</p>
+<p>Allow linking:</p>
+<p>Working Paper → Evidence → Audit Procedure → Finding → Report</p>
+<h1 id="14-findings-management">================================================== 14. FINDINGS MANAGEMENT</h1>
+<p>Implement a real findings system.</p>
+<p>Each finding should contain:</p>
+<ul>
+<li>Finding ID</li>
+<li>Title</li>
+<li>Description</li>
+<li>Audit area</li>
+<li>Criteria</li>
+<li>Condition</li>
+<li>Cause</li>
+<li>Effect</li>
+<li>Risk</li>
+<li>Recommendation</li>
+<li>Management response</li>
+<li>Severity</li>
+<li>Owner</li>
+<li>Due date</li>
+<li>Status</li>
+<li>Evidence</li>
+<li>Related working paper</li>
+</ul>
+<p>Statuses:</p>
+<p>Open Management Response Remediation Resolved Closed Accepted Risk</p>
+<p>Dashboard counts must derive from this data.</p>
+<h1 id="15-reports">================================================== 15. REPORTS</h1>
+<p>Reports must be generated from actual engagement data.</p>
+<p>Support at least:</p>
+<ul>
+<li>Audit status report</li>
+<li>Findings report</li>
+<li>GST reconciliation report</li>
+<li>Compliance report</li>
+<li>Working paper index</li>
+<li>Executive audit summary</li>
+</ul>
+<p>Do not generate fake placeholder reports.</p>
+<p>Report data must come from the selected engagement.</p>
+<h1 id="16-file-archival">================================================== 16. FILE ARCHIVAL</h1>
+<p>Implement proper archival behavior.</p>
+<p>Archived engagements should become read-only.</p>
+<p>Do not delete audit evidence accidentally.</p>
+<p>Support:</p>
+<ul>
+<li>archive engagement</li>
+<li>archive documents</li>
+<li>restore where appropriate</li>
+<li>archive metadata</li>
+<li>integrity verification</li>
+</ul>
+<p>Preserve SHA-256 hashes for files.</p>
+<h1 id="17-roll-forward">================================================== 17. ROLL-FORWARD</h1>
+<p>Make Roll-Forward functional.</p>
+<p>Allow previous-year engagement information to be carried into a new financial
+year.</p>
+<p>Possible roll-forward items:</p>
+<ul>
+<li>client information</li>
+<li>audit programs</li>
+<li>audit procedures</li>
+<li>risk assessments</li>
+<li>materiality settings</li>
+<li>recurring working paper structures</li>
+<li>prior findings</li>
+<li>compliance checklist</li>
+<li>document index</li>
+</ul>
+<p>Clearly distinguish:</p>
+<p>Carried Forward vs Needs Current-Year Update</p>
+<p>Never blindly copy evidence that should be re-obtained.</p>
+<h1 id="18-search">================================================== 18. SEARCH</h1>
+<p>The global search box must actually work.</p>
+<p>Search across:</p>
+<ul>
+<li>clients</li>
+<li>engagements</li>
+<li>documents</li>
+<li>findings</li>
+<li>working papers</li>
+<li>reports</li>
+</ul>
+<p>Results should indicate type and allow navigation.</p>
+<p>Support keyboard shortcut:</p>
+<p>Cmd/Ctrl + K</p>
+<h1 id="19-active-engagement">================================================== 19. ACTIVE ENGAGEMENT</h1>
+<p>This is critical.</p>
+<p>The top navigation contains an ACTIVE ENGAGEMENT selector.</p>
+<p>Make it functional.</p>
+<p>When an engagement is selected:</p>
+<p>all modules should operate against that engagement unless explicitly browsing
+global/client-level data.</p>
+<p>The active engagement should survive navigation and refresh.</p>
+<p>Avoid accidental cross-engagement data contamination.</p>
+<h1 id="20-offline-first-requirement">================================================== 20. OFFLINE-FIRST REQUIREMENT</h1>
+<p>This is an OFFLINE-FIRST application.</p>
+<p>Do not introduce unnecessary cloud dependencies.</p>
+<p>The core application must work without internet access.</p>
+<p>Use the existing local persistence architecture if one exists.</p>
+<p>If persistence is currently inadequate, implement a robust local storage layer
+appropriate for the existing architecture.</p>
+<p>Data must survive:</p>
+<ul>
+<li>navigation</li>
+<li>page reload</li>
+<li>application restart</li>
+</ul>
+<p>Use migrations/versioning if changing the data schema.</p>
+<h1 id="21-ux-ui">================================================== 21. UX / UI</h1>
+<p>Preserve the current FinAuditPro visual identity.</p>
+<p>The current design is clean and professional.</p>
+<p>Keep:</p>
+<ul>
+<li>left sidebar</li>
+<li>white/light audit-professional aesthetic</li>
+<li>blue primary actions</li>
+<li>compact tables</li>
+<li>status indicators</li>
+<li>cards</li>
+<li>workflow indicators</li>
+</ul>
+<p>But improve:</p>
+<ul>
+<li>empty states</li>
+<li>loading states</li>
+<li>error states</li>
+<li>confirmation dialogs</li>
+<li>validation messages</li>
+<li>responsive behavior</li>
+<li>table readability</li>
+<li>action discoverability</li>
+</ul>
+<p>Do NOT make the UI unnecessarily flashy.</p>
+<p>This is professional audit software, not a marketing website.</p>
+<h1 id="22-important-no-fake-functionality">================================================== 22. IMPORTANT — NO FAKE FUNCTIONALITY</h1>
+<p>This is extremely important.</p>
+<p>DO NOT:</p>
+<ul>
+<li>hardcode dashboard metrics</li>
+<li>hardcode table rows</li>
+<li>make buttons appear functional without persistence</li>
+<li>fake compliance results</li>
+<li>fake audit findings</li>
+<li>fake GST results</li>
+<li>fabricate hashes</li>
+<li>fabricate financial calculations</li>
+<li>show "success" when an operation failed</li>
+<li>silently swallow errors</li>
+</ul>
+<p>Every displayed number should have a real source.</p>
+<p>Every action should either:</p>
+<ol>
+<li>modify persisted application state, or</li>
+<li>navigate to a real workflow.</li>
+</ol>
+<h1 id="23-data-integrity">================================================== 23. DATA INTEGRITY</h1>
+<p>Implement validation and defensive programming.</p>
+<p>Handle:</p>
+<ul>
+<li>duplicate records</li>
+<li>invalid identifiers</li>
+<li>missing required fields</li>
+<li>invalid financial values</li>
+<li>malformed files</li>
+<li>corrupted imports</li>
+<li>missing active engagement</li>
+<li>deleted referenced entities</li>
+<li>orphan records</li>
+</ul>
+<p>Use stable IDs.</p>
+<p>Do not rely on display names as database identifiers.</p>
+<h1 id="24-testing">================================================== 24. TESTING</h1>
+<p>After implementation, test the application end-to-end.</p>
+<p>At minimum test:</p>
+<ol>
+<li>Create audit firm.</li>
+<li>Create client.</li>
+<li>Create financial year.</li>
+<li>Create engagement.</li>
+<li>Set active engagement.</li>
+<li>Upload document.</li>
+<li>Import financial dataset.</li>
+<li>Run analytics.</li>
+<li>Import GST data.</li>
+<li>Run GST reconciliation.</li>
+<li>Evaluate compliance.</li>
+<li>Create audit procedure.</li>
+<li>Create working paper.</li>
+<li>Create finding.</li>
+<li>Generate report.</li>
+<li>Complete engagement.</li>
+<li>Archive engagement.</li>
+<li>Refresh application.</li>
+<li>Confirm data persists.</li>
+<li>Confirm dashboard reflects all changes.</li>
+</ol>
+<p>Fix all errors found.</p>
+<h1 id="25-code-quality">================================================== 25. CODE QUALITY</h1>
+<p>While implementing:</p>
+<ul>
+<li>preserve existing working functionality</li>
+<li>avoid unnecessary rewrites</li>
+<li>use reusable components</li>
+<li>separate UI from business logic</li>
+<li>centralize validation</li>
+<li>centralize persistence</li>
+<li>centralize domain models</li>
+<li>avoid duplicated calculations</li>
+<li>use clear naming</li>
+<li>handle errors explicitly</li>
+<li>keep modules maintainable</li>
+</ul>
+<p>Do not create one giant component.</p>
+<h1 id="26-final-verification">================================================== 26. FINAL VERIFICATION</h1>
+<p>Before saying the task is complete:</p>
+<p>Run the application.</p>
+<p>Navigate through EVERY sidebar item.</p>
+<p>Verify that every page:</p>
+<ul>
+<li>loads</li>
+<li>has working navigation</li>
+<li>has working primary actions</li>
+<li>persists data</li>
+<li>handles empty state</li>
+<li>handles errors</li>
+<li>respects active engagement</li>
+<li>displays real data</li>
+</ul>
+<p>Check the browser/console/application logs for errors.</p>
+<p>Fix them.</p>
+<p>Then provide me with:</p>
+<ol>
+<li>What was broken.</li>
+<li>What you changed.</li>
+<li>Files/components changed.</li>
+<li>Data model changes.</li>
+<li>Tests performed.</li>
+<li>Remaining limitations, if any.</li>
+</ol>
+<p>Do not stop after fixing only the screenshots I provided.</p>
+<p>The goal is to make FinAuditPro function as a coherent audit operating system,
+not merely make individual pages look better.</p>
+<p>PROMPT 3 : You are a senior full-stack engineer specializing in audit software,
+financial systems, AI/RAG systems, and production-grade UX.</p>
+<p>I am building an application called “FinAuditPro — Offline-First Audit Operating
+System”.</p>
+<p>I need you to FIX and COMPLETE the existing implementation, not create a
+superficial mockup.</p>
+<p>The current AI Audit Analysis Workspace has these sections:</p>
+<ol>
+<li>Top summary:</li>
+<li>Total Findings</li>
+<li>Critical / High</li>
+<li>Medium Risk</li>
+<li>Unresolved</li>
+<li>Evidence Sources</li>
+<li>“Run ICAI Audit Scan” button</li>
+<li>
+<p>“Rule Engine Fallback Active” indicator</p>
+</li>
+<li>
+<p>Left panel:</p>
+</li>
+<li>Audit Evidence Sources</li>
+<li>ICAI Audit Prompt Library</li>
+<li>CARO 2020 Inventory</li>
+<li>Sec 188 Related Party</li>
+<li>Sec 185/186 Loans</li>
+<li>SA 240 Revenue Anomaly</li>
+<li>Form 3CD Clause 44</li>
+<li>
+<p>SA 500 Audit Evidence</p>
+</li>
+<li>
+<p>Center:</p>
+</li>
+<li>AI Audit Investigation Copilot</li>
+<li>Conversation/reasoning area</li>
+<li>Prompt input</li>
+<li>Send Prompt</li>
+<li>
+<p>Loading/model reasoning state</p>
+</li>
+<li>
+<p>Right panel:</p>
+</li>
+<li>Audit Findings &amp; Evidence</li>
+<li>Currently “No Anomalies Flagged”</li>
+</ol>
+<p>The current implementation looks visually complete but the actual functionality
+is incomplete.</p>
+<p>YOUR TASK:</p>
+<p>Audit the existing codebase and implement the missing functionality end-to-end.</p>
+<p>DO NOT rewrite the entire application unnecessarily. DO NOT destroy existing
+working functionality. DO NOT replace real functionality with static/demo data.
+DO NOT merely improve CSS. Find the actual architecture and integrate into it
+properly.</p>
+<p>==================================================</p>
+<ol>
+<li>
+<h1 id="first-understand-the-existing-codebase">FIRST: UNDERSTAND THE EXISTING CODEBASE</h1>
+</li>
+</ol>
+<p>Before making changes:</p>
+<ul>
+<li>Inspect the entire project structure.</li>
+<li>Identify the framework/runtime.</li>
+<li>Identify the backend architecture.</li>
+<li>Identify database/storage.</li>
+<li>Identify how audit engagements are represented.</li>
+<li>Identify existing models/schemas.</li>
+<li>Identify existing document upload/storage logic.</li>
+<li>Identify existing financial dataset logic.</li>
+<li>Identify existing GST reconciliation logic.</li>
+<li>Identify existing statutory compliance logic.</li>
+<li>Identify existing audit matrix/materiality logic.</li>
+<li>Identify existing AI/RAG code.</li>
+<li>Identify existing rule-engine/fallback logic.</li>
+<li>Identify existing navigation/routing.</li>
+<li>Identify existing state management.</li>
+</ul>
+<p>Do not assume anything.</p>
+<p>Trace the real data flow from:</p>
+<p>Document / Financial Dataset ↓ Evidence extraction ↓ Normalization ↓ Audit rules
+/ analytics ↓ AI/RAG analysis ↓ Findings ↓ Evidence ↓ Copilot ↓ Reports /
+Working Papers</p>
+<p>Then fix the weakest/missing links.</p>
+<h1 id="2-make-ai-audit-copilot-actually-functional">================================================== 2. MAKE AI AUDIT COPILOT ACTUALLY FUNCTIONAL</h1>
+<p>The center AI Copilot must be a real application feature.</p>
+<p>It should support prompts such as:</p>
+<ul>
+<li>“Analyze revenue for unusual transactions.”</li>
+<li>“Find transactions that may indicate fraud.”</li>
+<li>“Check related party transactions under Section 188.”</li>
+<li>“Check loans and guarantees under Sections 185/186.”</li>
+<li>“Analyze inventory discrepancies.”</li>
+<li>“Check GST 2B reconciliation exceptions.”</li>
+<li>“Evaluate CARO 2020 compliance.”</li>
+<li>“Review audit evidence under SA 500.”</li>
+<li>“Explain this finding.”</li>
+<li>“Show supporting evidence for this finding.”</li>
+<li>“What audit procedure should I perform next?”</li>
+<li>“Generate a working-paper-ready explanation.”</li>
+</ul>
+<p>The Copilot should NOT hallucinate findings.</p>
+<p>Every finding must be grounded in actual application evidence whenever evidence
+exists.</p>
+<p>Use this response structure:</p>
+<p>Finding Risk Why it matters Applicable standard / provision Evidence Evidence
+source Affected transaction/document Recommended audit procedure Suggested
+auditor conclusion Confidence Status</p>
+<p>If evidence is insufficient, explicitly say:</p>
+<p>“Insufficient evidence — additional audit evidence required.”</p>
+<p>Never invent financial values, invoices, transactions, documents, legal
+provisions, or audit conclusions.</p>
+<h1 id="3-connect-the-evidence-sources">================================================== 3. CONNECT THE EVIDENCE SOURCES</h1>
+<p>The left-side evidence panel cannot be decorative.</p>
+<p>When documents or datasets exist, display actual evidence sources.</p>
+<p>Each evidence source should expose:</p>
+<ul>
+<li>filename</li>
+<li>document type</li>
+<li>upload date</li>
+<li>hash</li>
+<li>page count</li>
+<li>extracted text status</li>
+<li>processing status</li>
+<li>engagement</li>
+<li>relevant audit area</li>
+</ul>
+<p>Clicking an evidence source should allow the AI to use that evidence.</p>
+<p>If possible, support:</p>
+<p>Evidence → finding traceability.</p>
+<p>For example:</p>
+<p>Finding: “Potential revenue recognition anomaly”</p>
+<p>Evidence: invoice_1042.pdf page 7 ₹12,50,000 transaction date customer relevant
+ledger entry</p>
+<p>The auditor should be able to open the source.</p>
+<h1 id="4-implement-real-audit-findings">================================================== 4. IMPLEMENT REAL AUDIT FINDINGS</h1>
+<p>Create a proper finding model if one does not already exist.</p>
+<p>Minimum fields:</p>
+<p>id engagement_id title description category severity risk_level status standard
+section source_document_id source_reference affected_rows evidence
+recommendation auditor_conclusion confidence created_at updated_at</p>
+<p>Severity:</p>
+<p>CRITICAL HIGH MEDIUM LOW INFO</p>
+<p>Status:</p>
+<p>OPEN UNDER_REVIEW RESOLVED DISMISSED</p>
+<p>Every finding must have traceable evidence.</p>
+<h1 id="5-implement-deterministic-rule-engine">================================================== 5. IMPLEMENT DETERMINISTIC RULE ENGINE</h1>
+<p>The “Rule Engine Fallback Active” state must represent a real fallback.</p>
+<p>Implement deterministic audit routines where appropriate.</p>
+<p>Examples:</p>
+<p>SA 240:</p>
+<ul>
+<li>unusual revenue spikes</li>
+<li>unusual period-end revenue</li>
+<li>duplicate invoices</li>
+<li>round-value transactions</li>
+<li>unusual customer concentration</li>
+<li>credit notes after year-end</li>
+<li>manual journal entries affecting revenue</li>
+</ul>
+<p>Section 188:</p>
+<ul>
+<li>related-party transaction identification</li>
+<li>related party name matching</li>
+<li>transaction classification</li>
+<li>approval/evidence checks</li>
+</ul>
+<p>Sections 185/186:</p>
+<ul>
+<li>loans</li>
+<li>guarantees</li>
+<li>securities</li>
+<li>investments</li>
+<li>directors / related entities</li>
+</ul>
+<p>CARO 2020:</p>
+<ul>
+<li>inventory</li>
+<li>PPE</li>
+<li>loans</li>
+<li>statutory dues</li>
+<li>defaults</li>
+<li>related parties</li>
+<li>internal audit</li>
+<li>cash losses</li>
+<li>working capital</li>
+<li>etc.</li>
+</ul>
+<p>GST:</p>
+<ul>
+<li>purchase register vs GSTR-2B</li>
+<li>missing invoices</li>
+<li>mismatched taxable value</li>
+<li>mismatched GST</li>
+<li>duplicate invoices</li>
+<li>rate differences</li>
+<li>ineligible ITC indicators</li>
+</ul>
+<p>Do NOT blindly mark everything as non-compliant.</p>
+<p>Rules should generate:</p>
+<p>PASS WARNING EXCEPTION INSUFFICIENT_EVIDENCE</p>
+<h1 id="6-fix-the-run-icai-audit-scan-button">================================================== 6. FIX THE “RUN ICAI AUDIT SCAN” BUTTON</h1>
+<p>This button must actually execute the audit pipeline.</p>
+<p>Expected flow:</p>
+<p>User clicks: RUN ICAI AUDIT SCAN</p>
+<p>↓</p>
+<p>Validate active engagement</p>
+<p>↓</p>
+<p>Load evidence</p>
+<p>↓</p>
+<p>Load financial datasets</p>
+<p>↓</p>
+<p>Normalize available data</p>
+<p>↓</p>
+<p>Run deterministic audit rules</p>
+<p>↓</p>
+<p>Run AI/RAG analysis where configured</p>
+<p>↓</p>
+<p>Deduplicate findings</p>
+<p>↓</p>
+<p>Assign severity</p>
+<p>↓</p>
+<p>Attach evidence</p>
+<p>↓</p>
+<p>Persist findings</p>
+<p>↓</p>
+<p>Update dashboard counters</p>
+<p>↓</p>
+<p>Display findings in right panel</p>
+<p>↓</p>
+<p>Make findings available to Copilot</p>
+<p>Do not show fake loading states without actually processing data.</p>
+<p>Show meaningful progress:</p>
+<p>Loading evidence Analyzing transactions Running audit rules Evaluating statutory
+compliance Generating findings Finalizing evidence links</p>
+<h1 id="7-fix-the-right-side-findings-panel">================================================== 7. FIX THE RIGHT-SIDE FINDINGS PANEL</h1>
+<p>Replace the empty:</p>
+<p>“No Anomalies Flagged”</p>
+<p>state with a functional findings list when findings exist.</p>
+<p>Each finding card should show:</p>
+<p>Severity Title Risk Short explanation Evidence count Standard / section Status</p>
+<p>Example:</p>
+<p>HIGH Revenue anomaly detected</p>
+<p>3 transactions occurred unusually close to year-end and differ significantly
+from historical customer patterns.</p>
+<p>Evidence: 3 records Standard: SA 240 Status: Open</p>
+<p>Clicking the finding should open detailed evidence.</p>
+<h1 id="8-implement-finding-details">================================================== 8. IMPLEMENT FINDING DETAILS</h1>
+<p>Create a detailed finding view/modal/panel.</p>
+<p>Include:</p>
+<p>Finding title Severity Risk explanation Audit implication Applicable standard
+Evidence Affected transactions Source documents Audit procedure Management
+response Auditor response Conclusion Status Confidence Created date</p>
+<p>Allow auditor to:</p>
+<ul>
+<li>Accept finding</li>
+<li>Mark under review</li>
+<li>Resolve</li>
+<li>Dismiss</li>
+<li>Add note</li>
+<li>Attach evidence</li>
+<li>Ask Copilot about finding</li>
+</ul>
+<h1 id="9-make-the-prompt-library-functional">================================================== 9. MAKE THE PROMPT LIBRARY FUNCTIONAL</h1>
+<p>Clicking:</p>
+<p>CARO 2020 Inventory Sec 188 Related Party Sec 185/186 Loans SA 240 Revenue
+Anomaly Form 3CD Clause 44 SA 500 Audit Evidence</p>
+<p>should automatically load a structured audit prompt into the Copilot.</p>
+<p>Do not use generic prompts.</p>
+<p>Create specialized prompts for each audit area.</p>
+<p>Each prompt should define:</p>
+<p>Objective Evidence required Tests to perform Rules Relevant standard Expected
+output Evidence requirements False-positive handling</p>
+<h1 id="10-rag-ai-architecture">================================================== 10. RAG / AI ARCHITECTURE</h1>
+<p>If an AI provider is configured:</p>
+<p>Use retrieved application evidence as context.</p>
+<p>Recommended pipeline:</p>
+<p>User prompt ↓ Intent detection ↓ Evidence retrieval ↓ Relevant transaction
+retrieval ↓ Relevant statutory/audit guidance retrieval ↓ Context assembly ↓ LLM
+analysis ↓ Structured response ↓ Evidence validation ↓ Finding creation if
+applicable</p>
+<p>The model must not be allowed to invent evidence.</p>
+<p>If no LLM/API is configured:</p>
+<p>Use deterministic rule-engine fallback and clearly display:</p>
+<p>“AI unavailable — deterministic audit analysis active.”</p>
+<p>Do not crash.</p>
+<h1 id="11-offline-first-requirement">================================================== 11. OFFLINE-FIRST REQUIREMENT</h1>
+<p>This application is explicitly called:</p>
+<p>FinAuditPro — Offline-First Audit Operating System</p>
+<p>Therefore:</p>
+<ul>
+<li>Core audit functionality must work without internet.</li>
+<li>Documents should remain locally available.</li>
+<li>Deterministic audit rules must work offline.</li>
+<li>Findings must persist locally.</li>
+<li>Copilot should gracefully degrade when no AI provider is configured.</li>
+<li>Do not make the application dependent on an external API for basic auditing.</li>
+</ul>
+<h1 id="12-data-integrity">================================================== 12. DATA INTEGRITY</h1>
+<p>This is audit software.</p>
+<p>Do NOT silently modify source evidence.</p>
+<p>Preserve:</p>
+<ul>
+<li>original document</li>
+<li>original hash</li>
+<li>normalized representation</li>
+<li>derived analysis</li>
+<li>finding</li>
+<li>evidence relationship</li>
+<li>audit trail</li>
+</ul>
+<p>Implement an audit log if one does not exist.</p>
+<p>Track:</p>
+<p>who what when old value new value reason/action</p>
+<h1 id="13-ux-improvements">================================================== 13. UX IMPROVEMENTS</h1>
+<p>Keep the current FinAuditPro visual language.</p>
+<p>Do NOT redesign the entire application.</p>
+<p>Maintain:</p>
+<ul>
+<li>clean white interface</li>
+<li>blue primary actions</li>
+<li>restrained colors</li>
+<li>compact professional tables</li>
+<li>audit-software appearance</li>
+<li>clear hierarchy</li>
+</ul>
+<p>Improve usability:</p>
+<ul>
+<li>loading states</li>
+<li>empty states</li>
+<li>error states</li>
+<li>success states</li>
+<li>disabled states</li>
+<li>tooltips</li>
+<li>clickable evidence</li>
+<li>finding drill-down</li>
+<li>keyboard-friendly interactions</li>
+<li>responsive layout</li>
+</ul>
+<p>The UI should feel like professional audit software, not an AI chatbot.</p>
+<h1 id="14-fix-the-other-modules-if-necessary">================================================== 14. FIX THE OTHER MODULES IF NECESSARY</h1>
+<p>The screenshots show that several modules currently appear empty:</p>
+<p>Audit Firms Clients Engagements Documents Financial Statements GST
+Reconciliation Statutory Compliance Audit Matrix AI Copilot</p>
+<p>Do not populate them with fake rows.</p>
+<p>Instead, ensure that when real data is created/imported, it flows correctly
+through the system.</p>
+<p>Especially ensure:</p>
+<p>Client → Engagement → Documents → Financial Dataset → Audit Matrix → Compliance
+→ Findings → Working Papers → Reports</p>
+<p>is a coherent end-to-end workflow.</p>
+<h1 id="15-important-no-mock-functionality">================================================== 15. IMPORTANT: NO MOCK FUNCTIONALITY</h1>
+<p>Do not solve the problem by:</p>
+<ul>
+<li>hardcoded findings</li>
+<li>fake API responses</li>
+<li>fake loading</li>
+<li>static dashboard counters</li>
+<li>placeholder transactions</li>
+<li>fake AI responses</li>
+<li>dummy evidence</li>
+<li>random risk scores</li>
+</ul>
+<p>If seed/demo data already exists, clearly isolate it from production data.</p>
+<h1 id="16-test-everything">================================================== 16. TEST EVERYTHING</h1>
+<p>After implementation:</p>
+<p>Run the application.</p>
+<p>Test:</p>
+<ol>
+<li>Create audit firm</li>
+<li>Create client</li>
+<li>Create engagement</li>
+<li>Upload document</li>
+<li>Import financial dataset</li>
+<li>Run deterministic analytics</li>
+<li>Run GST matching</li>
+<li>Run statutory compliance evaluation</li>
+<li>Run materiality calculation</li>
+<li>Run ICAI Audit Scan</li>
+<li>Generate finding</li>
+<li>Open finding</li>
+<li>View evidence</li>
+<li>Ask Copilot about finding</li>
+<li>Change finding status</li>
+<li>Verify dashboard updates</li>
+<li>Verify persistence after restart</li>
+</ol>
+<p>Also test empty states.</p>
+<p>Also test invalid input.</p>
+<p>Also test missing evidence.</p>
+<p>Also test AI unavailable.</p>
+<p>Also test duplicate documents.</p>
+<h1 id="17-fix-bugs-you-discover">================================================== 17. FIX BUGS YOU DISCOVER</h1>
+<p>If you find bugs while implementing this, fix them.</p>
+<p>Do not stop after identifying them.</p>
+<p>Look for:</p>
+<ul>
+<li>broken routes</li>
+<li>missing handlers</li>
+<li>state synchronization problems</li>
+<li>database persistence problems</li>
+<li>incorrect calculations</li>
+<li>inconsistent terminology</li>
+<li>dead buttons</li>
+<li>broken forms</li>
+<li>missing validation</li>
+<li>frontend/backend mismatches</li>
+<li>errors hidden by try/catch</li>
+<li>race conditions</li>
+<li>stale UI state</li>
+</ul>
+<h1 id="18-final-requirement">================================================== 18. FINAL REQUIREMENT</h1>
+<p>I want a REAL working audit operating system, not a UI prototype.</p>
+<p>Prioritize in this order:</p>
+<ol>
+<li>Data integrity</li>
+<li>Functional workflow</li>
+<li>Evidence traceability</li>
+<li>Deterministic audit logic</li>
+<li>AI/RAG integration</li>
+<li>Finding management</li>
+<li>UX polish</li>
+</ol>
+<p>Before finishing, perform a complete codebase review and verify that the AI
+Audit Analysis Workspace is genuinely connected to the rest of FinAuditPro.</p>
+<p>When finished, give me:</p>
+<p>A. What you changed B. Files changed C. Database/schema changes D. New audit
+rules E. AI/RAG changes F. Bugs fixed G. Tests performed H. Remaining
+limitations</p>
+<p>Do not just tell me what I should do.</p>
+<p>ACTUALLY IMPLEMENT THE CHANGES IN THE EXISTING CODEBASE.</p>
+<p>PROMPT 4 : You are working on my existing FinAuditPro application.</p>
+<p>I need you to FIX and COMPLETE the "Working Papers" and "Reports" modules shown
+in the attached screenshots.</p>
+<p>IMPORTANT:</p>
+<ul>
+<li>Do NOT redesign the entire application.</li>
+<li>Preserve the existing FinAuditPro visual language, sidebar, top navigation,
+  typography, spacing, colors, borders, buttons, cards, and table styling.</li>
+<li>Do not create a fake/static UI. These modules must actually work.</li>
+<li>Inspect the existing codebase first and understand the current architecture,
+  data models, routing, state management, and persistence before making changes.</li>
+<li>Reuse existing components and utilities wherever possible.</li>
+<li>Do not break any existing modules.</li>
+</ul>
+<p>==================================================</p>
+<ol>
+<li>WORKING PAPERS MODULE ==================================================</li>
+</ol>
+<p>Current screen contains:</p>
+<p>"Configurable Working Paper Index Guidance"</p>
+<p>Stats:</p>
+<ul>
+<li>Total Working Papers</li>
+<li>Open Review Points</li>
+<li>Signed Off &amp; Locked</li>
+</ul>
+<p>Table:</p>
+<ul>
+<li>Ref Code</li>
+<li>Title</li>
+<li>Audit Area</li>
+<li>Status</li>
+<li>Preparer</li>
+<li>Open Points</li>
+<li>Content Hash / Lock</li>
+<li>Actions</li>
+</ul>
+<p>There is a "+ New Working Paper" button.</p>
+<p>IMPLEMENT THIS AS A REAL WORKING-PAPER SYSTEM.</p>
+<p>New Working Paper should allow the auditor to create a working paper with:</p>
+<ul>
+<li>Reference Code</li>
+<li>Title</li>
+<li>Audit Area</li>
+<li>Financial Year</li>
+<li>Engagement</li>
+<li>Prepared By</li>
+<li>Reviewer</li>
+<li>Objective</li>
+<li>Audit Assertion</li>
+<li>Risk</li>
+<li>Materiality</li>
+<li>Procedures</li>
+<li>Evidence/Documents</li>
+<li>Findings</li>
+<li>Conclusion</li>
+<li>Review Notes</li>
+<li>Status</li>
+</ul>
+<p>Suggested statuses:</p>
+<p>Draft Prepared Under Review Review Points Approved Signed Off Locked</p>
+<p>Required functionality:</p>
+<ol>
+<li>Create working paper.</li>
+<li>Edit working paper.</li>
+<li>Open/view working paper.</li>
+<li>Save draft.</li>
+<li>Add audit procedures.</li>
+<li>Add evidence/document references.</li>
+<li>Add findings.</li>
+<li>Add review points.</li>
+<li>Assign reviewer.</li>
+<li>Mark review points as resolved.</li>
+<li>Reviewer approval.</li>
+<li>Sign-off workflow.</li>
+<li>Lock signed-off working paper.</li>
+<li>Prevent modification after locking.</li>
+<li>Show audit trail/history.</li>
+<li>Generate deterministic content hash when signed/locked.</li>
+<li>Display lock status and hash in the table.</li>
+<li>Search/filter/sort working papers.</li>
+<li>Open Points counter must update automatically.</li>
+<li>Signed &amp; Locked counter must update automatically.</li>
+<li>Total Working Papers must update automatically.</li>
+</ol>
+<p>Working papers must be linked to: Client → Engagement → Financial Year → Audit
+Area.</p>
+<p>Evidence added to a working paper should reference actual uploaded documents
+from the Documents module rather than creating duplicate files.</p>
+<h1 id="2-working-paper-detail-view">================================================== 2. WORKING PAPER DETAIL VIEW</h1>
+<p>Create a professional audit working-paper detail page.</p>
+<p>Use a layout similar to professional audit software:</p>
+<p>Header:</p>
+<ul>
+<li>Ref Code</li>
+<li>Working Paper Title</li>
+<li>Status badge</li>
+<li>Prepared By</li>
+<li>Reviewer</li>
+<li>Engagement</li>
+<li>Financial Year</li>
+</ul>
+<p>Sections/tabs:</p>
+<p>Overview Audit Objective Risk &amp; Assertions Audit Procedures Evidence Findings
+Review Points Conclusion Sign-Off Audit Trail</p>
+<p>For each audit procedure provide:</p>
+<ul>
+<li>Procedure ID</li>
+<li>Description</li>
+<li>Expected Result</li>
+<li>Actual Result</li>
+<li>Evidence</li>
+<li>Performed By</li>
+<li>Performed Date</li>
+<li>Result: Pass / Fail / Exception / N/A</li>
+</ul>
+<p>For findings provide:</p>
+<ul>
+<li>Finding ID</li>
+<li>Title</li>
+<li>Description</li>
+<li>Criteria</li>
+<li>Condition</li>
+<li>Cause</li>
+<li>Effect</li>
+<li>Recommendation</li>
+<li>Severity</li>
+<li>Management Response</li>
+<li>Status</li>
+</ul>
+<h1 id="3-reports-module">================================================== 3. REPORTS MODULE</h1>
+<p>Current Reports screen contains:</p>
+<p>"Statutory Report Text &amp; Legal Signature Honesty"</p>
+<p>Stats:</p>
+<ul>
+<li>Total Reports</li>
+<li>Draft Reports (Watermarked)</li>
+<li>Approved Reports</li>
+</ul>
+<p>Table:</p>
+<ul>
+<li>Report Title</li>
+<li>Type</li>
+<li>Status</li>
+<li>Data As-Of</li>
+<li>Generated By</li>
+<li>Content Hash</li>
+<li>Actions</li>
+</ul>
+<p>There is a "+ Generate New Report" button.</p>
+<p>TURN THIS INTO A REAL REPORT GENERATION MODULE.</p>
+<p>Generate New Report should support:</p>
+<ul>
+<li>Statutory Audit Report</li>
+<li>CARO 2020 Report</li>
+<li>Form 3CD / Tax Audit Report</li>
+<li>GST Reconciliation Report</li>
+<li>Audit Findings Report</li>
+<li>Management Letter</li>
+<li>Working Paper Summary</li>
+<li>Financial Statement Audit Summary</li>
+<li>Compliance Report</li>
+</ul>
+<p>The report generator must pull data from the actual application.</p>
+<p>DO NOT hardcode report values.</p>
+<p>Data should come from:</p>
+<p>Clients Audit Firms Engagements Documents Financial Statements GST
+Reconciliation Statutory Compliance Audit Matrix AI Audit Findings Working
+Papers</p>
+<h1 id="4-report-generation-workflow">================================================== 4. REPORT GENERATION WORKFLOW</h1>
+<p>Create a proper workflow:</p>
+<p>Select Client ↓ Select Engagement ↓ Select Financial Year ↓ Select Report Type ↓
+Select Data Sources ↓ Review Data ↓ Generate Draft ↓ Validate ↓ Approve ↓ Lock ↓
+Export</p>
+<p>Before generation show:</p>
+<ul>
+<li>Client</li>
+<li>Engagement</li>
+<li>Financial Year</li>
+<li>Report Type</li>
+<li>Data As-Of date</li>
+<li>Number of evidence sources</li>
+<li>Number of findings</li>
+<li>Number of working papers</li>
+<li>Compliance status</li>
+<li>Materiality</li>
+<li>Reviewer</li>
+</ul>
+<h1 id="5-report-detail-page">================================================== 5. REPORT DETAIL PAGE</h1>
+<p>Create a professional report viewer/editor.</p>
+<p>Header:</p>
+<ul>
+<li>Report title</li>
+<li>Report type</li>
+<li>Client</li>
+<li>Financial Year</li>
+<li>Status</li>
+<li>Data As-Of</li>
+<li>Generated By</li>
+<li>Content Hash</li>
+</ul>
+<p>Sections:</p>
+<p>Executive Summary Scope Audit Approach Materiality Key Findings Risk Assessment
+Statutory Compliance GST Reconciliation Financial Statement Observations CARO
+2020 Form 3CD Management Recommendations Conclusion Sign-Off</p>
+<p>Provide:</p>
+<ul>
+<li>Edit Draft</li>
+<li>Save</li>
+<li>Preview</li>
+<li>Validate</li>
+<li>Approve</li>
+<li>Generate PDF</li>
+<li>Generate DOCX</li>
+<li>Print</li>
+<li>Lock</li>
+</ul>
+<p>Draft reports MUST display a clear "DRAFT" / "WATERMARKED" state.</p>
+<p>Approved reports should be clearly distinguished from drafts.</p>
+<p>Locked reports must become immutable.</p>
+<h1 id="6-report-integrity">================================================== 6. REPORT INTEGRITY</h1>
+<p>Implement report versioning.</p>
+<p>Every generated report should have:</p>
+<ul>
+<li>Version</li>
+<li>Generated timestamp</li>
+<li>Generated by</li>
+<li>Source data version</li>
+<li>Content hash</li>
+<li>Approval status</li>
+<li>Lock timestamp</li>
+</ul>
+<p>When a report is approved/locked:</p>
+<p>Generate a deterministic SHA-256 hash based on the report content and relevant
+source/version metadata.</p>
+<p>If the report content changes:</p>
+<ul>
+<li>Create a new version.</li>
+<li>Never silently overwrite the previous approved version.</li>
+</ul>
+<p>Show version history.</p>
+<h1 id="7-legal-statutory-safety">================================================== 7. LEGAL / STATUTORY SAFETY</h1>
+<p>Do NOT fabricate statutory conclusions.</p>
+<p>Clearly distinguish:</p>
+<ul>
+<li>Application-generated analysis</li>
+<li>Auditor judgment</li>
+<li>Verified statutory information</li>
+<li>Unverified guidance</li>
+</ul>
+<p>If statutory sources are not verified, display an appropriate warning.</p>
+<p>Never present AI-generated text as an officially verified statutory conclusion.</p>
+<p>Reports must preserve an audit trail of how conclusions were generated.</p>
+<h1 id="8-pdf-docx-export">================================================== 8. PDF / DOCX EXPORT</h1>
+<p>Implement actual export functionality.</p>
+<p>PDF should contain:</p>
+<ul>
+<li>Firm name/logo</li>
+<li>Client name</li>
+<li>Engagement</li>
+<li>Financial Year</li>
+<li>Report title</li>
+<li>Report content</li>
+<li>Findings</li>
+<li>Conclusions</li>
+<li>Sign-off</li>
+<li>Version</li>
+<li>Data As-Of</li>
+<li>Content Hash</li>
+</ul>
+<p>DOCX should contain equivalent structured content.</p>
+<p>Do not create empty placeholder files.</p>
+<h1 id="9-dashboard-integration">================================================== 9. DASHBOARD INTEGRATION</h1>
+<p>Update the Dashboard automatically.</p>
+<p>Dashboard should reflect:</p>
+<ul>
+<li>Number of Working Papers</li>
+<li>Open Review Points</li>
+<li>Signed-Off Working Papers</li>
+<li>Draft Reports</li>
+<li>Approved Reports</li>
+<li>Open Findings</li>
+<li>High-Risk Findings</li>
+<li>Compliance exceptions</li>
+</ul>
+<p>All numbers must come from the same underlying data source.</p>
+<p>No duplicated hardcoded state.</p>
+<h1 id="10-persistence">================================================== 10. PERSISTENCE</h1>
+<p>Because FinAuditPro is designed as an offline-first audit operating system:</p>
+<ul>
+<li>Data must persist locally.</li>
+<li>Refreshing the application must not lose data.</li>
+<li>Closing/reopening the application must preserve data.</li>
+<li>Use the existing persistence layer if one already exists.</li>
+<li>If necessary, improve the existing local database/storage architecture.</li>
+<li>Maintain deterministic IDs.</li>
+<li>Maintain audit history.</li>
+</ul>
+<h1 id="11-ux-requirements">================================================== 11. UX REQUIREMENTS</h1>
+<p>The application currently has too many empty states.</p>
+<p>Replace meaningless empty tables with useful empty-state messages such as:</p>
+<p>"No working papers yet" "Create your first working paper to begin documenting
+audit evidence."</p>
+<p>" No reports generated yet" "Generate a report from your engagement data."</p>
+<p>Buttons should work.</p>
+<p>Forms should validate input.</p>
+<p>Show success/error notifications.</p>
+<p>Use confirmation dialogs for:</p>
+<ul>
+<li>Delete</li>
+<li>Approve</li>
+<li>Sign-off</li>
+<li>Lock</li>
+</ul>
+<p>Do not allow accidental destructive actions.</p>
+<h1 id="12-visual-design">================================================== 12. VISUAL DESIGN</h1>
+<p>Keep the existing FinAuditPro design.</p>
+<p>Use:</p>
+<ul>
+<li>White/light-gray workspace</li>
+<li>Blue primary actions</li>
+<li>Thin borders</li>
+<li>Compact professional tables</li>
+<li>Small audit-status badges</li>
+<li>Clean typography</li>
+<li>Consistent spacing</li>
+<li>Professional accounting/audit-software appearance</li>
+</ul>
+<p>Do NOT introduce:</p>
+<ul>
+<li>Huge cards</li>
+<li>Excessive gradients</li>
+<li>Neon colors</li>
+<li>Consumer-app styling</li>
+<li>Unnecessary animations</li>
+<li>Decorative UI that reduces audit usability</li>
+</ul>
+<p>The UI should feel like professional enterprise audit software.</p>
+<h1 id="13-important-engineering-requirements">================================================== 13. IMPORTANT ENGINEERING REQUIREMENTS</h1>
+<p>Before coding:</p>
+<ol>
+<li>Inspect the entire existing project.</li>
+<li>Identify the frontend framework.</li>
+<li>Identify backend/data layer.</li>
+<li>Identify routing.</li>
+<li>Identify existing models.</li>
+<li>Identify existing persistence.</li>
+<li>Identify existing document upload system.</li>
+<li>Identify existing report/export functionality.</li>
+<li>Identify reusable components.</li>
+<li>Identify existing bugs.</li>
+</ol>
+<p>Then implement the features using the existing architecture.</p>
+<p>DO NOT rewrite the application unnecessarily.</p>
+<p>Avoid duplicated logic.</p>
+<p>Create reusable components for:</p>
+<ul>
+<li>StatusBadge</li>
+<li>AuditTable</li>
+<li>EmptyState</li>
+<li>ReviewPoint</li>
+<li>SignOffPanel</li>
+<li>VersionHistory</li>
+<li>HashDisplay</li>
+<li>ReportViewer</li>
+<li>WorkingPaperEditor</li>
+</ul>
+<h1 id="14-test-everything">================================================== 14. TEST EVERYTHING</h1>
+<p>After implementation, test the complete workflow:</p>
+<p>Create Client → Create Engagement → Upload Document → Create Working Paper → Add
+Procedure → Attach Evidence → Add Finding → Add Review Point → Resolve Review
+Point → Reviewer Approval → Sign Off → Lock → Generate Report → Validate Report
+→ Approve Report → Lock Report → Export PDF → Export DOCX</p>
+<p>Also test:</p>
+<ul>
+<li>Refresh persistence</li>
+<li>Empty states</li>
+<li>Invalid forms</li>
+<li>Duplicate records</li>
+<li>Locked record editing prevention</li>
+<li>Hash generation</li>
+<li>Versioning</li>
+<li>Search/filter</li>
+<li>Navigation</li>
+<li>Dashboard counters</li>
+</ul>
+<p>Fix all errors found during testing.</p>
+<h1 id="final-requirement">================================================== FINAL REQUIREMENT</h1>
+<p>Do not simply make the screens look complete.</p>
+<p>Make Working Papers and Reports FUNCTIONAL, PERSISTENT, CONNECTED to the rest of
+FinAuditPro, and suitable for a real audit workflow.</p>
+<p>After implementation, give me:</p>
+<ol>
+<li>What you changed</li>
+<li>Files/components changed</li>
+<li>Database/data-model changes</li>
+<li>New workflows implemented</li>
+<li>Export functionality implemented</li>
+<li>Tests performed</li>
+<li>Any remaining limitations</li>
+</ol>
+<p>Do not stop after creating the UI. Continue until the complete workflow works
+end-to-end.</p>
+<p>PROMPT 5 : You are working on my existing FinAuditPro application.</p>
+<p>I need you to FIX and COMPLETE the "Working Papers" and "Reports" modules shown
+in the attached screenshots.</p>
+<p>IMPORTANT:</p>
+<ul>
+<li>Do NOT redesign the entire application.</li>
+<li>Preserve the existing FinAuditPro visual language, sidebar, top navigation,
+  typography, spacing, colors, borders, buttons, cards, and table styling.</li>
+<li>Do not create a fake/static UI. These modules must actually work.</li>
+<li>Inspect the existing codebase first and understand the current architecture,
+  data models, routing, state management, and persistence before making changes.</li>
+<li>Reuse existing components and utilities wherever possible.</li>
+<li>Do not break any existing modules.</li>
+</ul>
+<p>==================================================</p>
+<ol>
+<li>WORKING PAPERS MODULE ==================================================</li>
+</ol>
+<p>Current screen contains:</p>
+<p>"Configurable Working Paper Index Guidance"</p>
+<p>Stats:</p>
+<ul>
+<li>Total Working Papers</li>
+<li>Open Review Points</li>
+<li>Signed Off &amp; Locked</li>
+</ul>
+<p>Table:</p>
+<ul>
+<li>Ref Code</li>
+<li>Title</li>
+<li>Audit Area</li>
+<li>Status</li>
+<li>Preparer</li>
+<li>Open Points</li>
+<li>Content Hash / Lock</li>
+<li>Actions</li>
+</ul>
+<p>There is a "+ New Working Paper" button.</p>
+<p>IMPLEMENT THIS AS A REAL WORKING-PAPER SYSTEM.</p>
+<p>New Working Paper should allow the auditor to create a working paper with:</p>
+<ul>
+<li>Reference Code</li>
+<li>Title</li>
+<li>Audit Area</li>
+<li>Financial Year</li>
+<li>Engagement</li>
+<li>Prepared By</li>
+<li>Reviewer</li>
+<li>Objective</li>
+<li>Audit Assertion</li>
+<li>Risk</li>
+<li>Materiality</li>
+<li>Procedures</li>
+<li>Evidence/Documents</li>
+<li>Findings</li>
+<li>Conclusion</li>
+<li>Review Notes</li>
+<li>Status</li>
+</ul>
+<p>Suggested statuses:</p>
+<p>Draft Prepared Under Review Review Points Approved Signed Off Locked</p>
+<p>Required functionality:</p>
+<ol>
+<li>Create working paper.</li>
+<li>Edit working paper.</li>
+<li>Open/view working paper.</li>
+<li>Save draft.</li>
+<li>Add audit procedures.</li>
+<li>Add evidence/document references.</li>
+<li>Add findings.</li>
+<li>Add review points.</li>
+<li>Assign reviewer.</li>
+<li>Mark review points as resolved.</li>
+<li>Reviewer approval.</li>
+<li>Sign-off workflow.</li>
+<li>Lock signed-off working paper.</li>
+<li>Prevent modification after locking.</li>
+<li>Show audit trail/history.</li>
+<li>Generate deterministic content hash when signed/locked.</li>
+<li>Display lock status and hash in the table.</li>
+<li>Search/filter/sort working papers.</li>
+<li>Open Points counter must update automatically.</li>
+<li>Signed &amp; Locked counter must update automatically.</li>
+<li>Total Working Papers must update automatically.</li>
+</ol>
+<p>Working papers must be linked to: Client → Engagement → Financial Year → Audit
+Area.</p>
+<p>Evidence added to a working paper should reference actual uploaded documents
+from the Documents module rather than creating duplicate files.</p>
+<h1 id="2-working-paper-detail-view_1">================================================== 2. WORKING PAPER DETAIL VIEW</h1>
+<p>Create a professional audit working-paper detail page.</p>
+<p>Use a layout similar to professional audit software:</p>
+<p>Header:</p>
+<ul>
+<li>Ref Code</li>
+<li>Working Paper Title</li>
+<li>Status badge</li>
+<li>Prepared By</li>
+<li>Reviewer</li>
+<li>Engagement</li>
+<li>Financial Year</li>
+</ul>
+<p>Sections/tabs:</p>
+<p>Overview Audit Objective Risk &amp; Assertions Audit Procedures Evidence Findings
+Review Points Conclusion Sign-Off Audit Trail</p>
+<p>For each audit procedure provide:</p>
+<ul>
+<li>Procedure ID</li>
+<li>Description</li>
+<li>Expected Result</li>
+<li>Actual Result</li>
+<li>Evidence</li>
+<li>Performed By</li>
+<li>Performed Date</li>
+<li>Result: Pass / Fail / Exception / N/A</li>
+</ul>
+<p>For findings provide:</p>
+<ul>
+<li>Finding ID</li>
+<li>Title</li>
+<li>Description</li>
+<li>Criteria</li>
+<li>Condition</li>
+<li>Cause</li>
+<li>Effect</li>
+<li>Recommendation</li>
+<li>Severity</li>
+<li>Management Response</li>
+<li>Status</li>
+</ul>
+<h1 id="3-reports-module_1">================================================== 3. REPORTS MODULE</h1>
+<p>Current Reports screen contains:</p>
+<p>"Statutory Report Text &amp; Legal Signature Honesty"</p>
+<p>Stats:</p>
+<ul>
+<li>Total Reports</li>
+<li>Draft Reports (Watermarked)</li>
+<li>Approved Reports</li>
+</ul>
+<p>Table:</p>
+<ul>
+<li>Report Title</li>
+<li>Type</li>
+<li>Status</li>
+<li>Data As-Of</li>
+<li>Generated By</li>
+<li>Content Hash</li>
+<li>Actions</li>
+</ul>
+<p>There is a "+ Generate New Report" button.</p>
+<p>TURN THIS INTO A REAL REPORT GENERATION MODULE.</p>
+<p>Generate New Report should support:</p>
+<ul>
+<li>Statutory Audit Report</li>
+<li>CARO 2020 Report</li>
+<li>Form 3CD / Tax Audit Report</li>
+<li>GST Reconciliation Report</li>
+<li>Audit Findings Report</li>
+<li>Management Letter</li>
+<li>Working Paper Summary</li>
+<li>Financial Statement Audit Summary</li>
+<li>Compliance Report</li>
+</ul>
+<p>The report generator must pull data from the actual application.</p>
+<p>DO NOT hardcode report values.</p>
+<p>Data should come from:</p>
+<p>Clients Audit Firms Engagements Documents Financial Statements GST
+Reconciliation Statutory Compliance Audit Matrix AI Audit Findings Working
+Papers</p>
+<h1 id="4-report-generation-workflow_1">================================================== 4. REPORT GENERATION WORKFLOW</h1>
+<p>Create a proper workflow:</p>
+<p>Select Client ↓ Select Engagement ↓ Select Financial Year ↓ Select Report Type ↓
+Select Data Sources ↓ Review Data ↓ Generate Draft ↓ Validate ↓ Approve ↓ Lock ↓
+Export</p>
+<p>Before generation show:</p>
+<ul>
+<li>Client</li>
+<li>Engagement</li>
+<li>Financial Year</li>
+<li>Report Type</li>
+<li>Data As-Of date</li>
+<li>Number of evidence sources</li>
+<li>Number of findings</li>
+<li>Number of working papers</li>
+<li>Compliance status</li>
+<li>Materiality</li>
+<li>Reviewer</li>
+</ul>
+<h1 id="5-report-detail-page_1">================================================== 5. REPORT DETAIL PAGE</h1>
+<p>Create a professional report viewer/editor.</p>
+<p>Header:</p>
+<ul>
+<li>Report title</li>
+<li>Report type</li>
+<li>Client</li>
+<li>Financial Year</li>
+<li>Status</li>
+<li>Data As-Of</li>
+<li>Generated By</li>
+<li>Content Hash</li>
+</ul>
+<p>Sections:</p>
+<p>Executive Summary Scope Audit Approach Materiality Key Findings Risk Assessment
+Statutory Compliance GST Reconciliation Financial Statement Observations CARO
+2020 Form 3CD Management Recommendations Conclusion Sign-Off</p>
+<p>Provide:</p>
+<ul>
+<li>Edit Draft</li>
+<li>Save</li>
+<li>Preview</li>
+<li>Validate</li>
+<li>Approve</li>
+<li>Generate PDF</li>
+<li>Generate DOCX</li>
+<li>Print</li>
+<li>Lock</li>
+</ul>
+<p>Draft reports MUST display a clear "DRAFT" / "WATERMARKED" state.</p>
+<p>Approved reports should be clearly distinguished from drafts.</p>
+<p>Locked reports must become immutable.</p>
+<h1 id="6-report-integrity_1">================================================== 6. REPORT INTEGRITY</h1>
+<p>Implement report versioning.</p>
+<p>Every generated report should have:</p>
+<ul>
+<li>Version</li>
+<li>Generated timestamp</li>
+<li>Generated by</li>
+<li>Source data version</li>
+<li>Content hash</li>
+<li>Approval status</li>
+<li>Lock timestamp</li>
+</ul>
+<p>When a report is approved/locked:</p>
+<p>Generate a deterministic SHA-256 hash based on the report content and relevant
+source/version metadata.</p>
+<p>If the report content changes:</p>
+<ul>
+<li>Create a new version.</li>
+<li>Never silently overwrite the previous approved version.</li>
+</ul>
+<p>Show version history.</p>
+<h1 id="7-legal-statutory-safety_1">================================================== 7. LEGAL / STATUTORY SAFETY</h1>
+<p>Do NOT fabricate statutory conclusions.</p>
+<p>Clearly distinguish:</p>
+<ul>
+<li>Application-generated analysis</li>
+<li>Auditor judgment</li>
+<li>Verified statutory information</li>
+<li>Unverified guidance</li>
+</ul>
+<p>If statutory sources are not verified, display an appropriate warning.</p>
+<p>Never present AI-generated text as an officially verified statutory conclusion.</p>
+<p>Reports must preserve an audit trail of how conclusions were generated.</p>
+<h1 id="8-pdf-docx-export_1">================================================== 8. PDF / DOCX EXPORT</h1>
+<p>Implement actual export functionality.</p>
+<p>PDF should contain:</p>
+<ul>
+<li>Firm name/logo</li>
+<li>Client name</li>
+<li>Engagement</li>
+<li>Financial Year</li>
+<li>Report title</li>
+<li>Report content</li>
+<li>Findings</li>
+<li>Conclusions</li>
+<li>Sign-off</li>
+<li>Version</li>
+<li>Data As-Of</li>
+<li>Content Hash</li>
+</ul>
+<p>DOCX should contain equivalent structured content.</p>
+<p>Do not create empty placeholder files.</p>
+<h1 id="9-dashboard-integration_1">================================================== 9. DASHBOARD INTEGRATION</h1>
+<p>Update the Dashboard automatically.</p>
+<p>Dashboard should reflect:</p>
+<ul>
+<li>Number of Working Papers</li>
+<li>Open Review Points</li>
+<li>Signed-Off Working Papers</li>
+<li>Draft Reports</li>
+<li>Approved Reports</li>
+<li>Open Findings</li>
+<li>High-Risk Findings</li>
+<li>Compliance exceptions</li>
+</ul>
+<p>All numbers must come from the same underlying data source.</p>
+<p>No duplicated hardcoded state.</p>
+<h1 id="10-persistence_1">================================================== 10. PERSISTENCE</h1>
+<p>Because FinAuditPro is designed as an offline-first audit operating system:</p>
+<ul>
+<li>Data must persist locally.</li>
+<li>Refreshing the application must not lose data.</li>
+<li>Closing/reopening the application must preserve data.</li>
+<li>Use the existing persistence layer if one already exists.</li>
+<li>If necessary, improve the existing local database/storage architecture.</li>
+<li>Maintain deterministic IDs.</li>
+<li>Maintain audit history.</li>
+</ul>
+<h1 id="11-ux-requirements_1">================================================== 11. UX REQUIREMENTS</h1>
+<p>The application currently has too many empty states.</p>
+<p>Replace meaningless empty tables with useful empty-state messages such as:</p>
+<p>"No working papers yet" "Create your first working paper to begin documenting
+audit evidence."</p>
+<p>" No reports generated yet" "Generate a report from your engagement data."</p>
+<p>Buttons should work.</p>
+<p>Forms should validate input.</p>
+<p>Show success/error notifications.</p>
+<p>Use confirmation dialogs for:</p>
+<ul>
+<li>Delete</li>
+<li>Approve</li>
+<li>Sign-off</li>
+<li>Lock</li>
+</ul>
+<p>Do not allow accidental destructive actions.</p>
+<h1 id="12-visual-design_1">================================================== 12. VISUAL DESIGN</h1>
+<p>Keep the existing FinAuditPro design.</p>
+<p>Use:</p>
+<ul>
+<li>White/light-gray workspace</li>
+<li>Blue primary actions</li>
+<li>Thin borders</li>
+<li>Compact professional tables</li>
+<li>Small audit-status badges</li>
+<li>Clean typography</li>
+<li>Consistent spacing</li>
+<li>Professional accounting/audit-software appearance</li>
+</ul>
+<p>Do NOT introduce:</p>
+<ul>
+<li>Huge cards</li>
+<li>Excessive gradients</li>
+<li>Neon colors</li>
+<li>Consumer-app styling</li>
+<li>Unnecessary animations</li>
+<li>Decorative UI that reduces audit usability</li>
+</ul>
+<p>The UI should feel like professional enterprise audit software.</p>
+<h1 id="13-important-engineering-requirements_1">================================================== 13. IMPORTANT ENGINEERING REQUIREMENTS</h1>
+<p>Before coding:</p>
+<ol>
+<li>Inspect the entire existing project.</li>
+<li>Identify the frontend framework.</li>
+<li>Identify backend/data layer.</li>
+<li>Identify routing.</li>
+<li>Identify existing models.</li>
+<li>Identify existing persistence.</li>
+<li>Identify existing document upload system.</li>
+<li>Identify existing report/export functionality.</li>
+<li>Identify reusable components.</li>
+<li>Identify existing bugs.</li>
+</ol>
+<p>Then implement the features using the existing architecture.</p>
+<p>DO NOT rewrite the application unnecessarily.</p>
+<p>Avoid duplicated logic.</p>
+<p>Create reusable components for:</p>
+<ul>
+<li>StatusBadge</li>
+<li>AuditTable</li>
+<li>EmptyState</li>
+<li>ReviewPoint</li>
+<li>SignOffPanel</li>
+<li>VersionHistory</li>
+<li>HashDisplay</li>
+<li>ReportViewer</li>
+<li>WorkingPaperEditor</li>
+</ul>
+<h1 id="14-test-everything_1">================================================== 14. TEST EVERYTHING</h1>
+<p>After implementation, test the complete workflow:</p>
+<p>Create Client → Create Engagement → Upload Document → Create Working Paper → Add
+Procedure → Attach Evidence → Add Finding → Add Review Point → Resolve Review
+Point → Reviewer Approval → Sign Off → Lock → Generate Report → Validate Report
+→ Approve Report → Lock Report → Export PDF → Export DOCX</p>
+<p>Also test:</p>
+<ul>
+<li>Refresh persistence</li>
+<li>Empty states</li>
+<li>Invalid forms</li>
+<li>Duplicate records</li>
+<li>Locked record editing prevention</li>
+<li>Hash generation</li>
+<li>Versioning</li>
+<li>Search/filter</li>
+<li>Navigation</li>
+<li>Dashboard counters</li>
+</ul>
+<p>Fix all errors found during testing.</p>
+<h1 id="final-requirement_1">================================================== FINAL REQUIREMENT</h1>
+<p>Do not simply make the screens look complete.</p>
+<p>Make Working Papers and Reports FUNCTIONAL, PERSISTENT, CONNECTED to the rest of
+FinAuditPro, and suitable for a real audit workflow.</p>
+<p>After implementation, give me:</p>
+<ol>
+<li>What you changed</li>
+<li>Files/components changed</li>
+<li>Database/data-model changes</li>
+<li>New workflows implemented</li>
+<li>Export functionality implemented</li>
+<li>Tests performed</li>
+<li>Any remaining limitations</li>
+</ol>
+<p>Do not stop after creating the UI. Continue until the complete workflow works
+end-to-end.</p>
+<p>PROMPT 6 : You are a senior full-stack architect, product engineer, UI/UX
+designer, audit-domain systems engineer, and QA engineer.</p>
+<p>I am building an application called:</p>
+<p>FINAUDITPRO “Offline-First Audit Operating System”</p>
+<p>The current application is a Python desktop application running on macOS ARM64.
+The UI already exists, but many screens are empty/static and several workflows
+are incomplete.</p>
+<p>I want you to inspect the existing codebase FIRST and then implement the
+application properly.</p>
+<p>IMPORTANT: DO NOT rebuild the application blindly. DO NOT remove existing
+functionality. DO NOT create fake/demo-only buttons. DO NOT replace working
+modules unnecessarily. DO NOT use placeholder data where real application state
+should be used. Preserve the existing architecture where practical, but refactor
+it when necessary for reliability and maintainability.</p>
+<p>==================================================</p>
+<ol>
+<li>CURRENT APPLICATION ==================================================</li>
+</ol>
+<p>The application currently contains these major modules:</p>
+<p>WORKSPACE</p>
+<ul>
+<li>Dashboard</li>
+<li>Audit Firms</li>
+<li>Clients</li>
+<li>Engagements</li>
+</ul>
+<p>FINANCIAL</p>
+<ul>
+<li>Documents</li>
+<li>Financial Statements</li>
+<li>GST Reconciliation</li>
+<li>Statutory Compliance</li>
+</ul>
+<p>ANALYSIS</p>
+<ul>
+<li>Audit Matrix</li>
+<li>AI Copilot</li>
+</ul>
+<p>AUDIT WORKFLOW</p>
+<ul>
+<li>Working Papers</li>
+<li>Reports</li>
+</ul>
+<p>SYSTEM</p>
+<ul>
+<li>File Archival</li>
+<li>Roll-Forward</li>
+<li>Settings</li>
+</ul>
+<p>The application also has:</p>
+<ul>
+<li>Offline-first architecture</li>
+<li>Local AI/LLM integration</li>
+<li>Evidence/document processing</li>
+<li>Audit findings</li>
+<li>Working papers</li>
+<li>Reports</li>
+<li>Engagement management</li>
+<li>Audit materiality</li>
+<li>SA 510 opening balance tie-out</li>
+<li>File archival</li>
+<li>Roll-forward</li>
+<li>AI audit analysis</li>
+</ul>
+<h1 id="2-main-problem">================================================== 2. MAIN PROBLEM</h1>
+<p>The current UI looks like a prototype.</p>
+<p>Several pages show:</p>
+<ul>
+<li>0 records</li>
+<li>empty tables</li>
+<li>buttons without meaningful workflows</li>
+<li>configuration displayed as static text</li>
+<li>empty evidence panels</li>
+<li>empty findings panels</li>
+<li>incomplete audit workflows</li>
+<li>no realistic seeded engagement</li>
+<li>weak connections between modules</li>
+</ul>
+<p>I want you to transform this into a cohesive, production-style application where
+the modules actually communicate with each other.</p>
+<p>The application must behave like a real audit engagement management and audit
+execution system.</p>
+<h1 id="3-core-principle">================================================== 3. CORE PRINCIPLE</h1>
+<p>Everything should revolve around:</p>
+<p>FIRM → CLIENT → ENGAGEMENT → PERIOD → DOCUMENTS → FINANCIAL DATA → AUDIT AREAS →
+PROCEDURES → EVIDENCE → FINDINGS → WORKING PAPERS → REVIEW → REPORT → ARCHIVE</p>
+<p>Create a proper relational/domain model around this lifecycle.</p>
+<p>No isolated screens.</p>
+<p>Every relevant screen must consume and update shared application state.</p>
+<h1 id="4-database-persistence">================================================== 4. DATABASE / PERSISTENCE</h1>
+<p>Implement proper local persistence.</p>
+<p>Prefer SQLite for structured data.</p>
+<p>Create a clean database layer/repository layer.</p>
+<p>At minimum model:</p>
+<ul>
+<li>users</li>
+<li>audit_firms</li>
+<li>clients</li>
+<li>engagements</li>
+<li>engagement_periods</li>
+<li>financial_statements</li>
+<li>accounts</li>
+<li>trial_balance</li>
+<li>documents</li>
+<li>document_versions</li>
+<li>evidence</li>
+<li>audit_areas</li>
+<li>audit_procedures</li>
+<li>audit_programs</li>
+<li>working_papers</li>
+<li>findings</li>
+<li>finding_evidence</li>
+<li>materiality_calculations</li>
+<li>review_points</li>
+<li>reports</li>
+<li>report_versions</li>
+<li>archive_records</li>
+<li>roll_forward_records</li>
+<li>statutory_compliance_items</li>
+<li>gst_reconciliations</li>
+<li>ai_analysis_runs</li>
+<li>audit_logs</li>
+<li>application_settings</li>
+</ul>
+<p>Every important object needs:</p>
+<ul>
+<li>UUID/unique ID</li>
+<li>created_at</li>
+<li>updated_at</li>
+<li>status where applicable</li>
+<li>audit trail where appropriate</li>
+</ul>
+<p>Use migrations/versioning for the database schema.</p>
+<h1 id="5-seed-a-realistic-demo-engagement">================================================== 5. SEED A REALISTIC DEMO ENGAGEMENT</h1>
+<p>The application should NOT open to an entirely empty system.</p>
+<p>Create a clearly marked DEMO engagement that demonstrates the entire workflow.</p>
+<p>Example:</p>
+<p>Client: “ABC Manufacturing Private Limited”</p>
+<p>Financial Year: FY 2025-26</p>
+<p>Currency: INR</p>
+<p>Industry: Manufacturing</p>
+<p>Populate realistic but clearly synthetic data:</p>
+<ul>
+<li>Trial balance</li>
+<li>Revenue</li>
+<li>Purchases</li>
+<li>Inventory</li>
+<li>Fixed assets</li>
+<li>Receivables</li>
+<li>Payables</li>
+<li>Cash/bank</li>
+<li>Loans</li>
+<li>Related parties</li>
+<li>GST data</li>
+<li>statutory compliance items</li>
+<li>audit documents</li>
+<li>evidence</li>
+<li>audit findings</li>
+<li>review points</li>
+<li>working papers</li>
+</ul>
+<p>Make it obvious that this is synthetic/demo data.</p>
+<p>Provide a way to reset/delete demo data.</p>
+<h1 id="6-dashboard">================================================== 6. DASHBOARD</h1>
+<p>Build a real engagement dashboard.</p>
+<p>Show:</p>
+<ul>
+<li>Active engagements</li>
+<li>Current client</li>
+<li>Financial year</li>
+<li>Audit status</li>
+<li>Overall materiality</li>
+<li>Performance materiality</li>
+<li>Clearly trivial threshold</li>
+<li>Total audit areas</li>
+<li>Completed procedures</li>
+<li>Pending procedures</li>
+<li>Evidence collected</li>
+<li>Findings</li>
+<li>High/Critical findings</li>
+<li>Open review points</li>
+<li>Working papers pending review</li>
+<li>Report status</li>
+<li>Archival status</li>
+</ul>
+<p>Add useful visual indicators.</p>
+<p>Clicking a metric should navigate to the relevant module.</p>
+<h1 id="7-engagement-management">================================================== 7. ENGAGEMENT MANAGEMENT</h1>
+<p>Implement:</p>
+<p>Create Engagement Edit Engagement Open Engagement Close Engagement Reopen
+Engagement Archive Engagement</p>
+<p>Engagement fields should include:</p>
+<ul>
+<li>Client</li>
+<li>Financial year</li>
+<li>Engagement type</li>
+<li>Audit period</li>
+<li>Partner</li>
+<li>Manager</li>
+<li>Senior</li>
+<li>Team</li>
+<li>Status</li>
+<li>Reporting framework</li>
+<li>Applicable standards</li>
+<li>Materiality status</li>
+</ul>
+<p>Implement proper lifecycle:</p>
+<p>PLANNING → FIELDWORK → REVIEW → REPORTING → COMPLETED → ARCHIVED</p>
+<p>Prevent invalid transitions.</p>
+<p>Require confirmation for destructive operations.</p>
+<h1 id="8-audit-materiality">================================================== 8. AUDIT MATERIALITY</h1>
+<p>The SA 320 Materiality screen must become functional.</p>
+<p>Allow selection of benchmark:</p>
+<ul>
+<li>Revenue</li>
+<li>Profit Before Tax</li>
+<li>Total Assets</li>
+<li>Net Assets</li>
+<li>Expenses</li>
+<li>User-defined benchmark</li>
+</ul>
+<p>Allow benchmark amount input.</p>
+<p>Allow percentage selection/input.</p>
+<p>Calculate:</p>
+<p>Overall Materiality Performance Materiality Clearly Trivial Threshold</p>
+<p>Default calculations may use:</p>
+<p>OM = Benchmark × Selected %</p>
+<p>PM = OM × 75%</p>
+<p>CTT = OM × 5%</p>
+<p>BUT:</p>
+<p>Do not represent these percentages as mandatory statutory rules.</p>
+<p>Clearly label them as configurable auditor judgments / suggested defaults.</p>
+<p>Allow users to override the percentages.</p>
+<p>Store every materiality version.</p>
+<p>Display:</p>
+<p>Version Benchmark Amount Percentage OM PM CTT Prepared By Date Reason for
+Revision</p>
+<p>Keep a complete revision history.</p>
+<h1 id="9-ai-audit-copilot">================================================== 9. AI AUDIT COPILOT</h1>
+<p>The AI Copilot should become one of the strongest features.</p>
+<p>The application already indicates local AI:</p>
+<p>LM Studio: http://localhost:1234</p>
+<p>Model: qwen-based local model</p>
+<p>Embedding: nomic-embed-text</p>
+<p>Maintain offline-first behavior.</p>
+<p>AI should NEVER silently send audit evidence to external cloud APIs.</p>
+<p>Cloud AI must remain opt-in.</p>
+<p>Implement:</p>
+<p>Document ingestion Text extraction Chunking Embedding Local vector search RAG
+Prompt templates Evidence citations Finding generation Risk analysis Anomaly
+detection</p>
+<p>The AI must distinguish:</p>
+<p>FACT INFERENCE RECOMMENDATION MISSING EVIDENCE</p>
+<p>Never fabricate audit evidence.</p>
+<p>Every AI-generated finding must reference source evidence.</p>
+<h1 id="10-ai-prompt-library">================================================== 10. AI PROMPT LIBRARY</h1>
+<p>Implement functional audit prompts such as:</p>
+<p>CARO 2020 Inventory SA 188 Related Party SA 185/186 Loans SA 240 Revenue Anomaly
+Form 3CD Clause 44 SA 500 Audit Evidence</p>
+<p>Add more:</p>
+<p>SA 315 Risk Assessment SA 330 Responses to Assessed Risks SA 450 Misstatements
+SA 505 External Confirmations SA 520 Analytical Procedures SA 530 Sampling SA
+550 Related Parties SA 560 Subsequent Events SA 570 Going Concern SA 580 Written
+Representations SA 700 Reporting</p>
+<p>Each prompt should:</p>
+<ol>
+<li>Identify relevant evidence</li>
+<li>Analyze evidence</li>
+<li>Identify exceptions</li>
+<li>Assign risk</li>
+<li>Explain reasoning</li>
+<li>Cite evidence</li>
+<li>Suggest audit procedures</li>
+<li>Identify missing evidence</li>
+<li>Create a structured finding when appropriate</li>
+</ol>
+<h1 id="11-audit-findings">================================================== 11. AUDIT FINDINGS</h1>
+<p>Create a unified findings system.</p>
+<p>Finding fields:</p>
+<ul>
+<li>Finding ID</li>
+<li>Engagement</li>
+<li>Audit area</li>
+<li>Title</li>
+<li>Description</li>
+<li>Condition</li>
+<li>Criteria</li>
+<li>Cause</li>
+<li>Effect</li>
+<li>Recommendation</li>
+<li>Risk</li>
+<li>Severity</li>
+<li>Financial impact</li>
+<li>Evidence</li>
+<li>Management response</li>
+<li>Auditor conclusion</li>
+<li>Status</li>
+<li>Owner</li>
+<li>Due date</li>
+</ul>
+<p>Severity:</p>
+<p>LOW MEDIUM HIGH CRITICAL</p>
+<p>Status:</p>
+<p>OPEN IN_PROGRESS RESOLVED ACCEPTED CLOSED</p>
+<p>The AI Copilot should be able to create a finding draft, but a human must
+approve it.</p>
+<h1 id="12-audit-matrix_1">================================================== 12. AUDIT MATRIX</h1>
+<p>Create a real audit matrix.</p>
+<p>Columns:</p>
+<p>Audit Area Risk Assertion Risk Rating Control Procedure Sample Size Evidence
+Status Finding Reviewer Conclusion</p>
+<p>Allow filtering by:</p>
+<ul>
+<li>Risk</li>
+<li>Status</li>
+<li>Audit area</li>
+<li>Assertion</li>
+<li>Reviewer</li>
+</ul>
+<p>Show completion percentage.</p>
+<h1 id="13-working-papers_1">================================================== 13. WORKING PAPERS</h1>
+<p>Working papers must become functional.</p>
+<p>Allow:</p>
+<p>Create Edit Attach evidence Add procedures Add conclusions Add review notes
+Submit for review Review Return for modification Approve Lock</p>
+<p>Working paper status:</p>
+<p>DRAFT PREPARED UNDER_REVIEW REVIEW_NOTES APPROVED LOCKED</p>
+<p>Once locked, prevent unauthorized modification.</p>
+<p>Show:</p>
+<p>Ref Code Title Audit Area Status Preparer Reviewer Open Points Content Hash Lock
+Status</p>
+<h1 id="14-reporting">================================================== 14. REPORTING</h1>
+<p>The Reports screen should generate real reports from engagement data.</p>
+<p>Report types:</p>
+<ul>
+<li>Audit Summary</li>
+<li>Findings Report</li>
+<li>Management Letter</li>
+<li>Working Paper Completion Report</li>
+<li>Evidence Summary</li>
+<li>Statutory Compliance Report</li>
+<li>GST Reconciliation Report</li>
+<li>CARO Report</li>
+<li>Audit Completion Report</li>
+</ul>
+<p>Reports should contain:</p>
+<ul>
+<li>Client</li>
+<li>Financial year</li>
+<li>Report date</li>
+<li>Scope</li>
+<li>Significant findings</li>
+<li>Materiality</li>
+<li>Audit completion status</li>
+<li>Open issues</li>
+<li>Conclusions</li>
+</ul>
+<p>Implement report versioning.</p>
+<p>Draft reports must clearly show:</p>
+<p>DRAFT / WATERMARKED</p>
+<p>Approved reports should be immutable/versioned.</p>
+<p>Do not falsely claim statutory approval.</p>
+<h1 id="15-working-paper-report-connection">================================================== 15. WORKING PAPER → REPORT CONNECTION</h1>
+<p>Reports must pull information from:</p>
+<ul>
+<li>Working papers</li>
+<li>Findings</li>
+<li>Evidence</li>
+<li>Materiality</li>
+<li>Audit matrix</li>
+<li>Compliance modules</li>
+</ul>
+<p>Do not make report data manually duplicated.</p>
+<p>If a finding changes, the next report version should reflect it.</p>
+<h1 id="16-file-archival_1">================================================== 16. FILE ARCHIVAL</h1>
+<p>Implement real archival behavior.</p>
+<p>When an engagement is completed:</p>
+<ol>
+<li>Verify required working papers</li>
+<li>Verify unresolved review points</li>
+<li>Verify report status</li>
+<li>Calculate content hashes</li>
+<li>Create immutable archive record</li>
+<li>Encrypt archive where appropriate</li>
+<li>Record archive timestamp</li>
+<li>Record retention date</li>
+<li>Prevent normal modification</li>
+</ol>
+<p>Display:</p>
+<p>Archive ID Report Date Assembly Deadline Retain Until Encrypted Content Hash</p>
+<p>Use configurable retention settings.</p>
+<p>Do not hard-code retention periods as statutory law.</p>
+<p>Clearly identify guidance/configuration vs legal requirements.</p>
+<h1 id="17-roll-forward_1">================================================== 17. ROLL-FORWARD</h1>
+<p>Make SA 510 opening balance tie-out functional.</p>
+<p>Compare:</p>
+<p>Prior Closing DR Prior Closing CR</p>
+<p>against:</p>
+<p>Current Opening DR Current Opening CR</p>
+<p>For every account.</p>
+<p>Show:</p>
+<p>Account Code Account Name Opening DR Opening CR Prior Closing DR Prior Closing
+CR Difference Tie-Out Status</p>
+<p>Statuses:</p>
+<p>MATCHED MISMATCH MISSING_PRIOR MISSING_CURRENT REVIEW_REQUIRED</p>
+<p>Require auditor confirmation before finalizing.</p>
+<p>Provide:</p>
+<p>“Confirm Tie-Out (Auditor)”</p>
+<p>Record:</p>
+<p>User Timestamp Confirmation status Comments</p>
+<h1 id="18-gst-reconciliation">================================================== 18. GST RECONCILIATION</h1>
+<p>Implement:</p>
+<p>Books GST GSTR data Input Tax Credit Output Tax Differences Potential mismatches</p>
+<p>Show:</p>
+<p>Taxable Value CGST SGST IGST Cess Books Amount Return Amount Difference Status</p>
+<p>Automatically identify anomalies.</p>
+<h1 id="19-statutory-compliance">================================================== 19. STATUTORY COMPLIANCE</h1>
+<p>Create a configurable compliance checklist.</p>
+<p>Do NOT present configurable guidance as guaranteed statutory law.</p>
+<p>Each compliance item should have:</p>
+<ul>
+<li>Requirement</li>
+<li>Applicability</li>
+<li>Evidence</li>
+<li>Due date</li>
+<li>Status</li>
+<li>Responsible person</li>
+<li>Reviewer</li>
+<li>Notes</li>
+<li>Source/reference</li>
+<li>Verification status</li>
+</ul>
+<p>Support:</p>
+<p>Applicable Not Applicable Pending Completed Exception</p>
+<h1 id="20-document-management">================================================== 20. DOCUMENT MANAGEMENT</h1>
+<p>Documents should be first-class objects.</p>
+<p>Allow:</p>
+<p>Upload Import Preview Rename Version Tag Categorize Attach to audit area Attach
+to working paper Attach to finding Search Archive</p>
+<p>Document categories:</p>
+<p>Bank GST Tax Ledger Trial Balance Invoices Payroll Loans Related Parties
+Inventory Fixed Assets Legal Contracts Board Minutes Other</p>
+<p>Generate hashes for document integrity.</p>
+<h1 id="21-search">================================================== 21. SEARCH</h1>
+<p>The global search bar should actually work.</p>
+<p>Search across:</p>
+<p>Clients Engagements Documents Evidence Working Papers Findings Reports Audit
+Procedures</p>
+<p>Provide keyboard shortcut:</p>
+<p>⌘K</p>
+<p>Search should return categorized results.</p>
+<h1 id="22-settings">================================================== 22. SETTINGS</h1>
+<p>Turn the Settings page into a real configuration page.</p>
+<p>Sections:</p>
+<p>Application Database Local AI LLM Embeddings Security Encryption Cloud AI Audit
+Defaults Materiality Defaults Retention Compliance Backup</p>
+<p>For Local AI:</p>
+<p>Base URL Model Embedding Model Connection Test</p>
+<p>Add:</p>
+<p>“Test Local AI Connection”</p>
+<p>Show:</p>
+<p>CONNECTED DISCONNECTED ERROR</p>
+<p>Do not expose secrets in plaintext.</p>
+<h1 id="23-system-diagnostics">================================================== 23. SYSTEM DIAGNOSTICS</h1>
+<p>Implement the “Run System Diagnostics” button.</p>
+<p>Check:</p>
+<ul>
+<li>Database</li>
+<li>File storage</li>
+<li>Permissions</li>
+<li>Encryption</li>
+<li>Local AI endpoint</li>
+<li>Embedding model</li>
+<li>Vector index</li>
+<li>Disk space</li>
+<li>Configuration</li>
+<li>Migration status</li>
+</ul>
+<p>Return a clear diagnostic report.</p>
+<h1 id="24-security">================================================== 24. SECURITY</h1>
+<p>Implement strong local security architecture.</p>
+<p>Include:</p>
+<ul>
+<li>Role-based access</li>
+<li>Audit logs</li>
+<li>Secure configuration</li>
+<li>File hashing</li>
+<li>Immutable records where required</li>
+<li>Confirmation dialogs</li>
+<li>Safe deletion</li>
+<li>Backup/restore</li>
+<li>Encryption support</li>
+</ul>
+<p>Roles:</p>
+<p>ADMIN PARTNER MANAGER SENIOR ASSOCIATE REVIEWER</p>
+<p>Enforce permissions in the backend/domain layer, not only in UI.</p>
+<h1 id="25-audit-trail">================================================== 25. AUDIT TRAIL</h1>
+<p>Every sensitive action should create an audit log.</p>
+<p>Examples:</p>
+<p>Created engagement Changed materiality Uploaded document Created finding
+Modified finding Approved working paper Reviewed working paper Generated report
+Approved report Closed engagement Archived engagement Reopened engagement</p>
+<p>Log:</p>
+<p>Timestamp User Action Object Previous Value New Value Reason where applicable</p>
+<h1 id="26-uiux">================================================== 26. UI/UX</h1>
+<p>Keep the existing clean FinAuditPro visual identity.</p>
+<p>Maintain:</p>
+<ul>
+<li>White/light background</li>
+<li>Blue primary accent</li>
+<li>Dark navy text</li>
+<li>Compact professional layout</li>
+<li>Sidebar navigation</li>
+<li>Cards</li>
+<li>Tables</li>
+<li>Status badges</li>
+</ul>
+<p>Improve:</p>
+<ul>
+<li>Empty states</li>
+<li>Loading states</li>
+<li>Error states</li>
+<li>Success notifications</li>
+<li>Confirmation dialogs</li>
+<li>Breadcrumbs</li>
+<li>Filters</li>
+<li>Pagination</li>
+<li>Tooltips</li>
+<li>Responsive layouts</li>
+</ul>
+<p>Avoid excessive rounded cards.</p>
+<p>Avoid unnecessary decorative UI.</p>
+<p>The application should look like professional audit software, not a generic AI
+dashboard.</p>
+<h1 id="27-empty-states">================================================== 27. EMPTY STATES</h1>
+<p>Never leave important screens as giant blank white areas.</p>
+<p>Instead show meaningful empty states.</p>
+<p>Example:</p>
+<p>“No engagements yet”</p>
+<p>[Create Engagement]</p>
+<p>or:</p>
+<p>“No audit findings”</p>
+<p>“Run an audit analysis or create a finding manually.”</p>
+<p>Every empty screen should explain:</p>
+<ul>
+<li>what is missing</li>
+<li>why it matters</li>
+<li>what action the user can take</li>
+</ul>
+<h1 id="28-error-handling">================================================== 28. ERROR HANDLING</h1>
+<p>Every operation must have proper error handling.</p>
+<p>Never silently fail.</p>
+<p>Show actionable errors.</p>
+<p>Example:</p>
+<p>“Unable to connect to local LLM at localhost:1234.</p>
+<p>Check that LM Studio is running and the configured model is loaded.”</p>
+<p>Do not expose Python stack traces to normal users.</p>
+<p>Log detailed errors internally.</p>
+<h1 id="29-offline-first">================================================== 29. OFFLINE-FIRST</h1>
+<p>The application must work without internet.</p>
+<p>Core functionality must NOT require cloud services.</p>
+<p>Offline functionality:</p>
+<ul>
+<li>Database</li>
+<li>Documents</li>
+<li>Evidence</li>
+<li>Audit procedures</li>
+<li>Findings</li>
+<li>Working papers</li>
+<li>Reports</li>
+<li>Archival</li>
+<li>Roll-forward</li>
+<li>GST reconciliation</li>
+<li>AI when local model is available</li>
+</ul>
+<p>Cloud AI should be an explicit opt-in feature.</p>
+<h1 id="30-data-integrity">================================================== 30. DATA INTEGRITY</h1>
+<p>Use transactions for multi-step operations.</p>
+<p>Prevent orphan records.</p>
+<p>Use foreign keys.</p>
+<p>Validate input.</p>
+<p>Use deterministic calculations.</p>
+<p>Never let UI state become the source of truth.</p>
+<p>Database/domain state must be authoritative.</p>
+<h1 id="31-testing">================================================== 31. TESTING</h1>
+<p>Create automated tests.</p>
+<p>At minimum test:</p>
+<ul>
+<li>Materiality calculation</li>
+<li>Materiality revisions</li>
+<li>SA 510 tie-out</li>
+<li>Finding lifecycle</li>
+<li>Working paper lifecycle</li>
+<li>Report generation</li>
+<li>Engagement lifecycle</li>
+<li>Archive creation</li>
+<li>Roll-forward</li>
+<li>GST reconciliation</li>
+<li>Permissions</li>
+<li>Database migrations</li>
+<li>AI evidence citation</li>
+<li>Search</li>
+</ul>
+<p>Also test invalid states.</p>
+<h1 id="32-demo-workflow">================================================== 32. DEMO WORKFLOW</h1>
+<p>After implementation, I should be able to demonstrate this complete workflow:</p>
+<ol>
+<li>Open FinAuditPro</li>
+<li>Select demo client</li>
+<li>Open FY 2025-26 engagement</li>
+<li>View dashboard</li>
+<li>Review materiality</li>
+<li>Review trial balance</li>
+<li>Review audit matrix</li>
+<li>Review documents</li>
+<li>Run AI audit analysis</li>
+<li>Detect an anomaly</li>
+<li>Create finding</li>
+<li>Attach evidence</li>
+<li>Create working paper</li>
+<li>Submit working paper</li>
+<li>Add reviewer note</li>
+<li>Resolve review point</li>
+<li>Approve working paper</li>
+<li>Generate audit report</li>
+<li>Review report</li>
+<li>Approve report</li>
+<li>Close engagement</li>
+<li>Run SA 510 tie-out</li>
+<li>Archive engagement</li>
+<li>View archive hash</li>
+<li>Roll-forward engagement into next period</li>
+</ol>
+<p>Every step should use real persisted data.</p>
+<h1 id="33-important-accountingaudit-safety">================================================== 33. IMPORTANT ACCOUNTING/AUDIT SAFETY</h1>
+<p>This software is an audit workflow and decision-support system.</p>
+<p>It must NOT pretend that software-generated judgments are automatically
+compliant with auditing standards.</p>
+<p>Clearly distinguish:</p>
+<ul>
+<li>statutory requirement</li>
+<li>professional guidance</li>
+<li>configurable firm policy</li>
+<li>auditor judgment</li>
+<li>AI recommendation</li>
+</ul>
+<p>AI must never claim:</p>
+<p>“Compliant”</p>
+<p>unless the application has an explicit verified rule/evidence basis.</p>
+<p>Use wording such as:</p>
+<p>“Potential exception identified” “Suggested procedure” “Requires auditor
+judgment” “Evidence insufficient” “Not independently verified”</p>
+<h1 id="34-code-quality">================================================== 34. CODE QUALITY</h1>
+<p>Use clean architecture.</p>
+<p>Separate:</p>
+<p>UI Application services Domain models Repositories Database AI services Document
+processing Reporting Security Configuration</p>
+<p>Avoid huge monolithic files.</p>
+<p>Avoid duplicated business logic.</p>
+<p>Use typed models where practical.</p>
+<p>Use dependency injection where useful.</p>
+<p>Keep UI event handlers thin.</p>
+<p>Business logic belongs in services/domain modules.</p>
+<h1 id="35-important-implementation-process">================================================== 35. IMPORTANT IMPLEMENTATION PROCESS</h1>
+<p>Before changing anything:</p>
+<ol>
+<li>Inspect the entire repository.</li>
+<li>Identify the framework.</li>
+<li>Identify the entry point.</li>
+<li>Identify database implementation.</li>
+<li>Identify existing models.</li>
+<li>Identify existing navigation.</li>
+<li>Identify existing AI integration.</li>
+<li>Identify incomplete/TODO functionality.</li>
+<li>Identify duplicate code.</li>
+<li>Identify current persistence behavior.</li>
+</ol>
+<p>Then create a short implementation plan.</p>
+<p>Then implement in logical phases.</p>
+<p>Do not merely describe what should be done.</p>
+<p>Actually modify the application.</p>
+<p>After implementation:</p>
+<ul>
+<li>Run the application</li>
+<li>Run tests</li>
+<li>Fix runtime errors</li>
+<li>Fix UI errors</li>
+<li>Verify navigation</li>
+<li>Verify database persistence</li>
+<li>Verify demo workflow</li>
+<li>Verify local AI configuration</li>
+<li>Verify all buttons</li>
+<li>Verify empty states</li>
+<li>Verify destructive-action confirmations</li>
+</ul>
+<h1 id="36-final-acceptance-criteria">================================================== 36. FINAL ACCEPTANCE CRITERIA</h1>
+<p>The project is NOT finished if:</p>
+<ul>
+<li>pages only look good but don't work</li>
+<li>buttons are fake</li>
+<li>data disappears after restart</li>
+<li>modules don't share data</li>
+<li>AI findings have no evidence</li>
+<li>reports contain hard-coded data</li>
+<li>archive records are fake</li>
+<li>materiality is static</li>
+<li>roll-forward is static</li>
+<li>working papers are static</li>
+<li>settings are static</li>
+<li>search does nothing</li>
+<li>diagnostics do nothing</li>
+</ul>
+<p>The project IS finished when FinAuditPro behaves like a coherent offline-first
+audit operating system with a complete end-to-end engagement lifecycle.</p>
+<p>Prioritize FUNCTIONALITY + DATA INTEGRITY + AUDIT TRACEABILITY first, then
+polish the UI.</p>
+<p>Start by inspecting the existing project and provide the implementation plan
+before making changes.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

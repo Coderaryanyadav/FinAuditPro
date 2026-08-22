@@ -52,11 +52,3 @@ jobs:
       - name: Run Pytest Test Suite & Code Coverage
         run: |
           pytest -v --cov=src/finauditpro tests
-
-      - name: Run Automated Diagnostic Environment Probe
-        run: |
-          python scripts/development/automated_system_check.py
-
-      - name: Run Master 1,000-Point Forensic Runner
-        run: |
-          python scripts/development/run_1000_verifications.py

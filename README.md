@@ -338,12 +338,15 @@ FinAuditPro/
 ├── SECURITY.md                    # Canonical security policy & vulnerability reporting
 ├── CONTRIBUTING.md                # Development workflow & contribution guide
 ├── CODE_OF_CONDUCT.md             # Contributor Covenant code of conduct
+├── CHANGELOG.md                   # Keep a Changelog format release notes (Root ONLY)
 ├── pyproject.toml                 # Packaging & tool configurations (pytest, ruff, mypy)
-├── uv.lock                        # Deterministic dependency lockfile
-├── requirements.txt               # Generated production runtime dependencies
-├── requirements-dev.txt           # Generated development & testing dependencies
+├── uv.lock                        # Deterministic dependency lockfile (Single Source of Truth)
+├── requirements.txt               # Generated production runtime dependencies (uv export)
+├── requirements-dev.txt           # Generated development & testing dependencies (uv export)
 ├── finauditpro.spec               # PyInstaller standalone build specification
-├── mkdocs.yml                     # MkDocs Material documentation site definition
+├── .gitignore                     # Git ignore rules for caches, builds, DBs, and client data
+├── .env.example                   # Machine environment variable overrides template
+├── .python-version                # Target Python version pin (3.12+)
 │
 ├── src/
 │   └── finauditpro/               # 4-Layer Domain-Driven Architecture Source Tree
@@ -361,12 +364,10 @@ FinAuditPro/
 │
 ├── docs/                          # Structured Technical & Statutory Documentation
 │   ├── README.md                  # Master documentation map
-│   ├── installation.md            # Installation & setup guide
+│   ├── installation.md            # Installation & launch guide
 │   ├── design.md                  # UI/UX design tokens & visual hierarchy specification
-│   ├── changelog.md               # Version release notes & changelog
+│   ├── decisions.md               # Architecture Decision Records (ADRs 001..005)
 │   ├── roadmap.md                 # Product milestones & future engineering goals
-│   ├── decisions.md               # Architecture Decision Records (ADRs)
-│   ├── packaging.md               # Standalone packaging & distribution guide
 │   ├── architecture/              # System architecture & database schema
 │   ├── features/                  # Subsystem functional specifications
 │   ├── security/                  # Security models, RBAC & threat analysis
@@ -376,7 +377,7 @@ FinAuditPro/
 ├── scripts/                       # Categorized Developer & Operational Automation
 │   ├── README.md                  # Script reference guide
 │   ├── development/               # Supervised launcher & diagnostic runners
-│   ├── packaging/                 # PyInstaller bundle & macOS signing scripts
+│   ├── packaging/                 # PyInstaller bundle, Windows ISS, Linux desktop & macOS signing
 │   ├── database/                  # Database wipe & re-migration utilities
 │   └── maintenance/               # Vacuum, archive verify & retention sweeps
 │
@@ -390,24 +391,19 @@ FinAuditPro/
 │   ├── .gitkeep
 │   └── README.md
 │
-├── installer/                     # Platform Installer Configurations
-│   ├── macos/                     # macOS DMG installer recipe & signing guide
-│   ├── windows/                   # Inno Setup 6 script (finauditpro.iss)
-│   └── linux/                     # Freedesktop .desktop entry definition
-│
 └── .github/                       # GitHub Actions CI/CD & Project Governance
     ├── CODEOWNERS                 # Architectural domain sign-off enforcement
     ├── dependabot.yml             # Weekly automated dependency vulnerability checks
     ├── PULL_REQUEST_TEMPLATE.md   # Architectural & statutory PR checklist
     ├── ISSUE_TEMPLATE/            # Structured bug and feature request forms
-    └── workflows/                 # CI matrix, docs deploy & release packaging workflows
+    └── workflows/                 # Fast CI matrix workflow (ruff, mypy, pytest)
 ```
 
 ---
 
 ## Documentation Map
 
-Full documentation is available in the [`docs/`](docs/) directory or via MkDocs:
+Full documentation is available in the [`docs/`](docs/) directory:
 
 - **[Master Documentation Index](docs/README.md)**
 - **[Installation & Run Guide](docs/installation.md)**
@@ -421,8 +417,10 @@ Full documentation is available in the [`docs/`](docs/) directory or via MkDocs:
 - **[Archival & Multi-Year Roll-Forward](docs/features/archival.md)**
 - **[Local AI Subsystem & RAG Pipeline](docs/features/ai.md)**
 - **[Developer Setup](docs/development/setup.md)** & **[Testing Strategy](docs/development/testing.md)**
-- **[Architecture Decision Records (ADRs)](docs/decisions.md)**
-- **[Product Roadmap](docs/roadmap.md)** & **[Changelog](docs/changelog.md)**
+- **[Architecture Decision Records (ADRs 001..005)](docs/decisions.md)**
+- **[Product Roadmap](docs/roadmap.md)**
+- **[Release Notes / Changelog](CHANGELOG.md)**
+
 
 ---
 

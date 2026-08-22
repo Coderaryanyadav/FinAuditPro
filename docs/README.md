@@ -8,13 +8,11 @@ Welcome to the FinAuditPro documentation. FinAuditPro is an offline-first deskto
 
 ```text
 docs/
-├── README.md                          # Master documentation map
-├── installation.md                    # Installation and execution instructions
-├── changelog.md                       # Version release notes
-├── decisions.md                       # Architecture Decision Records (ADRs)
+├── README.md                          # Master documentation index and sitemap
+├── installation.md                    # Installation and launch instructions
 ├── design.md                          # UI/UX design tokens and component specification
-├── packaging.md                       # Packaging, PyInstaller build spec and distribution
-├── roadmap.md                         # Completed milestones and future roadmap
+├── decisions.md                       # Architecture Decision Records (ADRs 001..005)
+├── roadmap.md                         # Completed milestones and product roadmap
 │
 ├── architecture/
 │   ├── overview.md                    # 4-layer architecture, invariants & data flows
@@ -49,7 +47,10 @@ docs/
 - **[Getting Started & Installation](installation.md)**
 - **[System Architecture](architecture/overview.md)**
 - **[Database Schema & Migrations](architecture/database.md)**
-- **[Security Policy & Model](security/security-model.md)**
-- **[Development Setup](development/setup.md)**
+- **[Security Architecture & Model](security/security-model.md)**
+- **[Architecture Decision Records](decisions.md)**
+- **[Developer Setup](development/setup.md)**
 - **[Testing Strategy](development/testing.md)**
 - **[UI Design System](design.md)**
+- **[Release Notes / Changelog](../CHANGELOG.md)**
+- **[Canonical Security Policy](../SECURITY.md)**

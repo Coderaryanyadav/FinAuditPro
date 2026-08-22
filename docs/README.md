@@ -13,6 +13,7 @@ docs/
 ├── design.md                          # UI/UX design tokens and component specification
 ├── decisions.md                       # Architecture Decision Records (ADRs 001..005)
 ├── roadmap.md                         # Completed milestones and product roadmap
+├── CHANGELOG.md                       # Version release notes & milestone history
 │
 ├── architecture/
 │   └── system-architecture.md         # 4-layer DDD architecture, invariants & migrations 1..9
@@ -47,5 +48,8 @@ docs/
 - **[Developer Onboarding & QA Guide](development/developer-guide.md)**
 - **[Operations & Troubleshooting Guide](operations/operations-guide.md)**
 - **[UI Design System](design.md)**
-- **[Release Notes / Changelog](../CHANGELOG.md)**
-- **[Canonical Security Policy](../SECURITY.md)**
+- **[Release Notes / Changelog](CHANGELOG.md)**
+- **[Canonical Security Policy](../.github/SECURITY.md)**
+- **[Contributing Guidelines](../.github/CONTRIBUTING.md)**
+- **[Code of Conduct](../.github/CODE_OF_CONDUCT.md)**
+

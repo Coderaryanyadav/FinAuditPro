@@ -368,6 +368,7 @@ FinAuditPro/
 │   ├── design.md                  # UI/UX design tokens & visual hierarchy specification
 │   ├── decisions.md               # Architecture Decision Records (ADRs 001..005)
 │   ├── roadmap.md                 # Product milestones & future engineering goals
+│   ├── CHANGELOG.md               # Version release notes & milestone history
 │   ├── architecture/              # System & SQLite database architecture
 │   ├── features/                  # Subsystem functional specifications
 │   ├── security/                  # Security model & threat defense guide
@@ -386,6 +387,9 @@ FinAuditPro/
     ├── dependabot.yml             # Weekly automated dependency vulnerability checks
     ├── PULL_REQUEST_TEMPLATE.md   # Architectural & statutory PR checklist
     ├── ISSUE_TEMPLATE/            # Structured bug and feature request forms
+    ├── SECURITY.md                # Canonical security policy & vulnerability disclosure
+    ├── CONTRIBUTING.md            # Developer onboarding & PR guidelines
+    ├── CODE_OF_CONDUCT.md         # Community standards
     └── workflows/                 # Fast CI matrix workflow (ruff, mypy, pytest)
 ```
 
@@ -408,8 +412,10 @@ Full documentation is available in the [`docs/`](docs/) directory:
 - **[Operations & Troubleshooting Guide](docs/operations/operations-guide.md)**
 - **[Architecture Decision Records (ADRs 001..005)](docs/decisions.md)**
 - **[Product Roadmap](docs/roadmap.md)**
-- **[Release Notes / Changelog](CHANGELOG.md)**
-- **[Canonical Security Policy](SECURITY.md)**
+- **[Release Notes / Changelog](docs/CHANGELOG.md)**
+- **[Canonical Security Policy](.github/SECURITY.md)**
+
+
 
 
 

@@ -1,6 +1,7 @@
 # FinAuditPro — Installation & From-Source Execution Guide
 
-FinAuditPro is an offline-first, privacy-first desktop audit intelligence operating system for Indian statutory audit practice.
+FinAuditPro is an offline-first, privacy-first desktop audit intelligence
+operating system for Indian statutory audit practice.
 
 ---
 
@@ -22,6 +23,7 @@ FinAuditPro is an offline-first, privacy-first desktop audit intelligence operat
 ## 2. From-Source Setup & Execution (Verified)
 
 ### Step 1: Clone Repository & Create Virtual Environment
+
 ```bash
 cd /path/to/Audit
 python3 -m venv .venv
@@ -29,22 +31,25 @@ source .venv/bin/activate
 ```
 
 ### Step 2: Install Package in Editable Mode
+
 ```bash
 pip install -e .
 ```
 
 ### Step 3: Launch FinAuditPro Application
+
 ```bash
 # Via Python module entrypoint:
 python -m finauditpro
 
 # Or via installed console script entrypoint:
 finauditpro
-
 ```
 
 ---
 
 ## 3. Environment Self-Check Diagnostics
 
-On launch, click **Settings $\rightarrow$ Run System Diagnostics** to inspect real system prerequisite probes. FinAuditPro gracefully degrades when optional features (LM Studio, Tesseract) are unavailable.
+On launch, click **Settings $\rightarrow$ Run System Diagnostics** to inspect
+real system prerequisite probes. FinAuditPro gracefully degrades when optional
+features (LM Studio, Tesseract) are unavailable.

@@ -106,22 +106,18 @@ class DashboardView(QWidget):
         hdr_l.addLayout(left_v)
         hdr_l.addStretch()
 
-        self.date_lbl = QLabel(utc_now().strftime("%d %b %Y"))
-        self.date_lbl.setStyleSheet("font-size: 11px; font-weight: 500; color: #94A3B8; background: transparent; border: none;")
-        hdr_l.addWidget(self.date_lbl, alignment=Qt.AlignmentFlag.AlignTop)
-        body_layout.addWidget(hdr)
-
+        # Live Executive Date & Time Pill Badge
+        dt_badge = QFrame(); dt_badge.setStyleSheet("QFrame { background-color: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; padding: 4px 10px; }")
+        dt_l = QHBoxLayout(dt_badge); dt_l.setContentsMargins(0, 0, 0, 0); dt_l.setSpacing(6)
+        cal_icon = QLabel("📅"); cal_icon.setStyleSheet("font-size: 13px; border: none; background: transparent;")
+        self.date_lbl = QLabel(utc_now().strftime("%a, %d %b %Y")); self.date_lbl.setStyleSheet("font-size: 13px; font-weight: 600; color: #334155; border: none; background: transparent;")
+        dt_l.addWidget(cal_icon); dt_l.addWidget(self.date_lbl)
+        hdr_l.addWidget(dt_badge, alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight); body_layout.addWidget(hdr)
 
         # 2. Row 1: Workflow Stepper (60%) + Needs Attention (40%)
-        row1 = QHBoxLayout()
-        row1.setSpacing(12)
-
-        ws_card = CardWidget("AUDIT WORKFLOW")
-        ws_v = QVBoxLayout()
-        ws_v.setSpacing(8)
-
-        stepper = QHBoxLayout()
-        stepper.setSpacing(0)
+        row1 = QHBoxLayout(); row1.setSpacing(12)
+        ws_card = CardWidget("AUDIT WORKFLOW"); ws_v = QVBoxLayout(); ws_v.setSpacing(8)
+        stepper = QHBoxLayout(); stepper.setSpacing(0)
         self.steps_data = [("Client", "", True, False), ("FY", "", True, False), ("Engagement", "●", False, True), ("Materiality", "○", False, False), ("Documentation", "○", False, False), ("Completion", "○", False, False)]
         self.step_widgets: list[QLabel] = []
         for i, (name, icon, is_done, is_active) in enumerate(self.steps_data):

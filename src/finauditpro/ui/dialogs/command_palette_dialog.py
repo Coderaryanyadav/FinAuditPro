@@ -115,106 +115,64 @@ class CommandPaletteDialog(QDialog):
 
         # Command list
         self.list_widget = QListWidget()
-        self.list_widget.setFixedHeight(280)
+        self.list_widget.setFixedHeight(300)
         self.list_widget.setStyleSheet("""
             QListWidget { border: none; background: transparent; outline: none; }
             QListWidget::item { border-radius: 6px; padding: 0px; margin-bottom: 2px; }
             QListWidget::item:selected { background-color: #EFF6FF; }
         """)
         self.list_widget.itemActivated.connect(self._on_item_activated)
+        self.list_widget.itemClicked.connect(self._on_item_activated)
+        self.input_field.returnPressed.connect(self._on_enter_pressed)
         c_layout.addWidget(self.list_widget)
 
         self._all_commands: list[dict[str, Any]] = []
         self._register_default_commands()
-
         self._populate_list(self._all_commands)
+
+    def keyPressEvent(self, event: Any) -> None:
+        if event.key() == Qt.Key.Key_Down:
+            curr = self.list_widget.currentRow()
+            if curr < self.list_widget.count() - 1:
+                self.list_widget.setCurrentRow(curr + 1)
+            event.accept()
+            return
+        elif event.key() == Qt.Key.Key_Up:
+            curr = self.list_widget.currentRow()
+            if curr > 0:
+                self.list_widget.setCurrentRow(curr - 1)
+            event.accept()
+            return
+        elif event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter:
+            self._on_enter_pressed()
+            event.accept()
+            return
+        super().keyPressEvent(event)
+
+    def _on_enter_pressed(self) -> None:
+        item = self.list_widget.currentItem()
+        if item:
+            self._on_item_activated(item)
 
     def _register_default_commands(self) -> None:
         self._all_commands = [
-            {
-                "title": "Go to Dashboard Overview",
-                "category": "Navigation",
-                "shortcut": "Alt+1",
-                "key": "nav",
-                "payload": 0,
-            },
-            {
-                "title": "Go to Audit Firms Management",
-                "category": "Navigation",
-                "shortcut": "Alt+2",
-                "key": "nav",
-                "payload": 1,
-            },
-            {
-                "title": "Go to Client Management",
-                "category": "Navigation",
-                "shortcut": "Alt+3",
-                "key": "nav",
-                "payload": 2,
-            },
-            {
-                "title": "Go to Engagement Manager",
-                "category": "Navigation",
-                "shortcut": "Alt+4",
-                "key": "nav",
-                "payload": 3,
-            },
-            {
-                "title": "Go to Document Intelligence Vault",
-                "category": "Navigation",
-                "shortcut": "Alt+5",
-                "key": "nav",
-                "payload": 4,
-            },
-            {
-                "title": "Go to Financial Statements",
-                "category": "Navigation",
-                "shortcut": "Alt+6",
-                "key": "nav",
-                "payload": 5,
-            },
-            {
-                "title": "Go to GST Reconciliation & 2B Match",
-                "category": "Navigation",
-                "shortcut": "Alt+7",
-                "key": "nav",
-                "payload": 6,
-            },
-            {
-                "title": "Go to Statutory Compliance Matrix",
-                "category": "Navigation",
-                "shortcut": "Alt+8",
-                "key": "nav",
-                "payload": 7,
-            },
-            {
-                "title": "Go to AI Audit Analysis Copilot",
-                "category": "Navigation",
-                "shortcut": "Alt+9",
-                "key": "nav",
-                "payload": 9,
-            },
-            {
-                "title": "Go to SA 230 Working Papers",
-                "category": "Navigation",
-                "shortcut": "",
-                "key": "nav",
-                "payload": 10,
-            },
-            {
-                "title": "Go to Independent Audit Reports",
-                "category": "Navigation",
-                "shortcut": "",
-                "key": "nav",
-                "payload": 11,
-            },
-            {
-                "title": "Go to System Settings & CA Profile",
-                "category": "Navigation",
-                "shortcut": "Ctrl+,",
-                "key": "nav",
-                "payload": 14,
-            },
+            {"title": "Command Center / Overview", "category": "Pipeline", "shortcut": "Alt+1", "key": "nav", "payload": 0},
+            {"title": "Intake & PBC Tracker", "category": "Pipeline", "shortcut": "Alt+2", "key": "nav", "payload": 1},
+            {"title": "Planning & SA 320 Materiality", "category": "Pipeline", "shortcut": "Alt+3", "key": "nav", "payload": 2},
+            {"title": "TB / GL Scrutiny & Datasets", "category": "Pipeline", "shortcut": "Alt+4", "key": "nav", "payload": 3},
+            {"title": "Schedule III Working Papers", "category": "Pipeline", "shortcut": "Alt+5", "key": "nav", "payload": 4},
+            {"title": "Statutory Audit Reports & Sign-Off", "category": "Pipeline", "shortcut": "Alt+6", "key": "nav", "payload": 5},
+            {"title": "Client Audit Queries", "category": "Fieldwork", "shortcut": "", "key": "nav", "payload": 6},
+            {"title": "Uploaded Evidence & Document Vault", "category": "Fieldwork", "shortcut": "", "key": "nav", "payload": 7},
+            {"title": "GST 2B Reconciler", "category": "Fieldwork", "shortcut": "", "key": "nav", "payload": 8},
+            {"title": "Statutory Compliance Matrix", "category": "Fieldwork", "shortcut": "", "key": "nav", "payload": 9},
+            {"title": "AI Copilot Lab", "category": "Fieldwork", "shortcut": "⌘K", "key": "nav", "payload": 10},
+            {"title": "Audit Clients Directory", "category": "Admin", "shortcut": "", "key": "nav", "payload": 11},
+            {"title": "Engagement Manager", "category": "Admin", "shortcut": "", "key": "nav", "payload": 12},
+            {"title": "Audit Firm Configuration", "category": "Admin", "shortcut": "", "key": "nav", "payload": 13},
+            {"title": "Archival & Cryptographic Sealing", "category": "System", "shortcut": "", "key": "nav", "payload": 14},
+            {"title": "Roll-Forward & FY Tie-Out", "category": "System", "shortcut": "", "key": "nav", "payload": 15},
+            {"title": "System Settings & Credentials", "category": "System", "shortcut": "⌘,", "key": "nav", "payload": 16},
         ]
 
     def _populate_list(self, commands: list[dict[str, Any]]) -> None:

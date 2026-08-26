@@ -272,11 +272,12 @@ class PageHeader(QFrame):
     def __init__(self, title: str, subtitle: str = "", action_text: str = "", action_callback: object = None, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setStyleSheet("background: transparent; border: none;")
-        h_layout = QHBoxLayout(self)
-        h_layout.setContentsMargins(0, 0, 0, 0)
-        h_layout.setSpacing(12)
+        self.action_layout = QHBoxLayout(self)
+        self.action_layout.setContentsMargins(0, 0, 0, 0)
+        self.action_layout.setSpacing(12)
         left_v = QVBoxLayout()
         left_v.setSpacing(2)
+
         self.title_lbl = QLabel(title)
         self.title_lbl.setStyleSheet("font-size: 20px; font-weight: 700; color: #0F172A; letter-spacing: -0.4px; border: none; background: transparent;")
         left_v.addWidget(self.title_lbl)
@@ -284,12 +285,13 @@ class PageHeader(QFrame):
             self.subtitle_lbl = QLabel(subtitle)
             self.subtitle_lbl.setStyleSheet("font-size: 12px; color: #64748B; border: none; background: transparent;")
             left_v.addWidget(self.subtitle_lbl)
-        h_layout.addLayout(left_v)
-        h_layout.addStretch()
+        self.action_layout.addLayout(left_v)
+        self.action_layout.addStretch()
         if action_text and action_callback:
             self.action_btn = QPushButton(action_text)
             self.action_btn.setObjectName("primaryButton")
             self.action_btn.setCursor(Qt.CursorShape.PointingHandCursor)
             self.action_btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
             self.action_btn.clicked.connect(action_callback)
-            h_layout.addWidget(self.action_btn, alignment=Qt.AlignmentFlag.AlignVCenter)
+            self.action_layout.addWidget(self.action_btn, alignment=Qt.AlignmentFlag.AlignVCenter)
+

@@ -5,7 +5,7 @@ Maker-Checker control, review notes, and cryptographic tamper verification.
 
 from typing import Any
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QHeaderView,
@@ -49,13 +49,31 @@ class WorkingPaperView(QWidget):
         layout.setContentsMargins(24, 20, 24, 24)
         layout.setSpacing(14)
 
-        # 1. Page Header
+        # 1. Page Header with Auto-Scaffolding
         self.header = PageHeader(
             title="Working Papers & Controls",
-            subtitle="Prepare, review, sign off, and cryptographically seal audit documentation.",
+            subtitle="Prepare, review, sign off, and cryptographically seal statutory audit documentation (SA 230).",
             action_text="+ New Working Paper",
             action_callback=self._on_new_wp_clicked,
         )
+        self.btn_scaffold = QPushButton("✨ Auto-Generate Schedule III Folders")
+        self.btn_scaffold.setStyleSheet("""
+            QPushButton {
+                background: #1e293b;
+                color: #38bdf8;
+                border: 1px solid #0284c7;
+                border-radius: 6px;
+                padding: 6px 12px;
+                font-weight: 600;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background: #0369a1;
+                color: #ffffff;
+            }
+        """)
+        self.btn_scaffold.clicked.connect(self._on_scaffold_clicked)
+        self.header.action_layout.insertWidget(0, self.btn_scaffold)
         layout.addWidget(self.header)
 
         # 2. Metric Summary Cards
@@ -76,7 +94,10 @@ class WorkingPaperView(QWidget):
         summary_layout.addWidget(self.card_signed)
         layout.addLayout(summary_layout)
 
-        # 3. Table Card & Empty State
+        # 3. Splitter Workspace (Left: Table, Right: Details / Evidence Preview)
+        from PySide6.QtWidgets import QSplitter, QTextEdit
+        self.splitter = QSplitter(Qt.Orientation.Horizontal)
+
         self.table_card = CardWidget("WORKING PAPERS DIRECTORY")
         self.table = QTableWidget()
         self.table.setColumnCount(8)
@@ -99,20 +120,44 @@ class WorkingPaperView(QWidget):
             )
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
+        self.table.itemSelectionChanged.connect(self._on_wp_selected)
 
         self.empty_state = EmptyStateWidget(
             title="No working papers created yet",
-            description="Create a working paper to document audit procedures, link evidence, and complete maker-checker signoff.",
-            action_text="+ New Working Paper",
-            action_callback=self._on_new_wp_clicked,
+            description="Generate standard Schedule III audit folders or create a custom working paper.",
+            action_text="+ Auto-Generate Folders",
+            action_callback=self._on_scaffold_clicked,
         )
 
         self.table_card.content_layout.addWidget(self.table)
         self.table_card.content_layout.addWidget(self.empty_state)
-        layout.addWidget(self.table_card)
-        layout.addStretch(1)
+        self.splitter.addWidget(self.table_card)
+
+        # Right Pane: Evidence & Details
+        self.preview_card = CardWidget("DOCUMENT EVIDENCE & TESTING PREVIEW")
+        self.preview_text = QTextEdit()
+        self.preview_text.setReadOnly(True)
+        self.preview_text.setStyleSheet("""
+            QTextEdit {
+                background: #0f172a;
+                border: 1px solid #334155;
+                border-radius: 6px;
+                color: #e2e8f0;
+                font-family: 'SF Mono', Menlo, Consolas, monospace;
+                font-size: 11px;
+                padding: 10px;
+            }
+        """)
+        self.preview_text.setPlaceholderText("Select a working paper row on the left to inspect testing procedures, audit conclusions, and linked evidence items.")
+        self.preview_card.content_layout.addWidget(self.preview_text)
+        self.splitter.addWidget(self.preview_card)
+        self.splitter.setStretchFactor(0, 6)
+        self.splitter.setStretchFactor(1, 4)
+
+        layout.addWidget(self.splitter, 1)
 
         self.refresh()
+
 
     def set_engagement(self, engagement: Any) -> None:
         if isinstance(engagement, Engagement):
@@ -238,9 +283,71 @@ class WorkingPaperView(QWidget):
             self.refresh()
             self.wp_changed.emit()
 
+    def _on_scaffold_clicked(self) -> None:
+        if not self.current_engagement:
+            QMessageBox.warning(
+                self, "No Engagement", "Please select an active audit engagement first."
+            )
+            return
+        created = self.wp_service.scaffold_schedule_iii_working_papers(self.current_engagement.id)
+        if created:
+            QMessageBox.information(
+                self,
+                "Schedule III Folders Scaffolded",
+                f"Successfully generated {len(created)} standard ICAI Schedule III statutory working papers.",
+            )
+        else:
+            QMessageBox.information(
+                self,
+                "Schedule III Folders",
+                "All standard Schedule III statutory audit working papers already exist for this engagement.",
+            )
+        self.refresh()
+        self.wp_changed.emit()
+
+    def _on_wp_selected(self) -> None:
+        selected_rows = self.table.selectedItems()
+        if not selected_rows:
+            return
+        row = selected_rows[0].row()
+        ref_item = self.table.item(row, 0)
+        if not ref_item or not self.current_engagement:
+            return
+
+        wps = self.wp_service.list_working_papers(self.current_engagement.id)
+        if row < len(wps):
+            wp = wps[row]
+            sections = self.wp_service.get_sections(wp.id)
+            links = self.wp_service.list_links(wp.id)
+
+            lines = [
+                "===========================================================",
+                f" WORKING PAPER: [{wp.index_reference}] {wp.title}",
+                f" Area: {wp.area} | Status: {wp.status.value}",
+                f" Preparer: {wp.preparer_id} | Version: {wp.version}",
+                f" Locked: {'YES (Tamper-Sealed)' if wp.is_locked else 'NO (Draft / Editable)'}",
+                f" Content Hash: {wp.content_hash or 'Not sealed yet'}",
+                "===========================================================\n",
+                "--- SECTIONS & PROCEDURAL TESTING ---",
+            ]
+
+            for s in sections:
+                lines.append(f"\n▶ {s.title}")
+                lines.append(f"  {s.content_markdown}")
+
+            lines.append("\n--- LINKED AUDIT EVIDENCE & PROCEDURES ---")
+            if links:
+                for l in links:
+                    lines.append(f"• [{l.get('link_type', 'evidence').upper()}] ID: {l.get('target_id')}")
+            else:
+                lines.append("• No external PDF / document evidence linked yet. Link evidence via Document Intelligence.")
+
+            self.preview_text.setText("\n".join(lines))
+
     def _verify_hash(self, wp_id: str) -> None:
         is_valid, msg = self.wp_service.verify_integrity(wp_id)
         if is_valid:
             QMessageBox.information(self, "Integrity Verified", msg)
         else:
             QMessageBox.critical(self, "TAMPER DETECTED", msg)
+

@@ -91,6 +91,54 @@ class WorkingPaperService:
             AuditEventRepository(session).add(AuditEvent(engagement_id=dto.engagement_id, actor=dto.preparer_id, action="Working Paper Created", details=f"Created Working Paper '{saved_wp.index_reference}': {saved_wp.title}"))
             return saved_wp
 
+    def scaffold_schedule_iii_working_papers(self, engagement_id: str, preparer_id: str = "auditor") -> list[WorkingPaper]:
+        """Automatically scaffold standard ICAI Schedule III statutory audit working papers."""
+        standard_heads = [
+            ("WP-A", "Cash & Cash Equivalents (Bank Confirmations & Reconciliation)", "Cash & Bank", "Verify 100% bank statement reconciliations, confirmation letters, and cash in hand verification."),
+            ("WP-B", "Trade Receivables (Ageing & Balance Confirmations)", "Receivables", "Inspect trade receivable ageing schedules (>6 months), SA 505 third-party balance confirmations, and expected credit loss (ECL) provisions."),
+            ("WP-C", "Property, Plant & Equipment (Fixed Assets & Depreciation)", "Fixed Assets", "Verify physical asset register, title deeds, capital additions vouching, and Schedule II depreciation rates."),
+            ("WP-D", "Borrowings & Financial Liabilities (Sanction Letters & Terms)", "Liabilities", "Verify loan agreements, hypothecation charges registered on MCA portal, and bank interest calculation."),
+            ("WP-E", "Revenue from Operations & Cut-Off Testing", "Revenue", "Perform year-end cut-off vouching across 15 days before/after balance sheet date, credit notes, and GST turnover tie-out."),
+            ("WP-F", "Statutory Dues (GST 2B/3B, TDS, PF, ESI Reconciliation)", "Statutory Dues", "Reconcile GSTR-2B eligible ITC against Purchase Register, and verify timely deposit of statutory dues per CARO 2020."),
+        ]
+
+        created = []
+        with self.db_manager.session_scope() as session:
+            wp_repo = WorkingPaperRepository(session)
+            existing = wp_repo.list_for_engagement(engagement_id)
+            existing_refs = {w.index_reference for w in existing}
+
+            for ref, title, area, scope_desc in standard_heads:
+                if ref in existing_refs:
+                    continue
+                wp = WorkingPaper(
+                    engagement_id=engagement_id,
+                    index_reference=ref,
+                    title=title,
+                    area=area,
+                    status=WorkingPaperStatusEnum.DRAFT,
+                    preparer_id=preparer_id,
+                )
+                saved_wp = wp_repo.add_working_paper(wp)
+                for order, s_title, content in [
+                    (1, "1. Objective & Scope", scope_desc),
+                    (2, "2. Work Done & Substantive Testing Summary", "Document vouching sample details, ledger extracts, and verification findings."),
+                    (3, "3. Conclusion & SA 700 Impact", "Auditor conclusion regarding material misstatement."),
+                ]:
+                    wp_repo.add_section(WorkingPaperSection(working_paper_id=saved_wp.id, section_order=order, title=s_title, content_markdown=content))
+                created.append(saved_wp)
+
+            if created:
+                AuditEventRepository(session).add(
+                    AuditEvent(
+                        engagement_id=engagement_id,
+                        actor=preparer_id,
+                        action="Schedule III Working Papers Scaffolded",
+                        details=f"Auto-generated {len(created)} standard ICAI Schedule III working paper templates.",
+                    )
+                )
+        return created
+
     def get_working_paper(self, wp_id: str) -> WorkingPaper:
         with self.db_manager.session_scope() as session:
             wp = WorkingPaperRepository(session).get_working_paper(wp_id)
@@ -98,9 +146,19 @@ class WorkingPaperService:
                 raise EntityNotFoundError("WorkingPaper", wp_id)
             return wp
 
+
     def list_working_papers(self, engagement_id: str) -> list[WorkingPaper]:
         with self.db_manager.session_scope() as session:
             return WorkingPaperRepository(session).list_for_engagement(engagement_id)
+
+    def get_sections(self, wp_id: str) -> list[WorkingPaperSection]:
+        with self.db_manager.session_scope() as session:
+            return WorkingPaperRepository(session).get_sections(wp_id)
+
+    def list_links(self, wp_id: str) -> list[dict[str, str]]:
+        with self.db_manager.session_scope() as session:
+            return WorkingPaperRepository(session).get_links(wp_id)
+
 
     def count_open_review_notes(self, wp_id: str) -> int:
         with self.db_manager.session_scope() as session:

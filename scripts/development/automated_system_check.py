@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 # Ensure src/ is in sys.path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "src"))
 
 def run_system_check() -> int:
     print("=" * 65)

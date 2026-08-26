@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 
 # Ensure src/ is in sys.path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "src"))
 
 def run_1000_verifications() -> int:
     print("=" * 70)

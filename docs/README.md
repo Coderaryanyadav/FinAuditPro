@@ -9,6 +9,7 @@ Welcome to the FinAuditPro documentation. FinAuditPro is an offline-first deskto
 ```text
 docs/
 ├── README.md                          # Master documentation index and sitemap
+├── guide.md                           # End-to-end operational guide & strategic assessment
 ├── installation.md                    # Installation and launch instructions
 ├── design.md                          # UI/UX design tokens and component specification
 ├── decisions.md                       # Architecture Decision Records (ADRs 001..005)
@@ -41,6 +42,7 @@ docs/
 ---
 
 ## 🚀 Quick Links
+- **[Comprehensive User Guide & Strategic Assessment](guide.md)**
 - **[Getting Started & Installation](installation.md)**
 - **[System & Database Architecture](architecture/system-architecture.md)**
 - **[Security Architecture & Threat Defense](security/security-guide.md)**
@@ -52,4 +54,5 @@ docs/
 - **[Canonical Security Policy](../.github/SECURITY.md)**
 - **[Contributing Guidelines](../.github/CONTRIBUTING.md)**
 - **[Code of Conduct](../.github/CODE_OF_CONDUCT.md)**
+
 

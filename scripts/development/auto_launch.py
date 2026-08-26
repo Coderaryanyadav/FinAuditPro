@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 # Ensure src/ is in sys.path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "src"))
 
 def main() -> None:
     from finauditpro.__main__ import main as app_main

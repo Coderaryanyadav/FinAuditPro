@@ -364,6 +364,7 @@ FinAuditPro/
 │
 ├── docs/                          # Structured Technical & Statutory Documentation
 │   ├── README.md                  # Master documentation map
+│   ├── guide.md                   # End-to-end operational guide & strategic assessment
 │   ├── installation.md            # Installation & launch guide
 │   ├── design.md                  # UI/UX design tokens & visual hierarchy specification
 │   ├── decisions.md               # Architecture Decision Records (ADRs 001..005)
@@ -399,6 +400,7 @@ FinAuditPro/
 
 Full documentation is available in the [`docs/`](docs/) directory:
 
+- **[Comprehensive User Guide & Strategic Assessment](docs/guide.md)**
 - **[Master Documentation Index](docs/README.md)**
 - **[Installation & Run Guide](docs/installation.md)**
 - **[System & Database Architecture](docs/architecture/system-architecture.md)**
@@ -414,6 +416,7 @@ Full documentation is available in the [`docs/`](docs/) directory:
 - **[Product Roadmap](docs/roadmap.md)**
 - **[Release Notes / Changelog](docs/CHANGELOG.md)**
 - **[Canonical Security Policy](.github/SECURITY.md)**
+
 
 
 

@@ -80,16 +80,17 @@ class EngagementView(QWidget):
             "Search engagements by client name, FY, or audit type..."
         )
         self.search_input.setStyleSheet(
-            "QLineEdit { border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px 10px; font-size: 12px; background: #FFFFFF; }"
+            "QLineEdit { border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 7px 12px; font-size: 13px; background: #FFFFFF; color: #0F172A; }"
             "QLineEdit:focus { border-color: #2563EB; }"
         )
         self.search_input.textChanged.connect(self._apply_filters)
 
         type_lbl = QLabel("Type:")
         type_lbl.setStyleSheet(
-            "font-size: 11px; font-weight: 700; color: #64748B; letter-spacing: 0.5px;"
+            "font-size: 12px; font-weight: 700; color: #475569; letter-spacing: 0.3px;"
         )
         self.type_combo = QComboBox()
+        self.type_combo.setMinimumWidth(160)
         self.type_combo.addItems(
             ["All Types", "Statutory Audit", "Tax Audit", "Internal Audit", "GST Audit"]
         )
@@ -97,9 +98,10 @@ class EngagementView(QWidget):
 
         status_lbl = QLabel("Status:")
         status_lbl.setStyleSheet(
-            "font-size: 11px; font-weight: 700; color: #64748B; letter-spacing: 0.5px;"
+            "font-size: 12px; font-weight: 700; color: #475569; letter-spacing: 0.3px;"
         )
         self.status_combo = QComboBox()
+        self.status_combo.setMinimumWidth(150)
         self.status_combo.addItems(
             ["All Statuses", "Planning", "In Progress", "Review", "Completed", "Archived"]
         )
@@ -107,8 +109,10 @@ class EngagementView(QWidget):
 
         f_layout.addWidget(s_lbl)
         f_layout.addWidget(self.search_input, stretch=1)
+        f_layout.addSpacing(6)
         f_layout.addWidget(type_lbl)
         f_layout.addWidget(self.type_combo)
+        f_layout.addSpacing(6)
         f_layout.addWidget(status_lbl)
         f_layout.addWidget(self.status_combo)
         filter_card.content_layout.addLayout(f_layout)

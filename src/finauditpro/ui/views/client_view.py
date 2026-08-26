@@ -72,16 +72,17 @@ class ClientView(QWidget):
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Search clients by name, PAN, GSTIN, or industry...")
         self.search_input.setStyleSheet(
-            "QLineEdit { border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px 10px; font-size: 12px; background: #FFFFFF; }"
+            "QLineEdit { border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 7px 12px; font-size: 13px; background: #FFFFFF; color: #0F172A; }"
             "QLineEdit:focus { border-color: #2563EB; }"
         )
         self.search_input.textChanged.connect(self._apply_filters)
 
         type_lbl = QLabel("Entity:")
         type_lbl.setStyleSheet(
-            "font-size: 11px; font-weight: 700; color: #64748B; letter-spacing: 0.5px;"
+            "font-size: 12px; font-weight: 700; color: #475569; letter-spacing: 0.3px;"
         )
         self.type_combo = QComboBox()
+        self.type_combo.setMinimumWidth(180)
         self.type_combo.addItems(
             [
                 "All Entities",
@@ -96,6 +97,7 @@ class ClientView(QWidget):
 
         f_layout.addWidget(s_lbl)
         f_layout.addWidget(self.search_input, stretch=1)
+        f_layout.addSpacing(8)
         f_layout.addWidget(type_lbl)
         f_layout.addWidget(self.type_combo)
         filter_card.content_layout.addLayout(f_layout)

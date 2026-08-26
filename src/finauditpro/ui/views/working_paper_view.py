@@ -63,23 +63,12 @@ class WorkingPaperView(QWidget):
             action_callback=self._on_new_wp_clicked,
         )
         self.btn_scaffold = QPushButton("Auto-Generate Schedule III Folders")
-        self.btn_scaffold.setStyleSheet("""
-            QPushButton {
-                background: #1e293b;
-                color: #38bdf8;
-                border: 1px solid #0284c7;
-                border-radius: 6px;
-                padding: 6px 12px;
-                font-weight: 600;
-                font-size: 12px;
-            }
-            QPushButton:hover {
-                background: #0369a1;
-                color: #ffffff;
-            }
-        """)
+        self.btn_scaffold.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_scaffold.setStyleSheet(
+            "QPushButton { background: #0F172A; color: #38BDF8; border: 1px solid #334155; border-radius: 6px; padding: 7px 14px; font-weight: 600; font-size: 12px; } QPushButton:hover { background: #1E293B; color: #7DD3FC; border-color: #0284C7; }"
+        )
         self.btn_scaffold.clicked.connect(self._on_scaffold_clicked)
-        self.header.action_layout.insertWidget(0, self.btn_scaffold)
+        self.header.action_layout.addWidget(self.btn_scaffold)
         layout.addWidget(self.header)
 
         # 2. Metric Summary Cards

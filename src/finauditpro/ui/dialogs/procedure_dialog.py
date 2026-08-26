@@ -1,5 +1,7 @@
 """Dialog for creating and configuring Audit Procedures."""
 
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -56,7 +58,7 @@ class ProcedureDialog(QDialog):
         self.code_input = QLineEdit()
         self.code_input.setPlaceholderText("e.g. PROC-REV-01")
 
-        self.type_combo = QComboBox()
+        self.type_combo = CustomComboBox()
         self.type_combo.addItems(
             [
                 "Substantive Test of Details",

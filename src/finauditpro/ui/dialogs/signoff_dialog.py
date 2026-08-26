@@ -1,5 +1,7 @@
 """Sign-off dialog with explicit legal disclaimers and content hash binding."""
 
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -69,13 +71,13 @@ class SignOffDialog(QDialog):
         # 2. Form Inputs
         form = QFormLayout()
 
-        self.level_combo = QComboBox()
+        self.level_combo = CustomComboBox()
         self.level_combo.addItem("Reviewed", SignOffLevelEnum.REVIEWED)
         self.level_combo.addItem("Signed Off (Final Lock)", SignOffLevelEnum.FINAL_SIGN_OFF)
 
         default_user = self.user_session.username if self.user_session else "Lead Auditor"
         self.user_id_input = QLineEdit(default_user)
-        self.role_input = QComboBox()
+        self.role_input = CustomComboBox()
         self.role_input.addItems(["Associate", "Senior", "Manager", "Partner", "Administrator"])
 
         if self.user_session:

@@ -64,13 +64,13 @@ class WorkingPaperView(QWidget):
         )
         self.btn_scaffold_paf = QPushButton("🏛️ + Seed PAF")
         self.btn_scaffold_paf.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_scaffold_paf.setStyleSheet("QPushButton { background: #FFFFFF; color: #0F766E; border: 1.5px solid #99F6E4; border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 12px; }")
+        self.btn_scaffold_paf.setStyleSheet("QPushButton { background: #FFFFFF; color: #0F766E; border: 1px solid #99F6E4; border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 12px; }")
         self.btn_scaffold_paf.clicked.connect(self._on_scaffold_paf_clicked)
         self.header.action_layout.addWidget(self.btn_scaffold_paf)
 
         self.btn_scaffold = QPushButton("⚡ Auto-Generate Schedule III")
         self.btn_scaffold.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_scaffold.setStyleSheet("QPushButton { background: #FFFFFF; color: #1E293B; border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 12px; }")
+        self.btn_scaffold.setStyleSheet("QPushButton { background: #FFFFFF; color: #1E293B; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 12px; }")
         self.btn_scaffold.clicked.connect(self._on_scaffold_clicked)
         self.header.action_layout.addWidget(self.btn_scaffold)
         layout.addWidget(self.header)
@@ -97,7 +97,6 @@ class WorkingPaperView(QWidget):
         self.radio_all.setChecked(True)
 
         for idx, rb in enumerate([self.radio_all, self.radio_paf, self.radio_caf]):
-            rb.setStyleSheet("QRadioButton { font-weight: 600; font-size: 12px; color: #334155; padding: 2px 6px; }")
             self.btn_group_filter.addButton(rb, idx)
             filter_box.addWidget(rb)
             rb.toggled.connect(self.refresh)
@@ -136,6 +135,10 @@ class WorkingPaperView(QWidget):
         self.preview_text = QTextEdit()
         self.preview_text.setReadOnly(True)
         self.preview_text.setStyleSheet("QTextEdit { background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-family: 'SF Mono', monospace; font-size: 11px; padding: 10px; }")
+        from PySide6.QtGui import QPalette, QColor
+        pal = self.preview_text.palette()
+        pal.setColor(QPalette.ColorRole.PlaceholderText, QColor("#94a3b8"))
+        self.preview_text.setPalette(pal)
         self.preview_text.setPlaceholderText("Select a working paper row on the left to inspect testing procedures, audit conclusions, and linked evidence items.")
         self.preview_card.content_layout.addWidget(self.preview_text)
         self.splitter.addWidget(self.preview_card)

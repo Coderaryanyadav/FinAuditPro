@@ -108,7 +108,7 @@ class CardWidget(QFrame):
         if title:
             h_row = QHBoxLayout()
             h_lbl = QLabel(title)
-            h_lbl.setStyleSheet("font-size: 11px; font-weight: 700; color: #64748B; border: none; background: transparent; letter-spacing: 0.5px;")
+            h_lbl.setStyleSheet("font-size: 11px; font-weight: 700; color: #64748B; border: none; background: transparent;")
             h_row.addWidget(h_lbl)
             h_row.addStretch()
             layout.addLayout(h_row)
@@ -135,9 +135,9 @@ class MetricCard(QFrame):
         layout.setContentsMargins(14, 10, 14, 10)
         layout.setSpacing(2)
         self.title_lbl = QLabel(title)
-        self.title_lbl.setStyleSheet("font-size: 11px; font-weight: 600; color: #64748B; border: none; background: transparent; letter-spacing: 0.5px;")
+        self.title_lbl.setStyleSheet("font-size: 11px; font-weight: 600; color: #64748B; border: none; background: transparent;")
         self.value_lbl = QLabel(value)
-        self.value_lbl.setStyleSheet("font-size: 24px; font-weight: 600; color: #0F172A; border: none; background: transparent; letter-spacing: -0.6px;")
+        self.value_lbl.setStyleSheet("font-size: 24px; font-weight: 600; color: #0F172A; border: none; background: transparent;")
         sub_row = QHBoxLayout()
         sub_row.setContentsMargins(0, 0, 0, 0)
         self.sub_lbl = QLabel(subtitle)
@@ -307,21 +307,24 @@ class EmptyStateWidget(QFrame):
     def __init__(self, title: str, description: str, action_text: str = "", action_callback: object = None, glyph: str = "", parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setObjectName("emptyStateWidget")
+        self.setMinimumHeight(260)
         self.setStyleSheet("QFrame#emptyStateWidget { background-color: #FAFBFC; border: 1.5px dashed #CBD5E1; border-radius: 8px; }")
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 28, 24, 28)
-        layout.setSpacing(10)
-        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.setContentsMargins(24, 32, 24, 32)
+        layout.setSpacing(12)
+        layout.addStretch()
         layout.addWidget(EmptyStateIconWidget(), alignment=Qt.AlignmentFlag.AlignCenter)
+        
         t_lbl = QLabel(title)
         t_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        t_lbl.setStyleSheet("font-size: 15px; font-weight: 700; color: #0F172A; border: none; background: transparent;")
+        t_lbl.setStyleSheet("font-size: 17px; font-weight: 700; color: #0F172A; border: none; background: transparent; padding-bottom: 2px;")
         layout.addWidget(t_lbl)
+        
         d_lbl = QLabel(description)
         d_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         d_lbl.setWordWrap(True)
-        d_lbl.setStyleSheet("font-size: 13px; color: #64748B; border: none; background: transparent; padding: 4px 16px 8px 16px;")
-        d_lbl.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.MinimumExpanding)
+        d_lbl.setStyleSheet("font-size: 14px; color: #64748B; border: none; background: transparent; padding-bottom: 4px;")
+        d_lbl.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         layout.addWidget(d_lbl)
 
         if action_text and action_callback:
@@ -331,6 +334,8 @@ class EmptyStateWidget(QFrame):
             btn.clicked.connect(action_callback)
             layout.addSpacing(6)
             layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        layout.addStretch()
 
 
 class LoadingStateWidget(QFrame):
@@ -381,7 +386,7 @@ class PageHeader(QFrame):
         left_v.setSpacing(2)
 
         self.title_lbl = QLabel(title)
-        self.title_lbl.setStyleSheet("font-size: 22px; font-weight: 600; color: #0F172A; letter-spacing: -0.4px; border: none; background: transparent;")
+        self.title_lbl.setStyleSheet("font-size: 22px; font-weight: 600; color: #0F172A; border: none; background: transparent;")
         left_v.addWidget(self.title_lbl)
         if subtitle:
             self.subtitle_lbl = QLabel(subtitle)

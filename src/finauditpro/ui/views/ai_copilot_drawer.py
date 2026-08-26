@@ -92,7 +92,7 @@ class AICopilotDrawer(QFrame):
 
         # Quick Actions
         lbl_quick = QLabel("Quick Statutory Prompts")
-        lbl_quick.setStyleSheet("font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;")
+        lbl_quick.setStyleSheet("font-size: 11px; font-weight: 600; color: #64748b;")
         layout.addWidget(lbl_quick)
 
         quick_box = QVBoxLayout()

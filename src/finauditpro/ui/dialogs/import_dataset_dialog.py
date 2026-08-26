@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -80,7 +82,7 @@ class ImportDatasetDialog(QDialog):
         self.ds_name_input = QLineEdit()
         self.ds_name_input.setPlaceholderText("e.g. FY 2025-26 General Ledger")
 
-        self.ds_type_combo = QComboBox()
+        self.ds_type_combo = CustomComboBox()
         for dt in DatasetTypeEnum:
             self.ds_type_combo.addItem(dt.value, dt)
 
@@ -174,7 +176,7 @@ class ImportDatasetDialog(QDialog):
             self.mapping_table.insertRow(row)
             self.mapping_table.setItem(row, 0, QTableWidgetItem(field_label))
 
-            combo = QComboBox()
+            combo = CustomComboBox()
             combo.addItem("-- Not Mapped --", "")
             for h in self.headers:
                 combo.addItem(h, h)

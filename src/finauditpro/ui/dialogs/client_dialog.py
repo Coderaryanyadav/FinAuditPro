@@ -1,6 +1,8 @@
 """Client creation and editing dialog."""
 
 from PySide6.QtCore import Qt
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -81,7 +83,7 @@ class ClientDialog(QDialog):
         self.name_input.setPlaceholderText("e.g. Reliance Green Tech Pvt Ltd")
         self.name_input.setStyleSheet(field_style)
 
-        self.entity_type_combo = QComboBox()
+        self.entity_type_combo = CustomComboBox()
         for et in EntityTypeEnum:
             self.entity_type_combo.addItem(et.value, et)
         self.entity_type_combo.setStyleSheet(field_style)

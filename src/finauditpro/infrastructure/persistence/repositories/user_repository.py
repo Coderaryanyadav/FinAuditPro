@@ -49,6 +49,8 @@ class UserRepository:
             role=RoleEnum(model.role),
             is_active=model.is_active,
             must_change_password=model.must_change_password,
+            totp_secret=model.totp_secret,
+            is_totp_enabled=model.is_totp_enabled,
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
@@ -62,6 +64,8 @@ class UserRepository:
             role=user.role.value if hasattr(user.role, "value") else str(user.role),
             is_active=user.is_active,
             must_change_password=user.must_change_password,
+            totp_secret=user.totp_secret,
+            is_totp_enabled=user.is_totp_enabled,
             created_at=user.created_at,
             updated_at=user.updated_at,
         )
@@ -138,15 +142,8 @@ class UserRepository:
             user_id, new_password=new_password, must_change_password=must_change_password
         )
 
-    def seed_default_admin_if_empty(self) -> User | None:
-        """Seed default admin user (admin@finauditpro.com / Admin@123) if users table is empty."""
+    def is_empty(self) -> bool:
+        """Check if the users table is completely empty."""
         stmt = select(UserModel).limit(1)
         first_user = self.session.scalars(stmt).first()
-        if not first_user:
-            return self.create_user_with_password(
-                username="admin@finauditpro.com",
-                password="Admin@123",  # noqa: S106
-                role=RoleEnum.ADMINISTRATOR,
-                must_change_password=True,
-            )
-        return None
+        return first_user is None

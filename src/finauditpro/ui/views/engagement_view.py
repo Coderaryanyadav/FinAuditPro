@@ -4,6 +4,8 @@ Enterprise directory with audit lifecycle filters, status badges, and responsive
 """
 
 from PySide6.QtCore import Qt, Signal
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QComboBox,
     QHBoxLayout,
@@ -11,6 +13,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMessageBox,
+    QPushButton,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -73,23 +76,23 @@ class EngagementView(QWidget):
 
         s_lbl = QLabel("Search:")
         s_lbl.setStyleSheet(
-            "font-size: 11px; font-weight: 700; color: #64748B; letter-spacing: 0.5px;"
+            "font-size: 11px; font-weight: 700; color: #64748B;"
         )
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText(
             "Search engagements by client name, FY, or audit type..."
         )
         self.search_input.setStyleSheet(
-            "QLineEdit { border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 7px 12px; font-size: 13px; background: #FFFFFF; color: #0F172A; }"
+            "QLineEdit { border: 1px solid #CBD5E1; border-radius: 6px; padding: 7px 12px; font-size: 13px; background: #FFFFFF; color: #0F172A; }"
             "QLineEdit:focus { border-color: #2563EB; }"
         )
         self.search_input.textChanged.connect(self._apply_filters)
 
         type_lbl = QLabel("Type:")
         type_lbl.setStyleSheet(
-            "font-size: 12px; font-weight: 700; color: #475569; letter-spacing: 0.3px;"
+            "font-size: 12px; font-weight: 700; color: #475569;"
         )
-        self.type_combo = QComboBox()
+        self.type_combo = CustomComboBox()
         self.type_combo.setMinimumWidth(160)
         self.type_combo.addItems(
             ["All Types", "Statutory Audit", "Tax Audit", "Internal Audit", "GST Audit"]
@@ -98,17 +101,23 @@ class EngagementView(QWidget):
 
         status_lbl = QLabel("Status:")
         status_lbl.setStyleSheet(
-            "font-size: 12px; font-weight: 700; color: #475569; letter-spacing: 0.3px;"
+            "font-size: 12px; font-weight: 700; color: #475569;"
         )
-        self.status_combo = QComboBox()
+        self.status_combo = CustomComboBox()
         self.status_combo.setMinimumWidth(150)
         self.status_combo.addItems(
             ["All Statuses", "Planning", "In Progress", "Review", "Completed", "Archived"]
         )
         self.status_combo.currentIndexChanged.connect(self._apply_filters)
 
+        clear_btn = QPushButton("Clear")
+        clear_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        clear_btn.setStyleSheet("QPushButton { background-color: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 14px; font-weight: 500; } QPushButton:hover { background-color: #F1F5F9; color: #1E293B; border-color: #94A3B8; }")
+        clear_btn.clicked.connect(self.search_input.clear)
+
         f_layout.addWidget(s_lbl)
         f_layout.addWidget(self.search_input, stretch=1)
+        f_layout.addWidget(clear_btn)
         f_layout.addSpacing(6)
         f_layout.addWidget(type_lbl)
         f_layout.addWidget(self.type_combo)

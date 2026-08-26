@@ -1,5 +1,7 @@
 """Dialog for creating and editing Audit Risks."""
 
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -60,12 +62,12 @@ class RiskDialog(QDialog):
         self.category_input = QLineEdit()
         self.category_input.setText("Revenue & Statutory Compliance")
 
-        self.inherent_combo = QComboBox()
+        self.inherent_combo = CustomComboBox()
         for s in RiskSeverityEnum:
             self.inherent_combo.addItem(s.value, s)
         self.inherent_combo.setCurrentText("High")
 
-        self.control_combo = QComboBox()
+        self.control_combo = CustomComboBox()
         for s in RiskSeverityEnum:
             self.control_combo.addItem(s.value, s)
         self.control_combo.setCurrentText("Medium")

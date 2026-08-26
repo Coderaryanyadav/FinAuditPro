@@ -79,7 +79,7 @@ class LoginDialog(QDialog):
         h1 = QLabel("Built for\nstatutory auditors.")
         h1.setStyleSheet(
             "font-size: 34px; font-weight: 800; color: #ffffff; border: none; background: transparent;"
-            "line-height: 1.2; letter-spacing: -0.6px;"
+            "line-height: 1.2;"
         )
         h1.setWordWrap(True)
         ll.addWidget(h1)
@@ -158,7 +158,8 @@ class LoginDialog(QDialog):
         lbl_e.setStyleSheet(
             "font-size: 11px; font-weight: 600; color: #374151; margin-bottom: 4px; border: none; background: transparent;"
         )
-        self.input_user = QLineEdit("admin@finauditpro.com")
+        self.input_user = QLineEdit()
+        self.input_user.setPlaceholderText("Enter your email")
         self.input_user.setStyleSheet(
             "QLineEdit { border: 1.5px solid #D1D5DB; border-radius: 6px; padding: 10px 14px; background: #FFFFFF; color: #111827; font-size: 13px; }"
             "QLineEdit:focus { border-color: #007AFF; background: #FFFFFF; }"
@@ -168,7 +169,8 @@ class LoginDialog(QDialog):
         lbl_p.setStyleSheet(
             "font-size: 11px; font-weight: 600; color: #374151; margin-top: 14px; margin-bottom: 4px; border: none; background: transparent;"
         )
-        self.input_pass = QLineEdit("Admin@123")
+        self.input_pass = QLineEdit()
+        self.input_pass.setPlaceholderText("Enter your password")
         self.input_pass.setEchoMode(QLineEdit.EchoMode.Password)
         self.input_pass.setStyleSheet(
             "QLineEdit { border: 1.5px solid #D1D5DB; border-radius: 6px; padding: 10px 14px; background: #FFFFFF; color: #111827; font-size: 13px; }"
@@ -188,10 +190,22 @@ class LoginDialog(QDialog):
 
         toggle_login_pwd.triggered.connect(_toggle_login_pwd_visibility)
 
+        self.input_totp = QLineEdit()
+        self.input_totp.setPlaceholderText("6-Digit 2FA Code")
+        self.input_totp.setMaxLength(6)
+        self.input_totp.setEchoMode(QLineEdit.EchoMode.Password)
+        self.input_totp.setStyleSheet(
+            "QLineEdit { border: 1px solid #CBD5E1; border-radius: 6px; padding: 10px 14px; font-size: 13px; background: #FFFFFF; color: #0F172A; }"
+            "QLineEdit:focus { border-color: #2563EB; }"
+        )
+        self.input_totp.setVisible(False)
+        self.input_totp.returnPressed.connect(self._handle_login)
+
         fl.addWidget(lbl_e)
         fl.addWidget(self.input_user)
         fl.addWidget(lbl_p)
         fl.addWidget(self.input_pass)
+        fl.addWidget(self.input_totp)
         fl.addSpacing(20)
 
         # Submit CTA
@@ -219,7 +233,7 @@ class LoginDialog(QDialog):
         fl.addSpacing(8)
 
         hint = QLabel(
-            "Fully offline · No data leaves your machine\nDefault login: admin@finauditpro.com / Admin@123"
+            "Fully offline · No data leaves your machine"
         )
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
         hint.setStyleSheet(
@@ -235,6 +249,7 @@ class LoginDialog(QDialog):
     def _handle_login(self) -> None:
         user = self.input_user.text().strip()
         pwd = self.input_pass.text().strip()
+        totp = self.input_totp.text().strip() if self.input_totp.isVisible() else None
 
         if not user or not pwd:
             QMessageBox.warning(
@@ -248,7 +263,7 @@ class LoginDialog(QDialog):
             return
 
         try:
-            session = self.auth_service.authenticate(user, pwd)
+            session = self.auth_service.authenticate(user, pwd, totp_token=totp)
             if session.must_change_password:
                 from finauditpro.ui.dialogs.change_password_dialog import ChangePasswordDialog
 
@@ -273,7 +288,14 @@ class LoginDialog(QDialog):
             self.login_successful.emit(session.username, role_str)
             self.accept()
         except ValidationError as ex:
-            QMessageBox.warning(self, "Authentication Failed", str(ex))
+            if str(ex) == "TOTP_REQUIRED":
+                self.input_totp.setVisible(True)
+                self.input_user.setEnabled(False)
+                self.input_pass.setEnabled(False)
+                self.btn_submit.setText("Verify 2FA")
+                self.input_totp.setFocus()
+            else:
+                QMessageBox.warning(self, "Authentication Failed", str(ex))
         except Exception as ex:
             QMessageBox.critical(self, "Login Error", f"An unexpected error occurred: {ex}")
 

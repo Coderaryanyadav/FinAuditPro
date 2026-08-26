@@ -37,7 +37,12 @@ class SelfCheckDialog(QDialog):
         self.table.setHorizontalHeaderLabels(
             ["Prerequisite Name", "Status", "Probe Message", "Actionable Remediation"]
         )
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        self.table.setWordWrap(True)
+        self.resize(950, 450)
         layout.addWidget(self.table)
 
         self.refresh_btn = QPushButton("Re-Run Diagnostics")
@@ -63,3 +68,5 @@ class SelfCheckDialog(QDialog):
             self.table.setItem(row, 1, status_item)
             self.table.setItem(row, 2, QTableWidgetItem(item.message))
             self.table.setItem(row, 3, QTableWidgetItem(item.remediation or "—"))
+
+        self.table.resizeRowsToContents()

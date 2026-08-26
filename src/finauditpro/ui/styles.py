@@ -4,6 +4,7 @@ Apple-grade macOS & Linear enterprise desktop UI design system.
 """
 
 from PySide6.QtGui import QColor
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import QGraphicsDropShadowEffect, QWidget
 
 GLOBAL_QSS = """
@@ -38,7 +39,7 @@ QDialog { background-color: #FFFFFF; }
 QLineEdit, QTextEdit, QPlainTextEdit, QDateEdit, QDateTimeEdit {
     background-color: #FFFFFF;
     color: #0F172A;
-    border: 1.5px solid #E2E8F0;
+    border: 1px solid #E2E8F0;
     border-radius: 7px;
     padding: 8px 12px;
     font-size: 14px;
@@ -60,6 +61,33 @@ QLineEdit:disabled, QTextEdit:disabled, QPlainTextEdit:disabled, QDateEdit:disab
 
 QScrollArea, QScrollArea > QWidget, QScrollArea #qt_scrollarea_viewport {
     background-color: #F8FAFC; border: none;
+}
+
+/* ── CHECKBOX ────────────────────────────────────────────────────────────── */
+QCheckBox {
+    spacing: 8px;
+    color: #0F172A;
+    font-size: 14px;
+    background: transparent;
+}
+QCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1px solid #CBD5E1;
+    background-color: #FFFFFF;
+}
+QCheckBox::indicator:hover {
+    border-color: #2563EB;
+}
+QCheckBox::indicator:checked {
+    background-color: #2563EB;
+    border-color: #2563EB;
+    image: url("data:image/svg+xml;utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='white'%20stroke-width='3'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpolyline%20points='20%206%209%2017%204%2012'%3E%3C/polyline%3E%3C/svg%3E");
+}
+QCheckBox::indicator:disabled {
+    background-color: #F1F5F9;
+    border-color: #E2E8F0;
 }
 
 /* ── SCROLLBARS ──────────────────────────────────────────────────────────── */
@@ -99,13 +127,12 @@ QLabel#sidebarLogoBadge {
 }
 QLabel#sidebarAppTitle {
     font-size: 17px; font-weight: 700;
-    color: #0F172A; border: none; letter-spacing: -0.4px;
+    color: #0F172A; border: none;
 }
 QLabel#sidebarSectionLabel {
     font-size: 11px; font-weight: 700;
     color: #94A3B8;
     padding: 14px 12px 6px 12px; border: none;
-    letter-spacing: 0.8px; text-transform: uppercase;
 }
 QFrame#sidebarProfileFrame {
     border-top: 1px solid #F1F5F9;
@@ -187,132 +214,60 @@ QTabBar::tab:selected {
     border-color: #CBD5E1; border-bottom: 2px solid #FFFFFF; font-weight: 700;
 }
 
-/* ── COMBOBOXES ──────────────────────────────────────────────────────────── */
 QComboBox {
-    border: 1.5px solid #CBD5E1;
+    border: 1px solid #CBD5E1;
     border-radius: 6px;
-    padding: 7px 36px 7px 12px;
+    padding: 6px 12px;
+    font-size: 13px;
     background-color: #FFFFFF;
     color: #0F172A;
-    font-size: 14px;
-    font-weight: 500;
-    min-height: 36px;
+    min-height: 24px;
 }
-QComboBox:hover {
-    border-color: #94A3B8;
-    background-color: #FAFBFC;
-}
-QComboBox:focus {
-    border-color: #2563EB;
-}
+QComboBox:focus { border-color: #2563EB; }
+
 QComboBox::drop-down {
     subcontrol-origin: padding;
     subcontrol-position: top right;
-    width: 30px;
-    border-left: 1px solid #E2E8F0;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-    background-color: #F8FAFC;
+    width: 24px;
+    border-left-width: 0px;
 }
-QComboBox::drop-down:hover {
-    background-color: #F1F5F9;
-}
+
 QComboBox::down-arrow {
-    image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M2 2L6 6L10 2' stroke='%23475569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>");
-    width: 12px;
-    height: 8px;
-    margin-right: 0px;
+    image: none;
+    width: 0px;
+    height: 0px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid #64748B;
+    margin-right: 10px;
 }
+
 QComboBox QAbstractItemView {
     background-color: #FFFFFF;
-    border: 1.5px solid #CBD5E1;
-    border-radius: 6px;
-    color: #0F172A;
+    border: 1px solid #CBD5E1;
     selection-background-color: #EFF6FF;
     selection-color: #2563EB;
     outline: none;
-    padding: 4px;
-    font-size: 14px;
+    color: #0F172A;
 }
+
 QComboBox QAbstractItemView::item {
     background-color: #FFFFFF;
     color: #0F172A;
-    padding: 8px 12px;
-    min-height: 30px;
-    border-radius: 4px;
+    min-height: 28px;
+    padding: 6px;
 }
+
 QComboBox QAbstractItemView::item:hover {
     background-color: #F8FAFC;
     color: #0F172A;
 }
+
 QComboBox QAbstractItemView::item:selected {
     background-color: #EFF6FF;
     color: #2563EB;
-    font-weight: 600;
 }
 
-/* Active Engagement Context Selector Dropdown */
-QComboBox#clientSelectorCombo {
-    border: 1.5px solid #CBD5E1;
-    border-radius: 6px;
-    padding: 7px 36px 7px 12px;
-    background-color: #FFFFFF;
-    color: #0F172A;
-    font-size: 13px;
-    font-weight: 600;
-    min-height: 36px;
-}
-QComboBox#clientSelectorCombo:hover {
-    border-color: #94A3B8;
-    background-color: #FAFBFC;
-}
-QComboBox#clientSelectorCombo:focus {
-    border-color: #2563EB;
-}
-QComboBox#clientSelectorCombo::drop-down {
-    subcontrol-origin: padding;
-    subcontrol-position: top right;
-    width: 30px;
-    border-left: 1px solid #E2E8F0;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-    background-color: #F8FAFC;
-}
-QComboBox#clientSelectorCombo::drop-down:hover {
-    background-color: #F1F5F9;
-}
-QComboBox#clientSelectorCombo::down-arrow {
-    image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M2 2L6 6L10 2' stroke='%232563EB' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>");
-    width: 12px;
-    height: 8px;
-}
-QComboBox#clientSelectorCombo QAbstractItemView {
-    background-color: #FFFFFF;
-    border: 1.5px solid #CBD5E1;
-    border-radius: 6px;
-    color: #0F172A;
-    selection-background-color: #EFF6FF;
-    selection-color: #2563EB;
-    outline: none;
-    padding: 4px;
-    font-size: 13px;
-}
-QComboBox#clientSelectorCombo QAbstractItemView::item {
-    background-color: #FFFFFF;
-    color: #0F172A;
-    padding: 8px 12px;
-    min-height: 30px;
-    border-radius: 4px;
-}
-QComboBox#clientSelectorCombo QAbstractItemView::item:hover {
-    background-color: #F8FAFC;
-    color: #0F172A;
-}
-QComboBox#clientSelectorCombo QAbstractItemView::item:selected {
-    background-color: #EFF6FF;
-    color: #2563EB;
-    font-weight: 600;
-}
 
 /* ── BUTTONS ─────────────────────────────────────────────────────────────── */
 QPushButton {
@@ -329,7 +284,7 @@ QPushButton:disabled { color: #94A3B8; background-color: #F8FAFC; border-color: 
 QPushButton#primaryBtn, QPushButton#primaryButton {
     background-color: #2563EB; color: #FFFFFF;
     font-size: 14px; font-weight: 600; border-radius: 6px;
-    padding: 8px 18px; border: none; min-height: 20px;
+    padding: 8px 18px; border: 1px solid #2563EB; min-height: 20px;
 }
 QPushButton#primaryBtn:hover, QPushButton#primaryButton:hover { background-color: #1D4ED8; }
 QPushButton#primaryBtn:pressed, QPushButton#primaryButton:pressed { background-color: #1E40AF; }
@@ -341,8 +296,8 @@ QFrame#needsAttentionPanel, QFrame#auditWorkspacePanel {
     background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px;
 }
 
-QLabel#metricTitle { color: #64748B; font-size: 11px; font-weight: 600; border: none; background: transparent; letter-spacing: 0.5px; }
-QLabel#metricValue { color: #0F172A; font-size: 24px; font-weight: 600; border: none; background: transparent; letter-spacing: -0.6px; }
+QLabel#metricTitle { color: #64748B; font-size: 11px; font-weight: 600; border: none; background: transparent; }
+QLabel#metricValue { color: #0F172A; font-size: 24px; font-weight: 600; border: none; background: transparent; }
 
 /* ── TABLE WIDGET ────────────────────────────────────────────────────────── */
 QTableWidget, QTableView {
@@ -354,7 +309,7 @@ QTableWidget::item:hover, QTableView::item:hover { background-color: #F8FAFC; }
 QTableWidget::item:selected, QTableView::item:selected { background-color: #EFF6FF; color: #1D4ED8; }
 QHeaderView::section {
     background-color: #FAFBFC; color: #64748B;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+    font-size: 11px; font-weight: 600;
     border: none; border-bottom: 1px solid #E2E8F0; padding: 6px 12px;
 }
 """

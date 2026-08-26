@@ -5,6 +5,8 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -77,7 +79,7 @@ class DocumentViewerDialog(QDialog):
         cat_box = QHBoxLayout()
         cat_lbl = QLabel("Category:")
         cat_lbl.setStyleSheet("font-size: 12px; font-weight: 600; color: #0F172A;")
-        self.cat_combo = QComboBox()
+        self.cat_combo = CustomComboBox()
         for cat in DocumentCategoryEnum:
             self.cat_combo.addItem(cat.value, cat)
         curr_cat = doc.human_category or doc.document_category
@@ -124,7 +126,7 @@ class DocumentViewerDialog(QDialog):
         page_lbl = QLabel("Page:")
         page_lbl.setStyleSheet("font-size: 12px; font-weight: 600; color: #0F172A;")
 
-        self.page_combo = QComboBox()
+        self.page_combo = CustomComboBox()
         for p in range(1, self.details.document.page_count + 1):
             self.page_combo.addItem(f"Page {p} of {self.details.document.page_count}", p)
         if self.details.document.page_count == 0:

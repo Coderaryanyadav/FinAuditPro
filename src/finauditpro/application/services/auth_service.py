@@ -15,14 +15,35 @@ class AuthService:
 
     def __init__(self, db_manager: DatabaseManager) -> None:
         self.db_manager = db_manager
-        # Automatically ensure default administrator is present
-        self.ensure_default_admin()
 
-    def ensure_default_admin(self) -> User | None:
-        """Seed default admin if no users exist in database."""
+    def is_first_run(self) -> bool:
+        """Check if this is a fresh database requiring initial admin setup."""
         with self.db_manager.session_scope() as session:
             repo = UserRepository(session)
-            return repo.seed_default_admin_if_empty()
+            return repo.is_empty()
+
+    def setup_initial_admin(self, email: str, password: str) -> UserSession:
+        """Create the very first administrator account during onboarding."""
+        cleaned_email = email.strip().lower()
+        if not cleaned_email or "@" not in cleaned_email:
+            raise ValidationError("A valid email address is required.")
+        self.validate_password_complexity(password)
+        with self.db_manager.session_scope() as session:
+            repo = UserRepository(session)
+            if not repo.is_empty():
+                raise ValidationError("Administrator account already exists.")
+            user = repo.create_user_with_password(
+                username=cleaned_email,
+                password=password,
+                role=RoleEnum.ADMINISTRATOR,
+                must_change_password=False,
+            )
+            return UserSession(
+                user_id=user.id,
+                username=user.username,
+                role=user.role,
+                must_change_password=user.must_change_password,
+            )
 
     def reset_to_default_admin(self) -> None:
         """Reset default administrator credentials."""
@@ -50,7 +71,7 @@ class AuthService:
                 "New password cannot be the default administrator password (Admin@123)."
             )
 
-    def authenticate(self, username: str, password: str) -> UserSession:
+    def authenticate(self, username: str, password: str, totp_token: str | None = None) -> UserSession:
         """Verify username and password against database and return UserSession."""
         cleaned_user = username.strip().lower()
         if not cleaned_user or not password:
@@ -69,6 +90,12 @@ class AuthService:
 
             if not verify_password(password, user.password_hash, user.salt):
                 raise ValidationError("Invalid username or password.")
+                
+            if user.is_totp_enabled:
+                if not totp_token:
+                    raise ValidationError("TOTP_REQUIRED")
+                if not self.verify_totp_token(user.totp_secret, totp_token):
+                    raise ValidationError("Invalid 2FA token.")
 
             return UserSession(
                 user_id=user.id,
@@ -153,3 +180,47 @@ class AuthService:
         with self.db_manager.session_scope() as session:
             repo = UserRepository(session)
             return repo.list_all()
+
+    def generate_totp_secret(self) -> str:
+        """Generate a new secure TOTP base32 secret."""
+        import pyotp
+        return pyotp.random_base32()
+
+    def get_totp_uri(self, secret: str, username: str) -> str:
+        """Generate provisioning URI for QR code generation."""
+        import pyotp
+        return pyotp.totp.TOTP(secret).provisioning_uri(
+            name=username, issuer_name="FinAuditPro"
+        )
+
+    def verify_totp_token(self, secret: str, token: str) -> bool:
+        """Verify a 6-digit TOTP token against a secret."""
+        import pyotp
+        totp = pyotp.TOTP(secret)
+        return totp.verify(token)
+
+    def enable_totp(self, user_id: str, secret: str, token: str) -> bool:
+        """Verify token and permanently enable TOTP for the user."""
+        if not self.verify_totp_token(secret, token):
+            raise ValidationError("Invalid 2FA token.")
+        
+        with self.db_manager.session_scope() as session:
+            from finauditpro.infrastructure.persistence.models import UserModel
+            model = session.get(UserModel, user_id)
+            if not model:
+                raise ValidationError("User not found.")
+            model.totp_secret = secret
+            model.is_totp_enabled = True
+            session.flush()
+        return True
+
+    def disable_totp(self, user_id: str) -> None:
+        """Disable TOTP for the user."""
+        with self.db_manager.session_scope() as session:
+            from finauditpro.infrastructure.persistence.models import UserModel
+            model = session.get(UserModel, user_id)
+            if not model:
+                raise ValidationError("User not found.")
+            model.totp_secret = None
+            model.is_totp_enabled = False
+            session.flush()

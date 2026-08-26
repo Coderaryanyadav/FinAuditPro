@@ -81,7 +81,12 @@ class InspectionView(QWidget):
         layout.addLayout(stats_layout)
 
         # Inspection Tabs
+        from PySide6.QtCore import Qt
         self.tabs = QTabWidget()
+        self.tabs.setUsesScrollButtons(True)
+        self.tabs.setElideMode(Qt.TextElideMode.ElideNone)
+        self.tabs.tabBar().setElideMode(Qt.TextElideMode.ElideNone)
+        self.tabs.tabBar().setExpanding(False)
 
         # 1. Working Papers Inspection
         wp_tab = QWidget()

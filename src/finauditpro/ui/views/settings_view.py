@@ -91,6 +91,13 @@ class SettingsView(QWidget):
         btn_change_pwd.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_change_pwd.clicked.connect(self._on_change_password_clicked)
         sec_btn_row.addWidget(btn_change_pwd)
+
+        btn_2fa = QPushButton("Manage Two-Factor Auth (2FA)")
+        btn_2fa.setObjectName("secondaryButton")
+        btn_2fa.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_2fa.clicked.connect(self._on_manage_2fa_clicked)
+        sec_btn_row.addWidget(btn_2fa)
+
         sec_btn_row.addStretch()
         sec_layout.addLayout(sec_btn_row)
 
@@ -105,7 +112,7 @@ class SettingsView(QWidget):
 
         field_style = """
             QLineEdit {
-                border: 1.5px solid #CBD5E1; border-radius: 6px;
+                border: 1px solid #CBD5E1; border-radius: 6px;
                 padding: 7px 12px; font-size: 13px; color: #0F172A; background: #FFFFFF;
                 min-width: 320px;
             }
@@ -200,6 +207,14 @@ class SettingsView(QWidget):
             user_session=session,
             is_forced=False,
         )
+        dlg.exec()
+
+    def _on_manage_2fa_clicked(self) -> None:
+        win = self.window()
+        if not hasattr(win, "current_user_session") or not win.current_user_session:
+            return
+        from finauditpro.ui.dialogs.totp_dialog import TOTPDialog
+        dlg = TOTPDialog(self.window(), auth_service=self.auth_service, user_session=win.current_user_session)
         dlg.exec()
 
     def _open_self_check(self) -> None:

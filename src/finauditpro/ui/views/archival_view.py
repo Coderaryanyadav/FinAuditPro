@@ -107,7 +107,7 @@ class ArchivalView(QWidget):
         left_v.setSpacing(2)
         title = QLabel("File Archival & Retention")
         title.setStyleSheet(
-            "font-size: 20px; font-weight: 700; color: #0F172A; letter-spacing: -0.4px; border: none; background: transparent;"
+            "font-size: 20px; font-weight: 700; color: #0F172A; border: none; background: transparent;"
         )
         subtitle = QLabel(
             "Manage 7-year audit file retention (SA 230), sealing, and partner reopening controls."

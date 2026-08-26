@@ -4,6 +4,8 @@ from typing import Any
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeySequence, QShortcut
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QButtonGroup,
     QComboBox,
@@ -35,6 +37,7 @@ from finauditpro.application.services.working_paper_service import WorkingPaperS
 from finauditpro.domain.entities import RoleEnum
 from finauditpro.ui.dialogs.engagement_dialog import EngagementDialog
 from finauditpro.ui.dialogs.login_dialog import LoginDialog
+from finauditpro.ui.dialogs.onboarding_dialog import OnboardingDialog
 from finauditpro.ui.styles import GLOBAL_QSS
 from finauditpro.ui.theme import FinAuditLogoWidget
 from finauditpro.ui.views.ai_assistant_view import AIAssistantView
@@ -59,11 +62,11 @@ from finauditpro.ui.views.working_paper_view import WorkingPaperView
 
 NAV_ITEMS = [
     ("btn_dashboard", "Command Center", "WORKSPACE"),
-    ("btn_pbc", "Intake & PBC", "GUIDED PIPELINE"),
-    ("btn_audit_matrix", "Planning & SA 320", "GUIDED PIPELINE"),
-    ("btn_financial_data", "TB/GL & Scrutiny", "GUIDED PIPELINE"),
+    ("btn_pbc", "Intake && PBC", "GUIDED PIPELINE"),
+    ("btn_audit_matrix", "Planning && SA 320", "GUIDED PIPELINE"),
+    ("btn_financial_data", "TB/GL && Scrutiny", "GUIDED PIPELINE"),
     ("btn_working_papers", "Working Papers", "GUIDED PIPELINE"),
-    ("btn_reports", "Reports & Sign-Off", "GUIDED PIPELINE"),
+    ("btn_reports", "Reports && Sign-Off", "GUIDED PIPELINE"),
     ("btn_queries", "Client Queries", "FIELDWORK TOOLS"),
     ("btn_documents", "Uploaded Evidence", "FIELDWORK TOOLS"),
     ("btn_gst", "GST 2B Reconciler", "FIELDWORK TOOLS"),
@@ -73,20 +76,22 @@ NAV_ITEMS = [
     ("btn_clients", "Clients", "ADMINISTRATION"),
     ("btn_engagements", "Engagements", "ADMINISTRATION"),
     ("btn_firms", "Audit Firms", "ADMINISTRATION"),
-    ("btn_archival", "Archival & Sealing", "SYSTEM"),
+    ("btn_archival", "Archival && Sealing", "SYSTEM"),
     ("btn_roll_forward", "Roll-Forward Tie-Out", "SYSTEM"),
     ("btn_settings", "Settings", "SYSTEM"),
 ]
 
 GUIDED_STEPS = [
-    ("Intake & PBC", "btn_pbc"), ("Planning (SA 320)", "btn_audit_matrix"),
+    ("Intake && PBC", "btn_pbc"), ("Planning (SA 320)", "btn_audit_matrix"),
     ("TB/GL Scrutiny", "btn_financial_data"), ("Workpapers", "btn_working_papers"),
-    ("Report & Sign-Off", "btn_reports"),
+    ("Report && Sign-Off", "btn_reports"),
 ]
 
 
 def _tag(w: Any, name: str) -> Any:
     w.setObjectName(name); return w
+
+
 
 
 class MainWindow(QMainWindow):
@@ -123,10 +128,16 @@ class MainWindow(QMainWindow):
 
     def _show_login_flow(self) -> None:
         import sys
-        if "pytest" not in sys.modules:
-            dlg = LoginDialog(self, auth_service=self.auth_service)
+        if "pytest" not in sys.modules and self.auth_service:
+            if self.auth_service.is_first_run():
+                dlg = OnboardingDialog(self, auth_service=self.auth_service)
+            else:
+                dlg = LoginDialog(self, auth_service=self.auth_service)
+                
             if dlg.exec() and dlg.authenticated_session:
                 self.current_user_session = dlg.authenticated_session; self._apply_user_session()
+            else:
+                sys.exit(0)
 
     def _apply_user_session(self) -> None:
         if self.current_user_session:
@@ -182,15 +193,15 @@ class MainWindow(QMainWindow):
         rc_layout.setContentsMargins(0, 0, 0, 0); rc_layout.setSpacing(0)
 
         # Header Bar
-        header = _tag(QFrame(), "dashboardHeader"); header.setFixedHeight(56)
-        h_layout = QHBoxLayout(header); h_layout.setContentsMargins(20, 0, 20, 0)
+        header = _tag(QFrame(), "dashboardHeader"); header.setFixedHeight(68)
+        h_layout = QHBoxLayout(header); h_layout.setContentsMargins(20, 12, 20, 0)
         search_frame = _tag(QFrame(), "globalSearchFrame"); sf_l = QHBoxLayout(search_frame); sf_l.setContentsMargins(10, 4, 10, 4)
         sf_s = _tag(QLineEdit(), "globalSearchInput"); sf_s.setPlaceholderText("Quick Search (⌘P)..."); sf_s.setReadOnly(True); sf_s.setCursor(Qt.CursorShape.PointingHandCursor)
         sf_s.mousePressEvent = lambda e: self._open_command_palette()
         sf_l.addWidget(sf_s); sf_l.addWidget(_tag(QLabel("⌘P"), "globalShortcutBadge")); h_layout.addWidget(search_frame); h_layout.addStretch()
 
-        act_lbl = QLabel("ACTIVE AUDIT:"); act_lbl.setStyleSheet("font-size: 11px; font-weight: 600; color: #94A3B8; letter-spacing: 0.5px;")
-        self.eng_selector_combo = _tag(QComboBox(), "clientSelectorCombo"); self.eng_selector_combo.setMinimumWidth(280)
+        act_lbl = QLabel("ACTIVE AUDIT:"); act_lbl.setStyleSheet("font-size: 11px; font-weight: 600; color: #94A3B8;")
+        self.eng_selector_combo = _tag(CustomComboBox(), "clientSelectorCombo"); self.eng_selector_combo.setMinimumWidth(280)
         self.eng_selector_combo.currentIndexChanged.connect(self._on_header_engagement_changed)
         btn_new_audit = _tag(QPushButton("+ New Engagement"), "primaryBtn"); btn_new_audit.clicked.connect(self._on_new_engagement)
         self.btn_copilot_toggle = QPushButton("AI Copilot ⌘K")
@@ -204,7 +215,7 @@ class MainWindow(QMainWindow):
         # Guided Pipeline Ribbon
         pipeline_bar = QFrame(); pipeline_bar.setFixedHeight(38); pipeline_bar.setStyleSheet("background-color: #FFFFFF; border-bottom: 1px solid #E2E8F0;")
         p_layout = QHBoxLayout(pipeline_bar); p_layout.setContentsMargins(18, 0, 18, 0); p_layout.setSpacing(6)
-        p_lbl = QLabel("AUDIT PIPELINE:"); p_lbl.setStyleSheet("font-size: 11px; font-weight: 600; color: #64748B; letter-spacing: 0.5px;"); p_layout.addWidget(p_lbl)
+        p_lbl = QLabel("AUDIT PIPELINE:"); p_lbl.setStyleSheet("font-size: 11px; font-weight: 600; color: #64748B;"); p_layout.addWidget(p_lbl)
         self.pipeline_btns = []
         for step_name, btn_attr in GUIDED_STEPS:
             pbtn = QPushButton(step_name); pbtn.setCursor(Qt.CursorShape.PointingHandCursor)

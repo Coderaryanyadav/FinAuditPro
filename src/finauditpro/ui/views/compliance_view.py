@@ -98,7 +98,12 @@ class ComplianceView(QWidget):
             stats_layout.addWidget(c)
         main_layout.addLayout(stats_layout)
 
+        from PySide6.QtCore import Qt
         tabs = QTabWidget()
+        tabs.setUsesScrollButtons(True)
+        tabs.setElideMode(Qt.TextElideMode.ElideNone)
+        tabs.tabBar().setElideMode(Qt.TextElideMode.ElideNone)
+        tabs.tabBar().setExpanding(False)
 
         # CARO 2020 Tab
         caro_tab = QWidget()

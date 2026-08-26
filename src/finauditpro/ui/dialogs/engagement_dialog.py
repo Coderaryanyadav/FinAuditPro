@@ -1,6 +1,8 @@
 """Engagement creation and editing dialog."""
 
 from PySide6.QtCore import Qt
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -92,12 +94,12 @@ class EngagementDialog(QDialog):
         self.fy_input.setText("2025-26")
         self.fy_input.setStyleSheet(field_style)
 
-        self.audit_type_combo = QComboBox()
+        self.audit_type_combo = CustomComboBox()
         for at in AuditTypeEnum:
             self.audit_type_combo.addItem(at.value, at)
         self.audit_type_combo.setStyleSheet(field_style)
 
-        self.status_combo = QComboBox()
+        self.status_combo = CustomComboBox()
         for st in EngagementStatusEnum:
             self.status_combo.addItem(st.value, st)
         self.status_combo.setStyleSheet(field_style)

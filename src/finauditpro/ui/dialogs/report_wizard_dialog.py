@@ -3,6 +3,8 @@
 from typing import Any
 
 from PySide6.QtCore import QThread, Signal
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -81,7 +83,7 @@ class ReportWizardDialog(QDialog):
 
         # 2. Input Form
         form = QFormLayout()
-        self.tpl_combo = QComboBox()
+        self.tpl_combo = CustomComboBox()
         self.tpl_combo.currentIndexChanged.connect(self._on_template_selected)
 
         self.title_input = QLineEdit("Audit Findings & Internal Control Exceptions Summary")

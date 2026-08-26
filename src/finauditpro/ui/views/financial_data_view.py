@@ -6,6 +6,8 @@ Enterprise analytics hub for trial balance imports, exception scanning, and find
 from typing import Any
 
 from PySide6.QtCore import Qt, Signal
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QComboBox,
     QHBoxLayout,
@@ -86,10 +88,10 @@ class FinancialDataView(QWidget):
 
         sel_lbl = QLabel("Active Dataset:")
         sel_lbl.setStyleSheet(
-            "font-size: 11px; font-weight: 700; color: #64748B; letter-spacing: 0.5px;"
+            "font-size: 11px; font-weight: 700; color: #64748B;"
         )
 
-        self.dataset_combo = QComboBox()
+        self.dataset_combo = CustomComboBox()
         self.dataset_combo.setMinimumWidth(280)
         self.dataset_combo.addItem("— No Datasets Imported —", None)
         self.dataset_combo.currentIndexChanged.connect(self._on_dataset_changed)

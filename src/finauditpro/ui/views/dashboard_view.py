@@ -86,7 +86,7 @@ class DashboardView(QWidget):
         left_v.setSpacing(3)
 
         title_lbl = QLabel("Audit Overview")
-        title_lbl.setStyleSheet("font-size: 22px; font-weight: 700; color: #0F172A; letter-spacing: -0.4px; border: none; background: transparent;")
+        title_lbl.setStyleSheet("font-size: 22px; font-weight: 700; color: #0F172A; border: none; background: transparent;")
 
         ctx_row = QHBoxLayout()
         ctx_row.setSpacing(8)
@@ -132,10 +132,9 @@ class DashboardView(QWidget):
             self.step_widgets.append(slbl)
 
             if i < len(self.steps_data) - 1:
-                conn = QLabel("—")
-                conn.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                conn.setFixedWidth(16)
-                conn.setStyleSheet("color: #CBD5E1; font-weight: 400; font-size: 10px; border: none; background: transparent;")
+                conn = QFrame()
+                conn.setFixedSize(16, 2)
+                conn.setStyleSheet("background-color: #CBD5E1; border: none;")
                 stepper.addWidget(conn)
 
         ws_v.addLayout(stepper)
@@ -147,11 +146,11 @@ class DashboardView(QWidget):
         act_v = QVBoxLayout()
         act_v.setSpacing(2)
         act_hdr = QLabel("NEXT ACTION")
-        act_hdr.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; border: none; background: transparent;")
+        act_hdr.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748B; border: none; background: transparent;")
         self.act_title = QLabel("Register your first audit client")
-        self.act_title.setStyleSheet("font-size: 13px; font-weight: 600; color: #0F172A; border: none; background: transparent;")
+        self.act_title.setStyleSheet("font-size: 16px; font-weight: 700; color: #0F172A; border: none; background: transparent;")
         self.act_desc = QLabel("Add a client entity to begin statutory audit planning, materiality assessment, and ledger scrutiny.")
-        self.act_desc.setStyleSheet("font-size: 11px; color: #64748B; border: none; background: transparent;")
+        self.act_desc.setStyleSheet("font-size: 13px; color: #64748B; border: none; background: transparent;")
         act_v.addWidget(act_hdr)
         act_v.addWidget(self.act_title)
         act_v.addWidget(self.act_desc)
@@ -180,12 +179,19 @@ class DashboardView(QWidget):
         att_l.setSpacing(10)
 
         self.att_dot = QLabel("✓")
-        self.att_dot.setStyleSheet("font-size: 14px; font-weight: 700; color: #16A34A; background: #DCFCE7; border-radius: 10px; min-width: 20px; max-width: 20px; min-height: 20px; max-height: 20px; qproperty-alignment: AlignCenter;")
+        self.att_dot.setFixedSize(24, 24)
+        self.att_dot.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.att_dot.setStyleSheet("font-size: 14px; font-weight: 700; color: #16A34A; background: #DCFCE7; border-radius: 12px;")
+        
         self.att_txt = QLabel("All clear — no open findings or critical items require attention")
         self.att_txt.setStyleSheet("font-size: 13px; font-weight: 500; color: #334155; border: none; background: transparent;")
         self.att_txt.setWordWrap(True)
-        att_l.addWidget(self.att_dot)
-        att_l.addWidget(self.att_txt, stretch=1)
+        
+        att_l.addStretch()
+        att_l.addWidget(self.att_dot, alignment=Qt.AlignmentFlag.AlignVCenter)
+        att_l.addWidget(self.att_txt, alignment=Qt.AlignmentFlag.AlignVCenter)
+        att_l.addStretch()
+        
         att_v.addWidget(self.att_row)
         att_card.content_layout.addLayout(att_v)
         row1.addWidget(att_card, 4)

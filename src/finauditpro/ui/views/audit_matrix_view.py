@@ -6,6 +6,8 @@ Planning & Execution Core: SA 320 Materiality, SA 315 Risk Register, Procedures,
 from typing import Any
 
 from PySide6.QtCore import Qt, Signal
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QComboBox,
     QFormLayout,
@@ -58,6 +60,10 @@ class AuditMatrixView(QWidget):
         layout.addWidget(self.header)
 
         self.tabs = QTabWidget()
+        self.tabs.setUsesScrollButtons(True)
+        self.tabs.setElideMode(Qt.TextElideMode.ElideNone)
+        self.tabs.tabBar().setElideMode(Qt.TextElideMode.ElideNone)
+        self.tabs.tabBar().setExpanding(False)
 
         self.tab_mat, self.tab_risks, self.tab_procs, self.tab_findings = QWidget(), QWidget(), QWidget(), QWidget()
         self._init_materiality_tab()
@@ -82,16 +88,16 @@ class AuditMatrixView(QWidget):
         form.setLabelAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
 
         field_style = """
-            QLineEdit, QComboBox {
-                border: 1.5px solid #CBD5E1; border-radius: 6px;
+            QLineEdit {
+                border: 1px solid #CBD5E1; border-radius: 6px;
                 padding: 7px 12px; font-size: 13px; color: #0F172A; background: #FFFFFF;
                 min-width: 320px;
             }
-            QLineEdit:focus, QComboBox:focus { border-color: #2563EB; background: #FFFFFF; }
+            QLineEdit:focus { border-color: #2563EB; background: #FFFFFF; }
             QLineEdit::placeholder { color: #94A3B8; }
         """
 
-        self.bm_combo = QComboBox()
+        self.bm_combo = CustomComboBox()
         for opt in BENCHMARK_GUIDANCE_OPTIONS:
             self.bm_combo.addItem(f"{opt.benchmark_type.value} ({opt.default_overall_pct}%)", opt.benchmark_type)
 
@@ -99,7 +105,7 @@ class AuditMatrixView(QWidget):
         self.bm_amount_input.setPlaceholderText("Enter benchmark amount in INR...")
         self.bm_amount_input.setStyleSheet(field_style)
 
-        calc_btn = QPushButton("Calculate & Save Materiality")
+        calc_btn = QPushButton("Calculate && Save Materiality")
         calc_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         calc_btn.setStyleSheet("""
             QPushButton {

@@ -125,7 +125,7 @@ class AIAssistantView(QWidget):
     def refresh_provider_status(self) -> None:
         if not self.ai_service or not hasattr(self.ai_service, "check_status"):
             self.lbl_chat_status.setText("● Offline Rule Engine Active")
-            self.lbl_chat_status.setStyleSheet("font-size: 11px; font-weight: 700; color: #D97706;")
+            self.lbl_chat_status.setStyleSheet("font-size: 14px; font-weight: 800; color: #DC2626;")
             return
 
         try:
@@ -133,14 +133,14 @@ class AIAssistantView(QWidget):
             if status and getattr(status, "chat_model_loaded", False):
                 self.lbl_chat_status.setText("● Local AI RAG Connected")
                 self.lbl_chat_status.setStyleSheet(
-                    "font-size: 11px; font-weight: 700; color: #15803D;"
+                    "font-size: 14px; font-weight: 800; color: #16A34A;"
                 )
                 return
         except Exception:
             pass
 
         self.lbl_chat_status.setText("● Offline Rule Engine Active")
-        self.lbl_chat_status.setStyleSheet("font-size: 11px; font-weight: 700; color: #D97706;")
+        self.lbl_chat_status.setStyleSheet("font-size: 14px; font-weight: 800; color: #DC2626;")
 
     def _init_ui(self) -> None:
         main_layout = QVBoxLayout(self)
@@ -157,7 +157,7 @@ class AIAssistantView(QWidget):
         left_v.setSpacing(2)
         title = QLabel("AI Copilot & Investigation")
         title.setStyleSheet(
-            "font-size: 20px; font-weight: 700; color: #0F172A; letter-spacing: -0.4px; border: none; background: transparent;"
+            "font-size: 20px; font-weight: 700; color: #0F172A; border: none; background: transparent;"
         )
         subtitle = QLabel(
             "Local offline LLM RAG engine, ICAI audit prompt library, and anomaly detection."
@@ -171,7 +171,7 @@ class AIAssistantView(QWidget):
         hdr_layout.addStretch()
 
         self.lbl_chat_status = QLabel("● Checking Engine...")
-        self.lbl_chat_status.setStyleSheet("font-size: 11px; font-weight: 700; color: #64748B;")
+        self.lbl_chat_status.setStyleSheet("font-size: 14px; font-weight: 800; color: #64748B;")
         hdr_layout.addWidget(self.lbl_chat_status)
 
         btn_scan = QPushButton("Run ICAI Audit Scan")
@@ -192,7 +192,7 @@ class AIAssistantView(QWidget):
         c1_layout = col1.content_layout
 
         src_hdr = QLabel("LINKED AUDIT EVIDENCE (SA 500)")
-        src_hdr.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748B; letter-spacing: 0.5px;")
+        src_hdr.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748B;")
         c1_layout.addWidget(src_hdr)
 
         self.doc_sources_list = QListWidget()
@@ -202,7 +202,7 @@ class AIAssistantView(QWidget):
         c1_layout.addWidget(self.doc_sources_list, 1)
 
         p_lbl = QLabel("ICAI STATUTORY PROMPT LIBRARY")
-        p_lbl.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; margin-top: 6px;")
+        p_lbl.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748B; margin-top: 6px;")
         c1_layout.addWidget(p_lbl)
 
         prompt_scroll = QScrollArea()
@@ -238,18 +238,13 @@ class AIAssistantView(QWidget):
             "✦ FinAuditPro AI Statutory Copilot\n\nAsk questions about financial evidence, verify statutory CARO 2020 clauses, analyze trial balance anomalies, or click any prompt pill below."
         )
         self.chat_display.setStyleSheet(
-            "QTextEdit { border: 1px solid #E2E8F0; border-radius: 8px; background-color: #FFFFFF; padding: 14px; font-size: 13px; color: #0F172A; line-height: 1.6; }"
+            "QTextEdit { border: 1px solid #E2E8F0; border-radius: 8px; background-color: #FFFFFF; padding: 14px; font-size: 13px; color: #0F172A; }"
         )
         c2_layout.addWidget(self.chat_display, 1)
 
         self.reasoning_display = QTextEdit()
         self.reasoning_display.setReadOnly(True)
-        self.reasoning_display.setMaximumHeight(54)
-        self.reasoning_display.setPlaceholderText("Model reasoning tokens (<think>)...")
-        self.reasoning_display.setStyleSheet(
-            "QTextEdit { border: 1px solid #FDE68A; border-radius: 6px; background-color: #FFFDF5; padding: 6px 10px; font-size: 11px; color: #92400E; font-family: 'SF Mono', Menlo, monospace; }"
-        )
-        c2_layout.addWidget(self.reasoning_display)
+        self.reasoning_display.setVisible(False)
 
         pills_row = QHBoxLayout()
         pills_row.setSpacing(6)
@@ -271,7 +266,7 @@ class AIAssistantView(QWidget):
             "Ask AI Copilot about evidence, SA 500 compliance, or GST anomalies..."
         )
         self.qa_input.setStyleSheet(
-            "QLineEdit { border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 8px 12px; font-size: 13px; background: #FFFFFF; color: #0F172A; } QLineEdit:focus { border-color: #2563EB; }"
+            "QLineEdit { border: 1px solid #CBD5E1; border-radius: 6px; padding: 8px 12px; font-size: 13px; background: #FFFFFF; color: #0F172A; } QLineEdit:focus { border-color: #2563EB; }"
         )
         self.qa_input.returnPressed.connect(self._on_ask_clicked)
 

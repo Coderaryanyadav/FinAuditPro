@@ -129,14 +129,7 @@ class AuditQueryView(QWidget):
         layout.addLayout(self.metrics_row)
 
         # 3. Main Table Card
-        table_card = CardWidget()
-        tc_layout = QVBoxLayout(table_card)
-        tc_layout.setContentsMargins(16, 14, 16, 16)
-        tc_layout.setSpacing(10)
-
-        tc_header = QLabel("ENGAGEMENT AUDIT QUERIES")
-        tc_header.setStyleSheet("font-size: 11px; font-weight: bold; color: #475569; letter-spacing: 0.5px;")
-        tc_layout.addWidget(tc_header)
+        table_card = CardWidget("ENGAGEMENT AUDIT QUERIES")
 
         self.table = QTableWidget()
         self.table.setColumnCount(6)
@@ -150,7 +143,7 @@ class AuditQueryView(QWidget):
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
         self.table.setStyleSheet("QTableWidget { border: 1px solid #E2E8F0; border-radius: 6px; }")
-        tc_layout.addWidget(self.table)
+        table_card.content_layout.addWidget(self.table)
         layout.addWidget(table_card, stretch=1)
 
     def set_active_engagement(self, engagement_id: str | None) -> None:

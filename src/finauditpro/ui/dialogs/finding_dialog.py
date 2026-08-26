@@ -1,5 +1,7 @@
 """Dialog for logging structured Audit Findings."""
 
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -64,12 +66,12 @@ class FindingDialog(QDialog):
         self.title_input = QLineEdit()
         self.title_input.setPlaceholderText("e.g. Cut-Off Exception in Sales Invoices")
 
-        self.proc_combo = QComboBox()
+        self.proc_combo = CustomComboBox()
         self.proc_combo.addItem("-- Link Audit Procedure (Optional) --", None)
         for p in self.procedures:
             self.proc_combo.addItem(f"[{p.procedure_code}] {p.objective[:35]}...", p.id)
 
-        self.risk_combo = QComboBox()
+        self.risk_combo = CustomComboBox()
         self.risk_combo.addItem("-- Link Audit Risk (Optional) --", None)
         for r in self.risks:
             self.risk_combo.addItem(f"[{r.risk_code}] {r.title[:35]}...", r.id)
@@ -77,7 +79,7 @@ class FindingDialog(QDialog):
         self.category_input = QLineEdit()
         self.category_input.setText("Substantive Testing Exception")
 
-        self.severity_combo = QComboBox()
+        self.severity_combo = CustomComboBox()
         for s in RiskSeverityEnum:
             self.severity_combo.addItem(s.value, s)
         self.severity_combo.setCurrentText("High")
@@ -88,7 +90,7 @@ class FindingDialog(QDialog):
         self.account_input = QLineEdit()
         self.account_input.setPlaceholderText("e.g. Sales Revenue / Trade Receivables")
 
-        self.assertion_combo = QComboBox()
+        self.assertion_combo = CustomComboBox()
         for a in AssertionEnum:
             self.assertion_combo.addItem(a.value, a)
 

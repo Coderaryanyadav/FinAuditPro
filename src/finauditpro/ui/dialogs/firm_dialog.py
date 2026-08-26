@@ -1,5 +1,6 @@
 """Firm creation and editing dialog."""
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QDialog,
     QFormLayout,
@@ -30,63 +31,116 @@ class FirmDialog(QDialog):
         self.result_firm: Firm | None = None
 
         self.setWindowTitle("Edit Audit Firm" if firm else "Create New Audit Firm")
-        self.setMinimumWidth(480)
+        self.setMinimumWidth(620)
+        self.resize(640, 560)
 
         self._init_ui()
         if firm:
             self._populate_fields(firm)
 
     def _init_ui(self) -> None:
+        self.setStyleSheet("QDialog { background-color: #FFFFFF; }")
         layout = QVBoxLayout(self)
-        layout.setSpacing(16)
-        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(18)
+        layout.setContentsMargins(28, 28, 28, 28)
 
+        # Header
+        header = QVBoxLayout()
+        header.setSpacing(4)
         title = QLabel("Audit Firm Details")
-        title.setStyleSheet("font-size: 16px; font-weight: 700; color: #38bdf8;")
-        layout.addWidget(title)
+        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #0F172A;")
+        subtitle = QLabel("Enter ICAI Firm Registration Number (FRN), tax identifiers, and contact coordinates.")
+        subtitle.setStyleSheet("font-size: 12px; color: #64748B;")
+        header.addWidget(title)
+        header.addWidget(subtitle)
+        layout.addLayout(header)
 
+        # Form
         form_layout = QFormLayout()
-        form_layout.setSpacing(12)
+        form_layout.setSpacing(14)
+        form_layout.setLabelAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+
+        field_style = """
+            QLineEdit {
+                border: 1.5px solid #CBD5E1; border-radius: 6px;
+                padding: 9px 14px; font-size: 13px; color: #0F172A; background: #FFFFFF;
+                min-width: 380px;
+            }
+            QLineEdit:focus { border-color: #2563EB; background: #FFFFFF; }
+            QLineEdit::placeholder { color: #94A3B8; }
+        """
+        lbl_style = "font-size: 13px; font-weight: 600; color: #334155;"
 
         self.name_input = QLineEdit()
         self.name_input.setPlaceholderText("e.g. Apex Audit & Co.")
+        self.name_input.setStyleSheet(field_style)
 
         self.reg_input = QLineEdit()
         self.reg_input.setPlaceholderText("e.g. 123456N (ICAI Firm Reg. No.)")
+        self.reg_input.setStyleSheet(field_style)
 
         self.pan_input = QLineEdit()
         self.pan_input.setPlaceholderText("e.g. AAACC1234D")
+        self.pan_input.setStyleSheet(field_style)
 
         self.gstin_input = QLineEdit()
         self.gstin_input.setPlaceholderText("e.g. 27AAACC1234D1Z5")
+        self.gstin_input.setStyleSheet(field_style)
 
         self.address_input = QLineEdit()
         self.address_input.setPlaceholderText("Registered Office Address")
+        self.address_input.setStyleSheet(field_style)
 
         self.phone_input = QLineEdit()
         self.phone_input.setPlaceholderText("+91 98765 43210")
+        self.phone_input.setStyleSheet(field_style)
 
         self.email_input = QLineEdit()
         self.email_input.setPlaceholderText("contact@apexaudit.in")
+        self.email_input.setStyleSheet(field_style)
 
-        form_layout.addRow("Firm Name *:", self.name_input)
-        form_layout.addRow("FRN / Reg No:", self.reg_input)
-        form_layout.addRow("Firm PAN:", self.pan_input)
-        form_layout.addRow("Firm GSTIN:", self.gstin_input)
-        form_layout.addRow("Address:", self.address_input)
-        form_layout.addRow("Phone:", self.phone_input)
-        form_layout.addRow("Email:", self.email_input)
+        def make_lbl(txt: str) -> QLabel:
+            lbl = QLabel(txt)
+            lbl.setStyleSheet(lbl_style)
+            return lbl
+
+        form_layout.addRow(make_lbl("Firm Name *:"), self.name_input)
+        form_layout.addRow(make_lbl("FRN / Reg No:"), self.reg_input)
+        form_layout.addRow(make_lbl("Firm PAN:"), self.pan_input)
+        form_layout.addRow(make_lbl("Firm GSTIN:"), self.gstin_input)
+        form_layout.addRow(make_lbl("Address:"), self.address_input)
+        form_layout.addRow(make_lbl("Phone:"), self.phone_input)
+        form_layout.addRow(make_lbl("Email:"), self.email_input)
 
         layout.addLayout(form_layout)
+        layout.addStretch()
 
+        # Action Buttons
         btn_layout = QHBoxLayout()
+        btn_layout.setSpacing(10)
         btn_layout.addStretch()
 
         cancel_btn = QPushButton("Cancel")
-        cancel_btn.setObjectName("SecondaryButton")
+        cancel_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        cancel_btn.setStyleSheet("""
+            QPushButton {
+                background: #F1F5F9; color: #475569; font-size: 13px; font-weight: 600;
+                border: 1px solid #CBD5E1; border-radius: 6px; padding: 9px 20px;
+            }
+            QPushButton:hover { background: #E2E8F0; }
+        """)
         cancel_btn.clicked.connect(self.reject)
 
         save_btn = QPushButton("Save Firm")
+        save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        save_btn.setStyleSheet("""
+            QPushButton {
+                background: #2563EB; color: #FFFFFF; font-size: 13px; font-weight: 600;
+                border: none; border-radius: 6px; padding: 9px 24px;
+            }
+            QPushButton:hover { background: #1D4ED8; }
+            QPushButton:pressed { background: #1E40AF; }
+        """)
         save_btn.clicked.connect(self._save)
 
         btn_layout.addWidget(cancel_btn)

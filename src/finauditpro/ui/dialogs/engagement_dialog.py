@@ -1,5 +1,6 @@
 """Engagement creation and editing dialog."""
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -46,55 +47,105 @@ class EngagementDialog(QDialog):
         self.setWindowTitle(
             "Edit Audit Engagement" if engagement else "Create New Audit Engagement"
         )
-        self.setMinimumWidth(500)
+        self.setMinimumWidth(620)
+        self.resize(640, 500)
 
         self._init_ui()
         if engagement:
             self._populate_fields(engagement)
 
     def _init_ui(self) -> None:
+        self.setStyleSheet("QDialog { background-color: #FFFFFF; }")
         layout = QVBoxLayout(self)
-        layout.setSpacing(16)
-        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(18)
+        layout.setContentsMargins(28, 28, 28, 28)
 
-        title = QLabel(f"New Engagement for {self.client.name}")
-        title.setStyleSheet("font-size: 16px; font-weight: 700; color: #38bdf8;")
-        layout.addWidget(title)
+        # Header
+        header = QVBoxLayout()
+        header.setSpacing(4)
+        title = QLabel(f"New Audit Engagement — {self.client.name}")
+        title.setStyleSheet("font-size: 18px; font-weight: 700; color: #0F172A;")
+        subtitle = QLabel("Configure financial year, statutory audit scope, and assigned team members.")
+        subtitle.setStyleSheet("font-size: 12px; color: #64748B;")
+        header.addWidget(title)
+        header.addWidget(subtitle)
+        layout.addLayout(header)
 
+        # Form
         form_layout = QFormLayout()
-        form_layout.setSpacing(12)
+        form_layout.setSpacing(14)
+        form_layout.setLabelAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+
+        field_style = """
+            QLineEdit, QComboBox {
+                border: 1.5px solid #CBD5E1; border-radius: 6px;
+                padding: 9px 14px; font-size: 13px; color: #0F172A; background: #FFFFFF;
+                min-width: 380px;
+            }
+            QLineEdit:focus, QComboBox:focus { border-color: #2563EB; background: #FFFFFF; }
+            QLineEdit::placeholder { color: #94A3B8; }
+        """
+        lbl_style = "font-size: 13px; font-weight: 600; color: #334155;"
 
         self.fy_input = QLineEdit()
         self.fy_input.setPlaceholderText("e.g. 2025-26")
         self.fy_input.setText("2025-26")
+        self.fy_input.setStyleSheet(field_style)
 
         self.audit_type_combo = QComboBox()
         for at in AuditTypeEnum:
             self.audit_type_combo.addItem(at.value, at)
+        self.audit_type_combo.setStyleSheet(field_style)
 
         self.status_combo = QComboBox()
         for st in EngagementStatusEnum:
             self.status_combo.addItem(st.value, st)
+        self.status_combo.setStyleSheet(field_style)
 
         self.team_input = QLineEdit()
         self.team_input.setPlaceholderText("e.g. Partner, Manager, Senior (comma separated)")
         self.team_input.setText("Partner, Senior Auditor")
+        self.team_input.setStyleSheet(field_style)
 
-        form_layout.addRow("Financial Year *:", self.fy_input)
-        form_layout.addRow("Audit Type:", self.audit_type_combo)
-        form_layout.addRow("Initial Status:", self.status_combo)
-        form_layout.addRow("Assigned Team:", self.team_input)
+        def make_lbl(txt: str) -> QLabel:
+            lbl = QLabel(txt)
+            lbl.setStyleSheet(lbl_style)
+            return lbl
+
+        form_layout.addRow(make_lbl("Financial Year *:"), self.fy_input)
+        form_layout.addRow(make_lbl("Audit Type:"), self.audit_type_combo)
+        form_layout.addRow(make_lbl("Initial Status:"), self.status_combo)
+        form_layout.addRow(make_lbl("Assigned Team:"), self.team_input)
 
         layout.addLayout(form_layout)
+        layout.addStretch()
 
+        # Action Buttons
         btn_layout = QHBoxLayout()
+        btn_layout.setSpacing(10)
         btn_layout.addStretch()
 
         cancel_btn = QPushButton("Cancel")
-        cancel_btn.setObjectName("SecondaryButton")
+        cancel_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        cancel_btn.setStyleSheet("""
+            QPushButton {
+                background: #F1F5F9; color: #475569; font-size: 13px; font-weight: 600;
+                border: 1px solid #CBD5E1; border-radius: 6px; padding: 9px 20px;
+            }
+            QPushButton:hover { background: #E2E8F0; }
+        """)
         cancel_btn.clicked.connect(self.reject)
 
         save_btn = QPushButton("Save Engagement")
+        save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        save_btn.setStyleSheet("""
+            QPushButton {
+                background: #2563EB; color: #FFFFFF; font-size: 13px; font-weight: 600;
+                border: none; border-radius: 6px; padding: 9px 24px;
+            }
+            QPushButton:hover { background: #1D4ED8; }
+            QPushButton:pressed { background: #1E40AF; }
+        """)
         save_btn.clicked.connect(self._save)
 
         btn_layout.addWidget(cancel_btn)

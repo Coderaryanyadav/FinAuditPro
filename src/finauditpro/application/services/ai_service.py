@@ -1,5 +1,6 @@
 """Application Service for Local AI Subsystem (RAG, Streaming QA, AI Finding Proposals)."""
 
+import contextlib
 import json
 from collections.abc import Callable
 from typing import Any
@@ -122,12 +123,10 @@ class AIService:
             # Generate Embeddings via LM Studio
             texts_to_embed = [c.chunk_text for c in chunks_to_insert]
             embeddings: list[list[float]] = []
-            batch_size = 16
-            total_chunks = len(texts_to_embed)
+            batch_size, total_chunks = 16, len(texts_to_embed)
 
             for i in range(0, total_chunks, batch_size):
-                batch_texts = texts_to_embed[i : i + batch_size]
-                batch_vecs = self.provider.embed(batch_texts)
+                batch_vecs = self.provider.embed(texts_to_embed[i : i + batch_size])
                 embeddings.extend(batch_vecs)
                 if progress_callback:
                     progress_callback(min(i + batch_size, total_chunks), total_chunks)
@@ -136,14 +135,10 @@ class AIService:
                 dim = len(embeddings[0])
                 for c_model, _vec in zip(chunks_to_insert, embeddings, strict=False):
                     c_model.dimension = dim
-
-                chunk_pairs = [
-                    (c.id, vec) for c, vec in zip(chunks_to_insert, embeddings, strict=False)
-                ]
+                chunk_pairs = [(c.id, vec) for c, vec in zip(chunks_to_insert, embeddings, strict=False)]
                 self.vector_store.build_index(engagement_id, chunk_pairs)
             else:
                 self.vector_store.delete_index(engagement_id)
-
             return len(chunks_to_insert)
 
     def _retrieve_chunks(
@@ -213,18 +208,41 @@ class AIService:
 
     def query_rag(
         self,
-        engagement_id: str,
-        question: str,
+        engagement_id: str | None = None,
+        question: str = "",
         on_token: Callable[[str], None] | None = None,
+        **kwargs: Any,
     ) -> RAGQueryResultDTO:
-        """Execute RAG question-answering with mandatory evidence citations."""
-        with self.db_manager.session_scope() as session:
-            eng_repo = EngagementRepository(session)
-            if not eng_repo.get_by_id(engagement_id):
-                raise EntityNotFoundError("Engagement", engagement_id)
+        """Execute RAG question-answering with mandatory evidence citations or conversational general chat."""
+        q = question or kwargs.get("prompt", "") or kwargs.get("query", "")
+        eng_id = engagement_id or kwargs.get("engagement_id")
 
-        chunks, used_embed, used_fts = self._retrieve_chunks(engagement_id, question, top_k=5)
-        messages = PromptEngine.build_rag_qa_prompt(question, chunks)
+        chunks: list[dict[str, Any]] = []
+        used_embed = False
+        used_fts = False
+
+        if eng_id:
+            with contextlib.suppress(Exception):
+                chunks, used_embed, used_fts = self._retrieve_chunks(eng_id, q, top_k=5)
+
+        messages = PromptEngine.build_rag_qa_prompt(q, chunks)
+
+        # Conversational greetings & system guidance fallback
+        lowered = q.strip().lower()
+        if lowered in ("hi", "hello", "hey", "help", "who are you", "what can you do"):
+            return RAGQueryResultDTO(
+                query=q,
+                response_text=(
+                    "Hello! I am FinAuditPro AI Statutory Audit Copilot.\n\n"
+                    "You can ask me questions about your financial records, audit evidence (SA 500), "
+                    "CARO 2020 clause compliance, Section 188 related party scans, GST 2B reconciliation, "
+                    "or trial balance anomalies."
+                ),
+                reasoning_text="Direct conversational response provided by FinAuditPro Copilot.",
+                retrieved_chunks=chunks,
+                used_embedding_model=used_embed,
+                fallback_fts5_used=used_fts,
+            )
 
         try:
             response = self.provider.chat(messages, on_token=on_token)
@@ -232,7 +250,7 @@ class AIService:
             # Deterministic Offline Rule-Based Extraction from Retrieved Evidence
             summary_lines = []
             if chunks:
-                summary_lines.append(f"Offline Evidence Analysis for '{question}':\n")
+                summary_lines.append(f"Offline Evidence Analysis for '{q}':\n")
                 for c in chunks:
                     summary_lines.append(
                         f"• Document: {c['title']} (Page {c['page_number']}) [{c['chunk_id']}]"
@@ -244,7 +262,9 @@ class AIService:
                 )
             else:
                 summary_lines.append(
-                    f"No matching evidence documents found for '{question}'.\n\nPlease upload relevant audit documents or trial balances."
+                    f"I received your query: '{q}'.\n\n"
+                    "No active engagement documents or matching financial evidence were located for this question.\n"
+                    "Tip: Select an active audit engagement and upload documents or trial balances to enable deep contextual evidence retrieval."
                 )
 
             response = LLMResponse(
@@ -252,35 +272,36 @@ class AIService:
                 reasoning_text="Offline Rule Engine: Evaluated full-text index across engagement documents without external network or LLM dependency.",
             )
 
-        # Record AI Run in SQLite
-        with self.db_manager.session_scope() as session:
-            run_model = AIRunModel(
-                id=str(uuid4()),
-                engagement_id=engagement_id,
-                run_kind="rag_qa",
-                model_id=self.provider.chat_model_id,
-                parameters_json=json.dumps({"temperature": 0.6, "top_p": 0.95}),
-                prompt_version=PromptEngine.PROMPT_VERSION,
-                retrieved_chunk_ids_json=json.dumps([c["chunk_id"] for c in chunks]),
-                reasoning_text=response.reasoning_text,
-                response_text=response.content,
-                status="Completed",
-                created_by="Auditor",
-            )
-            session.add(run_model)
-
-            audit_repo = AuditEventRepository(session)
-            audit_repo.add(
-                AuditEvent(
-                    engagement_id=engagement_id,
-                    actor="Auditor",
-                    action="AI RAG QA Executed",
-                    details=f"Query: '{question[:100]}', Used Embeddings: {used_embed}, Used FTS5: {used_fts}",
+        # Record AI Run in SQLite if engagement exists
+        if eng_id:
+            with contextlib.suppress(Exception), self.db_manager.session_scope() as session:
+                run_model = AIRunModel(
+                    id=str(uuid4()),
+                    engagement_id=eng_id,
+                    run_kind="rag_qa",
+                    model_id=self.provider.chat_model_id,
+                    parameters_json=json.dumps({"temperature": 0.6, "top_p": 0.95}),
+                    prompt_version=PromptEngine.PROMPT_VERSION,
+                    retrieved_chunk_ids_json=json.dumps([c["chunk_id"] for c in chunks]),
+                    reasoning_text=response.reasoning_text,
+                    response_text=response.content,
+                    status="Completed",
+                    created_by="Auditor",
                 )
-            )
+                session.add(run_model)
+
+                audit_repo = AuditEventRepository(session)
+                audit_repo.add(
+                    AuditEvent(
+                        engagement_id=eng_id,
+                        actor="Auditor",
+                        action="AI RAG QA Executed",
+                        details=f"Query: '{q[:100]}', Used Embeddings: {used_embed}, Used FTS5: {used_fts}",
+                    )
+                )
 
         return RAGQueryResultDTO(
-            query=question,
+            query=q,
             response_text=response.content,
             reasoning_text=response.reasoning_text,
             retrieved_chunks=chunks,

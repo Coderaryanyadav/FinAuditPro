@@ -209,8 +209,15 @@ class AICopilotDrawer(QFrame):
             loading_lbl.deleteLater()
             self.btn_send.setEnabled(True)
             self.inp_query.setEnabled(True)
-            ans = res.get("response", str(res)) if isinstance(res, dict) else str(res)
-            citations = res.get("citations", []) if isinstance(res, dict) else []
+            if hasattr(res, "response_text"):
+                ans = res.response_text
+                citations = getattr(res, "retrieved_chunks", [])
+            elif isinstance(res, dict):
+                ans = res.get("response", str(res))
+                citations = res.get("citations", [])
+            else:
+                ans = str(res)
+                citations = []
             self._add_message(ans, is_user=False, citations=citations)
 
         def on_fail(err: str) -> None:

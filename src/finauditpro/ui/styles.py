@@ -202,13 +202,8 @@ QComboBox::drop-down {
 }
 QComboBox::drop-down:hover { background-color: #F1F5F9; }
 QComboBox::down-arrow {
-    image: none;
-    width: 0; height: 0;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 5px solid #475569;
-    border-bottom: 0px none;
-    margin-right: 0px;
+    image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1L5 5L9 1' stroke='%23475569' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>");
+    width: 10px; height: 6px;
 }
 QComboBox QAbstractItemView {
     background-color: #FFFFFF; border: 1.5px solid #CBD5E1;
@@ -236,13 +231,8 @@ QComboBox#clientSelectorCombo::drop-down {
 }
 QComboBox#clientSelectorCombo::drop-down:hover { background-color: #F1F5F9; }
 QComboBox#clientSelectorCombo::down-arrow {
-    image: none;
-    width: 0; height: 0;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 5px solid #2563EB;
-    border-bottom: 0px none;
-    margin-right: 0px;
+    image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1L5 5L9 1' stroke='%232563EB' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>");
+    width: 10px; height: 6px;
 }
 QComboBox#clientSelectorCombo QAbstractItemView {
     background-color: #FFFFFF; border: 1.5px solid #CBD5E1;

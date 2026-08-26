@@ -2,7 +2,6 @@
 
 import base64
 import os
-import sys
 from pathlib import Path
 
 from cryptography.fernet import Fernet
@@ -11,18 +10,10 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 
 def _get_app_data_dir() -> Path:
-    """Return platform-aware application data directory (mirrors database.py logic)."""
-    app_name = "FinAuditPro"
-    if sys.platform == "darwin":
-        data_dir = Path.home() / "Library" / "Application Support" / app_name
-    elif sys.platform == "win32":
-        app_data = os.environ.get("APPDATA") or str(Path.home() / "AppData" / "Roaming")
-        data_dir = Path(app_data) / app_name
-    else:
-        xdg_data = os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share")
-        data_dir = Path(xdg_data) / app_name
-    data_dir.mkdir(parents=True, exist_ok=True)
-    return data_dir
+    """Return platform-aware application data directory."""
+    from finauditpro.infrastructure.first_run import get_app_data_dir
+
+    return get_app_data_dir()
 
 
 def _get_key_file_path() -> Path:

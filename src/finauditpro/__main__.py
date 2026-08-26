@@ -6,6 +6,7 @@ from pathlib import Path
 
 from PySide6.QtWidgets import QApplication
 
+from finauditpro.infrastructure.ai.lmstudio_supervisor import LMStudioSupervisor
 from finauditpro.infrastructure.first_run import initialize_database
 from finauditpro.infrastructure.persistence.database import get_default_db_path
 from finauditpro.ui.main_window import MainWindow
@@ -36,7 +37,17 @@ def main() -> None:
     window = MainWindow(db_manager)
     window.show()
 
-    sys.exit(app.exec())
+    exit_code = app.exec()
+
+    # Graceful shutdown of resources
+    print("Initiating graceful shutdown...")
+    try:
+        db_manager.shutdown()
+        LMStudioSupervisor.stop_local_server()
+    except Exception as e:
+        print(f"Error during shutdown: {e}")
+
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":

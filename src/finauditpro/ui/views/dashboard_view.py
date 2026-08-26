@@ -19,10 +19,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from finauditpro.application.services.audit_matrix_service import AuditMatrixService
 from finauditpro.application.services.client_service import ClientService
 from finauditpro.application.services.engagement_service import EngagementService
 from finauditpro.application.services.firm_service import FirmService
-from finauditpro.application.services.audit_matrix_service import AuditMatrixService
 from finauditpro.domain.clock import utc_now
 from finauditpro.domain.entities import Client, Engagement, Firm
 from finauditpro.ui.theme import CardWidget, MetricCard, StatusBadge
@@ -330,7 +330,7 @@ class DashboardView(QWidget):
 
         self.card_pending.set_value(str(total_open_findings))
         self.card_high_risk.set_value(str(total_high_risk))
-        
+
         if has_risk_exposure:
             self.lbl_zero_risk.setText(f"⚠ {total_high_risk} high-risk areas identified")
             self.lbl_zero_risk.setStyleSheet("font-size: 12px; font-weight: 600; color: #DC2626; padding: 10px; border: none; background: transparent;")

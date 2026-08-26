@@ -1,6 +1,6 @@
 [project]
 name = "finauditpro"
-version = "0.1.0"
+version = "1.0.0"
 description = "Offline-first audit intelligence workspace for Indian audit practice"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -82,7 +82,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 # Tests legitimately use asserts, hardcoded sample credentials, and fixture unpacking.
 "tests/**" = ["S101", "S105", "S106", "F841", "RUF059", "PTH123", "PTH110"]
-"scripts/**" = ["S101", "S105", "S106", "F841", "RUF059", "PTH123", "PTH110", "E402", "DTZ005", "TID252"]
+"scripts/**" = ["S101", "S105", "S106", "F841", "RUF059", "PTH123", "PTH110", "E402", "DTZ005", "TID252", "S603", "S607", "PTH211", "SIM105", "SIM102"]
 
 
 

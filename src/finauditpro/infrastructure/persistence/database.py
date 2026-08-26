@@ -1,6 +1,5 @@
 """Database configuration and session management for SQLite persistence."""
 
-import os
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
@@ -20,12 +19,9 @@ class Base(DeclarativeBase):
 
 def get_default_db_path() -> Path:
     """Return default database file path in native platform data directory."""
-    app_data = os.environ.get("FINAUDITPRO_DATA_DIR")
-    if app_data:
-        data_dir = Path(app_data) / "db"
-    else:
-        data_dir = Path.home() / ".gemini" / "antigravity-ide" / "app_data" / "db"
+    from finauditpro.infrastructure.first_run import get_app_data_dir
 
+    data_dir = get_app_data_dir() / "db"
     data_dir.mkdir(parents=True, exist_ok=True)
     return data_dir / "finauditpro.db"
 
@@ -170,3 +166,8 @@ class DatabaseManager:
             raise
         finally:
             session.close()
+
+    def shutdown(self) -> None:
+        """Gracefully close the engine and all connections in the pool."""
+        if hasattr(self, "engine") and self.engine:
+            self.engine.dispose()

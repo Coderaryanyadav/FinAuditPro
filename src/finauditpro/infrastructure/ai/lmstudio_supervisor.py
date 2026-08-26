@@ -116,6 +116,23 @@ class LMStudioSupervisor:
 
         return cls.is_server_online(host, port)
 
+    @classmethod
+    def stop_local_server(cls) -> bool:
+        """Attempt to stop the LM Studio local server via CLI."""
+        cli_bin = cls.find_lms_cli()
+        if cli_bin:
+            try:
+                subprocess.run(  # noqa: S603
+                    [str(cli_bin), "server", "stop"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False
+                )
+                return True
+            except Exception:
+                pass
+        return False
+
     start_server_background = start_local_server
 
     @classmethod

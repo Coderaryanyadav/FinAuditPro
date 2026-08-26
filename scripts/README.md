@@ -5,36 +5,45 @@ This directory contains developer automation, diagnostic, packaging, and mainten
 ```text
 scripts/
 ├── README.md
+├── packaging/
+│   ├── build_macos.py              # macOS .app bundle and polished .dmg builder
+│   ├── build_windows.py            # Windows standalone .exe and Inno Setup installer builder
+│   ├── clean.py                    # Workspace build cache and artifact purger
+│   ├── generate_icons.py           # Multi-resolution icon (.icns / .ico / .png) generator
+│   ├── verify_release.py           # Security credential scanner & SHA-256 manifest generator
+│   └── finauditpro.iss             # Inno Setup Windows installer compiler configuration
 ├── development/
 │   ├── auto_launch.py              # Zero-friction supervised background desktop launcher
 │   ├── automated_system_check.py   # Launch-time system prerequisite and environment probe
 │   └── run_1000_verifications.py   # Master 15-stage 1,000-point forensic audit runner
-├── packaging/
-│   ├── build_app.sh                # Standalone PyInstaller desktop binary builder
-│   └── sign_and_notarize.sh        # macOS Apple code signing and notarization workflow
 ├── database/
 │   └── reset_db.py                 # Development database reset and re-migration tool
 └── maintenance/
-    └── .gitkeep                    # Operational maintenance utilities
+    ├── retention_policy_sweep.py   # Audit document retention policy validator
+    ├── vacuum_and_reindex.py       # SQLite database maintenance & reindexing
+    └── verify_archive_integrity.py # Archive cryptographic seal verifier
 ```
 
 ---
 
-## Quick Reference
+## Packaging Quick Reference
 
-- **Run Automated Diagnostic Self-Check**:
+- **Build macOS Bundle & DMG**:
   ```bash
-  python scripts/automated_system_check.py
-  # or python scripts/development/automated_system_check.py
+  python scripts/packaging/build_macos.py
   ```
 
-- **Run 1,000-Point Forensic Lifecycle Suite**:
-  ```bash
-  python scripts/run_1000_verifications.py
-  # or python scripts/development/run_1000_verifications.py
+- **Build Windows Executable & Installer**:
+  ```powershell
+  python scripts/packaging/build_windows.py
   ```
 
-- **Launch Supervised Desktop Application**:
+- **Run Release Security & Checksum Verification**:
   ```bash
-  python scripts/auto_launch.py
+  python scripts/packaging/verify_release.py
+  ```
+
+- **Clean Build Artifacts**:
+  ```bash
+  python scripts/packaging/clean.py
   ```

@@ -42,12 +42,11 @@ class AIService:
 
             provider = LMStudioProvider()
         if vector_store is None:
-            from pathlib import Path
-
             from finauditpro.infrastructure.ai.faiss_vector_store import FAISSVectorStore
+            from finauditpro.infrastructure.first_run import get_app_data_dir
 
             vector_store = FAISSVectorStore(
-                Path.home() / ".gemini" / "antigravity-ide" / "app_data" / "vector_store"
+                get_app_data_dir() / "vector_store"
             )
         self.provider = provider
         self.vector_store = vector_store

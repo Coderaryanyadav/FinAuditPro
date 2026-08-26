@@ -10,7 +10,7 @@ def test_version_info_validity() -> None:
     """Verify version info returns valid non-empty build metadata dictionary."""
     info = get_build_info()
     assert info["app_name"] == "FinAuditPro"
-    assert info["version"] == "0.1.0"
+    assert info["version"] == "1.0.0"
     assert info["offline_isolated"] == "True"
 
 

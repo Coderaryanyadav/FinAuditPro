@@ -11,12 +11,25 @@ from finauditpro.infrastructure.persistence.migrations import MigrationRunner
 
 
 def get_app_data_dir() -> Path:
-    """Return root application data directory path."""
+    """Return root application data directory path in native OS location."""
+    import sys
+
     app_data = os.environ.get("FINAUDITPRO_DATA_DIR")
     if app_data:
-        return Path(app_data)
-    home = Path.home()
-    return home / ".gemini" / "antigravity-ide" / "app_data"
+        data_dir = Path(app_data)
+    else:
+        app_name = "FinAuditPro"
+        if sys.platform == "darwin":
+            data_dir = Path.home() / "Library" / "Application Support" / app_name
+        elif sys.platform == "win32":
+            app_data_base = os.environ.get("APPDATA") or str(Path.home() / "AppData" / "Roaming")
+            data_dir = Path(app_data_base) / app_name
+        else:
+            xdg_data = os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share")
+            data_dir = Path(xdg_data) / "finauditpro"
+
+    data_dir.mkdir(parents=True, exist_ok=True)
+    return data_dir
 
 
 def bootstrap_app_data_dirs() -> tuple[Path, Path, Path, Path]:

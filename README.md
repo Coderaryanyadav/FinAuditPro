@@ -10,7 +10,7 @@
   [![PySide6](https://img.shields.io/badge/PySide6-6.8-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://www.qt.io/)
   [![SQLite WAL](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
   [![LM Studio](https://img.shields.io/badge/LM%20Studio-Air--Gapped%20AI-4F46E5?style=for-the-badge&logo=openai&logoColor=white)](https://lmstudio.ai/)
-  [![Tests](https://img.shields.io/badge/Tests-130%2F130%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+  [![Tests](https://img.shields.io/badge/Tests-132%2F132%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
   [![Type Checked](https://img.shields.io/badge/MyPy-Strict%20Passed-blue?style=for-the-badge&logo=python)](pyproject.toml)
   [![Code Style](https://img.shields.io/badge/Code%20Style-Ruff-black?style=for-the-badge&logo=ruff)](pyproject.toml)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
@@ -263,11 +263,32 @@ flowchart TD
 
 ---
 
-## Quickstart Guide
+---
+
+## Production Releases & Downloads
+
+Pre-built, standalone release packages are available on the [GitHub Releases](https://github.com/Coderaryanyadav/FinAuditPro/releases) page:
+
+### 🍏 macOS (Apple Silicon & Intel)
+1. Download `FinAuditPro-1.0.0-macOS-arm64.dmg` (or Intel `x86_64`).
+2. Double-click the DMG to open the installer.
+3. Drag **FinAuditPro** into your **Applications** folder.
+4. Launch FinAuditPro from Launchpad or Spotlight.
+
+### 🪟 Windows (64-bit)
+1. Download `FinAuditPro-Setup-1.0.0-x64.exe` (or standalone portable `.zip`).
+2. Run the installer wizard (or extract portable folder).
+3. Launch **FinAuditPro** from your Start Menu or Desktop shortcut.
+
+> *All release binaries are standalone and require zero manual Python installation.* For full packaging details, see [RELEASE.md](RELEASE.md).
+
+---
+
+## Quickstart Guide (Running from Source)
 
 ### Prerequisites
 
-- **Python**: Python 3.12 or higher (verified on Python 3.14.7)
+- **Python**: Python 3.12 or higher (verified on Python 3.12, 3.13, and 3.14)
 - **OS**: macOS (Apple Silicon arm64 / Intel), Linux x64, or Windows x64
 - **Optional Tools**:
   - `tesseract` (for OCR on scanned images: `brew install tesseract` on macOS / `sudo apt-get install tesseract-ocr` on Linux)

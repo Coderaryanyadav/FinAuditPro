@@ -85,7 +85,7 @@ class GSTVerificationView(QWidget):
         if not self.current_engagement:
             self._invoices = []
             return
-        
+
         # Currently no backend database table exists for GST invoices.
         # Fallback to an honest empty state until the feature is fully implemented.
         self._invoices = []

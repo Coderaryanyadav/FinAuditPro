@@ -1,0 +1,124 @@
+name: Release Build & Distribution
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            platform: macos
+            name: macOS
+          - os: windows-latest
+            platform: windows
+            name: Windows
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies & Packaging Tools
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -e .[ocr,ai] pyinstaller pytest pytest-cov
+        shell: bash
+
+      - name: Install Platform-Specific Packaging Tools (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          python -m pip install dmgbuild
+        shell: bash
+
+      - name: Run Test Suite
+        run: |
+          pytest tests/ -v
+        shell: bash
+
+      - name: Run Pre-Build Security & Consistency Audit
+        run: |
+          python scripts/packaging/verify_release.py --pre-build
+        shell: bash
+
+      - name: Build macOS Application (.app & .dmg)
+        if: runner.os == 'macOS'
+        run: |
+          python scripts/packaging/build_macos.py
+        shell: bash
+        env:
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+
+      - name: Build Windows Application (.exe / Installer)
+        if: runner.os == 'Windows'
+        run: |
+          python scripts/packaging/build_windows.py
+        shell: bash
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts-${{ matrix.platform }}
+          path: |
+            dist/*.dmg
+            dist/*.exe
+            dist/*.zip
+            dist/SHA256SUMS.txt
+            dist/release_manifest.json
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Download All Release Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist-merged
+
+      - name: Consolidate Artifacts & Recalculate Master SHA-256
+        run: |
+          mkdir -p dist
+          find dist-merged -type f \( -name "*.dmg" -o -name "*.exe" -o -name "*.zip" -o -name "release_manifest.json" \) -exec cp {} dist/ \;
+          cd dist
+          sha256sum *.dmg *.exe *.zip > SHA256SUMS.txt || true
+          echo "Release Directory Contents:"
+          ls -la
+          cat SHA256SUMS.txt
+        shell: bash
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: FinAuditPro ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            dist/*.dmg
+            dist/*.exe
+            dist/*.zip
+            dist/SHA256SUMS.txt
+            dist/release_manifest.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -57,11 +57,11 @@ from finauditpro.ui.views.working_paper_view import WorkingPaperView
 
 NAV_ITEMS = [
     ("btn_dashboard", "Command Center", "WORKSPACE"),
-    ("btn_pbc", "① Intake & PBC", "GUIDED PIPELINE"),
-    ("btn_audit_matrix", "② Planning & SA 320", "GUIDED PIPELINE"),
-    ("btn_financial_data", "③ TB/GL & Scrutiny", "GUIDED PIPELINE"),
-    ("btn_working_papers", "④ Working Papers", "GUIDED PIPELINE"),
-    ("btn_reports", "⑤ Reports & Sign-Off", "GUIDED PIPELINE"),
+    ("btn_pbc", "Intake & PBC", "GUIDED PIPELINE"),
+    ("btn_audit_matrix", "Planning & SA 320", "GUIDED PIPELINE"),
+    ("btn_financial_data", "TB/GL & Scrutiny", "GUIDED PIPELINE"),
+    ("btn_working_papers", "Working Papers", "GUIDED PIPELINE"),
+    ("btn_reports", "Reports & Sign-Off", "GUIDED PIPELINE"),
     ("btn_queries", "Client Queries", "FIELDWORK TOOLS"),
     ("btn_documents", "Uploaded Evidence", "FIELDWORK TOOLS"),
     ("btn_gst", "GST 2B Reconciler", "FIELDWORK TOOLS"),
@@ -76,9 +76,9 @@ NAV_ITEMS = [
 ]
 
 GUIDED_STEPS = [
-    ("1. Intake & PBC", "btn_pbc"), ("2. Planning (SA 320)", "btn_audit_matrix"),
-    ("3. TB/GL Scrutiny", "btn_financial_data"), ("4. Workpapers", "btn_working_papers"),
-    ("5. Report & Sign-Off", "btn_reports"),
+    ("Intake & PBC", "btn_pbc"), ("Planning (SA 320)", "btn_audit_matrix"),
+    ("TB/GL Scrutiny", "btn_financial_data"), ("Workpapers", "btn_working_papers"),
+    ("Report & Sign-Off", "btn_reports"),
 ]
 
 

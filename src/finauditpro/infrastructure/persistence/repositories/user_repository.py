@@ -48,6 +48,7 @@ class UserRepository:
             salt=model.salt,
             role=RoleEnum(model.role),
             is_active=model.is_active,
+            must_change_password=model.must_change_password,
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
@@ -60,6 +61,7 @@ class UserRepository:
             salt=user.salt,
             role=user.role.value if hasattr(user.role, "value") else str(user.role),
             is_active=user.is_active,
+            must_change_password=user.must_change_password,
             created_at=user.created_at,
             updated_at=user.updated_at,
         )
@@ -83,7 +85,11 @@ class UserRepository:
         return [self._to_entity(m) for m in models]
 
     def create_user_with_password(
-        self, username: str, password: str, role: RoleEnum = RoleEnum.ASSOCIATE
+        self,
+        username: str,
+        password: str,
+        role: RoleEnum = RoleEnum.ASSOCIATE,
+        must_change_password: bool = False,
     ) -> User:
         cleaned = username.strip().lower()
         existing = self.get_by_username(cleaned)
@@ -95,8 +101,23 @@ class UserRepository:
             password_hash=pwd_hash,
             salt=salt,
             role=role,
+            must_change_password=must_change_password,
         )
         return self.add(user)
+
+    def update_password(
+        self, user_id: str, new_password: str, must_change_password: bool = False
+    ) -> User:
+        """Update password hash, generate fresh salt, and update must_change_password flag."""
+        model = self.session.get(UserModel, user_id)
+        if not model:
+            raise ValueError(f"User with ID '{user_id}' not found.")
+        pwd_hash, salt = hash_password(new_password)
+        model.password_hash = pwd_hash
+        model.salt = salt
+        model.must_change_password = must_change_password
+        self.session.flush()
+        return self._to_entity(model)
 
     def seed_default_admin_if_empty(self) -> User | None:
         """Seed default admin user (admin@finauditpro.com / Admin@123) if users table is empty."""
@@ -107,5 +128,6 @@ class UserRepository:
                 username="admin@finauditpro.com",
                 password="Admin@123",  # noqa: S106
                 role=RoleEnum.ADMINISTRATOR,
+                must_change_password=True,
             )
         return None

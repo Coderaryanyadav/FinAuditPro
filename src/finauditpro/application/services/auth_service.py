@@ -24,6 +24,22 @@ class AuthService:
             repo = UserRepository(session)
             return repo.seed_default_admin_if_empty()
 
+    @staticmethod
+    def validate_password_complexity(password: str) -> None:
+        """Validate password meets enterprise security standards."""
+        if not password or len(password) < 8:
+            raise ValidationError("Password must be at least 8 characters long.")
+        has_letter = any(c.isalpha() for c in password)
+        has_number_or_symbol = any(c.isdigit() or not c.isalnum() for c in password)
+        if not (has_letter and has_number_or_symbol):
+            raise ValidationError(
+                "Password must contain letters and at least one number or special character."
+            )
+        if password == "Admin@123":  # noqa: S105
+            raise ValidationError(
+                "New password cannot be the default administrator password (Admin@123)."
+            )
+
     def authenticate(self, username: str, password: str) -> UserSession:
         """Verify username and password against database and return UserSession."""
         cleaned_user = username.strip().lower()
@@ -48,15 +64,56 @@ class AuthService:
                 user_id=user.id,
                 username=user.username,
                 role=user.role,
+                must_change_password=user.must_change_password,
+            )
+
+    def force_change_password(self, user_id: str, new_password: str) -> UserSession:
+        """Force update user password and clear must_change_password flag."""
+        self.validate_password_complexity(new_password)
+        with self.db_manager.session_scope() as session:
+            repo = UserRepository(session)
+            user = repo.update_password(user_id, new_password, must_change_password=False)
+            return UserSession(
+                user_id=user.id,
+                username=user.username,
+                role=user.role,
+                must_change_password=False,
+            )
+
+    def change_password(
+        self, user_id: str, old_password: str, new_password: str
+    ) -> UserSession:
+        """Change user password after verifying current credentials."""
+        self.validate_password_complexity(new_password)
+        with self.db_manager.session_scope() as session:
+            repo = UserRepository(session)
+            user = repo.get_by_id(user_id)
+            if not user:
+                raise ValidationError("User not found.")
+            if not verify_password(old_password, user.password_hash, user.salt):
+                raise ValidationError("Current password is incorrect.")
+            updated_user = repo.update_password(user_id, new_password, must_change_password=False)
+            return UserSession(
+                user_id=updated_user.id,
+                username=updated_user.username,
+                role=updated_user.role,
+                must_change_password=False,
             )
 
     def create_user(
-        self, username: str, password: str, role: RoleEnum = RoleEnum.ASSOCIATE
+        self,
+        username: str,
+        password: str,
+        role: RoleEnum = RoleEnum.ASSOCIATE,
+        must_change_password: bool = False,
     ) -> User:
         """Create a new user with secure password hash."""
+        self.validate_password_complexity(password)
         with self.db_manager.session_scope() as session:
             repo = UserRepository(session)
-            return repo.create_user_with_password(username, password, role)
+            return repo.create_user_with_password(
+                username, password, role, must_change_password=must_change_password
+            )
 
     def list_users(self) -> list[User]:
         """List all registered users."""

@@ -10,7 +10,7 @@
   [![PySide6](https://img.shields.io/badge/PySide6-6.8-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://www.qt.io/)
   [![SQLite WAL](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
   [![LM Studio](https://img.shields.io/badge/LM%20Studio-Air--Gapped%20AI-4F46E5?style=for-the-badge&logo=openai&logoColor=white)](https://lmstudio.ai/)
-  [![Tests](https://img.shields.io/badge/Tests-137%2F137%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+  [![Tests](https://img.shields.io/badge/Tests-138%2F138%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
   [![Type Checked](https://img.shields.io/badge/MyPy-Strict%20Passed-blue?style=for-the-badge&logo=python)](pyproject.toml)
   [![Code Style](https://img.shields.io/badge/Code%20Style-Ruff-black?style=for-the-badge&logo=ruff)](pyproject.toml)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
@@ -334,7 +334,7 @@ python -m finauditpro
 ## Automated Verification & Diagnostics
 
 ```bash
-# Run the complete test suite (137/137 passing)
+# Run the complete test suite (138/138 passing)
 pytest tests/ -v
 
 # Run strict static type checking
@@ -350,7 +350,7 @@ python scripts/development/run_1000_verifications.py
 python scripts/maintenance/vacuum_and_reindex.py
 ```
 
-**Test Suite Status**: **137 passed (100%)** across domain calculations, security hardening, multi-tenant database isolation, maker-checker sign-offs, FTS5 search, and multi-year roll-forward tie-outs.
+**Test Suite Status**: **138 passed (100%)** across domain calculations, security hardening, multi-tenant database isolation, maker-checker sign-offs, FTS5 search, and multi-year roll-forward tie-outs.
 
 ---
 

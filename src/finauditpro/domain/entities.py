@@ -181,6 +181,7 @@ class User(DomainBaseModel):
     salt: str = Field(...)
     role: RoleEnum = Field(default=RoleEnum.ASSOCIATE)
     is_active: bool = Field(default=True)
+    must_change_password: bool = Field(default=False)
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
 

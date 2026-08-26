@@ -224,6 +224,25 @@ class LoginDialog(QDialog):
 
         try:
             session = self.auth_service.authenticate(user, pwd)
+            if session.must_change_password:
+                from finauditpro.ui.dialogs.change_password_dialog import ChangePasswordDialog
+
+                pwd_dialog = ChangePasswordDialog(
+                    parent=self,
+                    auth_service=self.auth_service,
+                    user_session=session,
+                    is_forced=True,
+                )
+                if pwd_dialog.exec() != QDialog.DialogCode.Accepted:
+                    QMessageBox.warning(
+                        self,
+                        "Security Requirement",
+                        "You must set a new master password before accessing FinAuditPro.",
+                    )
+                    return
+                if pwd_dialog.updated_session:
+                    session = pwd_dialog.updated_session
+
             self.authenticated_session = session
             role_str = session.role.value if hasattr(session.role, "value") else str(session.role)
             self.login_successful.emit(session.username, role_str)

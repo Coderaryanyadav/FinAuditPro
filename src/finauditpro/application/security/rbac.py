@@ -11,6 +11,7 @@ class UserSession:
     user_id: str
     username: str
     role: RoleEnum
+    must_change_password: bool = False
 
 
 _ROLE_PERMISSIONS: dict[RoleEnum, set[str]] = {

@@ -168,3 +168,34 @@ def test_materiality_service_delegates_to_engine(db_env):
     assert mat.performance_materiality_paise == 37500000
     assert mat.clearly_trivial_threshold_paise == 2500000
     assert mat.version == 1
+
+
+def test_forced_password_reset_flow(db_env):
+    auth_svc = AuthService(db_env)
+
+    # 1. Initial admin seeded with must_change_password=True
+    session = auth_svc.authenticate("admin@finauditpro.com", "Admin@123")
+    assert session.must_change_password is True
+
+    # 2. Reject weak passwords
+    with pytest.raises(ValidationError, match="at least 8 characters"):
+        auth_svc.force_change_password(session.user_id, "short")
+
+    with pytest.raises(ValidationError, match="cannot be the default"):
+        auth_svc.force_change_password(session.user_id, "Admin@123")
+
+    with pytest.raises(ValidationError, match="at least one number"):
+        auth_svc.force_change_password(session.user_id, "OnlyLettersPassword")
+
+    # 3. Successful password update
+    new_pwd = "NewMasterPassword#2026"
+    updated_session = auth_svc.force_change_password(session.user_id, new_pwd)
+    assert updated_session.must_change_password is False
+
+    # 4. Old default password Admin@123 no longer works
+    with pytest.raises(ValidationError, match="Invalid username or password"):
+        auth_svc.authenticate("admin@finauditpro.com", "Admin@123")
+
+    # 5. New password works and must_change_password is False
+    subsequent_session = auth_svc.authenticate("admin@finauditpro.com", new_pwd)
+    assert subsequent_session.must_change_password is False

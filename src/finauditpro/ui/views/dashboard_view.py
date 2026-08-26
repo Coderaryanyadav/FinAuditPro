@@ -173,14 +173,23 @@ class DashboardView(QWidget):
 
         att_card = CardWidget("NEEDS ATTENTION")
         att_v = QVBoxLayout()
-        att_v.setSpacing(4)
+        att_v.setContentsMargins(0, 4, 0, 4)
+        att_v.setSpacing(6)
         self.att_row = QFrame()
-        self.att_row.setStyleSheet("background-color: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 6px; padding: 10px 12px;")
+        self.att_row.setStyleSheet(
+            "QFrame { background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 12px 14px; }"
+        )
         att_l = QHBoxLayout(self.att_row)
         att_l.setContentsMargins(0, 0, 0, 0)
-        self.att_txt = QLabel(" All clear — no findings require attention")
-        self.att_txt.setStyleSheet("font-size: 12px; font-weight: 600; color: #15803D; border: none; background: transparent;")
-        att_l.addWidget(self.att_txt)
+        att_l.setSpacing(10)
+
+        self.att_dot = QLabel("✓")
+        self.att_dot.setStyleSheet("font-size: 14px; font-weight: 700; color: #16A34A; background: #DCFCE7; border-radius: 10px; min-width: 20px; max-width: 20px; min-height: 20px; max-height: 20px; qproperty-alignment: AlignCenter;")
+        self.att_txt = QLabel("All clear — no open findings or critical items require attention")
+        self.att_txt.setStyleSheet("font-size: 13px; font-weight: 500; color: #334155; border: none; background: transparent;")
+        self.att_txt.setWordWrap(True)
+        att_l.addWidget(self.att_dot)
+        att_l.addWidget(self.att_txt, stretch=1)
         att_v.addWidget(self.att_row)
         att_card.content_layout.addLayout(att_v)
         row1.addWidget(att_card, 4)

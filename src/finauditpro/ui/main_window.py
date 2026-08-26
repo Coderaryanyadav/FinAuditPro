@@ -32,7 +32,7 @@ from finauditpro.application.services.financial_data_service import FinancialDat
 from finauditpro.application.services.firm_service import FirmService
 from finauditpro.application.services.report_service import ReportService
 from finauditpro.application.services.working_paper_service import WorkingPaperService
-from finauditpro.domain.entities import Client, Engagement, Firm, RoleEnum
+from finauditpro.domain.entities import RoleEnum
 from finauditpro.ui.dialogs.engagement_dialog import EngagementDialog
 from finauditpro.ui.dialogs.login_dialog import LoginDialog
 from finauditpro.ui.styles import GLOBAL_QSS
@@ -108,12 +108,9 @@ class MainWindow(QMainWindow):
             self.auth_service = AuthService(firm_service.db_manager)
 
         self.archival_repo, self.roll_forward_repo, self.db_manager = archival_repo, roll_forward_repo, db
-        self.current_firm: Firm | None = None
-        self.current_client: Client | None = None
-        self.current_engagement: Engagement | None = None
-        self.current_user_session: UserSession = UserSession(user_id="default", username="admin@finauditpro.com", role=RoleEnum.ADMINISTRATOR)
-        self.sidebar_collapsed = False
-        self.pipeline_btns: list[QPushButton] = []
+        self.current_firm, self.current_client, self.current_engagement = None, None, None
+        self.current_user_session = UserSession(user_id="default", username="admin@finauditpro.com", role=RoleEnum.ADMINISTRATOR)
+        self.sidebar_collapsed, self.pipeline_btns = False, []
         self.setWindowTitle("FinAuditPro — Guided Statutory Audit Operating System")
         self.resize(1440, 920); self.setStyleSheet(GLOBAL_QSS)
         self._init_ui(); self._show_login_flow(); self._auto_select_initial_engagement()
@@ -127,15 +124,13 @@ class MainWindow(QMainWindow):
         if "pytest" not in sys.modules:
             dlg = LoginDialog(self, auth_service=self.auth_service)
             if dlg.exec() and dlg.authenticated_session:
-                self.current_user_session = dlg.authenticated_session
-                self._apply_user_session()
+                self.current_user_session = dlg.authenticated_session; self._apply_user_session()
 
     def _apply_user_session(self) -> None:
         if self.current_user_session:
             name = self.current_user_session.username.split("@")[0].title()
             role_str = self.current_user_session.role.value if hasattr(self.current_user_session.role, "value") else str(self.current_user_session.role)
-            self.lbl_user_name.setText(name)
-            self.lbl_user_role.setText(role_str)
+            self.lbl_user_name.setText(name); self.lbl_user_role.setText(role_str)
             if hasattr(self, "view_working_papers") and self.view_working_papers:
                 self.view_working_papers.set_user_session(self.current_user_session)
 
@@ -224,7 +219,25 @@ class MainWindow(QMainWindow):
         self.ai_drawer = AICopilotDrawer(self.ai_service, parent=self); self.ai_drawer.setVisible(False); self.ai_drawer.closed.connect(lambda: self.ai_drawer.setVisible(False))
         body_layout.addWidget(self.ai_drawer); rc_layout.addLayout(body_layout, stretch=1); main_layout.addWidget(right_container, stretch=1)
         self.btn_group.idClicked.connect(self._on_nav_clicked)
-        QShortcut(QKeySequence("Ctrl+K"), self, self._toggle_ai_drawer); QShortcut(QKeySequence("Meta+K"), self, self._toggle_ai_drawer)
+        self._register_shortcuts()
+
+    def _register_shortcuts(self) -> None:
+        for seq in ("Ctrl+K", "Meta+K"): QShortcut(QKeySequence(seq), self, self._toggle_ai_drawer)
+        for seq in ("Ctrl+P", "Meta+P"): QShortcut(QKeySequence(seq), self, self._open_command_palette)
+        for seq in ("Ctrl+Q", "Meta+Q", "Alt+F4"): QShortcut(QKeySequence(seq), self, self.close)
+        for seq in ("Ctrl+W", "Meta+W"): QShortcut(QKeySequence(seq), self, self._handle_close_shortcut)
+        for seq in ("Ctrl+R", "Meta+R", "F5"): QShortcut(QKeySequence(seq), self, self._handle_refresh_shortcut)
+        for seq in ("Ctrl+,", "Meta+,"): QShortcut(QKeySequence(seq), self, lambda: self.btn_settings.click())
+        for seq in ("Ctrl+N", "Meta+N"): QShortcut(QKeySequence(seq), self, self._on_new_engagement)
+
+    def _handle_close_shortcut(self) -> None:
+        if self.ai_drawer.isVisible(): self.ai_drawer.setVisible(False)
+        else: self.close()
+
+    def _handle_refresh_shortcut(self) -> None:
+        self.view_dashboard.refresh_dashboard()
+        curr_view = self.stack.currentWidget()
+        if hasattr(curr_view, "refresh"): curr_view.refresh()
 
     def _init_views(self) -> None:
         self.view_dashboard = DashboardView(self.firm_service, self.client_service, self.engagement_service, self.audit_matrix_service)
@@ -239,13 +252,7 @@ class MainWindow(QMainWindow):
         self.view_working_papers, self.view_reports = WorkingPaperView(self.engagement_service, self.working_paper_service), ReportView(self.engagement_service, self.report_service)
         self.view_pbc, self.view_queries = PBCTrackerView(self.pbc_service), AuditQueryView(self.query_service)
         self.view_archival, self.view_roll_forward, self.view_settings = ArchivalView(self.db_manager), RollForwardView(self.db_manager), SettingsView(auth_service=self.auth_service)
-
-        views = (
-            self.view_dashboard, self.view_pbc, self.view_audit_matrix, self.view_financial_data,
-            self.view_working_papers, self.view_reports, self.view_queries, self.view_documents,
-            self.view_gst, self.view_compliance, self.view_ai_assistant, self.view_clients,
-            self.view_engagements, self.view_firms, self.view_archival, self.view_roll_forward, self.view_settings
-        )
+        views = (self.view_dashboard, self.view_pbc, self.view_audit_matrix, self.view_financial_data, self.view_working_papers, self.view_reports, self.view_queries, self.view_documents, self.view_gst, self.view_compliance, self.view_ai_assistant, self.view_clients, self.view_engagements, self.view_firms, self.view_archival, self.view_roll_forward, self.view_settings)
         for v in views: self.stack.addWidget(v)
 
     def _toggle_ai_drawer(self) -> None:

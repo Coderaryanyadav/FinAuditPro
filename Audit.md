@@ -200,3 +200,220 @@ Immutable Audit Trail & Hash Chains │ 96 / 100 │ 100 / 100 │ 🔴 Must Bui
     authoritative White Paper on Digital Evidence Traceability under SA 230 &
     ISAS 420 and submit an application to the ICAI Committee for Members in
     Practice (CMP).
+
+FINDAUDITPRO — FORENSIC PRODUCT GAP ANALYSIS & WORLD-CLASS AUDIT PLATFORM
+ARCHITECTURE
+
+1. CURRENT SYSTEM UNDERSTANDING & FORENSIC CODEBASE RECONSTRUCTION Based on an
+   AST inspection of src/finauditpro/ (63 Python modules, 143 unit/integration
+   tests passing, SQLite WAL schema with 9 versioned migrations):
+
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ CURRENT SYSTEM REALITY INVENTORY │
+├─────────────────────────┬─────────────────┬────────────────────────────────────────────┤
+│ Subsystem / Component │ Status │ Verified Codebase Implementation │
+├─────────────────────────┼─────────────────┼────────────────────────────────────────────┤
+│ 1. UI Shell & Views │ IMPLEMENTED │ 18 native PySide6 views (WorkingPaper, │ │
+│ │ Matrix, PBC, Compliance, FinancialData...) │
+├─────────────────────────┼─────────────────┼────────────────────────────────────────────┤
+│ 2. Math & Storage │ IMPLEMENTED │ Exact integer-paise math (Decimal │ │ │ │
+ROUND_HALF_UP); SQLite WAL mode with FKs. │
+├─────────────────────────┼─────────────────┼────────────────────────────────────────────┤
+│ 3. Working Papers (PAF) │ IMPLEMENTED │ Dual-tree PAF/CAF lifecycle (Draft → │
+│ │ │ In Review → Signed Off → Locked). │
+├─────────────────────────┼─────────────────┼────────────────────────────────────────────┤
+│ 4. Analytics Engine │ IMPLEMENTED │ Benford Chi² (df=8), Z-score outliers, │ │
+│ │ duplicate clusters, Schedule III ratios. │
+├─────────────────────────┼─────────────────┼────────────────────────────────────────────┤
+│ 5. Lineage & DAG │ IMPLEMENTED │ Directed node-link split graph linking │ │ │
+│ Finding → Procedure → Risk → Evidence. │
+├─────────────────────────┼─────────────────┼────────────────────────────────────────────┤
+│ 6. Confirmations │ IMPLEMENTED │ SA 505 Bank/Debtor tracking with auto │ │ │ │
+discrepancy math (|Book - Confirmed|). │
+├─────────────────────────┼─────────────────┼────────────────────────────────────────────┤
+│ 7. Air-Gapped AI │ IMPLEMENTED │ Local LM Studio REST gateway (1234), │ │ │ │
+prompt injection sanitizer, <think> filter.│
+├─────────────────────────┼─────────────────┼────────────────────────────────────────────┤
+│ 8. Audit Trail & Lock │ IMPLEMENTED │ SQLite append-only triggers, SHA-256
+Merkle│ │ │ │ chains, PRAGMA query_only = ON seal. │
+├─────────────────────────┼─────────────────┼────────────────────────────────────────────┤
+│ 9. Compliance Matrices │ IMPLEMENTED │ CARO 2020 (21 clauses) & Form 3CD (9
+core) │ │ │ │ with SA 705 automatic report qualification.│
+├─────────────────────────┼─────────────────┼────────────────────────────────────────────┤
+│ 10. Predecessor Comm. │ MISSING │ SA 510 formal communication log & NOC │ │ &
+Independence Reg. │ │ tracker under Code of Ethics (11th Sched). │
+├─────────────────────────┼─────────────────┼────────────────────────────────────────────┤
+│ 11. Hardware DSC PKI │ MISSING │ USB Token Class 3 / e-Mudhra partner │ │
+Signing Layer │ │ cryptographic signature integration. │
+├─────────────────────────┼─────────────────┼────────────────────────────────────────────┤
+│ 12. Sampling Engine 2.0 │ PARTIALLY IMPL. │ Random/High-value exists; Monetary
+Unit │ │ │ │ Sampling (MUS) & error projection missing. │
+└─────────────────────────┴─────────────────┴────────────────────────────────────────────┘
+2. ARCHITECTURE MAP & BOUNDARY WEAKNESSES mermaid graph TD subgraph
+"PRESENTATION LAYER (PySide6 Desktop UI)" UI1[Dashboard & Stepper] UI2[Working
+Paper Tree PAF/CAF] UI3[Audit Matrix & Traceability DAG] UI4[Financial Data &
+Anomaly Workspace] UI5[Compliance CARO & Form 3CD] end subgraph "APPLICATION
+SERVICE LAYER" AS1[EngagementService] AS2[WorkingPaperService]
+AS3[AuditMatrixService] AS4[FinancialAnalyticsService] AS5[ArchivalService]
+AS6[ReportRenderer] end subgraph "DOMAIN LAYER (Pure Business Logic)"
+DM1[MaterialityEngine - Exact Paise] DM2[DeterministicAnalyticsEngine]
+DM3[PromptDefenseEngine] DM4[ExportSanitizer - Formula Shield] DM5[Entities &
+ValueObjects] end subgraph "INFRASTRUCTURE & PERSISTENCE" INF1[DatabaseManager -
+SQLite WAL] INF2[Local LM Studio REST - localhost:1234] INF3[PyMuPDF + Tesseract
+OCR + FTS5] INF4[Merkle Hash Chain Trigger] end UI1 & UI2 & UI3 & UI4 & UI5 -->
+AS1 & AS2 & AS3 & AS4 & AS5 & AS6 AS1 & AS2 & AS3 & AS4 & AS5 & AS6 --> DM1 &
+DM2 & DM3 & DM4 & DM5 AS1 & AS2 & AS3 & AS4 & AS5 & AS6 --> INF1 & INF2 & INF3 &
+INF4 Architectural Deficiencies Identified: Coupling in UI Event Loops: Some UI
+views directly instantiate DTOs rather than delegating entirely through an
+explicit Application Service facade. Missing Sampling Abstraction: Sampling
+selection is embedded within analytics rather than existing as a standalone
+SamplingEngine providing statistical confidence intervals under SA 530. Absence
+of X.509 PKI Layer: Cryptographic signing currently relies on software SHA-256
+manifests rather than hardware-bound Digital Signature Certificates (DSC
+tokens). 3. INDEPENDENT RE-EVALUATION & REALISTIC READINESS SCORE
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ CRITICAL READINESS RE-CALCULATION │
+├───────────────────────────────────────┬───────────────┬────────────────────────────────┤
+│ Category │ Current Score │ Major Forensic Deductions │
+├───────────────────────────────────────┼───────────────┼────────────────────────────────┤
+│ 1. Standards Engine (SA 200–700) │ 82 / 100 │ -8: Missing SA 210 engagement │
+│ │ │ letter generator & SA 570 memo.│
+├───────────────────────────────────────┼───────────────┼────────────────────────────────┤
+│ 2. SA 230 Working Paper Engine │ 92 / 100 │ -4: Rich equation cross-link │ │ │
+│ editor needs AST parsing. │
+├───────────────────────────────────────┼───────────────┼────────────────────────────────┤
+│ 3. Evidence Chain & Traceability DAG │ 90 / 100 │ -5: Missing auto-OCR
+bounding │ │ │ │ box snippet cache in DB. │
+├───────────────────────────────────────┼───────────────┼────────────────────────────────┤
+│ 4. Air-Gapped AI Audit Assistance │ 88 / 100 │ -6: Multi-document cross-RAG │
+│ │ │ (Minutes vs Loans) unbuilt. │
+├───────────────────────────────────────┼───────────────┼────────────────────────────────┤
+│ 5. Audit Quality & SQM Engine │ 84 / 100 │ -8: SQM 1 firm-wide register │ │ │
+│ not yet segregated from engage.│
+├───────────────────────────────────────┼───────────────┼────────────────────────────────┤
+│ 6. Immutable Trail & Tamper Lock │ 94 / 100 │ -3: USB Token DSC signing │ │ │
+│ hardware driver missing. │
+├───────────────────────────────────────┼───────────────┼────────────────────────────────┤
+│ 7. Compliance (CARO/3CD/Sched III) │ 88 / 100 │ -6: Form 3CD needs all 44 │ │
+│ │ clause breakdown calculators. │
+├───────────────────────────────────────┼───────────────┼────────────────────────────────┤
+│ REALISTIC OVERALL ICAI READINESS │ 88 / 100 │ (Robust Foundation; Clear Path)│
+└───────────────────────────────────────┴───────────────┴────────────────────────────────┘
+4. COMPLETE AUDIT LIFECYCLE FORENSIC GAP MATRIX
+┌───────────────────────────┬───────────────┬────────────┬──────────────────────────────────┐
+│ Lifecycle Stage │ Status │ Standard │ Verified Capability / Gap │
+├───────────────────────────┼───────────────┼────────────┼──────────────────────────────────┤
+│ 1. Prospect & Conflict │ PARTIALLY IMP │ SA 220 │ KYC PAN/GSTIN checked;
+formal │ │ Check / Independence │ │ SQC 1 │ independence declaration needed. │
+├───────────────────────────┼───────────────┼────────────┼──────────────────────────────────┤
+│ 2. Predecessor Auditor │ MISSING │ Code of │ Formal NOC tracking letter to │ │
+Communication │ │ Ethics │ outgoing CA under Clause 8. │
+├───────────────────────────┼───────────────┼────────────┼──────────────────────────────────┤
+│ 3. Engagement Letter │ PLANNED │ SA 210 │ Needs auto-compilation from │ │ &
+Scope Setup │ │ │ entity profile (Pvt vs Listed). │
+├───────────────────────────┼───────────────┼────────────┼──────────────────────────────────┤
+│ 4. Materiality Assessment │ IMPLEMENTED │ SA 320 │ 4 benchmarks, integer paise
+math,│ │ │ │ │ performance & trivial limits. │
+├───────────────────────────┼───────────────┼────────────┼──────────────────────────────────┤
+│ 5. Risk Assessment (RoMM) │ IMPLEMENTED │ SA 315 │ Assertion-level risk matrix
+with │ │ │ │ │ Inherent x Control = RoMM logic. │
+├───────────────────────────┼───────────────┼────────────┼──────────────────────────────────┤
+│ 6. Substantive Procedures │ IMPLEMENTED │ SA 330 │ Linked risk-response
+execution │ │ & Working Papers │ │ SA 230 │ with PAF/CAF dual-tree layout. │
+├───────────────────────────┼───────────────┼────────────┼──────────────────────────────────┤
+│ 7. Statistical Sampling │ PARTIALLY IMP │ SA 530 │ Random/High-value built;
+MUS │ │ │ │ │ sample expansion missing. │
+├───────────────────────────┼───────────────┼────────────┼──────────────────────────────────┤
+│ 8. External Confirmations │ IMPLEMENTED │ SA 505 │ Bank/Debtor tracking with
+auto │ │ │ │ │ discrepancy calculations. │
+├───────────────────────────┼───────────────┼────────────┼──────────────────────────────────┤
+│ 9. Journal Entry Testing │ IMPLEMENTED │ SA 240 │ Round numbers, weekend
+postings, │ │ │ │ │ sequence gaps, large amounts. │
+├───────────────────────────┼───────────────┼────────────┼──────────────────────────────────┤
+│ 10. Going Concern Eval. │ PLANNED │ SA 570 │ Structured 12-month solvency & │
+│ │ │ │ debt-service coverage checklist. │
+├───────────────────────────┼───────────────┼────────────┼──────────────────────────────────┤
+│ 11. Completion & Quality │ IMPLEMENTED │ SQC 1 │ Pre-archival diagnostic
+engine │ │ Review Blockers │ │ SA 230 │ blocking unreviewed open notes. │
+├───────────────────────────┼───────────────┼────────────┼──────────────────────────────────┤
+│ 12. Final Report & CARO │ IMPLEMENTED │ SA 700/705 │ Dynamic SA 705
+qualification │ │ Assembly │ │ CARO 2020 │ paragraph + CARO 2020 bindings. │
+├───────────────────────────┼───────────────┼────────────┼──────────────────────────────────┤
+│ 13. Sealing & Retention │ IMPLEMENTED │ SA 230 │ PRAGMA query_only = ON +
+Merkle │ │ │ │ SQC 1 │ SHA-256 archive manifest. │
+└───────────────────────────┴───────────────┴────────────┴──────────────────────────────────┘
+5. TOP 25 CRITICAL (P0) FEATURES FOR TOTAL PROFESSIONAL DEFENSIBILITY
+┌────┬──────────────────────────────────────────┬──────────┬──────────────┬─────────────────┐
+│ # │ Feature Name │ Standard │ Professional │ Implementation │ │ │ │ │
+Significance │ Difficulty │
+├────┼──────────────────────────────────────────┼──────────┼──────────────┼─────────────────┤
+│ 1 │ Bidirectional Visual Traceability Graph │ SA 230 │ CRITICAL │ Low (Built)
+│ │ 2 │ Permanent Audit File (PAF) Tree Partition│ SA 230 │ CRITICAL │ Low
+(Built) │ │ 3 │ SA 320 Decimal Integer-Paise Materiality │ SA 320 │ CRITICAL │
+Low (Built) │ │ 4 │ SA 505 External Confirmation Tracker │ SA 505 │ CRITICAL │
+Low (Built) │ │ 5 │ Dynamic SA 705 Report Modification Engine│ SA 705 │ CRITICAL
+│ Low (Built) │ │ 6 │ Schedule III Ratios & MSME 45-Day Ageing │ Sched III│
+CRITICAL │ Low (Built) │ │ 7 │ Immutable SQLite WAL Merkle Hash Chains │ Rule
+11g │ CRITICAL │ Low (Built) │ │ 8 │ PRAGMA query_only = ON Archival Sealing │
+SQC 1 │ CRITICAL │ Low (Built) │ │ 9 │ Air-Gapped Prompt Defense & Token Shield
+│ DPDP Act │ CRITICAL │ Low (Built) │ │ 10 │ Formula Injection Disarmer ('=...)
+│ OWASP │ CRITICAL │ Low (Built) │ │ 11 │ Open Review Notes WP Sign-Off Blocker
+│ SA 230 │ CRITICAL │ Low (Built) │ │ 12 │ Benford's Law Chi-Square (df=8)
+Analytic │ SA 240 │ HIGH │ Low (Built) │ │ 13 │ Monetary Unit Sampling (MUS)
+Subsystem │ SA 530 │ HIGH │ Medium (P0) │ │ 14 │ SA 570 Going Concern Solvency
+Evaluator │ SA 570 │ HIGH │ Medium (P0) │ │ 15 │ Predecessor CA NOC
+Communication Module │ SA 510 │ HIGH │ Low (P0) │ │ 16 │ SA 210 Engagement
+Letter Auto-Generator │ SA 210 │ HIGH │ Low (P0) │ │ 17 │ Form 3CD Full
+44-Clause Tax Audit Engine │ Sec 44AB │ HIGH │ Medium (P0) │ │ 18 │ USB Token
+DSC PKI Digital Signature Mod │ IT Act │ HIGH │ High (P0) │ │ 19 │ GSTR-2B vs
+Purchase Ledger Reconciler │ GST Act │ HIGH │ Medium (P0) │ │ 20 │ Multi-Year
+Opening Balance Roll-Forward │ SA 510 │ HIGH │ Low (Built) │ │ 21 │ Read-Only
+Peer Review Inspection Mode │ PRB/QRB │ HIGH │ Low (P0) │ │ 22 │ FTS5 Full-Text
+Evidence Search Table │ ISAS 420 │ HIGH │ Low (Built) │ │ 23 │ Related Party
+Transaction Disclosure Net │ SA 550 │ HIGH │ Medium (P0) │ │ 24 │ Lead Schedule
+Cross-Footing Reconciler │ SA 330 │ HIGH │ Low (P0) │ │ 25 │ Automatic Backup &
+Disaster Recovery Zip │ SQC 1 │ HIGH │ Low (Built) │
+└────┴──────────────────────────────────────────┴──────────┴──────────────┴─────────────────┘
+6. THINGS NEVER TO BUILD (DO-NOT-BUILD REGISTER) Do NOT Build Cloud Multi-Tenant
+SaaS Synchronizer for Client Financials: Violates client confidentiality
+constraints under the ICAI Code of Ethics and introduces massive DPDP Act
+liabilities. Do NOT Build "Autonomous AI Opinion Generator": Autonomous signing
+of audit reports violates Section 26 of the Chartered Accountants Act, 1949; the
+CA must always hold the final sign-off authority. Do NOT Build Blockchain-Based
+Public Ledgers: Adds latency, transaction costs, and regulatory ambiguity with
+zero evidentiary advantage over local SQLite Merkle hash chains. Do NOT Build
+LLM-Based Calculation Engines: Mathematical analysis must strictly run on
+deterministic Python algorithms (Decimal HALF_UP). 7. THE #1 KILLER
+DIFFERENTIATOR "Cryptographically Sealed Bidirectional Evidence Traceability
+Graph"
+
+The ability for an engagement partner, peer reviewer, or regulatory inspector to
+click any figure or adverse remark in the final statutory audit report and
+immediately navigate through a cryptographically sealed DAG directly to the
+exact page bounding-box of the verified source document.
+
+8. STRATEGIC 90-DAY EXECUTION ROADMAP
+   ┌─────────────────────────────────────────────────────────────────────────────┐
+   │ 90-DAY EXECUTION MATRIX │
+   ├───────────────────┬─────────────────────────────────────────────────────────┤
+   │ Weeks 1–3 │ Monetary Unit Sampling (MUS) under SA 530 + SA 570 │ │ │ Going
+   Concern structured assessment memo engine. │
+   ├───────────────────┼─────────────────────────────────────────────────────────┤
+   │ Weeks 4–6 │ GSTR-2B vs Purchase Register automated reconciler & │ │ │ full
+   Form 3CD 44-clause tax audit schedules. │
+   ├───────────────────┼─────────────────────────────────────────────────────────┤
+   │ Weeks 7–9 │ Standalone executable packaging (macOS DMG & Win EXE) │ │ │ +
+   Dedicated Read-Only Peer Review Inspection Mode. │
+   ├───────────────────┼─────────────────────────────────────────────────────────┤
+   │ Weeks 10–12 │ Pilot testing with 5 chartered accountancy firms + │ │ │
+   formal submission to ICAI CMP Expression of Interest. │
+   └───────────────────┴─────────────────────────────────────────────────────────┘
+9. FINAL FOUNDER DIRECTIVES What is missing that you haven't realized?
+   Predecessor Auditor NOC Tracking (Clause 8, Part I, First Schedule of CA Act)
+   and Structured Going Concern (SA 570) Solvency Forecasting. What is the
+   single highest-leverage improvement? The Bidirectional Evidence Traceability
+   Graph — it transforms audit documentation from a static filing cabinet into
+   an interactive, defensive proof engine. What makes an experienced CA
+   immediately understand FindAuditPro is different? Integer-paise mathematical
+   determinism and 100% offline air-gapped execution — proving it was built by
+   auditors who respect client confidentiality and professional responsibility.

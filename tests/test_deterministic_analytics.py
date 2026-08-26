@@ -196,3 +196,46 @@ def test_trade_payables_msme_ageing() -> None:
     assert "Section 15 of MSMED Act" in res.exceptions[0].description
 
 
+def test_monetary_unit_sampling_engine() -> None:
+    """Verify SA 530 Monetary Unit Sampling (MUS) interval calculation and high-value item stratification."""
+    from finauditpro.domain.sampling_engine import AuditSamplingEngine
+
+    pop = [
+        {"voucher": "V-01", "amount_paise": 20000000},   # ₹2L
+        {"voucher": "V-02", "amount_paise": 150000000},  # ₹15L (High Value >= Interval)
+        {"voucher": "V-03", "amount_paise": 30000000},   # ₹3L
+        {"voucher": "V-04", "amount_paise": 50000000},   # ₹5L
+        {"voucher": "V-05", "amount_paise": 10000000},   # ₹1L
+    ]
+    # Tolerable misstatement: ₹30L -> Interval = 30L / 3.0 = ₹10L (10,00,000 paise * 100 = 100,000,000 paise)
+    res = AuditSamplingEngine.calculate_mus_sample(
+        population_records=pop,
+        tolerable_misstatement_paise=300000000,
+        expected_misstatement_paise=0,
+        confidence_level_pct=95.0,
+    )
+
+    assert res.sample_size >= 1
+    assert len(res.high_value_items) == 1
+    assert res.high_value_items[0]["voucher"] == "V-02"
+    assert "SA 530 MUS Plan" in res.rationale
+
+
+def test_going_concern_evaluation_engine() -> None:
+    """Verify SA 570 Going Concern financial indicator evaluation and reporting disclosures."""
+    from finauditpro.domain.going_concern_engine import GoingConcernEngine, SolvencyRiskLevelEnum
+
+    # Critical Solvency Flag (Negative Net Worth + Operating Losses)
+    level, report_req, text = GoingConcernEngine.evaluate_indicators(
+        has_operating_losses=True,
+        has_negative_operating_cashflow=True,
+        has_negative_net_worth=True,
+        has_covenant_breaches=False,
+        has_debt_maturity_unfunded=True,
+    )
+    assert level == SolvencyRiskLevelEnum.CRITICAL_GOING_CONCERN_RISK
+    assert report_req is True
+    assert "Material Uncertainty Related to Going Concern" in text
+
+
+

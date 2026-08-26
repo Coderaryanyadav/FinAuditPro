@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from finauditpro.application.security.rbac import UserSession
 from finauditpro.application.services.working_paper_service import WorkingPaperService
 from finauditpro.application.working_paper_dtos import SignOffDTO
 from finauditpro.domain.working_paper_entities import SignOffLevelEnum, WorkingPaper
@@ -26,11 +27,13 @@ class SignOffDialog(QDialog):
         self,
         working_paper: WorkingPaper,
         working_paper_service: WorkingPaperService,
+        user_session: UserSession | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
         self.wp = working_paper
         self.wp_service = working_paper_service
+        self.user_session = user_session
 
         self.setWindowTitle(f"Sign Off Working Paper — {self.wp.index_reference}")
         self.resize(550, 420)
@@ -57,7 +60,9 @@ class SignOffDialog(QDialog):
             "• It confers no external legal validity on any report or financial statement."
         )
         disc_text.setWordWrap(True)
-        disc_text.setStyleSheet("color: #78350f; font-size: 12px; background: transparent; border: none;")
+        disc_text.setStyleSheet(
+            "color: #78350f; font-size: 12px; background: transparent; border: none;"
+        )
         disc_layout.addWidget(disc_text)
         layout.addWidget(disclaimer_box)
 
@@ -68,9 +73,22 @@ class SignOffDialog(QDialog):
         self.level_combo.addItem("Reviewed", SignOffLevelEnum.REVIEWED)
         self.level_combo.addItem("Signed Off (Final Lock)", SignOffLevelEnum.FINAL_SIGN_OFF)
 
-        self.user_id_input = QLineEdit("Audit Partner")
+        default_user = self.user_session.username if self.user_session else "Lead Auditor"
+        self.user_id_input = QLineEdit(default_user)
         self.role_input = QComboBox()
-        self.role_input.addItems(["Manager", "Audit Partner", "Quality Reviewer"])
+        self.role_input.addItems(["Associate", "Senior", "Manager", "Partner", "Administrator"])
+
+        if self.user_session:
+            role_val = (
+                self.user_session.role.value
+                if hasattr(self.user_session.role, "value")
+                else str(self.user_session.role)
+            )
+            idx = self.role_input.findText(role_val)
+            if idx >= 0:
+                self.role_input.setCurrentIndex(idx)
+        else:
+            self.role_input.setCurrentIndex(3)  # Partner default
 
         self.note_input = QLineEdit()
         self.note_input.setPlaceholderText("Optional sign-off notes...")
@@ -105,7 +123,11 @@ class SignOffDialog(QDialog):
             try:
                 level = SignOffLevelEnum(raw_level)
             except ValueError:
-                level = SignOffLevelEnum[raw_level] if raw_level in SignOffLevelEnum.__members__ else SignOffLevelEnum.REVIEWED
+                level = (
+                    SignOffLevelEnum[raw_level]
+                    if raw_level in SignOffLevelEnum.__members__
+                    else SignOffLevelEnum.REVIEWED
+                )
         else:
             level = SignOffLevelEnum.REVIEWED
         note = self.note_input.text().strip()

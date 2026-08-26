@@ -16,15 +16,27 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from finauditpro.application.security.rbac import UserSession
+from finauditpro.application.services.auth_service import AuthService
+from finauditpro.domain.exceptions import ValidationError
+from finauditpro.version import __version__
+
 
 class LoginDialog(QDialog):
     """Enterprise Auditor Login Window — Split Navy & White Surface Design."""
 
     login_successful = Signal(str, str)  # username, role
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        auth_service: AuthService | None = None,
+    ) -> None:
         super().__init__(parent)
+        self.auth_service = auth_service
+        self.authenticated_session: UserSession | None = None
         self.setWindowTitle("FinAuditPro — Statutory Audit Platform")
+
         self.resize(1020, 640)
         self.setMinimumSize(780, 540)
         self.setStyleSheet("background-color: #F7F8FA;")
@@ -107,7 +119,7 @@ class LoginDialog(QDialog):
 
         ll.addStretch(3)
 
-        ver = QLabel("Enterprise v2.4.0 · Local deployment")
+        ver = QLabel(f"Enterprise v{__version__} · Local deployment")
         ver.setStyleSheet("font-size: 11px; color: #64748b; border: none; background: transparent;")
         ll.addWidget(ver)
 
@@ -205,5 +217,18 @@ class LoginDialog(QDialog):
             )
             return
 
-        self.login_successful.emit(user, "Administrator")
-        self.accept()
+        if not self.auth_service:
+            self.login_successful.emit(user, "Administrator")
+            self.accept()
+            return
+
+        try:
+            session = self.auth_service.authenticate(user, pwd)
+            self.authenticated_session = session
+            role_str = session.role.value if hasattr(session.role, "value") else str(session.role)
+            self.login_successful.emit(session.username, role_str)
+            self.accept()
+        except ValidationError as ex:
+            QMessageBox.warning(self, "Authentication Failed", str(ex))
+        except Exception as ex:
+            QMessageBox.critical(self, "Login Error", f"An unexpected error occurred: {ex}")

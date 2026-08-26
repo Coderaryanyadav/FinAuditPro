@@ -45,9 +45,7 @@ class AIService:
             from finauditpro.infrastructure.ai.faiss_vector_store import FAISSVectorStore
             from finauditpro.infrastructure.first_run import get_app_data_dir
 
-            vector_store = FAISSVectorStore(
-                get_app_data_dir() / "vector_store"
-            )
+            vector_store = FAISSVectorStore(get_app_data_dir() / "vector_store")
         self.provider = provider
         self.vector_store = vector_store
 
@@ -118,6 +116,9 @@ class AIService:
                 self.vector_store.delete_index(engagement_id)
                 return len(chunks_to_insert)
 
+            # Sort chunks deterministically before embedding & building index
+            chunks_to_insert.sort(key=lambda c: (c.created_at, c.id))
+
             # Generate Embeddings via LM Studio
             texts_to_embed = [c.chunk_text for c in chunks_to_insert]
             embeddings: list[list[float]] = []
@@ -136,8 +137,9 @@ class AIService:
                 for c_model, _vec in zip(chunks_to_insert, embeddings, strict=False):
                     c_model.dimension = dim
 
-
-                chunk_pairs = [(c.id, vec) for c, vec in zip(chunks_to_insert, embeddings, strict=False)]
+                chunk_pairs = [
+                    (c.id, vec) for c, vec in zip(chunks_to_insert, embeddings, strict=False)
+                ]
                 self.vector_store.build_index(engagement_id, chunk_pairs)
             else:
                 self.vector_store.delete_index(engagement_id)
@@ -162,10 +164,12 @@ class AIService:
                         chunk_models = (
                             session.query(DocumentChunkModel)
                             .filter(DocumentChunkModel.engagement_id == engagement_id)
+                            .order_by(
+                                DocumentChunkModel.created_at.asc(), DocumentChunkModel.id.asc()
+                            )
                             .all()
                         )
                         doc_repo = DocumentRepository(session)
-
 
                         retrieved: list[dict[str, Any]] = []
                         all_chunks_list = list(chunk_models)
@@ -183,6 +187,7 @@ class AIService:
                                         "score": score,
                                     }
                                 )
+
                         if retrieved:
                             return retrieved, True, False
             except Exception:
@@ -229,12 +234,18 @@ class AIService:
             if chunks:
                 summary_lines.append(f"Offline Evidence Analysis for '{question}':\n")
                 for c in chunks:
-                    summary_lines.append(f"• Document: {c['title']} (Page {c['page_number']}) [{c['chunk_id']}]")
-                    snippet = c['chunk_text'].strip()[:200].replace('\n', ' ')
-                    summary_lines.append(f"  Excerpt: \"{snippet}...\"\n")
-                summary_lines.append("Audit Notice: Offline Rule Engine active. Connect local LM Studio on port 1234 to enable generative LLM synthesis.")
+                    summary_lines.append(
+                        f"• Document: {c['title']} (Page {c['page_number']}) [{c['chunk_id']}]"
+                    )
+                    snippet = c["chunk_text"].strip()[:200].replace("\n", " ")
+                    summary_lines.append(f'  Excerpt: "{snippet}..."\n')
+                summary_lines.append(
+                    "Audit Notice: Offline Rule Engine active. Connect local LM Studio on port 1234 to enable generative LLM synthesis."
+                )
             else:
-                summary_lines.append(f"No matching evidence documents found for '{question}'.\n\nPlease upload relevant audit documents or trial balances.")
+                summary_lines.append(
+                    f"No matching evidence documents found for '{question}'.\n\nPlease upload relevant audit documents or trial balances."
+                )
 
             response = LLMResponse(
                 content="\n".join(summary_lines),
@@ -311,7 +322,6 @@ class AIService:
                 recommendation="Perform substantive manual vouching of supporting documentation.",
                 cited_chunk_ids=[first_chunk_id],
             )
-
 
         retrieved_ids = {c["chunk_id"] for c in chunks}
         valid_citations = [cid for cid in finding_schema.cited_chunk_ids if cid in retrieved_ids]

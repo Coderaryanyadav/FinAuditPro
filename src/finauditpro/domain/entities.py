@@ -172,3 +172,21 @@ class AuditEvent(DomainBaseModel):
     previous_hash: str | None = Field(default=None)
     entry_hash: str | None = Field(default=None)
     timestamp: datetime = Field(default_factory=utc_now)
+
+
+class User(DomainBaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    username: str = Field(..., min_length=1, max_length=255)
+    password_hash: str = Field(...)
+    salt: str = Field(...)
+    role: RoleEnum = Field(default=RoleEnum.ASSOCIATE)
+    is_active: bool = Field(default=True)
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now)
+
+    @field_validator("username")
+    @classmethod
+    def check_username(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValidationError("Username cannot be empty.")
+        return v.strip().lower()

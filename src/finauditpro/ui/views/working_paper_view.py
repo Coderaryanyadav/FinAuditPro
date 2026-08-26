@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from finauditpro.application.security.rbac import UserSession
 from finauditpro.application.services.engagement_service import EngagementService
 from finauditpro.application.services.working_paper_service import WorkingPaperService
 from finauditpro.application.working_paper_dtos import CreateWorkingPaperDTO
@@ -35,14 +36,19 @@ class WorkingPaperView(QWidget):
         self,
         engagement_service: EngagementService,
         working_paper_service: WorkingPaperService,
+        user_session: UserSession | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
         self.engagement_service = engagement_service
         self.wp_service = working_paper_service
+        self.user_session = user_session
         self.current_engagement: Engagement | None = None
 
         self._init_ui()
+
+    def set_user_session(self, session: UserSession | None) -> None:
+        self.user_session = session
 
     def _init_ui(self) -> None:
         layout = QVBoxLayout(self)
@@ -96,6 +102,7 @@ class WorkingPaperView(QWidget):
 
         # 3. Splitter Workspace (Left: Table, Right: Details / Evidence Preview)
         from PySide6.QtWidgets import QSplitter, QTextEdit
+
         self.splitter = QSplitter(Qt.Orientation.Horizontal)
 
         self.table_card = CardWidget("WORKING PAPERS DIRECTORY")
@@ -148,7 +155,9 @@ class WorkingPaperView(QWidget):
                 padding: 10px;
             }
         """)
-        self.preview_text.setPlaceholderText("Select a working paper row on the left to inspect testing procedures, audit conclusions, and linked evidence items.")
+        self.preview_text.setPlaceholderText(
+            "Select a working paper row on the left to inspect testing procedures, audit conclusions, and linked evidence items."
+        )
         self.preview_card.content_layout.addWidget(self.preview_text)
         self.splitter.addWidget(self.preview_card)
         self.splitter.setStretchFactor(0, 6)
@@ -157,7 +166,6 @@ class WorkingPaperView(QWidget):
         layout.addWidget(self.splitter, 1)
 
         self.refresh()
-
 
     def set_engagement(self, engagement: Any) -> None:
         if isinstance(engagement, Engagement):
@@ -176,7 +184,6 @@ class WorkingPaperView(QWidget):
         self.refresh()
 
     set_active_engagement = set_engagement
-
 
     def refresh(self) -> None:
         if not self.current_engagement:
@@ -256,13 +263,14 @@ class WorkingPaperView(QWidget):
             )
             return
 
+        preparer = self.user_session.username if self.user_session else "Lead Auditor"
         wp = self.wp_service.create_working_paper(
             CreateWorkingPaperDTO(
                 engagement_id=self.current_engagement.id,
                 index_reference="WP-REV-001",
                 title="Revenue Substantive Testing & Cut-Off",
                 area="C. Revenue & Receivables",
-                preparer_id="Senior Auditor",
+                preparer_id=preparer,
             )
         )
         QMessageBox.information(
@@ -279,7 +287,7 @@ class WorkingPaperView(QWidget):
 
     def _open_signoff(self, wp_id: str) -> None:
         wp = self.wp_service.get_working_paper(wp_id)
-        if SignOffDialog(wp, self.wp_service, parent=self).exec():
+        if SignOffDialog(wp, self.wp_service, user_session=self.user_session, parent=self).exec():
             self.refresh()
             self.wp_changed.emit()
 
@@ -338,9 +346,13 @@ class WorkingPaperView(QWidget):
             lines.append("\n--- LINKED AUDIT EVIDENCE & PROCEDURES ---")
             if links:
                 for l in links:
-                    lines.append(f"• [{l.get('link_type', 'evidence').upper()}] ID: {l.get('target_id')}")
+                    lines.append(
+                        f"• [{l.get('link_type', 'evidence').upper()}] ID: {l.get('target_id')}"
+                    )
             else:
-                lines.append("• No external PDF / document evidence linked yet. Link evidence via Document Intelligence.")
+                lines.append(
+                    "• No external PDF / document evidence linked yet. Link evidence via Document Intelligence."
+                )
 
             self.preview_text.setText("\n".join(lines))
 
@@ -350,4 +362,3 @@ class WorkingPaperView(QWidget):
             QMessageBox.information(self, "Integrity Verified", msg)
         else:
             QMessageBox.critical(self, "TAMPER DETECTED", msg)
-

@@ -20,8 +20,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from finauditpro.application.security.rbac import UserSession
 from finauditpro.application.services.audit_matrix_service import AuditMatrixService
 from finauditpro.application.services.audit_query_service import AuditQueryService
+from finauditpro.application.services.auth_service import AuthService
 from finauditpro.application.services.client_service import ClientService
 from finauditpro.application.services.document_request_service import DocumentRequestService
 from finauditpro.application.services.document_service import DocumentService
@@ -30,7 +32,7 @@ from finauditpro.application.services.financial_data_service import FinancialDat
 from finauditpro.application.services.firm_service import FirmService
 from finauditpro.application.services.report_service import ReportService
 from finauditpro.application.services.working_paper_service import WorkingPaperService
-from finauditpro.domain.entities import Client, Engagement, Firm
+from finauditpro.domain.entities import Client, Engagement, Firm, RoleEnum
 from finauditpro.ui.dialogs.engagement_dialog import EngagementDialog
 from finauditpro.ui.dialogs.login_dialog import LoginDialog
 from finauditpro.ui.styles import GLOBAL_QSS
@@ -81,8 +83,7 @@ GUIDED_STEPS = [
 
 
 def _tag(w: Any, name: str) -> Any:
-    w.setObjectName(name)
-    return w
+    w.setObjectName(name); return w
 
 
 class MainWindow(QMainWindow):
@@ -98,15 +99,18 @@ class MainWindow(QMainWindow):
             self.financial_data_service, self.audit_matrix_service = FinancialDataService(db), AuditMatrixService(db)
             self.working_paper_service, self.report_service, self.ai_service = WorkingPaperService(db), ReportService(db), AIService(db)
             self.pbc_service, self.query_service = DocumentRequestService(db), AuditQueryService(db)
+            self.auth_service = AuthService(db)
         else:
             self.firm_service, self.client_service, self.engagement_service, self.document_service = firm_service, client_service, engagement_service, document_service
             self.financial_data_service, self.audit_matrix_service, self.working_paper_service, self.report_service, self.ai_service = financial_data_service, audit_matrix_service, working_paper_service, report_service, ai_service
             self.pbc_service, self.query_service = DocumentRequestService(firm_service.db_manager), AuditQueryService(firm_service.db_manager)
+            self.auth_service = AuthService(firm_service.db_manager)
 
         self.archival_repo, self.roll_forward_repo, self.db_manager = archival_repo, roll_forward_repo, db
         self.current_firm: Firm | None = None
         self.current_client: Client | None = None
         self.current_engagement: Engagement | None = None
+        self.current_user_session: UserSession = UserSession(user_id="default", username="admin@finauditpro.com", role=RoleEnum.ADMINISTRATOR)
         self.sidebar_collapsed = False
         self.pipeline_btns: list[QPushButton] = []
         self.setWindowTitle("FinAuditPro — Guided Statutory Audit Operating System")
@@ -119,7 +123,20 @@ class MainWindow(QMainWindow):
 
     def _show_login_flow(self) -> None:
         import sys
-        if "pytest" not in sys.modules: LoginDialog(self).exec()
+        if "pytest" not in sys.modules:
+            dlg = LoginDialog(self, auth_service=self.auth_service)
+            if dlg.exec() and dlg.authenticated_session:
+                self.current_user_session = dlg.authenticated_session
+                self._apply_user_session()
+
+    def _apply_user_session(self) -> None:
+        if self.current_user_session:
+            name = self.current_user_session.username.split("@")[0].title()
+            role_str = self.current_user_session.role.value if hasattr(self.current_user_session.role, "value") else str(self.current_user_session.role)
+            self.lbl_user_name.setText(name)
+            self.lbl_user_role.setText(role_str)
+            if hasattr(self, "view_working_papers") and self.view_working_papers:
+                self.view_working_papers.set_user_session(self.current_user_session)
 
     def _init_ui(self) -> None:
         central = _tag(QWidget(), "appBg"); self.setCentralWidget(central)
@@ -149,7 +166,10 @@ class MainWindow(QMainWindow):
 
         prof = _tag(QFrame(), "sidebarProfileFrame"); pf_l = QHBoxLayout(prof); pf_l.setContentsMargins(4, 8, 4, 4)
         av = _tag(QLabel("CA"), "userAvatar"); av.setFixedSize(28, 28); av.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        u_info = QVBoxLayout(); u_info.setSpacing(0); u_info.addWidget(_tag(QLabel("Partner"), "userName")); u_info.addWidget(_tag(QLabel("Chartered Accountant"), "userRole"))
+        u_info = QVBoxLayout(); u_info.setSpacing(0)
+        self.lbl_user_name = _tag(QLabel("Partner"), "userName")
+        self.lbl_user_role = _tag(QLabel("Chartered Accountant"), "userRole")
+        u_info.addWidget(self.lbl_user_name); u_info.addWidget(self.lbl_user_role)
         btn_more = QPushButton("•••"); btn_more.setFixedSize(22, 22); btn_more.setStyleSheet("QPushButton { border: none; background: transparent; color: #64748B; font-weight: 600; }")
         btn_more.clicked.connect(self._show_profile_menu)
         for w in (av,): pf_l.addWidget(w)

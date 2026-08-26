@@ -171,8 +171,63 @@ QLabel#globalShortcutBadge {
     border-radius: 4px; padding: 2px 6px;
 }
 
+/* ── COMBOBOXES ──────────────────────────────────────────────────────────── */
+QComboBox {
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    padding: 6px 28px 6px 10px;
+    background-color: #FFFFFF;
+    color: #0F172A;
+    font-size: 13px;
+    font-weight: 500;
+    min-height: 30px;
+}
+QComboBox:hover {
+    border-color: #CBD5E1;
+    background-color: #FAFBFC;
+}
+QComboBox:focus {
+    border-color: #2563EB;
+}
+QComboBox::drop-down {
+    border: none;
+    width: 24px;
+    subcontrol-position: center right;
+    padding-right: 6px;
+}
+QComboBox::down-arrow {
+    image: none;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid #64748B;
+    width: 0; height: 0;
+}
+QComboBox QAbstractItemView {
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    color: #0F172A;
+    selection-background-color: #EFF6FF;
+    selection-color: #2563EB;
+    outline: none;
+    padding: 4px;
+    font-size: 13px;
+}
+QComboBox QAbstractItemView::item {
+    padding: 6px 10px;
+    min-height: 26px;
+}
+QComboBox QAbstractItemView::item:hover {
+    background-color: #F8FAFC;
+}
+QComboBox QAbstractItemView::item:selected {
+    background-color: #EFF6FF;
+    color: #2563EB;
+}
+
 /* Active Engagement Context Selector Dropdown */
 QComboBox#clientSelectorCombo {
+
     border: 1px solid #E2E8F0;
     border-radius: 6px;
     padding: 6px 28px 6px 10px;

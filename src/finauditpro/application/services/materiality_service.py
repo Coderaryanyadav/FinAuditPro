@@ -1,9 +1,8 @@
-"""SA 320 Materiality Calculation Engine and Service."""
-
 from finauditpro.application.audit_matrix_dtos import CalculateMaterialityDTO
 from finauditpro.domain.audit_matrix_entities import MaterialityAssessment
 from finauditpro.domain.entities import AuditEvent
 from finauditpro.domain.exceptions import EntityNotFoundError
+from finauditpro.domain.materiality_engine import MaterialityEngine
 from finauditpro.infrastructure.persistence.database import DatabaseManager
 from finauditpro.infrastructure.persistence.repositories import (
     AuditEventRepository,
@@ -30,20 +29,13 @@ class MaterialityService:
             next_version = (existing.version + 1) if existing else 1
 
         bm_paise = int(round(dto.benchmark_amount * 100))
-        om_paise = int(round(bm_paise * (dto.overall_percentage / 100.0)))
-        pm_paise = int(round(om_paise * (dto.performance_percentage / 100.0)))
-        ctt_paise = int(round(om_paise * (dto.trivial_percentage / 100.0)))
-
-        mat_assessment = MaterialityAssessment(
+        mat_assessment = MaterialityEngine.calculate(
             engagement_id=dto.engagement_id,
             benchmark_type=dto.benchmark_type,
             benchmark_amount_paise=bm_paise,
             overall_percentage=dto.overall_percentage,
-            overall_materiality_paise=om_paise,
             performance_percentage=dto.performance_percentage,
-            performance_materiality_paise=pm_paise,
             trivial_percentage=dto.trivial_percentage,
-            clearly_trivial_threshold_paise=ctt_paise,
             version=next_version,
             created_by=dto.created_by,
         )

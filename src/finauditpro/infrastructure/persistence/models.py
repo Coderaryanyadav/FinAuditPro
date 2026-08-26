@@ -377,3 +377,15 @@ class AuditEventModel(Base):
     details: Mapped[str | None] = mapped_column(Text, nullable=True)
     previous_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     entry_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+
+class UserModel(Base):
+    __tablename__ = "users"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    username: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+    password_hash: Mapped[str] = mapped_column(String(128), nullable=False)
+    salt: Mapped[str] = mapped_column(String(64), nullable=False)
+    role: Mapped[str] = mapped_column(String(50), nullable=False, default="Associate")
+    is_active: Mapped[bool] = mapped_column(nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+

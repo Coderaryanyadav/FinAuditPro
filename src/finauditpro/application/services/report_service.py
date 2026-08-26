@@ -73,6 +73,7 @@ class ReportService:
             if eng:
                 fy = str(eng.financial_year)
                 from finauditpro.infrastructure.persistence.repositories import ClientRepository
+
                 cli = ClientRepository(session).get_by_id(eng.client_id)
                 if cli:
                     client_name = cli.name
@@ -151,7 +152,6 @@ class ReportService:
                 "materiality": mat_data,
                 "working_papers": wp_data,
             }
-
 
     def generate_report(self, dto: GenerateReportDTO) -> Report:
         """Assemble report data, compute content hash digest, and render PDF artifact."""
@@ -318,14 +318,24 @@ class ReportService:
         with self.db_manager.session_scope() as session:
             from finauditpro.application.security.rbac import RBACManager, UserSession
             from finauditpro.domain.entities import RoleEnum
-            role = RoleEnum.PARTNER if "partner" in dto.approver_role.lower() else (RoleEnum.MANAGER if "manager" in dto.approver_role.lower() else RoleEnum.ASSOCIATE)
-            RBACManager(UserSession(user_id=dto.approved_by, username=dto.approved_by, role=role)).require_permission("engagement:signoff")
+
+            role = (
+                RoleEnum.PARTNER
+                if "partner" in dto.approver_role.lower()
+                else (
+                    RoleEnum.MANAGER
+                    if "manager" in dto.approver_role.lower()
+                    else RoleEnum.ASSOCIATE
+                )
+            )
+            RBACManager(
+                UserSession(user_id=dto.approved_by, username=dto.approved_by, role=role)
+            ).require_permission("engagement:signoff")
 
             report_repo = ReportRepository(session)
             report = report_repo.get_report(dto.report_id)
             if not report:
                 raise EntityNotFoundError("Report", dto.report_id)
-
 
             report.transition_to(ReportStatusEnum.APPROVED)
             report.approved_by = dto.approved_by
@@ -337,13 +347,24 @@ class ReportService:
             pdf_path = str(out_dir / f"report_{report.id}.pdf")
             render_pdf(updated, data, Path(pdf_path), is_draft=False)
 
+            # Record Approved PDF Artifact
+            pdf_bytes = Path(pdf_path).read_bytes()
+            art_hash = hashlib.sha256(pdf_bytes).hexdigest()
+            artifact = ReportArtifact(
+                report_id=report.id,
+                format=ExportFormatEnum.PDF,
+                file_path=pdf_path,
+                content_hash=art_hash,
+            )
+            report_repo.add_artifact(artifact)
+
             audit_repo = AuditEventRepository(session)
             audit_repo.add(
                 AuditEvent(
                     engagement_id=report.engagement_id,
                     actor=dto.approved_by,
                     action="Report Approved",
-                    details=f"Approved report '{report.title}' by {dto.approver_role} {dto.approved_by}",
+                    details=f"Approved report '{report.title}' by {dto.approver_role} {dto.approved_by}. Approved Hash: {art_hash[:16]}...",
                 )
             )
             return updated

@@ -17,6 +17,11 @@ class Base(DeclarativeBase):
     pass
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 def get_default_db_path() -> Path:
     """Return default database file path in native platform data directory."""
     from finauditpro.infrastructure.first_run import get_app_data_dir
@@ -65,6 +70,7 @@ class DatabaseManager:
         """Create all tables in database and apply append-only triggers for audit_events."""
         import finauditpro.infrastructure.persistence.models
         import finauditpro.infrastructure.persistence.pbc_and_query_models  # noqa: F401
+
         Base.metadata.create_all(self.engine)
         self._ensure_columns()
         self._create_fts_tables()
@@ -90,14 +96,16 @@ class DatabaseManager:
                                 cd = getattr(col, "default", None)
                                 if cd is not None and hasattr(cd, "arg") and not callable(cd.arg):
                                     val = cd.arg
-                                    default_clause = f" DEFAULT '{val}'" if isinstance(val, str) else f" DEFAULT {val}"
+                                    default_clause = (
+                                        f" DEFAULT '{val}'"
+                                        if isinstance(val, str)
+                                        else f" DEFAULT {val}"
+                                    )
 
                             stmt = f"ALTER TABLE {table_name} ADD COLUMN {col.name} {col_type}{default_clause};"
                             conn.execute(text(stmt))
-                except Exception:
-                    pass
-
-
+                except Exception as ex:
+                    logger.warning("Could not auto-migrate column for table %s: %s", table_name, ex)
 
     def _create_fts_tables(self) -> None:
         """Create SQLite FTS5 virtual tables for document full-text search."""

@@ -27,6 +27,9 @@ from finauditpro.infrastructure.persistence.repositories.report_repository impor
 from finauditpro.infrastructure.persistence.repositories.roll_forward_repository import (
     RollForwardRepository,
 )
+from finauditpro.infrastructure.persistence.repositories.user_repository import (
+    UserRepository,
+)
 from finauditpro.infrastructure.persistence.repositories.working_paper_repository import (
     WorkingPaperRepository,
 )
@@ -43,5 +46,6 @@ __all__ = [
     "FirmRepository",
     "ReportRepository",
     "RollForwardRepository",
+    "UserRepository",
     "WorkingPaperRepository",
 ]

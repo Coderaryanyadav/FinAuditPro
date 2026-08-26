@@ -3,14 +3,14 @@
 import os
 
 from finauditpro.infrastructure.first_run import bootstrap_app_data_dirs, initialize_database
-from finauditpro.version import get_build_info
+from finauditpro.version import __version__, get_build_info
 
 
 def test_version_info_validity() -> None:
     """Verify version info returns valid non-empty build metadata dictionary."""
     info = get_build_info()
     assert info["app_name"] == "FinAuditPro"
-    assert info["version"] == "1.0.0"
+    assert info["version"] == __version__
     assert info["offline_isolated"] == "True"
 
 

@@ -165,7 +165,10 @@ class MainWindow(QMainWindow):
             setattr(self, attr, btn); self.btn_group.addButton(btn, idx); sb_layout.addWidget(btn)
         self.btn_dashboard.setChecked(True); sb_layout.addStretch()
 
-        prof = _tag(QFrame(), "sidebarProfileFrame"); pf_l = QHBoxLayout(prof); pf_l.setContentsMargins(4, 8, 4, 4)
+        prof = _tag(QFrame(), "sidebarProfileFrame")
+        prof.setCursor(Qt.CursorShape.PointingHandCursor)
+        prof.mousePressEvent = lambda e: self.btn_settings.click()
+        pf_l = QHBoxLayout(prof); pf_l.setContentsMargins(4, 8, 4, 4)
         av = _tag(QLabel("CA"), "userAvatar"); av.setFixedSize(28, 28); av.setAlignment(Qt.AlignmentFlag.AlignCenter)
         u_info = QVBoxLayout(); u_info.setSpacing(0)
         self.lbl_user_name = _tag(QLabel("Partner"), "userName")
@@ -195,27 +198,7 @@ class MainWindow(QMainWindow):
         btn_new_audit = _tag(QPushButton("+ New Engagement"), "primaryBtn"); btn_new_audit.clicked.connect(self._on_new_engagement)
         self.btn_copilot_toggle = QPushButton("AI Copilot ⌘K")
         self.btn_copilot_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_copilot_toggle.setStyleSheet("""
-            QPushButton {
-                background-color: #0F172A;
-                color: #38BDF8;
-                border: 1px solid #334155;
-                border-radius: 6px;
-                padding: 6px 14px;
-                font-weight: 600;
-                font-size: 12px;
-                letter-spacing: 0.2px;
-            }
-            QPushButton:hover {
-                background-color: #1E293B;
-                color: #7DD3FC;
-                border-color: #0284C7;
-            }
-            QPushButton:pressed {
-                background-color: #0284C7;
-                color: #FFFFFF;
-            }
-        """)
+        self.btn_copilot_toggle.setStyleSheet("QPushButton { background-color: #0F172A; color: #38BDF8; border: 1px solid #334155; border-radius: 6px; padding: 6px 14px; font-weight: 600; font-size: 12px; } QPushButton:hover { background-color: #1E293B; color: #7DD3FC; border-color: #0284C7; } QPushButton:pressed { background-color: #0284C7; color: #FFFFFF; }")
         self.btn_copilot_toggle.clicked.connect(self._toggle_ai_drawer)
         for hw in (act_lbl, self.eng_selector_combo): h_layout.addWidget(hw)
         h_layout.addSpacing(6); h_layout.addWidget(btn_new_audit); h_layout.addSpacing(6); h_layout.addWidget(self.btn_copilot_toggle)
@@ -277,7 +260,16 @@ class MainWindow(QMainWindow):
 
     def _show_profile_menu(self) -> None:
         menu = QMenu(self); menu.setStyleSheet("QMenu { background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 4px; font-size: 12px; }")
-        menu.addAction("Firm Settings", lambda: self.btn_settings.click()); menu.addSeparator(); menu.addAction("Sign Out", self.close); menu.exec(self.cursor().pos())
+        menu.addAction("Edit Profile & Password", self._open_edit_profile_dialog)
+        menu.addAction("System Settings", lambda: self.btn_settings.click())
+        menu.addSeparator()
+        menu.addAction("Sign Out", self.close)
+        menu.exec(self.cursor().pos())
+
+    def _open_edit_profile_dialog(self) -> None:
+        if hasattr(self, "view_settings") and hasattr(self.view_settings, "_on_change_password_clicked"):
+            self.view_settings._on_change_password_clicked()
+            self._apply_user_session()
 
     def _auto_select_initial_engagement(self) -> None:
         try:

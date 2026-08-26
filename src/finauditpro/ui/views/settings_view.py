@@ -86,16 +86,9 @@ class SettingsView(QWidget):
         sec_layout.addWidget(sec_desc)
 
         sec_btn_row = QHBoxLayout()
-        btn_change_pwd = QPushButton("Change Master Password")
+        btn_change_pwd = QPushButton("Edit Profile & Credentials")
+        btn_change_pwd.setObjectName("primaryButton")
         btn_change_pwd.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_change_pwd.setStyleSheet("""
-            QPushButton {
-                background-color: #F1F5F9; color: #334155;
-                font-size: 12px; font-weight: 600;
-                border: 1px solid #CBD5E1; border-radius: 6px; padding: 7px 16px;
-            }
-            QPushButton:hover { background-color: #E2E8F0; }
-        """)
         btn_change_pwd.clicked.connect(self._on_change_password_clicked)
         sec_btn_row.addWidget(btn_change_pwd)
         sec_btn_row.addStretch()

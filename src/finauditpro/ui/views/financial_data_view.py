@@ -91,11 +91,13 @@ class FinancialDataView(QWidget):
 
         self.dataset_combo = QComboBox()
         self.dataset_combo.setMinimumWidth(280)
+        self.dataset_combo.addItem("— No Datasets Imported —", None)
         self.dataset_combo.currentIndexChanged.connect(self._on_dataset_changed)
 
         self.run_analytics_btn = QPushButton("Run Deterministic Analytics")
         self.run_analytics_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.run_analytics_btn.clicked.connect(self._on_run_analytics_clicked)
+        self.run_analytics_btn.setEnabled(False)
 
         sel_layout.addWidget(sel_lbl)
         sel_layout.addWidget(self.dataset_combo, stretch=1)
@@ -189,7 +191,10 @@ class FinancialDataView(QWidget):
 
     def refresh(self) -> None:
         if not self.current_engagement or not self.financial_service:
+            self.dataset_combo.blockSignals(True)
             self.dataset_combo.clear()
+            self.dataset_combo.addItem("— No Datasets Imported —", None)
+            self.dataset_combo.blockSignals(False)
             self._show_empty_state()
             return
 

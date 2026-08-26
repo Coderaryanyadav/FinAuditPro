@@ -372,6 +372,9 @@ class MainWindow(QMainWindow):
 
     def _on_header_engagement_changed(self, idx: int) -> None:
         data = self.eng_selector_combo.itemData(idx)
+        if data is None:
+            self.btn_clients.click()
+            return
         if data:
             if str(data).startswith("eng:"): self.set_active_engagement(str(data)[4:])
             elif str(data).startswith("cli:"): self.set_active_client(str(data)[4:])

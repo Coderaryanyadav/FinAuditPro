@@ -132,28 +132,28 @@ class PBCTrackerView(QWidget):
         layout.addLayout(self.metrics_row)
 
         # 3. Main Table Card
-        table_card = CardWidget()
-        tc_layout = QVBoxLayout(table_card)
-        tc_layout.setContentsMargins(16, 14, 16, 16)
-        tc_layout.setSpacing(10)
-
-        tc_header = QLabel("PBC AUDIT REQUEST DIRECTORY")
-        tc_header.setStyleSheet("font-size: 11px; font-weight: bold; color: #475569; letter-spacing: 0.5px;")
-        tc_layout.addWidget(tc_header)
-
+        table_card = CardWidget("PBC AUDIT REQUEST DIRECTORY")
         self.table = QTableWidget()
         self.table.setColumnCount(6)
         self.table.setHorizontalHeaderLabels(["DOCUMENT / SCHEDULE", "AUDIT PERIOD", "CONTACT", "DUE DATE", "STATUS", "ACTIONS"])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
+        for c in range(1, 6):
+            self.table.horizontalHeader().setSectionResizeMode(c, QHeaderView.ResizeMode.ResizeToContents)
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
         self.table.setStyleSheet("QTableWidget { border: 1px solid #E2E8F0; border-radius: 6px; }")
-        tc_layout.addWidget(self.table)
+        self.table.setVisible(False)
+
+        from finauditpro.ui.theme import EmptyStateWidget
+        self.empty_state = EmptyStateWidget(
+            title="No PBC document requests active",
+            description="Generate standard statutory document requests (TB, bank reconciliations, GST returns) or add custom PBC schedules.",
+            action_text="Auto-Seed Statutory PBC Package",
+            action_callback=self._on_seed_pbc,
+        )
+
+        table_card.content_layout.addWidget(self.table)
+        table_card.content_layout.addWidget(self.empty_state)
         layout.addWidget(table_card, stretch=1)
 
     def set_active_engagement(self, engagement_id: str | None) -> None:
@@ -162,10 +162,15 @@ class PBCTrackerView(QWidget):
 
     def refresh(self) -> None:
         if not self.active_engagement_id:
+            self.table.setVisible(False)
+            self.empty_state.setVisible(True)
             self.table.setRowCount(0)
             return
 
         requests = self.pbc_service.list_requests(self.active_engagement_id)
+        has_reqs = len(requests) > 0
+        self.table.setVisible(has_reqs)
+        self.empty_state.setVisible(not has_reqs)
         self.table.setRowCount(len(requests))
 
         total_cnt = len(requests)

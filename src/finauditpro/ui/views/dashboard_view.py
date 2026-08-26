@@ -152,23 +152,21 @@ class DashboardView(QWidget):
         act_v.setSpacing(2)
         act_hdr = QLabel("NEXT ACTION")
         act_hdr.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; border: none; background: transparent;")
-        act_title = QLabel("Complete engagement parameters")
-        act_title.setStyleSheet("font-size: 13px; font-weight: 600; color: #0F172A; border: none; background: transparent;")
-        act_desc = QLabel("Configure engagement details, statutory parameters, materiality and audit scope.")
-        act_desc.setStyleSheet("font-size: 11px; color: #64748B; border: none; background: transparent;")
+        self.act_title = QLabel("Register your first audit client")
+        self.act_title.setStyleSheet("font-size: 13px; font-weight: 600; color: #0F172A; border: none; background: transparent;")
+        self.act_desc = QLabel("Add a client entity to begin statutory audit planning, materiality assessment, and ledger scrutiny.")
+        self.act_desc.setStyleSheet("font-size: 11px; color: #64748B; border: none; background: transparent;")
         act_v.addWidget(act_hdr)
-        act_v.addWidget(act_title)
-        act_v.addWidget(act_desc)
+        act_v.addWidget(self.act_title)
+        act_v.addWidget(self.act_desc)
 
-        btn_go = QPushButton("Continue Setup →")
-        btn_go.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_go.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 14px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
-        btn_go.clicked.connect(self._on_continue_setup_clicked)
-
-
+        self.btn_go = QPushButton("Create Client →")
+        self.btn_go.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_go.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 14px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
+        self.btn_go.clicked.connect(self._on_continue_setup_clicked)
         act_l.addLayout(act_v)
         act_l.addStretch()
-        act_l.addWidget(btn_go)
+        act_l.addWidget(self.btn_go)
         ws_v.addWidget(act_frame)
         ws_card.content_layout.addLayout(ws_v)
         row1.addWidget(ws_card, 6)
@@ -189,95 +187,52 @@ class DashboardView(QWidget):
         body_layout.addLayout(row1)
 
         # 3. Row 2: 4 KPI Cards
-        stats = QHBoxLayout()
-        stats.setSpacing(10)
-        self.card_clients = MetricCard(
-            "TOTAL CLIENTS", "0", "Registered clients", accent_color="#0284C7", action_text="View →"
-        )
+        stats = QHBoxLayout(); stats.setSpacing(10)
+        self.card_clients = MetricCard("TOTAL CLIENTS", "0", "Registered clients", accent_color="#0284C7", action_text="View →")
         self.card_clients.clicked.connect(lambda: self.navigate_to_clients.emit())
-
-        self.card_completed = MetricCard(
-            "COMPLETED AUDITS", "0", "This financial year", accent_color="#16A34A"
-        )
-
-        self.card_pending = MetricCard(
-            "OPEN FINDINGS", "0", "No action required", accent_color="#D97706", action_text="View →"
-        )
+        self.card_completed = MetricCard("COMPLETED AUDITS", "0", "This financial year", accent_color="#16A34A")
+        self.card_pending = MetricCard("OPEN FINDINGS", "0", "No action required", accent_color="#D97706", action_text="View →")
         self.card_pending.clicked.connect(lambda: self.navigate_to_matrix.emit())
-
-        self.card_high_risk = MetricCard(
-            "HIGH RISK CASES",
-            "0",
-            "No high-risk exposure",
-            accent_color="#DC2626",
-            action_text="Review →",
-        )
+        self.card_high_risk = MetricCard("HIGH RISK CASES", "0", "No high-risk exposure", accent_color="#DC2626", action_text="Review →")
         self.card_high_risk.clicked.connect(lambda: self.navigate_to_matrix.emit())
-
-        stats.addWidget(self.card_clients)
-        stats.addWidget(self.card_completed)
-        stats.addWidget(self.card_pending)
-        stats.addWidget(self.card_high_risk)
+        for card_w in (self.card_clients, self.card_completed, self.card_pending, self.card_high_risk): stats.addWidget(card_w)
         body_layout.addLayout(stats)
 
         # 4. Row 3: Audit Progress + Risk Exposure
-        row3 = QHBoxLayout()
+        row3 = QHBoxLayout(); row3.setSpacing(12)
+        trend_card = CardWidget("AUDIT PROGRESS"); trend_v = QVBoxLayout()
+        trend_txt = QLabel("No completed audits yet\nComplete your first engagement to begin tracking progress.")
+        trend_txt.setAlignment(Qt.AlignmentFlag.AlignCenter); trend_txt.setStyleSheet("font-size: 12px; color: #94A3B8; padding: 10px; border: none; background: transparent; line-height: 1.4;")
+        trend_v.addWidget(trend_txt); trend_card.content_layout.addLayout(trend_v)
 
-        row3.setSpacing(12)
-
-        trend_card = CardWidget("AUDIT PROGRESS")
-        trend_v = QVBoxLayout()
-        trend_txt = QLabel(
-            "No completed audits yet\nComplete your first engagement to begin tracking progress."
-        )
-        trend_txt.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        trend_txt.setStyleSheet(
-            "font-size: 12px; color: #94A3B8; padding: 10px; border: none; background: transparent; line-height: 1.4;"
-        )
-        trend_v.addWidget(trend_txt)
-        trend_card.content_layout.addLayout(trend_v)
-
-        risk_card = CardWidget("RISK EXPOSURE")
-        self.risk_v = QVBoxLayout()
-        self.risk_v.setSpacing(4)
+        risk_card = CardWidget("RISK EXPOSURE"); self.risk_v = QVBoxLayout(); self.risk_v.setSpacing(4)
         self.lbl_zero_risk = QLabel(" No risk exposure identified")
-        self.lbl_zero_risk.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lbl_zero_risk.setStyleSheet(
-            "font-size: 12px; font-weight: 600; color: #15803D; padding: 10px; border: none; background: transparent;"
-        )
-        self.risk_v.addWidget(self.lbl_zero_risk)
-        risk_card.content_layout.addLayout(self.risk_v)
-
-        row3.addWidget(trend_card, 6)
-        row3.addWidget(risk_card, 4)
-        body_layout.addLayout(row3)
+        self.lbl_zero_risk.setAlignment(Qt.AlignmentFlag.AlignCenter); self.lbl_zero_risk.setStyleSheet("font-size: 12px; font-weight: 600; color: #15803D; padding: 10px; border: none; background: transparent;")
+        self.risk_v.addWidget(self.lbl_zero_risk); risk_card.content_layout.addLayout(self.risk_v)
+        row3.addWidget(trend_card, 6); row3.addWidget(risk_card, 4); body_layout.addLayout(row3)
 
         # 5. Row 4: Recent Audit Engagements (content-driven height)
         table_card = CardWidget("RECENT AUDIT ENGAGEMENTS")
-        self.table_projects = QTableWidget()
-        self.table_projects.setColumnCount(6)
-        self.table_projects.setHorizontalHeaderLabels(
-            ["CLIENT", "FINANCIAL YEAR", "TYPE", "STATUS", "RISK", "ACTION"]
-        )
-        self.table_projects.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.ResizeMode.Stretch
-        )
-        for c in range(1, 6):
-            self.table_projects.horizontalHeader().setSectionResizeMode(
-                c, QHeaderView.ResizeMode.Fixed
-            )
-        self.table_projects.setColumnWidth(1, 120)
-        self.table_projects.setColumnWidth(2, 140)
-        self.table_projects.setColumnWidth(3, 100)
-        self.table_projects.setColumnWidth(4, 100)
-        self.table_projects.setColumnWidth(5, 80)
-        self.table_projects.verticalHeader().setVisible(False)
+        self.table_projects = QTableWidget(); self.table_projects.setColumnCount(6)
+        self.table_projects.setHorizontalHeaderLabels(["CLIENT", "FINANCIAL YEAR", "TYPE", "STATUS", "RISK", "ACTION"])
+        self.table_projects.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        for c, w in enumerate([120, 140, 100, 100, 80], start=1):
+            self.table_projects.horizontalHeader().setSectionResizeMode(c, QHeaderView.ResizeMode.Fixed)
+            self.table_projects.setColumnWidth(c, w)
+        self.table_projects.verticalHeader().setVisible(False); self.table_projects.setAlternatingRowColors(True)
         self.table_projects.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-        self.table_projects.setAlternatingRowColors(True)
         self.table_projects.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self.table_projects.itemClicked.connect(self._on_table_click)
+        self.table_projects.itemClicked.connect(self._on_table_click); self.table_projects.setVisible(False)
 
+        from finauditpro.ui.theme import EmptyStateWidget
+        self.recent_empty = EmptyStateWidget(
+            title="No audit engagements registered",
+            description="Create your first client and statutory engagement to begin executing audit workflows.",
+            action_text="+ Create Client / Engagement",
+            action_callback=self._on_continue_setup_clicked,
+        )
         table_card.content_layout.addWidget(self.table_projects)
+        table_card.content_layout.addWidget(self.recent_empty)
         body_layout.addWidget(table_card)
 
         # Absorb remaining viewport space so cards don't stretch
@@ -346,10 +301,35 @@ class DashboardView(QWidget):
             self.lbl_context_text.setText(f"{c_name} · FY {e_active.financial_year}")
             self.lbl_audit_type.setText(audit_t)
             self.status_badge.setText(status_v)
+            self.act_title.setText(f"Execute audit procedures for {c_name}")
+            self.act_desc.setText("Review qualitative risks, execute substantive test procedures, and calculate materiality.")
+            self.btn_go.setText("Open Audit Matrix →")
+            step_active_idx = 3
+        elif clients:
+            self.lbl_context_text.setText(f"{clients[0].name} — Ready to create engagement")
+            self.lbl_audit_type.setText("Statutory Audit")
+            self.status_badge.setText("Setup")
+            self.act_title.setText("Create an engagement for " + clients[0].name)
+            self.act_desc.setText("Set up the financial year, audit scope, and statutory terms to activate audit tools.")
+            self.btn_go.setText("+ Create Engagement →")
+            step_active_idx = 2
         else:
             self.lbl_context_text.setText("No active engagement — Ready for setup")
             self.lbl_audit_type.setText("Statutory Audit")
             self.status_badge.setText("Setup")
+            self.act_title.setText("Register your first audit client")
+            self.act_desc.setText("Add a client entity to begin statutory audit planning, materiality assessment, and ledger scrutiny.")
+            self.btn_go.setText("+ Create Client →")
+            step_active_idx = 0
+
+        for i, slbl in enumerate(self.step_widgets):
+            is_done = i < step_active_idx
+            is_active = i == step_active_idx
+            bg = "#F0FDF4" if is_done else ("#EFF6FF" if is_active else "#F8FAFC")
+            fg = "#15803D" if is_done else ("#1D4ED8" if is_active else "#94A3B8")
+            bd = "#BBF7D0" if is_done else ("#BFDBFE" if is_active else "#E2E8F0")
+            fw = "600" if (is_done or is_active) else "500"
+            slbl.setStyleSheet(f"background-color: {bg}; color: {fg}; font-size: 11px; font-weight: {fw}; border: 1px solid {bd}; border-radius: 4px; padding: 5px 2px;")
 
         self.table_projects.setRowCount(0)
         client_map = {c.id: c.name for c in clients}
@@ -382,9 +362,8 @@ class DashboardView(QWidget):
             for col, item in enumerate(items):
                 item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 self.table_projects.setItem(idx, col, item)
-
-        row_cnt = max(1, len(all_engagements[:10]))
-        self.table_projects.setFixedHeight(row_cnt * 36 + 32)
-
-
-
+        has_eng = len(all_engagements) > 0
+        self.table_projects.setVisible(has_eng)
+        self.recent_empty.setVisible(not has_eng)
+        if has_eng:
+            self.table_projects.setFixedHeight(len(all_engagements[:10]) * 36 + 32)

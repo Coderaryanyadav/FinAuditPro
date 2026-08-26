@@ -33,6 +33,9 @@ def main() -> None:
     app = QApplication(sys.argv)
     app.setApplicationName("FinAuditPro")
     app.setOrganizationName("FinAuditPro")
+    app.setHighDpiScaleFactorRoundingPolicy(
+        app.highDpiScaleFactorRoundingPolicy().PassThrough
+    )
 
     window = MainWindow(db_manager)
     window.show()

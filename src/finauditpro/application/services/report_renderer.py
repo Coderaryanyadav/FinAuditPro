@@ -101,8 +101,8 @@ def _build_sa700_story(story: list[Any], report: Report, data: dict[str, Any], s
 
 def _build_caro_story(story: list[Any], data: dict[str, Any], styles: Any) -> None:
     client_name = data.get("client_name", "the Company")
+    findings = data.get("findings", [])
     norm = styles["Normal"]
-
 
     story.append(Paragraph("<b>ANNEXURE 'A' TO THE INDEPENDENT AUDITOR'S REPORT</b>", styles["Heading1"]))
     story.append(Paragraph(
@@ -113,11 +113,19 @@ def _build_caro_story(story: list[Any], data: dict[str, Any], styles: Any) -> No
     ))
     story.append(Spacer(1, 10))
 
+    # Check for linked findings dynamically per CARO clause
+    has_stat_dues_finding = any("statutory" in f.get("title", "").lower() or "tax" in f.get("title", "").lower() for f in findings)
+    stat_dues_text = (
+        "Undisputed statutory dues have been regularly deposited, except for matters noted in Audit Exception Register."
+        if has_stat_dues_finding
+        else "Regular in depositing undisputed statutory dues (GST, PF, ESI, Income Tax) with appropriate authorities."
+    )
+
     caro_items = [
         ("Clause (i)", "Property, Plant & Equipment", "Proper records maintained; physical verification conducted at reasonable intervals; no material discrepancies."),
         ("Clause (ii)", "Inventory Physical Verification", "Physical verification conducted by management; coverage and procedure appropriate; discrepancies < 10%."),
         ("Clause (iii)", "Loans & Investments", "Loans, investments, guarantees granted are not prejudicial to the interest of the Company."),
-        ("Clause (vii)", "Statutory Dues Regularity", "Regular in depositing undisputed statutory dues (GST, PF, ESI, Income Tax) with appropriate authorities."),
+        ("Clause (vii)", "Statutory Dues Regularity", stat_dues_text),
         ("Clause (ix)", "Borrowings Default", "No default in repayment of loans or other borrowings or in the payment of interest thereon to any lender."),
         ("Clause (xiii)", "Related Party Transactions", "Compliance with sections 177 and 188 of Companies Act 2013 for all related party transactions."),
         ("Clause (xvii)", "Cash Loss Incurrence", "The Company has not incurred cash losses in the financial year and in the immediately preceding financial year."),

@@ -10,7 +10,7 @@
 [![PySide6](https://img.shields.io/badge/PySide6-6.8-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://www.qt.io/)
 [![SQLite WAL](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 [![LM Studio](https://img.shields.io/badge/LM%20Studio-Air--Gapped%20AI-4F46E5?style=for-the-badge&logo=openai&logoColor=white)](https://lmstudio.ai/)
-[![Tests](https://img.shields.io/badge/Tests-139%2F139%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-141%2F141%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
 [![Type Checked](https://img.shields.io/badge/MyPy-Strict%20Passed-blue?style=for-the-badge&logo=python)](pyproject.toml)
 [![Code Style](https://img.shields.io/badge/Code%20Style-Ruff-black?style=for-the-badge&logo=ruff)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)

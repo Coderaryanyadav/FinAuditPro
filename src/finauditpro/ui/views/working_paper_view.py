@@ -62,10 +62,10 @@ class WorkingPaperView(QWidget):
             action_text="+ New Working Paper",
             action_callback=self._on_new_wp_clicked,
         )
-        self.btn_scaffold = QPushButton("Auto-Generate Schedule III Folders")
+        self.btn_scaffold = QPushButton("⚡ Auto-Generate Schedule III Folders")
         self.btn_scaffold.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_scaffold.setStyleSheet(
-            "QPushButton { background: #0F172A; color: #38BDF8; border: 1px solid #334155; border-radius: 6px; padding: 7px 14px; font-weight: 600; font-size: 12px; } QPushButton:hover { background: #1E293B; color: #7DD3FC; border-color: #0284C7; }"
+            "QPushButton { background: #FFFFFF; color: #1E293B; border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 7px 16px; font-weight: 600; font-size: 13px; } QPushButton:hover { background: #F8FAFC; color: #2563EB; border-color: #93C5FD; } QPushButton:pressed { background: #EFF6FF; }"
         )
         self.btn_scaffold.clicked.connect(self._on_scaffold_clicked)
         self.header.action_layout.addWidget(self.btn_scaffold)

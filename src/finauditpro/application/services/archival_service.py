@@ -177,6 +177,43 @@ class ArchivalService:
                     )
                 )
 
+            # 5. SQC 1 / SQM 1 High-Risk Audit Procedure Response Check
+            from finauditpro.infrastructure.persistence.repositories.audit_matrix_repository import (
+                AuditMatrixRepository,
+            )
+            matrix_repo = AuditMatrixRepository(session)
+            risks = matrix_repo.list_risks_for_engagement(engagement_id)
+            high_risks = [r for r in risks if hasattr(r, "romm") and r.romm.value == "High"]
+            procs = matrix_repo.list_procedures_for_engagement(engagement_id)
+            unresponded_high_risks = []
+            for hr in high_risks:
+                linked = [p for p in procs if hr.id in getattr(p, "linked_risk_ids", [])]
+                if not linked or not any(p.status.value in ("Completed", "Reviewed") for p in linked):
+                    unresponded_high_risks.append(hr.risk_code)
+
+            if unresponded_high_risks:
+                has_soft = True
+                items.append(
+                    ReadinessItemDTO(
+                        category="SQC 1 Quality",
+                        item_name="High-Risk Procedure Responses",
+                        is_passed=False,
+                        is_hard_blocker=False,
+                        details=f"{len(unresponded_high_risks)} high-risk RoMM item(s) [{', '.join(unresponded_high_risks[:3])}] lack completed audit procedures.",
+                    )
+                )
+            else:
+                items.append(
+                    ReadinessItemDTO(
+                        category="SQC 1 Quality",
+                        item_name="High-Risk Procedure Responses",
+                        is_passed=True,
+                        is_hard_blocker=False,
+                        details=f"All {len(high_risks)} high RoMM risk items have substantive procedural responses.",
+                    )
+                )
+
+
         is_ready = not has_hard
         return ReadinessCheckResultDTO(
             engagement_id=engagement_id,

@@ -196,15 +196,19 @@ QComboBox:hover { border-color: #94A3B8; background-color: #FAFBFC; }
 QComboBox:focus { border-color: #2563EB; }
 QComboBox::drop-down {
     subcontrol-origin: padding; subcontrol-position: top right;
-    width: 30px; border-left: 1px solid #E2E8F0;
-    border-top-right-radius: 6px; border-bottom-right-radius: 6px;
+    width: 28px; border-left: 1px solid #E2E8F0;
+    border-top-right-radius: 5px; border-bottom-right-radius: 5px;
     background-color: #F8FAFC;
 }
 QComboBox::drop-down:hover { background-color: #F1F5F9; }
 QComboBox::down-arrow {
-    image: none; border-left: 5px solid transparent;
-    border-right: 5px solid transparent; border-top: 6px solid #475569;
-    width: 0px; height: 0px;
+    image: none;
+    width: 0; height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid #475569;
+    border-bottom: 0px none;
+    margin-right: 0px;
 }
 QComboBox QAbstractItemView {
     background-color: #FFFFFF; border: 1.5px solid #CBD5E1;
@@ -226,15 +230,19 @@ QComboBox#clientSelectorCombo:hover { border-color: #94A3B8; background-color: #
 QComboBox#clientSelectorCombo:focus { border-color: #2563EB; }
 QComboBox#clientSelectorCombo::drop-down {
     subcontrol-origin: padding; subcontrol-position: top right;
-    width: 30px; border-left: 1px solid #E2E8F0;
-    border-top-right-radius: 6px; border-bottom-right-radius: 6px;
+    width: 28px; border-left: 1px solid #E2E8F0;
+    border-top-right-radius: 5px; border-bottom-right-radius: 5px;
     background-color: #F8FAFC;
 }
 QComboBox#clientSelectorCombo::drop-down:hover { background-color: #F1F5F9; }
 QComboBox#clientSelectorCombo::down-arrow {
-    image: none; border-left: 5px solid transparent;
-    border-right: 5px solid transparent; border-top: 6px solid #2563EB;
-    width: 0px; height: 0px;
+    image: none;
+    width: 0; height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid #2563EB;
+    border-bottom: 0px none;
+    margin-right: 0px;
 }
 QComboBox#clientSelectorCombo QAbstractItemView {
     background-color: #FFFFFF; border: 1.5px solid #CBD5E1;

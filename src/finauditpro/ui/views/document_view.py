@@ -76,9 +76,13 @@ class DocumentView(QWidget):
         self.search_input.returnPressed.connect(self._on_search)
 
         search_btn = QPushButton("Search")
+        search_btn.setObjectName("primaryButton")
+        search_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         search_btn.clicked.connect(self._on_search)
 
         clear_btn = QPushButton("Clear")
+        clear_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        clear_btn.setStyleSheet("QPushButton { background-color: #F8FAFC; color: #475569; border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 6px 14px; font-weight: 500; } QPushButton:hover { background-color: #F1F5F9; color: #1E293B; border-color: #94A3B8; }")
         clear_btn.clicked.connect(self._on_clear_search)
 
         s_layout.addWidget(search_lbl)

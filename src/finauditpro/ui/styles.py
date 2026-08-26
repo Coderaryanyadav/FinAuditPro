@@ -188,22 +188,39 @@ QTabBar::tab:selected {
 
 /* ── COMBOBOXES ──────────────────────────────────────────────────────────── */
 QComboBox {
-    border: 1.5px solid #CBD5E1; border-radius: 6px;
-    padding: 6px 36px 6px 12px; background-color: #FFFFFF;
-    color: #0F172A; font-size: 13px; font-weight: 500; min-height: 32px;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 6px;
+    padding: 6px 36px 6px 12px;
+    background-color: #FFFFFF;
+    color: #0F172A;
+    font-size: 13px;
+    font-weight: 500;
+    min-height: 32px;
 }
-QComboBox:hover { border-color: #94A3B8; background-color: #FAFBFC; }
-QComboBox:focus { border-color: #2563EB; }
+QComboBox:hover {
+    border-color: #94A3B8;
+    background-color: #FAFBFC;
+}
+QComboBox:focus {
+    border-color: #2563EB;
+}
 QComboBox::drop-down {
-    subcontrol-origin: padding; subcontrol-position: top right;
-    width: 28px; border-left: 1px solid #E2E8F0;
-    border-top-right-radius: 5px; border-bottom-right-radius: 5px;
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 28px;
+    border-left: 1px solid #E2E8F0;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
     background-color: #F8FAFC;
 }
-QComboBox::drop-down:hover { background-color: #F1F5F9; }
+QComboBox::drop-down:hover {
+    background-color: #F1F5F9;
+}
 QComboBox::down-arrow {
-    image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1L5 5L9 1' stroke='%23475569' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>");
-    width: 10px; height: 6px;
+    image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M2 2L6 6L10 2' stroke='%23475569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>");
+    width: 12px;
+    height: 8px;
+    margin-right: 0px;
 }
 QComboBox QAbstractItemView {
     background-color: #FFFFFF;
@@ -235,22 +252,38 @@ QComboBox QAbstractItemView::item:selected {
 
 /* Active Engagement Context Selector Dropdown */
 QComboBox#clientSelectorCombo {
-    border: 1.5px solid #CBD5E1; border-radius: 6px;
-    padding: 6px 36px 6px 12px; background-color: #FFFFFF;
-    color: #0F172A; font-size: 12px; font-weight: 600; min-height: 34px;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 6px;
+    padding: 6px 36px 6px 12px;
+    background-color: #FFFFFF;
+    color: #0F172A;
+    font-size: 12px;
+    font-weight: 600;
+    min-height: 34px;
 }
-QComboBox#clientSelectorCombo:hover { border-color: #94A3B8; background-color: #FAFBFC; }
-QComboBox#clientSelectorCombo:focus { border-color: #2563EB; }
+QComboBox#clientSelectorCombo:hover {
+    border-color: #94A3B8;
+    background-color: #FAFBFC;
+}
+QComboBox#clientSelectorCombo:focus {
+    border-color: #2563EB;
+}
 QComboBox#clientSelectorCombo::drop-down {
-    subcontrol-origin: padding; subcontrol-position: top right;
-    width: 28px; border-left: 1px solid #E2E8F0;
-    border-top-right-radius: 5px; border-bottom-right-radius: 5px;
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 28px;
+    border-left: 1px solid #E2E8F0;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
     background-color: #F8FAFC;
 }
-QComboBox#clientSelectorCombo::drop-down:hover { background-color: #F1F5F9; }
+QComboBox#clientSelectorCombo::drop-down:hover {
+    background-color: #F1F5F9;
+}
 QComboBox#clientSelectorCombo::down-arrow {
-    image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1L5 5L9 1' stroke='%232563EB' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>");
-    width: 10px; height: 6px;
+    image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M2 2L6 6L10 2' stroke='%232563EB' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>");
+    width: 12px;
+    height: 8px;
 }
 QComboBox#clientSelectorCombo QAbstractItemView {
     background-color: #FFFFFF;

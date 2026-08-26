@@ -94,7 +94,8 @@ class FinancialDataView(QWidget):
         self.dataset_combo.addItem("— No Datasets Imported —", None)
         self.dataset_combo.currentIndexChanged.connect(self._on_dataset_changed)
 
-        self.run_analytics_btn = QPushButton("Run Deterministic Analytics")
+        self.run_analytics_btn = QPushButton("⚡ Run Deterministic Analytics")
+        self.run_analytics_btn.setObjectName("primaryButton")
         self.run_analytics_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.run_analytics_btn.clicked.connect(self._on_run_analytics_clicked)
         self.run_analytics_btn.setEnabled(False)

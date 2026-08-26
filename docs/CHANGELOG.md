@@ -7,12 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [1.0.0] - 2026-08-26
 
 ### Added
-- GitHub CI/CD fast matrix pipeline (`.github/workflows/ci.yml`) supporting Python 3.12, 3.13, and 3.14 across macOS and Ubuntu.
-- Automated dependency scanning with Dependabot (`.github/dependabot.yml`).
-- Statutory maintenance scripts for SQLite WAL vacuuming, archive hash verification, and retention policy scanning (`scripts/maintenance/`).
+- **Persistent User Authentication**: PBKDF2-HMAC-SHA256 password hashing (100,000 iterations, 16-byte cryptographic salt, constant-time `secrets.compare_digest` verification) stored in SQLite `users` table.
+- **Mandatory First-Login Password Change**: Automatic `ChangePasswordDialog` forcing default `Admin@123` replacement with password complexity enforcement (min. 8 characters, letters, numbers/symbols).
+- **Segregation of Duties (SoD) Enforcement**: Statutory rule in `WorkingPaperService` preventing preparers from performing final sign-offs on their own working papers.
+- **Deterministic Vector Alignment**: Chronological and deterministic `(created_at ASC, id ASC)` ordering across both FAISS embedding chunks and SQLite retrieval.
+- **Approved Report Artifact Ledger**: Approved report PDFs recorded into `report_artifacts` with SHA-256 digests.
+- **Clean UI & Universal Dropdown Styling**: Universal `QComboBox` and `QAbstractItemView` styling eliminating unstyled system grey-pills on macOS; clean text labels across all navigation items and buttons.
+- **138 Passing Automated Tests**: Comprehensive test suite covering auth, SoD, RAG, materiality, analytics, persistence, and scale performance.
 
 ---
 

@@ -109,7 +109,7 @@ class PBCTrackerView(QWidget):
         header_row.addLayout(title_box)
         header_row.addStretch()
 
-        self.btn_seed = QPushButton("⚡ Auto-Seed Statutory PBC Package")
+        self.btn_seed = QPushButton("Auto-Seed Statutory PBC Package")
         self.btn_seed.setStyleSheet("background-color: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 500; padding: 6px 12px;")
         self.btn_seed.clicked.connect(self._on_seed_pbc)
         header_row.addWidget(self.btn_seed)

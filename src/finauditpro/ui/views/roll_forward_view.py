@@ -42,7 +42,7 @@ class RollForwardView(QWidget):
         self.header = PageHeader(
             title="Roll-Forward & SA 510 Continuity",
             subtitle="Verify prior period closing balances against current period opening balances per SA 510.",
-            action_text="✓ Confirm Tie-Out",
+            action_text="Confirm Tie-Out",
             action_callback=self._confirm_tie_out,
         )
         layout.addWidget(self.header)
@@ -92,7 +92,7 @@ class RollForwardView(QWidget):
         self.empty_state = EmptyStateWidget(
             title="No opening balance accounts mapped",
             description="Import current and prior year trial balance datasets to calculate automatic SA 510 tie-out continuity.",
-            action_text="✓ Confirm Tie-Out",
+            action_text="Confirm Tie-Out",
             action_callback=self._confirm_tie_out,
         )
 

@@ -39,7 +39,7 @@ class SettingsView(QWidget):
         self.header = PageHeader(
             title="Settings & System Diagnostics",
             subtitle="Local AI engine endpoints, cloud opt-in security posture, and runtime environment diagnostics.",
-            action_text="📋 Run Diagnostics",
+            action_text="Run Diagnostics",
             action_callback=self._open_self_check,
         )
         layout.addWidget(self.header)

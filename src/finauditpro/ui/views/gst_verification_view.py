@@ -41,7 +41,7 @@ class GSTVerificationView(QWidget):
         self.header = PageHeader(
             title="GST Reconciliation",
             subtitle="Compare purchase register entries against GSTR-2B and audit statutory ITC claims (Sec 16/17).",
-            action_text="⚡ Run GST Matching",
+            action_text="Run GST Matching",
             action_callback=self._run_matching,
         )
         main_layout.addWidget(self.header)
@@ -91,8 +91,8 @@ class GSTVerificationView(QWidget):
 
         self.empty_state = EmptyStateWidget(
             title="No GST reconciliation records loaded",
-            description="Select an active engagement and click '⚡ Run GST Matching' to audit purchase register vs GSTR-2B.",
-            action_text="⚡ Run GST Matching",
+            description="Select an active engagement and click 'Run GST Matching' to audit purchase register vs GSTR-2B.",
+            action_text="Run GST Matching",
             action_callback=self._run_matching,
         )
 

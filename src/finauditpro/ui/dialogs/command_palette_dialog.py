@@ -82,7 +82,7 @@ class CommandPaletteDialog(QDialog):
 
         # Search bar
         search_box = QHBoxLayout()
-        search_icon = QLabel("🔍")
+        search_icon = QLabel("")
         search_icon.setStyleSheet("font-size: 14px; border: none; background: transparent;")
 
         self.input_field = QLineEdit()

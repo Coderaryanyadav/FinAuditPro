@@ -56,23 +56,23 @@ from finauditpro.ui.views.settings_view import SettingsView
 from finauditpro.ui.views.working_paper_view import WorkingPaperView
 
 NAV_ITEMS = [
-    ("btn_dashboard", "📊 Command Center", "WORKSPACE"),
+    ("btn_dashboard", "Command Center", "WORKSPACE"),
     ("btn_pbc", "① Intake & PBC", "GUIDED PIPELINE"),
     ("btn_audit_matrix", "② Planning & SA 320", "GUIDED PIPELINE"),
     ("btn_financial_data", "③ TB/GL & Scrutiny", "GUIDED PIPELINE"),
     ("btn_working_papers", "④ Working Papers", "GUIDED PIPELINE"),
     ("btn_reports", "⑤ Reports & Sign-Off", "GUIDED PIPELINE"),
-    ("btn_queries", "💬 Client Queries", "FIELDWORK TOOLS"),
-    ("btn_documents", "📁 Uploaded Evidence", "FIELDWORK TOOLS"),
-    ("btn_gst", "⚡ GST 2B Reconciler", "FIELDWORK TOOLS"),
-    ("btn_compliance", "⚖️ Compliance Checklist", "FIELDWORK TOOLS"),
-    ("btn_ai_assistant", "✨ AI Copilot Lab", "FIELDWORK TOOLS"),
-    ("btn_clients", "🏢 Clients", "ADMINISTRATION"),
-    ("btn_engagements", "📋 Engagements", "ADMINISTRATION"),
-    ("btn_firms", "🏛️ Audit Firms", "ADMINISTRATION"),
-    ("btn_archival", "🔒 Archival & Sealing", "SYSTEM"),
-    ("btn_roll_forward", "🔄 Roll-Forward Tie-Out", "SYSTEM"),
-    ("btn_settings", "⚙️ Settings", "SYSTEM"),
+    ("btn_queries", "Client Queries", "FIELDWORK TOOLS"),
+    ("btn_documents", "Uploaded Evidence", "FIELDWORK TOOLS"),
+    ("btn_gst", "GST 2B Reconciler", "FIELDWORK TOOLS"),
+    ("btn_compliance", "Compliance Checklist", "FIELDWORK TOOLS"),
+    ("btn_ai_assistant", "AI Copilot Lab", "FIELDWORK TOOLS"),
+    ("btn_clients", "Clients", "ADMINISTRATION"),
+    ("btn_engagements", "Engagements", "ADMINISTRATION"),
+    ("btn_firms", "Audit Firms", "ADMINISTRATION"),
+    ("btn_archival", "Archival & Sealing", "SYSTEM"),
+    ("btn_roll_forward", "Roll-Forward Tie-Out", "SYSTEM"),
+    ("btn_settings", "Settings", "SYSTEM"),
 ]
 
 GUIDED_STEPS = [
@@ -192,7 +192,7 @@ class MainWindow(QMainWindow):
         self.eng_selector_combo = _tag(QComboBox(), "clientSelectorCombo"); self.eng_selector_combo.setMinimumWidth(280)
         self.eng_selector_combo.currentIndexChanged.connect(self._on_header_engagement_changed)
         btn_new_audit = _tag(QPushButton("+ New Engagement"), "primaryBtn"); btn_new_audit.clicked.connect(self._on_new_engagement)
-        self.btn_copilot_toggle = QPushButton("✨ AI Copilot")
+        self.btn_copilot_toggle = QPushButton("AI Copilot")
         self.btn_copilot_toggle.setStyleSheet("QPushButton { background: #1e293b; color: #38bdf8; border: 1px solid #0284c7; border-radius: 6px; padding: 6px 14px; font-weight: 600; font-size: 13px; } QPushButton:hover { background: #0369a1; color: #ffffff; }")
         self.btn_copilot_toggle.clicked.connect(self._toggle_ai_drawer)
         for hw in (act_lbl, self.eng_selector_combo): h_layout.addWidget(hw)

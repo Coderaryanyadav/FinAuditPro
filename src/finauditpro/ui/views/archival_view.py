@@ -120,14 +120,14 @@ class ArchivalView(QWidget):
         hdr_layout.addLayout(left_v)
         hdr_layout.addStretch()
 
-        self.close_wizard_btn = QPushButton("🔒 Close & Seal Engagement")
+        self.close_wizard_btn = QPushButton("Close & Seal Engagement")
         self.close_wizard_btn.setStyleSheet(
             "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }"
         )
         self.close_wizard_btn.clicked.connect(self._open_close_wizard)
         hdr_layout.addWidget(self.close_wizard_btn)
 
-        self.reopen_btn = QPushButton("🔓 Reopen File (Partner)")
+        self.reopen_btn = QPushButton("Reopen File (Partner)")
         self.reopen_btn.setStyleSheet(
             "QPushButton { background-color: #B45309; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #92400E; }"
         )
@@ -175,7 +175,7 @@ class ArchivalView(QWidget):
         self.empty_state = EmptyStateWidget(
             title="No sealed archives exist for this engagement",
             description="When all audit procedures and review signoffs are finished, use the Close & Seal wizard to generate a tamper-evident archive.",
-            action_text="🔒 Close & Seal Engagement",
+            action_text="Close & Seal Engagement",
             action_callback=self._open_close_wizard,
         )
 

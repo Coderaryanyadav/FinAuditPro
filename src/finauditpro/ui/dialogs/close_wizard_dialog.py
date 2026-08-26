@@ -120,8 +120,8 @@ class CloseWizardDialog(QDialog):
         self.readiness_result = self.archival_service.run_readiness_check(self.engagement_id)
 
         for item in self.readiness_result.items:
-            icon = "✅" if item.is_passed else ("❌" if item.is_hard_blocker else "⚠️")
-            item_text = f"{icon} [{item.category}] {item.item_name}: {item.details}"
+            status_tag = "[PASS]" if item.is_passed else ("[FAIL]" if item.is_hard_blocker else "[WARN]")
+            item_text = f"{status_tag} [{item.category}] {item.item_name}: {item.details}"
             list_item = QListWidgetItem(item_text)
             self.checklist_widget.addItem(list_item)
 

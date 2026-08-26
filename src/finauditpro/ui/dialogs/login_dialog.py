@@ -102,7 +102,7 @@ class LoginDialog(QDialog):
         ]
         for f in features:
             row = QHBoxLayout()
-            dot = QLabel("✓")
+            dot = QLabel("")
             dot.setStyleSheet(
                 "font-size: 13px; color: #38BDF8; font-weight: 700; border: none; background: transparent;"
             )
@@ -194,7 +194,7 @@ class LoginDialog(QDialog):
         fl.addSpacing(16)
 
         hint = QLabel(
-            "🔒 Fully offline · No data leaves your machine\nDefault login: admin@finauditpro.com / Admin@123"
+            "Fully offline · No data leaves your machine\nDefault login: admin@finauditpro.com / Admin@123"
         )
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
         hint.setStyleSheet(

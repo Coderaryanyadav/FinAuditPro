@@ -174,7 +174,7 @@ class AIAssistantView(QWidget):
         self.lbl_chat_status.setStyleSheet("font-size: 11px; font-weight: 700; color: #64748B;")
         hdr_layout.addWidget(self.lbl_chat_status)
 
-        btn_scan = QPushButton("⚡ Run ICAI Audit Scan")
+        btn_scan = QPushButton("Run ICAI Audit Scan")
         btn_scan.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_scan.setStyleSheet(
             "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }"
@@ -320,7 +320,7 @@ class AIAssistantView(QWidget):
             docs = fn(self.current_engagement.id)
             for doc in docs:
                 name = getattr(doc, "filename", getattr(doc, "original_filename", "Document"))
-                self.doc_sources_list.addItem(QListWidgetItem(f"📄 {name}"))
+                self.doc_sources_list.addItem(QListWidgetItem(f"{name}"))
 
 
     def _on_prompt_pill_clicked(self, prompt_str: str) -> None:
@@ -363,7 +363,7 @@ class AIAssistantView(QWidget):
         if not q or not self.ai_service or not hasattr(self.ai_service, "query_rag") or not self.current_engagement:
             return
 
-        self.chat_display.setText("⏳ Executing RAG Query against Local LM Studio AI Model...")
+        self.chat_display.setText(" Executing RAG Query against Local LM Studio AI Model...")
         self.reasoning_display.setText("Waiting for model reasoning (<think>) tokens...")
 
         eng_id = self.current_engagement.id

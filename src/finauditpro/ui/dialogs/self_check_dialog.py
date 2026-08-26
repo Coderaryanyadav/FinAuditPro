@@ -40,7 +40,7 @@ class SelfCheckDialog(QDialog):
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         layout.addWidget(self.table)
 
-        self.refresh_btn = QPushButton("🔄 Re-Run Diagnostics")
+        self.refresh_btn = QPushButton("Re-Run Diagnostics")
         self.refresh_btn.clicked.connect(self._run_check)
         layout.addWidget(self.refresh_btn)
 

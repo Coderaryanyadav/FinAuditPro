@@ -122,7 +122,7 @@ class DashboardView(QWidget):
 
         stepper = QHBoxLayout()
         stepper.setSpacing(0)
-        self.steps_data = [("Client", "✓", True, False), ("FY", "✓", True, False), ("Engagement", "●", False, True), ("Materiality", "○", False, False), ("Documentation", "○", False, False), ("Completion", "○", False, False)]
+        self.steps_data = [("Client", "", True, False), ("FY", "", True, False), ("Engagement", "●", False, True), ("Materiality", "○", False, False), ("Documentation", "○", False, False), ("Completion", "○", False, False)]
         self.step_widgets: list[QLabel] = []
         for i, (name, icon, is_done, is_active) in enumerate(self.steps_data):
             slbl = QLabel(f"{icon}  {name}")
@@ -180,7 +180,7 @@ class DashboardView(QWidget):
         self.att_row.setStyleSheet("background-color: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 6px; padding: 10px 12px;")
         att_l = QHBoxLayout(self.att_row)
         att_l.setContentsMargins(0, 0, 0, 0)
-        self.att_txt = QLabel("✓  All clear — no findings require attention")
+        self.att_txt = QLabel(" All clear — no findings require attention")
         self.att_txt.setStyleSheet("font-size: 12px; font-weight: 600; color: #15803D; border: none; background: transparent;")
         att_l.addWidget(self.att_txt)
         att_v.addWidget(self.att_row)
@@ -240,7 +240,7 @@ class DashboardView(QWidget):
         risk_card = CardWidget("RISK EXPOSURE")
         self.risk_v = QVBoxLayout()
         self.risk_v.setSpacing(4)
-        self.lbl_zero_risk = QLabel("✓  No risk exposure identified")
+        self.lbl_zero_risk = QLabel(" No risk exposure identified")
         self.lbl_zero_risk.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lbl_zero_risk.setStyleSheet(
             "font-size: 12px; font-weight: 600; color: #15803D; padding: 10px; border: none; background: transparent;"
@@ -332,10 +332,10 @@ class DashboardView(QWidget):
         self.card_high_risk.set_value(str(total_high_risk))
 
         if has_risk_exposure:
-            self.lbl_zero_risk.setText(f"⚠ {total_high_risk} high-risk areas identified")
+            self.lbl_zero_risk.setText(f"{total_high_risk} high-risk areas identified")
             self.lbl_zero_risk.setStyleSheet("font-size: 12px; font-weight: 600; color: #DC2626; padding: 10px; border: none; background: transparent;")
         else:
-            self.lbl_zero_risk.setText("✓  No risk exposure identified")
+            self.lbl_zero_risk.setText(" No risk exposure identified")
             self.lbl_zero_risk.setStyleSheet("font-size: 12px; font-weight: 600; color: #15803D; padding: 10px; border: none; background: transparent;")
 
         if all_engagements:

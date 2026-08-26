@@ -51,7 +51,7 @@ class ChangePasswordDialog(QDialog):
         hl.setContentsMargins(0, 0, 0, 0)
         hl.setSpacing(6)
 
-        badge = QLabel("🛡️ MANDATORY SECURITY SETUP")
+        badge = QLabel("MANDATORY SECURITY SETUP")
         badge.setStyleSheet("""
             font-size: 11px; font-weight: 700; color: #DC2626;
             background: #FEF2F2; border: 1px solid #FEE2E2;
@@ -114,7 +114,7 @@ class ChangePasswordDialog(QDialog):
         layout.addWidget(form_frame)
 
         # Requirements Note
-        req = QLabel("✓ Min. 8 characters  •  ✓ Letters & numbers/symbols  •  ✓ Cannot be Admin@123")
+        req = QLabel("Min. 8 characters  •  Letters & numbers/symbols  •  Cannot be Admin@123")
         req.setStyleSheet("font-size: 11px; font-weight: 500; color: #475569;")
         layout.addWidget(req)
 

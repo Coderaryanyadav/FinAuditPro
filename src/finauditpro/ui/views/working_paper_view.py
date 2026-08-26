@@ -62,7 +62,7 @@ class WorkingPaperView(QWidget):
             action_text="+ New Working Paper",
             action_callback=self._on_new_wp_clicked,
         )
-        self.btn_scaffold = QPushButton("✨ Auto-Generate Schedule III Folders")
+        self.btn_scaffold = QPushButton("Auto-Generate Schedule III Folders")
         self.btn_scaffold.setStyleSheet("""
             QPushButton {
                 background: #1e293b;
@@ -225,7 +225,7 @@ class WorkingPaperView(QWidget):
             self.table.setItem(r, 5, QTableWidgetItem(str(op_count)))
 
             hash_str = (
-                f"🔒 LOCKED ({wp.content_hash[:8]}...)"
+                f"LOCKED ({wp.content_hash[:8]}...)"
                 if wp.is_locked and wp.content_hash
                 else "EDITABLE"
             )

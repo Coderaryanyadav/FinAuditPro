@@ -93,7 +93,7 @@ class FinancialDataView(QWidget):
         self.dataset_combo.setMinimumWidth(280)
         self.dataset_combo.currentIndexChanged.connect(self._on_dataset_changed)
 
-        self.run_analytics_btn = QPushButton("⚡ Run Deterministic Analytics")
+        self.run_analytics_btn = QPushButton("Run Deterministic Analytics")
         self.run_analytics_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.run_analytics_btn.clicked.connect(self._on_run_analytics_clicked)
 

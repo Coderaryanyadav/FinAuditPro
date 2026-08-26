@@ -82,7 +82,7 @@ class ComplianceView(QWidget):
         self.header = PageHeader(
             title="Statutory Compliance Matrix",
             subtitle="Clause-by-clause statutory verification for CARO 2020 & Tax Audit Form 3CD.",
-            action_text="⚡ Auto-Evaluate Compliance",
+            action_text="Auto-Evaluate Compliance",
             action_callback=self._on_evaluate_clicked,
         )
         main_layout.addWidget(self.header)

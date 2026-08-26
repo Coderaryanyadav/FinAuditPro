@@ -179,6 +179,7 @@ class ArchivalView(QWidget):
             action_callback=self._open_close_wizard,
         )
 
+        self.archives_table.setVisible(False)
         self.table_card.content_layout.addWidget(self.archives_table)
         self.table_card.content_layout.addWidget(self.empty_state)
         layout.addWidget(self.table_card)
@@ -241,8 +242,6 @@ class ArchivalView(QWidget):
             self.archives_table.setItem(
                 row, 5, QTableWidgetItem(f"{arch.sealed_content_hash[:16]}...")
             )
-
-        self.archives_table.setFixedHeight(max(1, len(archives)) * 36 + 32)
 
     def _open_close_wizard(self) -> None:
         if not self.current_engagement_id:

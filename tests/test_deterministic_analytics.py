@@ -238,4 +238,59 @@ def test_going_concern_evaluation_engine() -> None:
     assert "Material Uncertainty Related to Going Concern" in text
 
 
+def test_gst_reconciliation_engine() -> None:
+    """Verify GSTR-2B vs Purchase Register 3-way matching and ITC eligibility logic."""
+    from finauditpro.domain.gst_reconciliation_engine import (
+        GSTReconciliationEngine,
+        MatchStatusEnum,
+    )
+
+    books = [
+        {"invoice_number": "INV-001", "vendor_gstin": "27AAACB1234F1Z5", "tax_paise": 1800000, "is_sec_17_5_blocked": False},  # Matched
+        {"invoice_number": "INV-002", "vendor_gstin": "27AAACB1234F1Z5", "tax_paise": 500000, "is_sec_17_5_blocked": True},   # Ineligible Sec 17(5)
+        {"invoice_number": "INV-003", "vendor_gstin": "27XYZAB9999F1Z1", "tax_paise": 2400000, "is_sec_17_5_blocked": False},  # Missing in 2B
+    ]
+    gstr2b = [
+        {"invoice_number": "INV-001", "vendor_gstin": "27AAACB1234F1Z5", "tax_paise": 1800000},
+    ]
+
+    res = GSTReconciliationEngine.match_purchase_register_with_2b("eng-01", books, gstr2b)
+    assert res.total_vouchers == 3
+    assert res.matched_count == 1
+    assert res.ineligible_count == 1
+    assert res.mismatched_count == 1
+    assert res.records[0].match_status == MatchStatusEnum.MATCHED
+    assert res.records[1].match_status == MatchStatusEnum.ITC_INELIGIBLE_SEC_17_5
+    assert res.records[2].match_status == MatchStatusEnum.MISSING_IN_2B
+
+
+def test_related_party_scan_engine() -> None:
+    """Verify SA 550 detection of undisclosed transactions with common KMP PAN matches."""
+    from finauditpro.domain.related_party_engine import (
+        RelatedPartyCategoryEnum,
+        RelatedPartyEngine,
+        RelatedPartyEntity,
+    )
+
+    declared = [
+        RelatedPartyEntity(
+            engagement_id="eng-01",
+            party_name="Apex Holdings Pvt Ltd",
+            relationship_category=RelatedPartyCategoryEnum.HOLDING_SUBSIDIARY,
+        )
+    ]
+    txns = [
+        {"account_name": "Apex Holdings Pvt Ltd", "amount_paise": 50000000, "pan": "AAACA1111A", "has_audit_committee_approval": True},
+        {"account_name": "Secret Vendor Logistics", "amount_paise": 25000000, "pan": "ABCDE1234F", "has_audit_committee_approval": False},
+    ]
+    directors_pans = ["ABCDE1234F"]  # Matching the undeclared vendor
+
+    res = RelatedPartyEngine.scan_ledger_against_kmp_master(declared, txns, directors_pans)
+    assert res.total_transactions == 2
+    assert res.unapproved_count == 1
+    assert len(res.undeclared_vendor_matches) == 1
+    assert res.undeclared_vendor_matches[0]["account_name"] == "SECRET VENDOR LOGISTICS"
+
+
+
 

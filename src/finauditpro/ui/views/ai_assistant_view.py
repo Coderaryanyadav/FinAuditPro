@@ -177,7 +177,7 @@ class AIAssistantView(QWidget):
         btn_scan = QPushButton("Run ICAI Audit Scan")
         btn_scan.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_scan.setStyleSheet(
-            "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }"
+            "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }"
         )
         btn_scan.clicked.connect(self._on_run_icai_scan)
         hdr_layout.addWidget(btn_scan)
@@ -273,7 +273,7 @@ class AIAssistantView(QWidget):
         btn_send = QPushButton("Send →")
         btn_send.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_send.setStyleSheet(
-            "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 8px 18px; border: none; } QPushButton:hover { background-color: #1D4ED8; }"
+            "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 8px 18px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }"
         )
         btn_send.clicked.connect(self._on_ask_clicked)
 

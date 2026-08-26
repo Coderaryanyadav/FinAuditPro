@@ -330,7 +330,7 @@ class EmptyStateWidget(QFrame):
         if action_text and action_callback:
             btn = QPushButton(action_text)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 13px; font-weight: 600; border-radius: 6px; padding: 8px 20px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
+            btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 13px; font-weight: 600; border-radius: 6px; padding: 8px 20px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }")
             btn.clicked.connect(action_callback)
             layout.addSpacing(6)
             layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -398,7 +398,7 @@ class PageHeader(QFrame):
             self.action_btn = QPushButton(action_text)
             self.action_btn.setObjectName("primaryButton")
             self.action_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            self.action_btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 13px; font-weight: 500; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
+            self.action_btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 13px; font-weight: 500; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }")
             self.action_btn.clicked.connect(action_callback)
             self.action_layout.addWidget(self.action_btn, alignment=Qt.AlignmentFlag.AlignVCenter)
 

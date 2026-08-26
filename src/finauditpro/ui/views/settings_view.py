@@ -152,7 +152,7 @@ class SettingsView(QWidget):
             QPushButton {
                 background-color: #2563EB; color: #FFFFFF;
                 font-size: 13px; font-weight: 600;
-                border-radius: 6px; padding: 8px 22px; border: none;
+                border-radius: 6px; padding: 8px 22px; border: 1px solid transparent;
             }
             QPushButton:hover { background-color: #1D4ED8; }
             QPushButton:pressed { background-color: #1E40AF; }

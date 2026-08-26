@@ -217,7 +217,7 @@ class OnboardingDialog(QDialog):
         self.btn_submit = QPushButton("Sign Up")
         self.btn_submit.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_submit.setStyleSheet(
-            "QPushButton { background: #007AFF; color: #FFFFFF; border-radius: 6px; font-weight: 600; font-size: 14px; padding: 12px; border: none; }"
+            "QPushButton { background: #007AFF; color: #FFFFFF; border-radius: 6px; font-weight: 600; font-size: 14px; padding: 12px; border: 1px solid transparent; }"
             "QPushButton:hover { background: #0056b3; }"
             "QPushButton:pressed { background: #004085; }"
         )

@@ -208,13 +208,12 @@ class LoginDialog(QDialog):
         fl.addWidget(self.input_totp)
         fl.addSpacing(20)
 
-        # Submit CTA
         self.btn_submit = QPushButton("Sign In")
         self.btn_submit.setFixedHeight(40)
         self.btn_submit.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_submit.setStyleSheet(
-            "QPushButton { background-color: #007AFF; color: #FFFFFF; font-size: 13px; font-weight: 600; border-radius: 6px; border: none; }"
-            "QPushButton:hover { background-color: #0062CC; }"
+            "QPushButton { background-color: #007AFF; color: #FFFFFF; font-size: 13px; font-weight: 600; border-radius: 6px; border: 1px solid transparent; }"
+            "QPushButton:hover { background-color: #0062CC; border: 1px solid transparent; }"
         )
         self.btn_submit.clicked.connect(self._handle_login)
 
@@ -225,7 +224,7 @@ class LoginDialog(QDialog):
         btn_reset_pwd = QPushButton("Forgot or Reset Credentials?")
         btn_reset_pwd.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_reset_pwd.setStyleSheet(
-            "QPushButton { background: transparent; color: #64748B; font-size: 12px; font-weight: 500; border: none; text-decoration: underline; }"
+            "QPushButton { background: transparent; color: #64748B; font-size: 12px; font-weight: 500; border: 1px solid transparent; text-decoration: underline; }"
             "QPushButton:hover { color: #2563EB; }"
         )
         btn_reset_pwd.clicked.connect(self._handle_reset_to_default)

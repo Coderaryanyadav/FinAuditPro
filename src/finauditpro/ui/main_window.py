@@ -158,7 +158,7 @@ class MainWindow(QMainWindow):
         logo_box = FinAuditLogoWidget(size=30)
         self.logo_name = _tag(QLabel("FinAuditPro"), "sidebarAppTitle")
         self.btn_collapse = QPushButton("◀"); self.btn_collapse.setFixedSize(24, 24); self.btn_collapse.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_collapse.setStyleSheet("QPushButton { border: none; background: transparent; color: #64748B; font-size: 11px; font-weight: 600; }")
+        self.btn_collapse.setStyleSheet("QPushButton { border: 1px solid transparent; background: transparent; color: #64748B; font-size: 11px; font-weight: 600; }")
         self.btn_collapse.clicked.connect(self._toggle_sidebar)
         for w in (logo_box, self.logo_name): logo_row.addWidget(w)
         logo_row.addStretch(); logo_row.addWidget(self.btn_collapse)
@@ -182,7 +182,7 @@ class MainWindow(QMainWindow):
         self.lbl_user_name = _tag(QLabel("Partner"), "userName")
         self.lbl_user_role = _tag(QLabel("Chartered Accountant"), "userRole")
         u_info.addWidget(self.lbl_user_name); u_info.addWidget(self.lbl_user_role)
-        btn_more = QPushButton("•••"); btn_more.setFixedSize(22, 22); btn_more.setStyleSheet("QPushButton { border: none; background: transparent; color: #64748B; font-weight: 600; }")
+        btn_more = QPushButton("•••"); btn_more.setFixedSize(22, 22); btn_more.setStyleSheet("QPushButton { border: 1px solid transparent; background: transparent; color: #64748B; font-weight: 600; }")
         btn_more.clicked.connect(self._show_profile_menu)
         for w in (av,): pf_l.addWidget(w)
         pf_l.addLayout(u_info); pf_l.addStretch(); pf_l.addWidget(btn_more); sb_layout.addWidget(prof)
@@ -203,6 +203,7 @@ class MainWindow(QMainWindow):
         act_lbl = QLabel("ACTIVE AUDIT:"); act_lbl.setStyleSheet("font-size: 11px; font-weight: 600; color: #94A3B8;")
         self.eng_selector_combo = _tag(CustomComboBox(), "clientSelectorCombo"); self.eng_selector_combo.setMinimumWidth(280)
         self.eng_selector_combo.currentIndexChanged.connect(self._on_header_engagement_changed)
+        self.eng_selector_combo.empty_clicked.connect(self._handle_empty_engagement_click)
         btn_new_audit = _tag(QPushButton("+ New Engagement"), "primaryBtn"); btn_new_audit.clicked.connect(self._on_new_engagement)
         self.btn_copilot_toggle = QPushButton("AI Copilot ⌘K")
         self.btn_copilot_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -251,6 +252,11 @@ class MainWindow(QMainWindow):
         self.view_dashboard.refresh_dashboard()
         curr_view = self.stack.currentWidget()
         if hasattr(curr_view, "refresh"): curr_view.refresh()
+
+    def _handle_empty_engagement_click(self) -> None:
+        self.btn_clients.click()
+        if hasattr(self.view_clients, "_create_client"):
+            self.view_clients._create_client()
 
     def _init_views(self) -> None:
         self.view_dashboard = DashboardView(self.firm_service, self.client_service, self.engagement_service, self.audit_matrix_service)

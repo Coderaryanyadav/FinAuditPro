@@ -157,7 +157,7 @@ class DashboardView(QWidget):
 
         self.btn_go = QPushButton("Create Client →")
         self.btn_go.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_go.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 14px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
+        self.btn_go.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 14px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }")
         self.btn_go.clicked.connect(self._on_continue_setup_clicked)
         act_l.addLayout(act_v)
         act_l.addStretch()

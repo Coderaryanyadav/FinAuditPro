@@ -162,7 +162,7 @@ class AICopilotDrawer(QFrame):
             QPushButton {
                 background: #3b82f6;
                 color: #ffffff;
-                border: none;
+                border: 1px solid transparent;
                 border-radius: 6px;
                 padding: 8px 14px;
                 font-weight: 600;

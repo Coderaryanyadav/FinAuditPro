@@ -122,14 +122,14 @@ class ArchivalView(QWidget):
 
         self.close_wizard_btn = QPushButton("Close & Seal Engagement")
         self.close_wizard_btn.setStyleSheet(
-            "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }"
+            "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }"
         )
         self.close_wizard_btn.clicked.connect(self._open_close_wizard)
         hdr_layout.addWidget(self.close_wizard_btn)
 
         self.reopen_btn = QPushButton("Reopen File (Partner)")
         self.reopen_btn.setStyleSheet(
-            "QPushButton { background-color: #B45309; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #92400E; }"
+            "QPushButton { background-color: #B45309; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #92400E; }"
         )
         self.reopen_btn.clicked.connect(self._open_reopen_dialog)
         hdr_layout.addWidget(self.reopen_btn)

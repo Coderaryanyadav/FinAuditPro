@@ -111,7 +111,7 @@ class AuditMatrixView(QWidget):
             QPushButton {
                 background-color: #2563EB; color: #FFFFFF;
                 font-size: 13px; font-weight: 600;
-                border-radius: 6px; padding: 8px 20px; border: none;
+                border-radius: 6px; padding: 8px 20px; border: 1px solid transparent;
             }
             QPushButton:hover { background-color: #1D4ED8; }
             QPushButton:pressed { background-color: #1E40AF; }
@@ -165,7 +165,7 @@ class AuditMatrixView(QWidget):
             QPushButton {
                 background-color: #2563EB; color: #FFFFFF;
                 font-size: 12px; font-weight: 600;
-                border-radius: 6px; padding: 7px 16px; border: none;
+                border-radius: 6px; padding: 7px 16px; border: 1px solid transparent;
             }
             QPushButton:hover { background-color: #1D4ED8; }
         """)
@@ -197,7 +197,7 @@ class AuditMatrixView(QWidget):
         title_lbl = QLabel("Structured Audit Procedures Execution Hub")
         title_lbl.setStyleSheet("font-size: 13px; font-weight: 700; color: #1E293B;")
         hdr.addWidget(title_lbl)
-        btn_qss = "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }"
+        btn_qss = "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }"
         btn = QPushButton("+ New Procedure")
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.setStyleSheet(btn_qss)
@@ -232,7 +232,7 @@ class AuditMatrixView(QWidget):
         hdr.addStretch()
         btn = QPushButton("+ Log Finding")
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
+        btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }")
         btn.clicked.connect(self._on_new_finding_clicked)
         hdr.addWidget(btn)
         layout.addLayout(hdr)

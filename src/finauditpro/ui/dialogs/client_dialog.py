@@ -150,7 +150,7 @@ class ClientDialog(QDialog):
         save_btn.setStyleSheet("""
             QPushButton {
                 background: #2563EB; color: #FFFFFF; font-size: 13px; font-weight: 600;
-                border: none; border-radius: 6px; padding: 9px 24px;
+                border: 1px solid transparent; border-radius: 6px; padding: 9px 24px;
             }
             QPushButton:hover { background: #1D4ED8; }
             QPushButton:pressed { background: #1E40AF; }

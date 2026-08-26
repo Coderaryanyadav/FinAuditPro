@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QGraphicsDropShadowEffect, QWidget
 GLOBAL_QSS = """
 /* ── BASE RESET ─────────────────────────────────────────────────────────── */
 * {
-    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    font-family: .AppleSystemUIFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
     font-size: 14px;
     font-weight: 400;
     color: #0F172A;
@@ -150,7 +150,7 @@ QLabel#userRole { font-size: 12px; color: #64748B; border: none; }
 QPushButton#navButton {
     background-color: transparent;
     color: #475569;
-    border: none;
+    border: 1px solid transparent;
     border-radius: 6px;
     text-align: left;
     padding: 0px 12px;
@@ -187,7 +187,7 @@ QFrame#globalSearchFrame:hover {
     border-color: #CBD5E1;
 }
 QLineEdit#globalSearchInput {
-    border: none; background: transparent;
+    border: 1px solid transparent; background: transparent;
     font-size: 14px; color: #64748B;
     padding: 6px 8px;
 }
@@ -245,6 +245,7 @@ QComboBox::down-arrow {
 QComboBox QAbstractItemView {
     background-color: #FFFFFF;
     border: 1px solid #CBD5E1;
+    border-radius: 4px;
     selection-background-color: #EFF6FF;
     selection-color: #2563EB;
     outline: none;
@@ -252,10 +253,15 @@ QComboBox QAbstractItemView {
 }
 
 QComboBox QAbstractItemView::item {
-    background-color: #FFFFFF;
+    border: 1px solid transparent;
+    background-color: transparent;
     color: #0F172A;
     min-height: 28px;
-    padding: 6px;
+    padding: 6px 12px;
+}
+
+QComboBox QAbstractItemView::item:selected {
+    background-color: #EFF6FF;
 }
 
 QComboBox QAbstractItemView::item:hover {
@@ -296,8 +302,8 @@ QFrame#needsAttentionPanel, QFrame#auditWorkspacePanel {
     background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px;
 }
 
-QLabel#metricTitle { color: #64748B; font-size: 11px; font-weight: 600; border: none; background: transparent; }
-QLabel#metricValue { color: #0F172A; font-size: 24px; font-weight: 600; border: none; background: transparent; }
+QLabel#metricTitle { color: #64748B; font-size: 11px; font-weight: 600; border: 1px solid transparent; background: transparent; }
+QLabel#metricValue { color: #0F172A; font-size: 24px; font-weight: 600; border: 1px solid transparent; background: transparent; }
 
 /* ── TABLE WIDGET ────────────────────────────────────────────────────────── */
 QTableWidget, QTableView {

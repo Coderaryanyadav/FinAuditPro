@@ -245,3 +245,80 @@ def test_deferred_tax_engine() -> None:
     assert res.items[1].is_dta is True
 
 
+def test_receivables_recovery_engine() -> None:
+    """Verify trade receivables subsequent cash recovery tie-out and ECL provisioning."""
+    from finauditpro.domain.receivables_recovery_engine import (
+        ReceivablesRecoveryEngine,
+        RecoveryStatusEnum,
+    )
+
+    balances = [
+        {"debtor_code": "D-01", "debtor_name": "Alpha Corp", "balance_at_year_end_paise": 10000000},
+        {"debtor_code": "D-02", "debtor_name": "Beta Enterprises", "balance_at_year_end_paise": 20000000},
+        {"debtor_code": "D-03", "debtor_name": "Gamma Solutions", "balance_at_year_end_paise": 15000000},
+    ]
+    receipts = [
+        {"debtor_code": "D-01", "receipt_amount_paise": 10000000},  # 100% recovered
+        {"debtor_code": "D-02", "receipt_amount_paise": 8000000},   # Partially recovered
+    ]
+
+    res = ReceivablesRecoveryEngine.tie_out_subsequent_receipts("eng-01", balances, receipts)
+    assert res.total_debtors_count == 3
+    assert res.fully_recovered_count == 1
+    assert res.partially_recovered_count == 1
+    assert res.unrecovered_count == 1
+    assert res.records[0].recovery_status == RecoveryStatusEnum.FULLY_RECOVERED
+    assert res.records[1].recovery_status == RecoveryStatusEnum.PARTIALLY_RECOVERED
+    assert res.records[2].recovery_status == RecoveryStatusEnum.UNRECOVERED_OVERDUE
+
+
+def test_minutes_contradiction_engine() -> None:
+    """Verify Section 180(1)(c) borrowing resolution limit breach detection against general ledger."""
+    from finauditpro.domain.minutes_contradiction_engine import (
+        ContradictionSeverityEnum,
+        MinutesContradictionEngine,
+        MinutesItemTypeEnum,
+    )
+
+    resolutions = [
+        {
+            "meeting_date": "2025-09-15", "resolution_type": MinutesItemTypeEnum.BORROWING_LIMIT_RESOLUTION,
+            "authorized_limit_paise": 5000000000, "extracted_text": "Resolved that borrowing limit is ₹50 Cr.",
+        }
+    ]
+    # Actual ledger borrowings: ₹60 Cr (> ₹50 Cr limit)
+    balances = {"total_borrowings_paise": 6000000000}
+
+    res = MinutesContradictionEngine.analyze_resolutions("eng-01", resolutions, balances)
+    assert res.total_resolutions_scanned == 1
+    assert res.contradictions_count == 1
+    assert res.records[0].severity == ContradictionSeverityEnum.BORROWING_LIMIT_BREACH
+
+
+def test_roc_secretarial_engine() -> None:
+    """Verify MCA Form MGT-7 paid-up capital and CHG-1 charge registration reconciliation."""
+    from finauditpro.domain.roc_secretarial_engine import (
+        ROCDiscrepancyTypeEnum,
+        ROCFormTypeEnum,
+        ROCSecretarialEngine,
+    )
+
+    filings = [
+        # MGT-7 Match
+        {"form_type": ROCFormTypeEnum.FORM_MGT_7, "srn_number": "SRN-12345", "reported_value_paise": 100000000},
+        # CHG-1 Deficit (Registered ₹3 Cr vs Borrowings ₹5 Cr)
+        {"form_type": ROCFormTypeEnum.FORM_CHG_1, "srn_number": "SRN-99887", "reported_value_paise": 300000000},
+    ]
+    books = {
+        "paid_up_capital_paise": 100000000,
+        "secured_loans_paise": 500000000,
+    }
+
+    res = ROCSecretarialEngine.reconcile_mca_filings("eng-01", filings, books)
+    assert res.total_filings_checked == 2
+    assert res.compliant_count == 1
+    assert res.discrepancy_count == 1
+    assert res.records[1].discrepancy_type == ROCDiscrepancyTypeEnum.UNREGISTERED_CHARGE_ON_ASSETS
+
+
+

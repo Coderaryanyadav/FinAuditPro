@@ -220,9 +220,8 @@ class EmptyStateWidget(QFrame):
         d_lbl = QLabel(description)
         d_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         d_lbl.setWordWrap(True)
-        d_lbl.setMaximumWidth(600)
-        d_lbl.setStyleSheet("font-size: 12px; color: #64748B; border: none; background: transparent; line-height: 1.4;")
-        layout.addWidget(d_lbl, alignment=Qt.AlignmentFlag.AlignCenter)
+        d_lbl.setStyleSheet("font-size: 12px; color: #64748B; border: none; background: transparent; padding: 2px 10px;")
+        layout.addWidget(d_lbl)
 
         if action_text and action_callback:
             btn = QPushButton(action_text)

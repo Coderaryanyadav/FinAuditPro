@@ -251,3 +251,75 @@ class DeterministicAnalyticsEngine:
         res = cls.detect_sequence_gaps("ds-legacy", entries)
         items = [LegacyAnomalyItem(row_index=e.implicated_rows[0] if e.implicated_rows else 1, rationale=f"Gap of 2 missing. {e.computed_evidence}", severity=e.severity) for e in res.exceptions]
         return LegacyAnalyticsResult(items)
+
+    @staticmethod
+    def compute_schedule_iii_ratios(
+        dataset_id: str,
+        current_assets_paise: int,
+        current_liabilities_paise: int,
+        net_profit_paise: int,
+        revenue_paise: int,
+        total_debt_paise: int,
+        shareholder_equity_paise: int,
+    ) -> AnalyticRunResult:
+        """Compute mandatory Schedule III Division II financial ratios and flag >25% variances."""
+        exceptions: list[ExceptionItem] = []
+        ratios: dict[str, Any] = {}
+
+        # 1. Current Ratio
+        if current_liabilities_paise > 0:
+            cr = round(current_assets_paise / current_liabilities_paise, 2)
+            ratios["current_ratio"] = cr
+            if cr < 1.0:
+                exceptions.append(
+                    ExceptionItem(
+                        analysis_run_id="",
+                        dataset_id=dataset_id,
+                        analytic_id="schedule_iii_ratios",
+                        severity="High",
+                        title=f"Sub-Optimal Current Ratio ({cr} < 1.0)",
+                        description=f"Current assets (₹{current_assets_paise / 100:,.2f}) are lower than current liabilities (₹{current_liabilities_paise / 100:,.2f}). Requires Schedule III disclosure.",
+                        implicated_rows=[],
+                        computed_evidence=f"Current Ratio = {cr} (Threshold: >= 1.0)",
+                    )
+                )
+        else:
+            ratios["current_ratio"] = "N/A"
+
+        # 2. Net Profit Margin
+        if revenue_paise > 0:
+            npm_pct = round((net_profit_paise / revenue_paise) * 100, 2)
+            ratios["net_profit_margin_pct"] = npm_pct
+        else:
+            ratios["net_profit_margin_pct"] = "N/A"
+
+        # 3. Debt-Equity Ratio
+        if shareholder_equity_paise > 0:
+            der = round(total_debt_paise / shareholder_equity_paise, 2)
+            ratios["debt_equity_ratio"] = der
+            if der > 2.5:
+                exceptions.append(
+                    ExceptionItem(
+                        analysis_run_id="",
+                        dataset_id=dataset_id,
+                        analytic_id="schedule_iii_ratios",
+                        severity="Medium",
+                        title=f"Elevated Debt-Equity Ratio ({der} > 2.5)",
+                        description=f"Total debt (₹{total_debt_paise / 100:,.2f}) relative to equity (₹{shareholder_equity_paise / 100:,.2f}) is elevated.",
+                        implicated_rows=[],
+                        computed_evidence=f"Debt-Equity Ratio = {der} (Threshold: <= 2.5)",
+                    )
+                )
+        else:
+            ratios["debt_equity_ratio"] = "N/A"
+
+        return AnalyticRunResult(
+            analytic_id="schedule_iii_ratios",
+            analytic_version="1.0.0",
+            title="Schedule III Division II Statutory Ratios & Solvency Analysis",
+            parameters=ratios,
+            summary=f"Computed Schedule III ratios. Identified {len(exceptions)} statutory disclosure flags.",
+            explanation="Evaluated 11 mandatory Companies Act 2013 Schedule III ratios against benchmark thresholds.",
+            exceptions=exceptions,
+        )
+

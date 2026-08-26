@@ -36,6 +36,8 @@ class AnalyticsTypeEnum(StrEnum):
     WEEKEND_POSTING_CHECK = "Weekend Posting Anomaly"
     SEQUENCE_GAP_CHECK = "Sequence Gap Anomaly"
     PERIOD_VARIANCE_ANALYSIS = "Period Variance Analysis"
+    RATIO_ANALYSIS = "Schedule III Statutory Ratios & Variance"
+    SCHEDULE_III_DISCLOSURES = "Schedule III Division II Disclosures Check"
 
 
 class DatasetStatusEnum(StrEnum):

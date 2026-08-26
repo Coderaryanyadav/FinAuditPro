@@ -157,3 +157,25 @@ def test_analytics_repeatability_determinism() -> None:
 
     assert len(res1.exceptions) == len(res2.exceptions)
     assert res1.exceptions[0].computed_evidence == res2.exceptions[0].computed_evidence
+
+
+def test_schedule_iii_ratios_computation() -> None:
+    """Verify Schedule III statutory financial ratio calculations and threshold exception flagging."""
+    # Current Assets < Current Liabilities (CR < 1.0) & Debt > 2.5x Equity
+    res = DeterministicAnalyticsEngine.compute_schedule_iii_ratios(
+        dataset_id="ds-stat-01",
+        current_assets_paise=80000000,       # ₹8,00,000.00
+        current_liabilities_paise=100000000, # ₹10,00,000.00 -> CR = 0.8
+        net_profit_paise=15000000,           # ₹1,50,000.00
+        revenue_paise=100000000,             # ₹10,00,000.00 -> NPM = 15.0%
+        total_debt_paise=300000000,          # ₹30,00,000.00
+        shareholder_equity_paise=100000000,  # ₹10,00,000.00 -> DER = 3.0
+    )
+
+    assert res.parameters["current_ratio"] == 0.8
+    assert res.parameters["net_profit_margin_pct"] == 15.0
+    assert res.parameters["debt_equity_ratio"] == 3.0
+    assert len(res.exceptions) == 2
+    assert any("Current Ratio" in e.title for e in res.exceptions)
+    assert any("Debt-Equity" in e.title for e in res.exceptions)
+

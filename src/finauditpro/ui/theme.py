@@ -201,6 +201,61 @@ class RiskBadge(QLabel):
         self.setStyleSheet(f"font-size: 11px; font-weight: 500; border-radius: 4px; padding: 2px 8px; {st}")
 
 
+class FinAuditLogoWidget(QWidget):
+    """Universal vector brand emblem for FinAuditPro — scalable for headers, sidebars, and app icons."""
+
+    def __init__(self, size: int = 30, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.size = size
+        self.setFixedSize(size, size)
+
+    def paintEvent(self, event: Any) -> None:
+        from PySide6.QtCore import QRectF
+        from PySide6.QtGui import QBrush, QColor, QLinearGradient, QPainter, QPainterPath, QPen
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        s = float(self.size)
+        r = s * 0.22
+
+        # Rounded Squircle base with linear gradient
+        grad = QLinearGradient(0, 0, s, s)
+        grad.setColorAt(0.0, QColor("#3B82F6"))
+        grad.setColorAt(1.0, QColor("#1D4ED8"))
+
+        path_bg = QPainterPath()
+        path_bg.addRoundedRect(QRectF(0, 0, s, s), r, r)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QBrush(grad))
+        painter.drawPath(path_bg)
+
+        # Scale factor relative to 30px reference
+        sf = s / 30.0
+
+        # Geometric Audit Shield
+        shield = QPainterPath()
+        shield.moveTo(15.0 * sf, 6.5 * sf)
+        shield.lineTo(22.5 * sf, 9.5 * sf)
+        shield.lineTo(22.5 * sf, 16.5 * sf)
+        shield.cubicTo(22.5 * sf, 21.0 * sf, 19.5 * sf, 24.0 * sf, 15.0 * sf, 25.5 * sf)
+        shield.cubicTo(10.5 * sf, 24.0 * sf, 7.5 * sf, 21.0 * sf, 7.5 * sf, 16.5 * sf)
+        shield.lineTo(7.5 * sf, 9.5 * sf)
+        shield.closeSubpath()
+
+        painter.setPen(QPen(QColor(255, 255, 255, 220), 1.5 * sf, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
+        painter.setBrush(QColor(255, 255, 255, 40))
+        painter.drawPath(shield)
+
+        # Crisp Inner Checkmark
+        chk = QPainterPath()
+        chk.moveTo(11.5 * sf, 15.5 * sf)
+        chk.lineTo(14.0 * sf, 18.0 * sf)
+        chk.lineTo(19.0 * sf, 12.5 * sf)
+        painter.setPen(QPen(QColor("#FFFFFF"), 2.0 * sf, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+        painter.drawPath(chk)
+
+
 class EmptyStateIconWidget(QWidget):
     """Clean vector icon for EmptyState cards with professional audit shield emblem."""
 

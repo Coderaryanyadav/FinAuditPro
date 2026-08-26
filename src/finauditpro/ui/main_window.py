@@ -36,6 +36,7 @@ from finauditpro.domain.entities import Client, Engagement, Firm, RoleEnum
 from finauditpro.ui.dialogs.engagement_dialog import EngagementDialog
 from finauditpro.ui.dialogs.login_dialog import LoginDialog
 from finauditpro.ui.styles import GLOBAL_QSS
+from finauditpro.ui.theme import FinAuditLogoWidget
 from finauditpro.ui.views.ai_assistant_view import AIAssistantView
 from finauditpro.ui.views.ai_copilot_drawer import AICopilotDrawer
 from finauditpro.ui.views.archival_view import ArchivalView
@@ -146,7 +147,7 @@ class MainWindow(QMainWindow):
         self.sidebar = _tag(QFrame(), "dashboardSidebar"); self.sidebar.setFixedWidth(230)
         sb_layout = QVBoxLayout(self.sidebar); sb_layout.setContentsMargins(10, 14, 10, 14); sb_layout.setSpacing(3)
         logo_row = QHBoxLayout()
-        logo_box = _tag(QLabel("FA"), "sidebarLogoBadge"); logo_box.setFixedSize(30, 30); logo_box.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        logo_box = FinAuditLogoWidget(size=30)
         self.logo_name = _tag(QLabel("FinAuditPro"), "sidebarAppTitle")
         self.btn_collapse = QPushButton("◀"); self.btn_collapse.setFixedSize(24, 24); self.btn_collapse.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_collapse.setStyleSheet("QPushButton { border: none; background: transparent; color: #64748B; font-size: 11px; font-weight: 600; }")

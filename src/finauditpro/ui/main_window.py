@@ -50,6 +50,7 @@ from finauditpro.ui.views.engagement_view import EngagementView
 from finauditpro.ui.views.financial_data_view import FinancialDataView
 from finauditpro.ui.views.firm_view import FirmView
 from finauditpro.ui.views.gst_verification_view import GSTVerificationView
+from finauditpro.ui.views.inspection_view import InspectionView
 from finauditpro.ui.views.pbc_tracker_view import PBCTrackerView
 from finauditpro.ui.views.report_view import ReportView
 from finauditpro.ui.views.roll_forward_view import RollForwardView
@@ -67,6 +68,7 @@ NAV_ITEMS = [
     ("btn_documents", "Uploaded Evidence", "FIELDWORK TOOLS"),
     ("btn_gst", "GST 2B Reconciler", "FIELDWORK TOOLS"),
     ("btn_compliance", "Compliance Checklist", "FIELDWORK TOOLS"),
+    ("btn_inspection", "PRB Inspection Sandbox", "FIELDWORK TOOLS"),
     ("btn_ai_assistant", "AI Copilot Lab", "FIELDWORK TOOLS"),
     ("btn_clients", "Clients", "ADMINISTRATION"),
     ("btn_engagements", "Engagements", "ADMINISTRATION"),
@@ -248,12 +250,14 @@ class MainWindow(QMainWindow):
         self.view_engagements.engagement_changed.connect(self.set_active_engagement); self.view_engagements.engagement_selected.connect(self.set_active_engagement)
         self.view_documents, self.view_financial_data = DocumentView(self.document_service), FinancialDataView(self.financial_data_service, self.engagement_service)
         self.view_gst, self.view_compliance, self.view_audit_matrix = GSTVerificationView(), ComplianceView(), AuditMatrixView(self.audit_matrix_service)
+        self.view_inspection = InspectionView(self.engagement_service, self.working_paper_service, self.audit_matrix_service)
         self.view_ai_assistant = AIAssistantView(self.ai_service, self.document_service, self.engagement_service)
         self.view_working_papers, self.view_reports = WorkingPaperView(self.engagement_service, self.working_paper_service), ReportView(self.engagement_service, self.report_service)
         self.view_pbc, self.view_queries = PBCTrackerView(self.pbc_service), AuditQueryView(self.query_service)
         self.view_archival, self.view_roll_forward, self.view_settings = ArchivalView(self.db_manager), RollForwardView(self.db_manager), SettingsView(auth_service=self.auth_service)
-        views = (self.view_dashboard, self.view_pbc, self.view_audit_matrix, self.view_financial_data, self.view_working_papers, self.view_reports, self.view_queries, self.view_documents, self.view_gst, self.view_compliance, self.view_ai_assistant, self.view_clients, self.view_engagements, self.view_firms, self.view_archival, self.view_roll_forward, self.view_settings)
+        views = (self.view_dashboard, self.view_pbc, self.view_audit_matrix, self.view_financial_data, self.view_working_papers, self.view_reports, self.view_queries, self.view_documents, self.view_gst, self.view_compliance, self.view_inspection, self.view_ai_assistant, self.view_clients, self.view_engagements, self.view_firms, self.view_archival, self.view_roll_forward, self.view_settings)
         for v in views: self.stack.addWidget(v)
+
 
     def _toggle_ai_drawer(self) -> None:
         self.ai_drawer.setVisible(not self.ai_drawer.isVisible())
@@ -372,9 +376,7 @@ class MainWindow(QMainWindow):
 
     def _on_header_engagement_changed(self, idx: int) -> None:
         data = self.eng_selector_combo.itemData(idx)
-        if data is None:
-            self.btn_clients.click()
-            return
+        if data is None: self.btn_clients.click(); return
         if data:
             if str(data).startswith("eng:"): self.set_active_engagement(str(data)[4:])
             elif str(data).startswith("cli:"): self.set_active_client(str(data)[4:])
@@ -389,10 +391,10 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "No Client", "Please create a Client first before adding an Engagement."); self.btn_clients.click(); return
         dlg = EngagementDialog(self.engagement_service, firm=firm, client=self.current_client or clients[0], parent=self)
         if dlg.exec() and dlg.result_engagement:
-            if hasattr(self.working_paper_service, "scaffold_schedule_iii_working_papers"):
-                self.working_paper_service.scaffold_schedule_iii_working_papers(dlg.result_engagement.id)
+            if hasattr(self.working_paper_service, "scaffold_schedule_iii_working_papers"): self.working_paper_service.scaffold_schedule_iii_working_papers(dlg.result_engagement.id)
             self.set_active_engagement(dlg.result_engagement.id); self.view_engagements.refresh(); self.view_dashboard.refresh_dashboard()
 
     def _open_command_palette(self) -> None:
         from finauditpro.ui.dialogs.command_palette_dialog import CommandPaletteDialog
         dlg = CommandPaletteDialog(self); dlg.action_triggered.connect(lambda k, p: self.stack.setCurrentIndex(p) if k == "nav" and 0 <= p < self.stack.count() else None); dlg.exec()
+

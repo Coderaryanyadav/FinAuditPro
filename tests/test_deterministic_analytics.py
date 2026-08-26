@@ -179,3 +179,20 @@ def test_schedule_iii_ratios_computation() -> None:
     assert any("Current Ratio" in e.title for e in res.exceptions)
     assert any("Debt-Equity" in e.title for e in res.exceptions)
 
+
+def test_trade_payables_msme_ageing() -> None:
+    """Verify Schedule III trade payables MSMED Act Section 15 45-day overdue exception detection."""
+    records = [
+        {"vendor_name": "ABC Tech MSME", "is_msme": True, "days_overdue": 62, "amount_paise": 45000000},  # ₹4.5L Overdue >45d
+        {"vendor_name": "Standard Corp Non-MSME", "is_msme": False, "days_overdue": 90, "amount_paise": 100000000},
+        {"vendor_name": "XYZ Spares MSME", "is_msme": True, "days_overdue": 20, "amount_paise": 15000000},  # Within 45d
+    ]
+
+    res = DeterministicAnalyticsEngine.analyze_trade_payables_ageing("ds-ap-01", records)
+    assert res.parameters["total_vendors"] == 3
+    assert res.parameters["msme_overdue_paise"] == 45000000
+    assert len(res.exceptions) == 1
+    assert "MSME Payment Overdue > 45 Days: ABC Tech MSME" in res.exceptions[0].title
+    assert "Section 15 of MSMED Act" in res.exceptions[0].description
+
+

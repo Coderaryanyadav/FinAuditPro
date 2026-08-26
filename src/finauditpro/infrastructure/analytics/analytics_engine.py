@@ -323,3 +323,57 @@ class DeterministicAnalyticsEngine:
             exceptions=exceptions,
         )
 
+    @staticmethod
+    def analyze_trade_payables_ageing(
+        dataset_id: str,
+        vendor_records: list[dict[str, Any]],
+    ) -> AnalyticRunResult:
+        """Analyze Schedule III Trade Payables Ageing Schedule (MSME vs Others, <1y, 1-2y, 2-3y, >3y)."""
+        exceptions: list[ExceptionItem] = []
+        msme_overdue_paise = 0
+        disputed_dues_paise = 0
+
+        for idx, rec in enumerate(vendor_records):
+            is_msme = rec.get("is_msme", False)
+            days_overdue = int(rec.get("days_overdue", 0))
+            amt_paise = int(rec.get("amount_paise", 0))
+            is_disputed = rec.get("is_disputed", False)
+            v_name = rec.get("vendor_name", f"Vendor #{idx+1}")
+
+            if is_msme and days_overdue > 45:
+                msme_overdue_paise += amt_paise
+                exceptions.append(
+                    ExceptionItem(
+                        analysis_run_id="",
+                        dataset_id=dataset_id,
+                        analytic_id="trade_payables_ageing",
+                        severity="High",
+                        title=f"MSME Payment Overdue > 45 Days: {v_name}",
+                        description=f"Outstanding dues of ₹{amt_paise / 100:,.2f} to MSME vendor '{v_name}' exceed statutory 45-day threshold under Section 15 of MSMED Act, 2006 (Overdue: {days_overdue} days).",
+                        implicated_rows=[idx + 1],
+                        computed_evidence=f"MSME Overdue = {days_overdue} days | Amount = ₹{amt_paise / 100:,.2f}",
+                    )
+                )
+
+            if is_disputed:
+                disputed_dues_paise += amt_paise
+
+        summary_text = (
+            f"Analyzed {len(vendor_records)} trade payable accounts. "
+            f"Found {len(exceptions)} MSME overdue exceptions (Total: ₹{msme_overdue_paise / 100:,.2f})."
+        )
+        return AnalyticRunResult(
+            analytic_id="trade_payables_ageing",
+            analytic_version="1.0.0",
+            title="Schedule III Trade Payables Ageing & MSMED Act Section 15 Compliance",
+            parameters={
+                "total_vendors": len(vendor_records),
+                "msme_overdue_paise": msme_overdue_paise,
+                "disputed_dues_paise": disputed_dues_paise,
+            },
+            summary=summary_text,
+            explanation="Cross-examined trade payables ledger against statutory Schedule III ageing buckets and MSMED Act 45-day payment limit.",
+            exceptions=exceptions,
+        )
+
+

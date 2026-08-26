@@ -1,19 +1,19 @@
 <div align="center">
 
-  <h1>FinAuditPro</h1>
+<h1>FinAuditPro</h1>
 
-  <h3>Offline-First AI-Powered Audit Intelligence Platform for Statutory Audit Practice</h3>
+<h3>Offline-First AI-Powered Audit Intelligence Platform for Statutory Audit Practice</h3>
 
-  <p><i>Tailored for Indian Chartered Accountants, Statutory Auditors, and Compliance Professionals (SA 320, SA 230, SA 510, CARO 2020)</i></p>
+<p><i>Tailored for Indian Chartered Accountants, Statutory Auditors, and Compliance Professionals (SA 320, SA 230, SA 510, CARO 2020)</i></p>
 
-  [![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-  [![PySide6](https://img.shields.io/badge/PySide6-6.8-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://www.qt.io/)
-  [![SQLite WAL](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-  [![LM Studio](https://img.shields.io/badge/LM%20Studio-Air--Gapped%20AI-4F46E5?style=for-the-badge&logo=openai&logoColor=white)](https://lmstudio.ai/)
-  [![Tests](https://img.shields.io/badge/Tests-139%2F139%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
-  [![Type Checked](https://img.shields.io/badge/MyPy-Strict%20Passed-blue?style=for-the-badge&logo=python)](pyproject.toml)
-  [![Code Style](https://img.shields.io/badge/Code%20Style-Ruff-black?style=for-the-badge&logo=ruff)](pyproject.toml)
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![PySide6](https://img.shields.io/badge/PySide6-6.8-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://www.qt.io/)
+[![SQLite WAL](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![LM Studio](https://img.shields.io/badge/LM%20Studio-Air--Gapped%20AI-4F46E5?style=for-the-badge&logo=openai&logoColor=white)](https://lmstudio.ai/)
+[![Tests](https://img.shields.io/badge/Tests-139%2F139%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+[![Type Checked](https://img.shields.io/badge/MyPy-Strict%20Passed-blue?style=for-the-badge&logo=python)](pyproject.toml)
+[![Code Style](https://img.shields.io/badge/Code%20Style-Ruff-black?style=for-the-badge&logo=ruff)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 </div>
 
@@ -45,22 +45,29 @@
 
 ## Overview
 
-**FinAuditPro** is an air-gapped, offline-first desktop audit operating system designed specifically for Indian statutory audit practice. It provides Chartered Accountants (CAs) and audit firms with deterministic mathematical analytics, automated SA 320 materiality calculation, PyMuPDF and Tesseract OCR document extraction, SQLite FTS5 full-text indexing, FAISS local vector similarity search, electronic working paper maker-checker workflows, and SQC 1 sealed archival — all powered by local LLM reasoning (via LM Studio) without ever sending client financial records to external cloud servers.
+**FinAuditPro** is an air-gapped, offline-first desktop audit operating system
+designed specifically for Indian statutory audit practice. It provides Chartered
+Accountants (CAs) and audit firms with deterministic mathematical analytics,
+automated SA 320 materiality calculation, PyMuPDF and Tesseract OCR document
+extraction, SQLite FTS5 full-text indexing, FAISS local vector similarity
+search, electronic working paper maker-checker workflows, and SQC 1 sealed
+archival — all powered by local LLM reasoning (via LM Studio) without ever
+sending client financial records to external cloud servers.
 
 ---
 
 ## Key Features
 
-| Subsystem | Core Capabilities & Statutory Standards |
-| :--- | :--- |
-| **Workspace & Multi-Tenancy** | 3-tier hierarchy (`Firm` $\rightarrow$ `Client` $\rightarrow$ `Engagement`), financial year scoping (`FY 2024-25`), single-tenant SQLite multi-engagement partitioning with strict `engagement_id` query isolation. |
+| Subsystem                           | Core Capabilities & Statutory Standards                                                                                                                                                                                                                           |
+| :---------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Workspace & Multi-Tenancy**       | 3-tier hierarchy (`Firm` $\rightarrow$ `Client` $\rightarrow$ `Engagement`), financial year scoping (`FY 2024-25`), single-tenant SQLite multi-engagement partitioning with strict `engagement_id` query isolation.                                               |
 | **Financial Ingestion & Analytics** | Automated Trial Balance, General Ledger, and Bank Statement import; **exact integer paise** calculation precision; Benford's 1st Law Chi-Square ($\chi^2$) analysis; duplicate payment detection; weekend/holiday posting detectors; high-value outlier z-scores. |
-| **Audit Matrix & Materiality** | SA 320 compliant materiality engine (Overall, Performance, and Trivial threshold calculations based on Revenue/PBT/Assets benchmarks); risk assessment and planned audit procedure matrix. |
-| **Document Processing & OCR** | Multi-format ingestion (PDF, PNG, JPG, CSV, TXT); PyMuPDF vector text extraction + Tesseract OCR fallback; SQLite FTS5 full-text indexing; SHA-256 evidence digests; path traversal and ZIP slip protection. |
-| **Air-Gapped AI Copilot (RAG)** | Local LM Studio REST integration (`http://localhost:1234`); `nomic-embed-text` embeddings with FAISS vector indexing; `<think>` reasoning token neutralization; prompt injection defense; mandatory `[AI Generated]` disclaimers with human override. |
-| **Working Papers & Sign-Off** | SA 230 electronic working paper lifecycle (`Draft` $\rightarrow$ `InReview` $\rightarrow$ `SignedOff`); maker-checker segregation of duties; open review notes blocking validation; SHA-256 content hash locking. |
-| **Statutory Reporting & Export** | Dynamic ReportLab PDF generation with automatic `"DRAFT"` watermark management; spreadsheet formula-injection escaping (`'=...`) in OpenPyXL exports; full audit event provenance logging. |
-| **Archival & SA 510 Roll-Forward** | SQC 1 engagement sealing with internal SHA-256 manifest validation; SQLite `PRAGMA query_only = ON` lock; multi-year roll-forward with carried-forward findings; SA 510 opening balance tie-out variance analysis. |
+| **Audit Matrix & Materiality**      | SA 320 compliant materiality engine (Overall, Performance, and Trivial threshold calculations based on Revenue/PBT/Assets benchmarks); risk assessment and planned audit procedure matrix.                                                                        |
+| **Document Processing & OCR**       | Multi-format ingestion (PDF, PNG, JPG, CSV, TXT); PyMuPDF vector text extraction + Tesseract OCR fallback; SQLite FTS5 full-text indexing; SHA-256 evidence digests; path traversal and ZIP slip protection.                                                      |
+| **Air-Gapped AI Copilot (RAG)**     | Local LM Studio REST integration (`http://localhost:1234`); `nomic-embed-text` embeddings with FAISS vector indexing; `<think>` reasoning token neutralization; prompt injection defense; mandatory `[AI Generated]` disclaimers with human override.             |
+| **Working Papers & Sign-Off**       | SA 230 electronic working paper lifecycle (`Draft` $\rightarrow$ `InReview` $\rightarrow$ `SignedOff`); maker-checker segregation of duties; open review notes blocking validation; SHA-256 content hash locking.                                                 |
+| **Statutory Reporting & Export**    | Dynamic ReportLab PDF generation with automatic `"DRAFT"` watermark management; spreadsheet formula-injection escaping (`'=...`) in OpenPyXL exports; full audit event provenance logging.                                                                        |
+| **Archival & SA 510 Roll-Forward**  | SQC 1 engagement sealing with internal SHA-256 manifest validation; SQLite `PRAGMA query_only = ON` lock; multi-year roll-forward with carried-forward findings; SA 510 opening balance tie-out variance analysis.                                                |
 
 ---
 
@@ -68,7 +75,8 @@
 
 ### 4-Layer Domain-Driven Architecture
 
-FinAuditPro strictly enforces clean layer separation. Dependencies flow inward toward the pure domain layer:
+FinAuditPro strictly enforces clean layer separation. Dependencies flow inward
+toward the pure domain layer:
 
 ```mermaid
 %%{init: {
@@ -242,24 +250,29 @@ flowchart TD
 
 ## Technology Stack
 
-| Category | Technology | Specification & Purpose |
-| :--- | :--- | :--- |
-| **Desktop GUI** | [![PySide6](https://img.shields.io/badge/PySide6-6.8-41CD52?style=flat-square&logo=qt&logoColor=white)](https://www.qt.io/) | High-density desktop UI shell with neutral dark surfaces (`#0f1117`, `#181b22`, `#222732`). |
-| **Database & ORM** | [![SQLite](https://img.shields.io/badge/SQLite-WAL_Mode-003B57?style=flat-square&logo=sqlite&logoColor=white)](https://www.sqlite.org/) | SQLAlchemy 2.0 ORM with Write-Ahead Logging (WAL) and migrations 1..9. |
-| **Full-Text Search** | [![FTS5](https://img.shields.io/badge/SQLite-FTS5_Index-blue?style=flat-square)](https://www.sqlite.org/fts5.html) | Virtual table porter tokenization for millisecond document keyword search. |
-| **Local AI Engine** | [![LM Studio](https://img.shields.io/badge/LM_Studio-Local_REST-4F46E5?style=flat-square)](https://lmstudio.ai/) | Air-gapped local OpenAI-compatible REST endpoint (`http://localhost:1234`). |
-| **Vector Indexing** | [![FAISS](https://img.shields.io/badge/FAISS-CPU_Vector_Search-FF6F00?style=flat-square)](https://github.com/facebookresearch/faiss) | CPU-optimized `IndexFlatIP` vector index for local document retrieval. |
-| **OCR & Extraction** | PyMuPDF & Tesseract | Vector PDF extraction with automated fallback to Tesseract 5.x OCR. |
-| **PDF Reporting** | ReportLab 4.2+ | Dynamic statutory audit report compiler with `"DRAFT"` watermark engine. |
-| **Spreadsheet Safety** | OpenPyXL Sanitizer | Automatic formula-injection escaping (`'=...`) for all CSV/XLSX exports. |
-| **Cryptography** | Cryptography (Fernet) | PBKDF2-HMAC salt derivation, AES-128-CBC encryption, and SHA-256 ledgers. |
-| **Static Verification** | Ruff & MyPy | Strict type checking (`mypy --strict`) and 0-warning linter enforcement. |
+| Category                | Technology                                                                                                                              | Specification & Purpose                                                                     |
+| :---------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------ |
+| **Desktop GUI**         | [![PySide6](https://img.shields.io/badge/PySide6-6.8-41CD52?style=flat-square&logo=qt&logoColor=white)](https://www.qt.io/)             | High-density desktop UI shell with neutral dark surfaces (`#0f1117`, `#181b22`, `#222732`). |
+| **Database & ORM**      | [![SQLite](https://img.shields.io/badge/SQLite-WAL_Mode-003B57?style=flat-square&logo=sqlite&logoColor=white)](https://www.sqlite.org/) | SQLAlchemy 2.0 ORM with Write-Ahead Logging (WAL) and migrations 1..9.                      |
+| **Full-Text Search**    | [![FTS5](https://img.shields.io/badge/SQLite-FTS5_Index-blue?style=flat-square)](https://www.sqlite.org/fts5.html)                      | Virtual table porter tokenization for millisecond document keyword search.                  |
+| **Local AI Engine**     | [![LM Studio](https://img.shields.io/badge/LM_Studio-Local_REST-4F46E5?style=flat-square)](https://lmstudio.ai/)                        | Air-gapped local OpenAI-compatible REST endpoint (`http://localhost:1234`).                 |
+| **Vector Indexing**     | [![FAISS](https://img.shields.io/badge/FAISS-CPU_Vector_Search-FF6F00?style=flat-square)](https://github.com/facebookresearch/faiss)    | CPU-optimized `IndexFlatIP` vector index for local document retrieval.                      |
+| **OCR & Extraction**    | PyMuPDF & Tesseract                                                                                                                     | Vector PDF extraction with automated fallback to Tesseract 5.x OCR.                         |
+| **PDF Reporting**       | ReportLab 4.2+                                                                                                                          | Dynamic statutory audit report compiler with `"DRAFT"` watermark engine.                    |
+| **Spreadsheet Safety**  | OpenPyXL Sanitizer                                                                                                                      | Automatic formula-injection escaping (`'=...`) for all CSV/XLSX exports.                    |
+| **Cryptography**        | Cryptography (Fernet)                                                                                                                   | PBKDF2-HMAC salt derivation, AES-128-CBC encryption, and SHA-256 ledgers.                   |
+| **Static Verification** | Ruff & MyPy                                                                                                                             | Strict type checking (`mypy --strict`) and 0-warning linter enforcement.                    |
 
 ---
 
 > [!IMPORTANT]
+>
 > ### 🛡️ 100% Air-Gap & Confidentiality Guarantee
-> **FinAuditPro** is engineered for statutory confidentiality. It makes **zero outbound internet connections**. All document OCR processing, LLM inferences, vector embeddings, mathematical analytics, database transactions, and report generation run **100% locally on your machine**.
+>
+> **FinAuditPro** is engineered for statutory confidentiality. It makes **zero
+> outbound internet connections**. All document OCR processing, LLM inferences,
+> vector embeddings, mathematical analytics, database transactions, and report
+> generation run **100% locally on your machine**.
 
 ---
 
@@ -267,20 +280,24 @@ flowchart TD
 
 ## Production Releases & Downloads
 
-Pre-built, standalone release packages are available on the [GitHub Releases](https://github.com/Coderaryanyadav/FinAuditPro/releases) page:
+Pre-built, standalone release packages are available on the
+[GitHub Releases](https://github.com/Coderaryanyadav/FinAuditPro/releases) page:
 
 ### 🍏 macOS (Apple Silicon & Intel)
+
 1. Download `FinAuditPro-1.0.0-macOS-arm64.dmg` (or Intel `x86_64`).
 2. Double-click the DMG to open the installer.
 3. Drag **FinAuditPro** into your **Applications** folder.
 4. Launch FinAuditPro from Launchpad or Spotlight.
 
 ### 🪟 Windows (64-bit)
+
 1. Download `FinAuditPro-Setup-1.0.0-x64.exe` (or standalone portable `.zip`).
 2. Run the installer wizard (or extract portable folder).
 3. Launch **FinAuditPro** from your Start Menu or Desktop shortcut.
 
-> *All release binaries are standalone and require zero manual Python installation.* For full packaging details, see [RELEASE.md](RELEASE.md).
+> _All release binaries are standalone and require zero manual Python
+> installation._ For full packaging details, see [RELEASE.md](RELEASE.md).
 
 ---
 
@@ -291,14 +308,16 @@ Pre-built, standalone release packages are available on the [GitHub Releases](ht
 - **Python**: Python 3.12 or higher (verified on Python 3.12, 3.13, and 3.14)
 - **OS**: macOS (Apple Silicon arm64 / Intel), Linux x64, or Windows x64
 - **Optional Tools**:
-  - `tesseract` (for OCR on scanned images: `brew install tesseract` on macOS / `sudo apt-get install tesseract-ocr` on Linux)
-  - [LM Studio](https://lmstudio.ai/) (for local AI assistant features: load `deepseek-r1-distill-qwen-14b` and start server on port 1234)
+  - `tesseract` (for OCR on scanned images: `brew install tesseract` on macOS /
+    `sudo apt-get install tesseract-ocr` on Linux)
+  - [LM Studio](https://lmstudio.ai/) (for local AI assistant features: load
+    `deepseek-r1-distill-qwen-14b` and start server on port 1234)
 
 ---
 
 ### Installation & Launch
 
-```bash
+````bash
 # 1. Clone the repository
 git clone https://github.com/Coderaryanyadav/FinAuditPro.git
 cd FinAuditPro
@@ -322,12 +341,13 @@ python scripts/development/automated_system_check.py
 ```bash
 # 5. Launch the desktop application
 python -m finauditpro
-```
+````
 
 > **Default Administrator Credentials:**
+>
 > - **Username:** `admin@finauditpro.com`
-> - **Password:** `Admin@123`
-> *(Seeded automatically on first launch; manage users in Settings)*
+> - **Password:** `Admin@123` _(Seeded automatically on first launch; manage
+>   users in Settings)_
 
 ---
 
@@ -350,7 +370,9 @@ python scripts/development/run_1000_verifications.py
 python scripts/maintenance/vacuum_and_reindex.py
 ```
 
-**Test Suite Status**: **138 passed (100%)** across domain calculations, security hardening, multi-tenant database isolation, maker-checker sign-offs, FTS5 search, and multi-year roll-forward tie-outs.
+**Test Suite Status**: **139 passed (100%)** across domain calculations,
+security hardening, multi-tenant database isolation, maker-checker sign-offs,
+FTS5 search, and multi-year roll-forward tie-outs.
 
 ---
 
@@ -444,27 +466,27 @@ Full documentation is available in the [`docs/`](docs/) directory:
 - **[Release Notes / Changelog](docs/CHANGELOG.md)**
 - **[Canonical Security Policy](.github/SECURITY.md)**
 
-
-
-
-
-
-
 ---
 
 ## Security & Air-Gap Guarantee
 
-- **Fail-Closed RBAC**: Fine-grained role permissions (`Partner`, `Manager`, `Senior`, `Staff`) strictly enforced at the application service layer.
-- **Read-Only Archive Protection**: Sealed archives lock SQLite connections in `query_only=ON` mode with cryptographic SHA-256 manifest validation.
-- **Formula-Injection Escaping**: XLSX/CSV export pipeline neutralizes leading `=`, `+`, `-`, `@`, `\t`, `\r` trigger characters.
-- **Strict Data Isolation**: Repositories enforce `engagement_id` filtering on all database and document queries.
-- **Zero Real Client Data**: Repository contains strictly synthetic test datasets.
+- **Fail-Closed RBAC**: Fine-grained role permissions (`Partner`, `Manager`,
+  `Senior`, `Staff`) strictly enforced at the application service layer.
+- **Read-Only Archive Protection**: Sealed archives lock SQLite connections in
+  `query_only=ON` mode with cryptographic SHA-256 manifest validation.
+- **Formula-Injection Escaping**: XLSX/CSV export pipeline neutralizes leading
+  `=`, `+`, `-`, `@`, `\t`, `\r` trigger characters.
+- **Strict Data Isolation**: Repositories enforce `engagement_id` filtering on
+  all database and document queries.
+- **Zero Real Client Data**: Repository contains strictly synthetic test
+  datasets.
 
 ---
 
 ## License & Authors
 
-FinAuditPro is licensed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
+FinAuditPro is licensed under the **MIT License**. See [`LICENSE`](LICENSE) for
+details.
 
 <br>
 

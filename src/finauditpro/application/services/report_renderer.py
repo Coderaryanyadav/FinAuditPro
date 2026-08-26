@@ -61,34 +61,55 @@ def _generate_chart(findings: list[dict[str, Any]], chart_path: Path) -> None:
 def _build_sa700_story(story: list[Any], report: Report, data: dict[str, Any], styles: Any) -> None:
     client_name = data.get("client_name", "the Company")
     fy = data.get("financial_year", "2025-26")
+    findings = data.get("findings", [])
     h2 = styles["Heading2"]
     norm = styles["Normal"]
+
+    # SA 705 Opinion Modification Evaluation
+    high_findings = [f for f in findings if f.get("severity", "").upper() == "HIGH"]
+    is_qualified = len(high_findings) > 0
 
     story.append(Paragraph("<b>INDEPENDENT AUDITOR'S REPORT</b>", styles["Heading1"]))
     story.append(Paragraph(f"<b>To the Members of {client_name}</b>", norm))
     story.append(Spacer(1, 8))
 
-    story.append(Paragraph("<b>1. Opinion</b>", h2))
-    story.append(Paragraph(
-        f"We have audited the financial statements of <b>{client_name}</b>, which comprise the Balance Sheet as at "
-        f"March 31, 2026, the Statement of Profit and Loss, and the Statement of Cash Flows for the year then ended ({fy}), "
-        f"and notes to the financial statements, including a summary of significant accounting policies.<br/>"
-        f"In our opinion and to the best of our information and according to the explanations given to us, the aforesaid "
-        f"financial statements give the information required by the Companies Act, 2013 in the manner so required and give a "
-        f"true and fair view in conformity with the accounting principles generally accepted in India.", norm
-    ))
-    story.append(Spacer(1, 8))
+    if is_qualified:
+        story.append(Paragraph("<b>1. Qualified Opinion (SA 705 Revised)</b>", h2))
+        story.append(Paragraph(
+            f"We have audited the financial statements of <b>{client_name}</b> ({fy}). "
+            f"In our opinion and to the best of our information and according to the explanations given to us, "
+            f"<b>except for the effects of the matter(s) described in the Basis for Qualified Opinion section of our report</b>, "
+            f"the aforesaid financial statements give a true and fair view in conformity with the accounting principles generally accepted in India.", norm
+        ))
+        story.append(Spacer(1, 8))
 
-    story.append(Paragraph("<b>2. Basis for Opinion (SA 200 / SA 500)</b>", h2))
-    story.append(Paragraph(
-        "We conducted our audit in accordance with the Standards on Auditing (SAs) specified under section 143(10) of the Act. "
-        "Our responsibilities under those Standards are further described in the Auditor’s Responsibilities section of our report. "
-        "We believe that the audit evidence we have obtained is sufficient and appropriate to provide a basis for our opinion.", norm
-    ))
-    story.append(Spacer(1, 8))
+        story.append(Paragraph("<b>2. Basis for Qualified Opinion</b>", h2))
+        for hf in high_findings:
+            title = hf.get("title", "Material Audit Exception")
+            desc = hf.get("description", "Material exception identified during substantive testing.")
+            story.append(Paragraph(f"• <b>{title}</b>: {desc}", norm))
+        story.append(Spacer(1, 8))
+    else:
+        story.append(Paragraph("<b>1. Unmodified Opinion (SA 700)</b>", h2))
+        story.append(Paragraph(
+            f"We have audited the financial statements of <b>{client_name}</b>, which comprise the Balance Sheet as at "
+            f"March 31, 2026, the Statement of Profit and Loss, and the Statement of Cash Flows for the year then ended ({fy}), "
+            f"and notes to the financial statements, including a summary of significant accounting policies.<br/>"
+            f"In our opinion and to the best of our information and according to the explanations given to us, the aforesaid "
+            f"financial statements give the information required by the Companies Act, 2013 in the manner so required and give a "
+            f"true and fair view in conformity with the accounting principles generally accepted in India.", norm
+        ))
+        story.append(Spacer(1, 8))
+
+        story.append(Paragraph("<b>2. Basis for Opinion (SA 200 / SA 500)</b>", h2))
+        story.append(Paragraph(
+            "We conducted our audit in accordance with the Standards on Auditing (SAs) specified under section 143(10) of the Act. "
+            "Our responsibilities under those Standards are further described in the Auditor’s Responsibilities section of our report. "
+            "We believe that the audit evidence we have obtained is sufficient and appropriate to provide a basis for our opinion.", norm
+        ))
+        story.append(Spacer(1, 8))
 
     story.append(Paragraph("<b>3. Key Audit Matters (SA 701)</b>", h2))
-    findings = data.get("findings", [])
     if findings:
         story.append(Paragraph(
             f"Key audit matters are those matters that, in our professional judgment, were of most significance in our audit. "

@@ -46,6 +46,14 @@ python -m finauditpro
 finauditpro
 ```
 
+### Step 4: Sign In
+
+On initial launch, sign in with the pre-seeded local administrator account:
+- **Username:** `admin@finauditpro.com`
+- **Password:** `Admin@123`
+
+You can add additional Partner, Manager, and Associate accounts via the user management service.
+
 ---
 
 ## 3. Environment Self-Check Diagnostics

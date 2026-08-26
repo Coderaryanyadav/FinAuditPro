@@ -10,7 +10,7 @@
   [![PySide6](https://img.shields.io/badge/PySide6-6.8-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://www.qt.io/)
   [![SQLite WAL](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
   [![LM Studio](https://img.shields.io/badge/LM%20Studio-Air--Gapped%20AI-4F46E5?style=for-the-badge&logo=openai&logoColor=white)](https://lmstudio.ai/)
-  [![Tests](https://img.shields.io/badge/Tests-132%2F132%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+  [![Tests](https://img.shields.io/badge/Tests-137%2F137%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
   [![Type Checked](https://img.shields.io/badge/MyPy-Strict%20Passed-blue?style=for-the-badge&logo=python)](pyproject.toml)
   [![Code Style](https://img.shields.io/badge/Code%20Style-Ruff-black?style=for-the-badge&logo=ruff)](pyproject.toml)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
@@ -319,18 +319,22 @@ pip install -r requirements-dev.txt
 # 4. Run automated pre-flight system diagnostics
 python scripts/development/automated_system_check.py
 
+```bash
 # 5. Launch the desktop application
 python -m finauditpro
-# or use the supervised auto-launcher:
-python scripts/development/auto_launch.py
 ```
+
+> **Default Administrator Credentials:**
+> - **Username:** `admin@finauditpro.com`
+> - **Password:** `Admin@123`
+> *(Seeded automatically on first launch; manage users in Settings)*
 
 ---
 
 ## Automated Verification & Diagnostics
 
 ```bash
-# Run the complete test suite (130/130 passing)
+# Run the complete test suite (137/137 passing)
 pytest tests/ -v
 
 # Run strict static type checking
@@ -346,7 +350,7 @@ python scripts/development/run_1000_verifications.py
 python scripts/maintenance/vacuum_and_reindex.py
 ```
 
-**Test Suite Status**: **130 passed in 5.81s (100%)** across domain calculations, security hardening, multi-tenant database isolation, maker-checker sign-offs, FTS5 search, and multi-year roll-forward tie-outs.
+**Test Suite Status**: **137 passed (100%)** across domain calculations, security hardening, multi-tenant database isolation, maker-checker sign-offs, FTS5 search, and multi-year roll-forward tie-outs.
 
 ---
 
@@ -371,7 +375,7 @@ FinAuditPro/
 │
 ├── src/
 │   └── finauditpro/               # 4-Layer Domain-Driven Architecture Source Tree
-│       ├── __init__.py            # Package root (__version__ = "0.1.0")
+│       ├── __init__.py            # Package root (__version__ = "1.0.0")
 │       ├── __main__.py            # Desktop GUI & headless CLI entry point
 │       ├── domain/                # Pure entities, value objects & calculation rules
 │       ├── application/           # Application services, DTOs & security coordinators

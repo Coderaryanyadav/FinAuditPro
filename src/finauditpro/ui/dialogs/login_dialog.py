@@ -4,6 +4,7 @@ Split-view authentication window with crisp Apple typography and slate navy pane
 """
 
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QDialog,
     QFrame,
@@ -173,6 +174,19 @@ class LoginDialog(QDialog):
             "QLineEdit { border: 1.5px solid #D1D5DB; border-radius: 6px; padding: 10px 14px; background: #FFFFFF; color: #111827; font-size: 13px; }"
             "QLineEdit:focus { border-color: #007AFF; background: #FFFFFF; }"
         )
+
+        toggle_login_pwd = QAction("Show", self.input_pass)
+        self.input_pass.addAction(toggle_login_pwd, QLineEdit.ActionPosition.TrailingPosition)
+
+        def _toggle_login_pwd_visibility() -> None:
+            if self.input_pass.echoMode() == QLineEdit.EchoMode.Password:
+                self.input_pass.setEchoMode(QLineEdit.EchoMode.Normal)
+                toggle_login_pwd.setText("Hide")
+            else:
+                self.input_pass.setEchoMode(QLineEdit.EchoMode.Password)
+                toggle_login_pwd.setText("Show")
+
+        toggle_login_pwd.triggered.connect(_toggle_login_pwd_visibility)
 
         fl.addWidget(lbl_e)
         fl.addWidget(self.input_user)

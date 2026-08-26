@@ -1,6 +1,7 @@
 """Change Password / First-Login Mandatory Password Reset Dialog."""
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QDialog,
     QFrame,
@@ -93,6 +94,19 @@ class ChangePasswordDialog(QDialog):
             }
             QLineEdit:focus { border: 1px solid #2563EB; background: #FFFFFF; }
         """)
+        toggle_new = QAction("Show", self.input_new)
+        self.input_new.addAction(toggle_new, QLineEdit.ActionPosition.TrailingPosition)
+
+        def _toggle_new_pwd() -> None:
+            if self.input_new.echoMode() == QLineEdit.EchoMode.Password:
+                self.input_new.setEchoMode(QLineEdit.EchoMode.Normal)
+                toggle_new.setText("Hide")
+            else:
+                self.input_new.setEchoMode(QLineEdit.EchoMode.Password)
+                toggle_new.setText("Show")
+
+        toggle_new.triggered.connect(_toggle_new_pwd)
+
         fl.addWidget(lbl_new)
         fl.addWidget(self.input_new)
 
@@ -108,6 +122,19 @@ class ChangePasswordDialog(QDialog):
             }
             QLineEdit:focus { border: 1px solid #2563EB; background: #FFFFFF; }
         """)
+        toggle_confirm = QAction("Show", self.input_confirm)
+        self.input_confirm.addAction(toggle_confirm, QLineEdit.ActionPosition.TrailingPosition)
+
+        def _toggle_confirm_pwd() -> None:
+            if self.input_confirm.echoMode() == QLineEdit.EchoMode.Password:
+                self.input_confirm.setEchoMode(QLineEdit.EchoMode.Normal)
+                toggle_confirm.setText("Hide")
+            else:
+                self.input_confirm.setEchoMode(QLineEdit.EchoMode.Password)
+                toggle_confirm.setText("Show")
+
+        toggle_confirm.triggered.connect(_toggle_confirm_pwd)
+
         fl.addWidget(lbl_confirm)
         fl.addWidget(self.input_confirm)
 

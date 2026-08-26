@@ -151,6 +151,7 @@ class EngagementView(QWidget):
             action_callback=self._create_engagement,
         )
 
+        self.table.setVisible(False)
         self.table_card.content_layout.addWidget(self.table)
         self.table_card.content_layout.addWidget(self.empty_state)
         layout.addWidget(self.table_card)

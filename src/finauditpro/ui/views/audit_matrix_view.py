@@ -92,7 +92,6 @@ class AuditMatrixView(QWidget):
         """
 
         self.bm_combo = QComboBox()
-        self.bm_combo.setStyleSheet(field_style)
         for opt in BENCHMARK_GUIDANCE_OPTIONS:
             self.bm_combo.addItem(f"{opt.benchmark_type.value} ({opt.default_overall_pct}%)", opt.benchmark_type)
 

@@ -206,14 +206,32 @@ QComboBox::down-arrow {
     width: 10px; height: 6px;
 }
 QComboBox QAbstractItemView {
-    background-color: #FFFFFF; border: 1.5px solid #CBD5E1;
-    border-radius: 6px; color: #0F172A;
-    selection-background-color: #EFF6FF; selection-color: #2563EB;
-    outline: none; padding: 4px; font-size: 13px;
+    background-color: #FFFFFF;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 6px;
+    color: #0F172A;
+    selection-background-color: #EFF6FF;
+    selection-color: #2563EB;
+    outline: none;
+    padding: 4px;
+    font-size: 13px;
 }
-QComboBox QAbstractItemView::item { padding: 8px 12px; min-height: 28px; }
-QComboBox QAbstractItemView::item:hover { background-color: #F8FAFC; }
-QComboBox QAbstractItemView::item:selected { background-color: #EFF6FF; color: #2563EB; font-weight: 600; }
+QComboBox QAbstractItemView::item {
+    background-color: #FFFFFF;
+    color: #0F172A;
+    padding: 8px 12px;
+    min-height: 28px;
+    border-radius: 4px;
+}
+QComboBox QAbstractItemView::item:hover {
+    background-color: #F8FAFC;
+    color: #0F172A;
+}
+QComboBox QAbstractItemView::item:selected {
+    background-color: #EFF6FF;
+    color: #2563EB;
+    font-weight: 600;
+}
 
 /* Active Engagement Context Selector Dropdown */
 QComboBox#clientSelectorCombo {
@@ -235,14 +253,32 @@ QComboBox#clientSelectorCombo::down-arrow {
     width: 10px; height: 6px;
 }
 QComboBox#clientSelectorCombo QAbstractItemView {
-    background-color: #FFFFFF; border: 1.5px solid #CBD5E1;
-    border-radius: 6px; color: #0F172A;
-    selection-background-color: #EFF6FF; selection-color: #2563EB;
-    outline: none; padding: 4px; font-size: 12px;
+    background-color: #FFFFFF;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 6px;
+    color: #0F172A;
+    selection-background-color: #EFF6FF;
+    selection-color: #2563EB;
+    outline: none;
+    padding: 4px;
+    font-size: 12px;
 }
-QComboBox#clientSelectorCombo QAbstractItemView::item { padding: 8px 12px; min-height: 28px; }
-QComboBox#clientSelectorCombo QAbstractItemView::item:hover { background-color: #F8FAFC; }
-QComboBox#clientSelectorCombo QAbstractItemView::item:selected { background-color: #EFF6FF; color: #2563EB; font-weight: 600; }
+QComboBox#clientSelectorCombo QAbstractItemView::item {
+    background-color: #FFFFFF;
+    color: #0F172A;
+    padding: 8px 12px;
+    min-height: 28px;
+    border-radius: 4px;
+}
+QComboBox#clientSelectorCombo QAbstractItemView::item:hover {
+    background-color: #F8FAFC;
+    color: #0F172A;
+}
+QComboBox#clientSelectorCombo QAbstractItemView::item:selected {
+    background-color: #EFF6FF;
+    color: #2563EB;
+    font-weight: 600;
+}
 
 /* ── BUTTONS ─────────────────────────────────────────────────────────────── */
 QPushButton {

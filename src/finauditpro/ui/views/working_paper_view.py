@@ -136,6 +136,7 @@ class WorkingPaperView(QWidget):
             action_callback=self._on_scaffold_clicked,
         )
 
+        self.table.setVisible(False)
         self.table_card.content_layout.addWidget(self.table)
         self.table_card.content_layout.addWidget(self.empty_state)
         self.splitter.addWidget(self.table_card)

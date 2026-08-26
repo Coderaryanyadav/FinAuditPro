@@ -62,12 +62,19 @@ class WorkingPaperService:
             if not EngagementRepository(session).get_by_id(dto.engagement_id):
                 raise EntityNotFoundError("Engagement", dto.engagement_id)
 
+            from finauditpro.domain.working_paper_entities import FileCategoryEnum
+            try:
+                f_cat = FileCategoryEnum(dto.file_category)
+            except Exception:
+                f_cat = FileCategoryEnum.CURRENT_FILE
+
             wp_repo = WorkingPaperRepository(session)
             wp = WorkingPaper(
                 engagement_id=dto.engagement_id,
                 index_reference=dto.index_reference,
                 title=dto.title,
                 area=dto.area,
+                file_category=f_cat,
                 status=WorkingPaperStatusEnum.DRAFT,
                 preparer_id=dto.preparer_id,
                 reviewer_id=dto.reviewer_id,
@@ -88,11 +95,58 @@ class WorkingPaperService:
             for proc_id in dto.procedure_ids:
                 wp_repo.add_link(str(uuid4()), saved_wp.id, "procedure", proc_id)
 
-            AuditEventRepository(session).add(AuditEvent(engagement_id=dto.engagement_id, actor=dto.preparer_id, action="Working Paper Created", details=f"Created Working Paper '{saved_wp.index_reference}': {saved_wp.title}"))
+            AuditEventRepository(session).add(AuditEvent(engagement_id=dto.engagement_id, actor=dto.preparer_id, action="Working Paper Created", details=f"Created Working Paper '{saved_wp.index_reference}': {saved_wp.title} ({f_cat.value})"))
             return saved_wp
 
+    def scaffold_permanent_audit_file(self, engagement_id: str, preparer_id: str = "auditor") -> list[WorkingPaper]:
+        """Automatically scaffold standard ICAI Permanent Audit File (PAF) legal and statutory structures."""
+        from finauditpro.domain.working_paper_entities import (
+            DEFAULT_PERMANENT_FILE_HEADS,
+            FileCategoryEnum,
+        )
+
+        created = []
+        with self.db_manager.session_scope() as session:
+            wp_repo = WorkingPaperRepository(session)
+            existing = wp_repo.list_for_engagement(engagement_id)
+            existing_refs = {w.index_reference for w in existing}
+
+            for ref, title, area, scope_desc in DEFAULT_PERMANENT_FILE_HEADS:
+                if ref in existing_refs:
+                    continue
+                wp = WorkingPaper(
+                    engagement_id=engagement_id,
+                    index_reference=ref,
+                    title=title,
+                    area=area,
+                    file_category=FileCategoryEnum.PERMANENT_FILE,
+                    status=WorkingPaperStatusEnum.DRAFT,
+                    preparer_id=preparer_id,
+                )
+                saved_wp = wp_repo.add_working_paper(wp)
+                for order, s_title, content in [
+                    (1, "1. Permanent Record Summary", scope_desc),
+                    (2, "2. Key Terms & Verification Details", "Record incorporation dates, authorized signatories, tax identification numbers, and terms."),
+                    (3, "3. Continuity & Update Log", "Verify if any amendments or alterations occurred during the current audit period."),
+                ]:
+                    wp_repo.add_section(WorkingPaperSection(working_paper_id=saved_wp.id, section_order=order, title=s_title, content_markdown=content))
+                created.append(saved_wp)
+
+            if created:
+                AuditEventRepository(session).add(
+                    AuditEvent(
+                        engagement_id=engagement_id,
+                        actor=preparer_id,
+                        action="Permanent Audit File (PAF) Scaffolded",
+                        details=f"Auto-generated {len(created)} standard ICAI Permanent Audit File (PAF) working paper templates.",
+                    )
+                )
+        return created
+
     def scaffold_schedule_iii_working_papers(self, engagement_id: str, preparer_id: str = "auditor") -> list[WorkingPaper]:
-        """Automatically scaffold standard ICAI Schedule III statutory audit working papers."""
+        """Automatically scaffold standard ICAI Schedule III statutory audit working papers (CAF)."""
+        from finauditpro.domain.working_paper_entities import FileCategoryEnum
+
         standard_heads = [
             ("WP-A", "Cash & Cash Equivalents (Bank Confirmations & Reconciliation)", "Cash & Bank", "Verify 100% bank statement reconciliations, confirmation letters, and cash in hand verification."),
             ("WP-B", "Trade Receivables (Ageing & Balance Confirmations)", "Receivables", "Inspect trade receivable ageing schedules (>6 months), SA 505 third-party balance confirmations, and expected credit loss (ECL) provisions."),
@@ -116,6 +170,7 @@ class WorkingPaperService:
                     index_reference=ref,
                     title=title,
                     area=area,
+                    file_category=FileCategoryEnum.CURRENT_FILE,
                     status=WorkingPaperStatusEnum.DRAFT,
                     preparer_id=preparer_id,
                 )

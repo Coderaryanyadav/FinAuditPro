@@ -59,6 +59,40 @@ def test_working_paper_legal_lifecycle_transitions(setup_wp_env) -> None:
     assert submitted_wp.status == WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW
 
 
+def test_working_paper_illegal_transitions_raise(setup_wp_env) -> None:
+    """Verify that jumping straight from Draft to Locked without sign-off raises an error."""
+    eng, wp_svc = setup_wp_env
+
+    wp = wp_svc.create_working_paper(
+        CreateWorkingPaperDTO(
+            engagement_id=eng.id,
+            index_reference="WP-CASH-001",
+            title="Cash Verification",
+            area="Cash",
+        )
+    )
+
+    with pytest.raises(InvalidStateTransitionError):
+        wp.transition_to(WorkingPaperStatusEnum.LOCKED)
+
+
+def test_permanent_audit_file_scaffolding(setup_wp_env) -> None:
+    """Verify that PAF scaffolding creates standard permanent records with PERMANENT_FILE category."""
+    from finauditpro.domain.working_paper_entities import FileCategoryEnum
+
+    eng, wp_svc = setup_wp_env
+
+    paf_wps = wp_svc.scaffold_permanent_audit_file(eng.id, preparer_id="Lead Partner")
+    assert len(paf_wps) == 5
+    for wp in paf_wps:
+        assert wp.file_category == FileCategoryEnum.PERMANENT_FILE
+        assert wp.index_reference.startswith("PAF-")
+
+    # Scaffolding again is idempotent
+    second_run = wp_svc.scaffold_permanent_audit_file(eng.id)
+    assert len(second_run) == 0
+
+
 def test_illegal_working_paper_transition_fails(setup_wp_env) -> None:
     """Verify illegal direct transition (e.g. Draft -> Signed Off) raises InvalidStateTransitionError."""
     eng, wp_svc = setup_wp_env

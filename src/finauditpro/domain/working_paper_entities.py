@@ -11,6 +11,11 @@ from finauditpro.domain.entities import DomainBaseModel
 from finauditpro.domain.exceptions import InvalidStateTransitionError, ValidationError
 
 
+class FileCategoryEnum(StrEnum):
+    PERMANENT_FILE = "Permanent File"
+    CURRENT_FILE = "Current File"
+
+
 class WorkingPaperStatusEnum(StrEnum):
     DRAFT = "Draft"
     IN_PREPARATION = "In Preparation"
@@ -36,6 +41,15 @@ class SignOffLevelEnum(StrEnum):
     REVIEWED = "Reviewed"
     FINAL_SIGN_OFF = "Signed Off"
 
+
+# Permanent Audit File (PAF) Standard ICAI Structure
+DEFAULT_PERMANENT_FILE_HEADS = [
+    ("PAF-01", "Memorandum & Articles of Association (MOA & AOA)", "Legal Structure", "Permanent constitutional documents of the company."),
+    ("PAF-02", "Tax Registrations (PAN, GSTIN, TAN, IEC Certificates)", "Statutory Registrations", "Permanent statutory registrations and tax identification numbers."),
+    ("PAF-03", "Organization Structure & Key Management Personnel (KMP)", "Governance", "List of directors, board committees, and organizational chart."),
+    ("PAF-04", "Long-Term Leases, Debt Instruments & Significant Contracts", "Agreements", "Major long-term agreements, title deeds, and loan agreements."),
+    ("PAF-05", "Bank Account Details & Authorized Signatories", "Banking", "Permanent bank accounts, credit facilities, and authorized signatories."),
+]
 
 # Non-statutory guidance disclaimer for working paper index structures and retention rules
 DEFAULT_WORKING_PAPER_INDEX_GUIDANCE = {
@@ -169,6 +183,7 @@ class WorkingPaper(DomainBaseModel):
     index_reference: str = Field(..., min_length=1)
     title: str = Field(..., min_length=1)
     area: str = Field(..., min_length=1)
+    file_category: FileCategoryEnum = Field(default=FileCategoryEnum.CURRENT_FILE)
     status: WorkingPaperStatusEnum = Field(default=WorkingPaperStatusEnum.DRAFT)
     conclusion: str = Field(default="")
     preparer_id: str = Field(..., min_length=1)

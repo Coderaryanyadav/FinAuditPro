@@ -62,11 +62,15 @@ class WorkingPaperView(QWidget):
             action_text="+ New Working Paper",
             action_callback=self._on_new_wp_clicked,
         )
-        self.btn_scaffold = QPushButton("⚡ Auto-Generate Schedule III Folders")
+        self.btn_scaffold_paf = QPushButton("🏛️ + Seed PAF")
+        self.btn_scaffold_paf.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_scaffold_paf.setStyleSheet("QPushButton { background: #FFFFFF; color: #0F766E; border: 1.5px solid #99F6E4; border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 12px; }")
+        self.btn_scaffold_paf.clicked.connect(self._on_scaffold_paf_clicked)
+        self.header.action_layout.addWidget(self.btn_scaffold_paf)
+
+        self.btn_scaffold = QPushButton("⚡ Auto-Generate Schedule III")
         self.btn_scaffold.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_scaffold.setStyleSheet(
-            "QPushButton { background: #FFFFFF; color: #1E293B; border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 7px 16px; font-weight: 600; font-size: 13px; } QPushButton:hover { background: #F8FAFC; color: #2563EB; border-color: #93C5FD; } QPushButton:pressed { background: #EFF6FF; }"
-        )
+        self.btn_scaffold.setStyleSheet("QPushButton { background: #FFFFFF; color: #1E293B; border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 12px; }")
         self.btn_scaffold.clicked.connect(self._on_scaffold_clicked)
         self.header.action_layout.addWidget(self.btn_scaffold)
         layout.addWidget(self.header)
@@ -74,46 +78,43 @@ class WorkingPaperView(QWidget):
         # 2. Metric Summary Cards
         summary_layout = QHBoxLayout()
         summary_layout.setSpacing(10)
-        self.card_total = MetricCard(
-            "TOTAL WORKING PAPERS", "0", "Indexed workpapers", accent_color="#2563EB"
-        )
-        self.card_open_notes = MetricCard(
-            "OPEN REVIEW POINTS", "0", "Awaiting clearance", accent_color="#D97706"
-        )
-        self.card_signed = MetricCard(
-            "SIGNED OFF & LOCKED", "0", "Cryptographically sealed", accent_color="#16A34A"
-        )
-
+        self.card_total = MetricCard("TOTAL WORKING PAPERS", "0", "Indexed workpapers", accent_color="#2563EB")
+        self.card_open_notes = MetricCard("OPEN REVIEW POINTS", "0", "Awaiting clearance", accent_color="#D97706")
+        self.card_signed = MetricCard("SIGNED OFF & LOCKED", "0", "Cryptographically sealed", accent_color="#16A34A")
         summary_layout.addWidget(self.card_total)
         summary_layout.addWidget(self.card_open_notes)
         summary_layout.addWidget(self.card_signed)
         layout.addLayout(summary_layout)
 
+        # 2b. PAF / CAF Segmented Filter Bar
+        from PySide6.QtWidgets import QButtonGroup, QRadioButton
+        filter_box = QHBoxLayout()
+        filter_box.setSpacing(8)
+        self.btn_group_filter = QButtonGroup(self)
+        self.radio_all = QRadioButton("📁 All Working Papers")
+        self.radio_paf = QRadioButton("🏛️ Permanent File (PAF)")
+        self.radio_caf = QRadioButton("📋 Current File (CAF)")
+        self.radio_all.setChecked(True)
+
+        for idx, rb in enumerate([self.radio_all, self.radio_paf, self.radio_caf]):
+            rb.setStyleSheet("QRadioButton { font-weight: 600; font-size: 12px; color: #334155; padding: 2px 6px; }")
+            self.btn_group_filter.addButton(rb, idx)
+            filter_box.addWidget(rb)
+            rb.toggled.connect(self.refresh)
+        filter_box.addStretch()
+        layout.addLayout(filter_box)
+
         # 3. Splitter Workspace (Left: Table, Right: Details / Evidence Preview)
         from PySide6.QtWidgets import QSplitter, QTextEdit
 
         self.splitter = QSplitter(Qt.Orientation.Horizontal)
-
         self.table_card = CardWidget("WORKING PAPERS DIRECTORY")
         self.table = QTableWidget()
-        self.table.setColumnCount(8)
-        self.table.setHorizontalHeaderLabels(
-            [
-                "REF CODE",
-                "TITLE",
-                "AUDIT AREA",
-                "STATUS",
-                "PREPARER",
-                "OPEN POINTS",
-                "LOCK / HASH",
-                "ACTIONS",
-            ]
-        )
-        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        for c in [0, 2, 3, 4, 5, 6, 7]:
-            self.table.horizontalHeader().setSectionResizeMode(
-                c, QHeaderView.ResizeMode.ResizeToContents
-            )
+        self.table.setColumnCount(9)
+        self.table.setHorizontalHeaderLabels(["REF CODE", "FILE TYPE", "TITLE", "AUDIT AREA", "STATUS", "PREPARER", "OPEN POINTS", "LOCK / HASH", "ACTIONS"])
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        for c in [0, 1, 3, 4, 5, 6, 7, 8]:
+            self.table.horizontalHeader().setSectionResizeMode(c, QHeaderView.ResizeMode.ResizeToContents)
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
         self.table.itemSelectionChanged.connect(self._on_wp_selected)
@@ -134,27 +135,13 @@ class WorkingPaperView(QWidget):
         self.preview_card = CardWidget("DOCUMENT EVIDENCE & TESTING PREVIEW")
         self.preview_text = QTextEdit()
         self.preview_text.setReadOnly(True)
-        self.preview_text.setStyleSheet("""
-            QTextEdit {
-                background: #0f172a;
-                border: 1px solid #334155;
-                border-radius: 6px;
-                color: #e2e8f0;
-                font-family: 'SF Mono', Menlo, Consolas, monospace;
-                font-size: 11px;
-                padding: 10px;
-            }
-        """)
-        self.preview_text.setPlaceholderText(
-            "Select a working paper row on the left to inspect testing procedures, audit conclusions, and linked evidence items."
-        )
+        self.preview_text.setStyleSheet("QTextEdit { background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-family: 'SF Mono', monospace; font-size: 11px; padding: 10px; }")
+        self.preview_text.setPlaceholderText("Select a working paper row on the left to inspect testing procedures, audit conclusions, and linked evidence items.")
         self.preview_card.content_layout.addWidget(self.preview_text)
         self.splitter.addWidget(self.preview_card)
         self.splitter.setStretchFactor(0, 6)
         self.splitter.setStretchFactor(1, 4)
-
         layout.addWidget(self.splitter, 1)
-
         self.refresh()
 
     def set_engagement(self, engagement: Any) -> None:
@@ -175,6 +162,8 @@ class WorkingPaperView(QWidget):
 
     set_active_engagement = set_engagement
 
+    set_active_engagement = set_engagement
+
     def refresh(self) -> None:
         if not self.current_engagement:
             self.table.setVisible(False)
@@ -184,14 +173,23 @@ class WorkingPaperView(QWidget):
             self.card_signed.set_value("0")
             return
 
-        wps = self.wp_service.list_working_papers(self.current_engagement.id)
-        if not wps:
+        all_wps = self.wp_service.list_working_papers(self.current_engagement.id)
+        if not all_wps:
             self.table.setVisible(False)
             self.empty_state.setVisible(True)
             self.card_total.set_value("0")
             self.card_open_notes.set_value("0")
             self.card_signed.set_value("0")
             return
+
+        # Apply PAF / CAF Radio Filter
+        from finauditpro.domain.working_paper_entities import FileCategoryEnum
+        if self.radio_paf.isChecked():
+            wps = [w for w in all_wps if getattr(w, "file_category", FileCategoryEnum.CURRENT_FILE) == FileCategoryEnum.PERMANENT_FILE]
+        elif self.radio_caf.isChecked():
+            wps = [w for w in all_wps if getattr(w, "file_category", FileCategoryEnum.CURRENT_FILE) == FileCategoryEnum.CURRENT_FILE]
+        else:
+            wps = all_wps
 
         self.table.setVisible(True)
         self.empty_state.setVisible(False)
@@ -207,19 +205,25 @@ class WorkingPaperView(QWidget):
             if wp.is_locked:
                 signed_count += 1
 
+            cat_str = wp.file_category.value if hasattr(wp.file_category, "value") else str(getattr(wp, "file_category", "Current File"))
+            is_paf = "Permanent" in cat_str
+
             self.table.setItem(r, 0, QTableWidgetItem(wp.index_reference))
-            self.table.setItem(r, 1, QTableWidgetItem(wp.title))
-            self.table.setItem(r, 2, QTableWidgetItem(wp.area))
-            self.table.setItem(r, 3, QTableWidgetItem(f"● {wp.status.value}"))
-            self.table.setItem(r, 4, QTableWidgetItem(wp.preparer_id))
-            self.table.setItem(r, 5, QTableWidgetItem(str(op_count)))
+            cat_item = QTableWidgetItem("🏛️ PAF" if is_paf else "📋 CAF")
+            cat_item.setForeground(Qt.GlobalColor.darkCyan if is_paf else Qt.GlobalColor.darkBlue)
+            self.table.setItem(r, 1, cat_item)
+            self.table.setItem(r, 2, QTableWidgetItem(wp.title))
+            self.table.setItem(r, 3, QTableWidgetItem(wp.area))
+            self.table.setItem(r, 4, QTableWidgetItem(f"● {wp.status.value}"))
+            self.table.setItem(r, 5, QTableWidgetItem(wp.preparer_id))
+            self.table.setItem(r, 6, QTableWidgetItem(str(op_count)))
 
             hash_str = (
                 f"LOCKED ({wp.content_hash[:8]}...)"
                 if wp.is_locked and wp.content_hash
                 else "EDITABLE"
             )
-            self.table.setItem(r, 6, QTableWidgetItem(hash_str))
+            self.table.setItem(r, 7, QTableWidgetItem(hash_str))
 
             act_widget = QWidget()
             act_layout = QHBoxLayout(act_widget)
@@ -239,12 +243,32 @@ class WorkingPaperView(QWidget):
             act_layout.addWidget(btn_notes)
             act_layout.addWidget(btn_sign)
             act_layout.addWidget(btn_verify)
-            self.table.setCellWidget(r, 7, act_widget)
+            self.table.setCellWidget(r, 8, act_widget)
 
         self.table.setFixedHeight(max(1, len(wps)) * 36 + 32)
-        self.card_total.set_value(str(len(wps)))
+        self.card_total.set_value(str(len(all_wps)))
         self.card_open_notes.set_value(str(total_open_notes))
         self.card_signed.set_value(str(signed_count))
+
+    def _on_scaffold_paf_clicked(self) -> None:
+        if not self.current_engagement:
+            QMessageBox.warning(self, "No Engagement", "Please select an active audit engagement first.")
+            return
+        created = self.wp_service.scaffold_permanent_audit_file(self.current_engagement.id)
+        if created:
+            QMessageBox.information(
+                self,
+                "Permanent Audit File (PAF) Seeded",
+                f"Successfully initialized {len(created)} permanent statutory records (MOA/AOA, Tax Registrations, KMP, Bank mandates).",
+            )
+        else:
+            QMessageBox.information(
+                self,
+                "Permanent Audit File",
+                "All standard Permanent Audit File (PAF) records already exist for this engagement.",
+            )
+        self.refresh()
+        self.wp_changed.emit()
 
     def _on_new_wp_clicked(self) -> None:
         if not self.current_engagement:

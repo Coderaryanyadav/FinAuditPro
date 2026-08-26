@@ -28,12 +28,21 @@ class WorkingPaperRepository:
         self.session = session
 
     def _to_wp_entity(self, model: WorkingPaperModel) -> WorkingPaper:
+        cat_str = getattr(model, "file_category", "Current File") or "Current File"
+        try:
+            from finauditpro.domain.working_paper_entities import FileCategoryEnum
+            file_cat = FileCategoryEnum(cat_str)
+        except Exception:
+            from finauditpro.domain.working_paper_entities import FileCategoryEnum
+            file_cat = FileCategoryEnum.CURRENT_FILE
+
         return WorkingPaper(
             id=model.id,
             engagement_id=model.engagement_id,
             index_reference=model.index_reference,
             title=model.title,
             area=model.area,
+            file_category=file_cat,
             status=WorkingPaperStatusEnum(model.status),
             conclusion=model.conclusion,
             preparer_id=model.preparer_id,
@@ -52,6 +61,7 @@ class WorkingPaperRepository:
             index_reference=wp.index_reference,
             title=wp.title,
             area=wp.area,
+            file_category=wp.file_category.value if hasattr(wp.file_category, "value") else str(wp.file_category),
             status=wp.status.value,
             conclusion=wp.conclusion,
             preparer_id=wp.preparer_id,

@@ -11,6 +11,7 @@ class CreateWorkingPaperDTO:
     index_reference: str
     title: str
     area: str
+    file_category: str = "Current File"
     preparer_id: str = "Lead Auditor"
     reviewer_id: str | None = None
     procedure_ids: list[str] = field(default_factory=list)

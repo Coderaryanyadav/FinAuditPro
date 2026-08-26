@@ -364,6 +364,7 @@ FinAuditPro/
 │
 ├── docs/                          # Structured Technical & Statutory Documentation
 │   ├── README.md                  # Master documentation map
+│   ├── product-audit-and-redesign.md # Tier-1 product audit & UX redesign blueprint
 │   ├── guide.md                   # End-to-end operational guide & strategic assessment
 │   ├── installation.md            # Installation & launch guide
 │   ├── design.md                  # UI/UX design tokens & visual hierarchy specification
@@ -400,6 +401,7 @@ FinAuditPro/
 
 Full documentation is available in the [`docs/`](docs/) directory:
 
+- **[Tier-1 Product Audit & Redesign Blueprint](docs/product-audit-and-redesign.md)**
 - **[Comprehensive User Guide & Strategic Assessment](docs/guide.md)**
 - **[Master Documentation Index](docs/README.md)**
 - **[Installation & Run Guide](docs/installation.md)**
@@ -416,6 +418,7 @@ Full documentation is available in the [`docs/`](docs/) directory:
 - **[Product Roadmap](docs/roadmap.md)**
 - **[Release Notes / Changelog](docs/CHANGELOG.md)**
 - **[Canonical Security Policy](.github/SECURITY.md)**
+
 
 
 

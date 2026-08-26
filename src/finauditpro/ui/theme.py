@@ -127,6 +127,7 @@ class MetricCard(QFrame):
         super().__init__(parent)
         self.setObjectName("metricCard")
         self.setFixedHeight(88)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.setStyleSheet(f"QFrame#metricCard {{ background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; border-top: 2px solid {accent_color}; }}")
         if action_text:
             self.setCursor(Qt.CursorShape.PointingHandCursor)

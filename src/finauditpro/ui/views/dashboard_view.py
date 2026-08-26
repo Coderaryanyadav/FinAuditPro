@@ -195,8 +195,8 @@ class DashboardView(QWidget):
         row1.addWidget(att_card, 4)
         body_layout.addLayout(row1)
 
-        # 3. Row 2: 4 KPI Cards
-        stats = QHBoxLayout(); stats.setSpacing(10)
+        # 3. Row 2: 4 KPI Cards (Equally distributed)
+        stats = QHBoxLayout(); stats.setSpacing(12)
         self.card_clients = MetricCard("TOTAL CLIENTS", "0", "Registered clients", accent_color="#0284C7", action_text="View →")
         self.card_clients.clicked.connect(lambda: self.navigate_to_clients.emit())
         self.card_completed = MetricCard("COMPLETED AUDITS", "0", "This financial year", accent_color="#16A34A")
@@ -204,7 +204,8 @@ class DashboardView(QWidget):
         self.card_pending.clicked.connect(lambda: self.navigate_to_matrix.emit())
         self.card_high_risk = MetricCard("HIGH RISK CASES", "0", "No high-risk exposure", accent_color="#DC2626", action_text="Review →")
         self.card_high_risk.clicked.connect(lambda: self.navigate_to_matrix.emit())
-        for card_w in (self.card_clients, self.card_completed, self.card_pending, self.card_high_risk): stats.addWidget(card_w)
+        for card_w in (self.card_clients, self.card_completed, self.card_pending, self.card_high_risk):
+            stats.addWidget(card_w, stretch=1)
         body_layout.addLayout(stats)
 
         # 4. Row 3: Audit Progress + Risk Exposure

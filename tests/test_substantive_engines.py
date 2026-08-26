@@ -129,3 +129,75 @@ def test_dsc_signing_engine() -> None:
     assert res.signature_record.signatory_icai_membership == "543210"
     assert res.signature_record.is_valid is True
     assert "digitally signed" in res.status_message
+
+
+def test_payroll_forensic_engine() -> None:
+    """Verify ghost employee detection via duplicate bank accounts and inactive staff checks."""
+    from finauditpro.domain.payroll_forensic_engine import (
+        PayrollAnomalyTypeEnum,
+        PayrollForensicEngine,
+    )
+
+    entries = [
+        # Normal staff
+        {"employee_code": "EMP-01", "employee_name": "Ramesh Kumar", "bank_account_number": "SBIN001122", "salary_paise": 5000000, "is_active": True},
+        # Duplicate bank account (Ghost employee)
+        {"employee_code": "EMP-02", "employee_name": "Ghost Staff 1", "bank_account_number": "SBIN001122", "salary_paise": 5000000, "is_active": True},
+        # Inactive employee paid post-resignation
+        {"employee_code": "EMP-03", "employee_name": "Suresh Ex-Employee", "bank_account_number": "HDFC998877", "salary_paise": 4000000, "is_active": False, "resignation_date": "2025-11-30"},
+    ]
+
+    res = PayrollForensicEngine.scan_payroll_master("eng-01", entries)
+    assert res.total_payroll_entries == 3
+    assert res.ghost_employee_anomalies_count == 3
+    assert res.records[0].anomaly_type == PayrollAnomalyTypeEnum.DUPLICATE_BANK_ACCOUNT
+    assert res.records[1].anomaly_type == PayrollAnomalyTypeEnum.DUPLICATE_BANK_ACCOUNT
+    assert res.records[2].anomaly_type == PayrollAnomalyTypeEnum.PAYMENT_TO_INACTIVE_EMPLOYEE
+
+
+
+def test_inventory_count_engine() -> None:
+    """Verify SA 501 physical inventory test count reconciliation against perpetual records."""
+    from finauditpro.domain.inventory_count_engine import (
+        InventoryCountEngine,
+        InventoryDiscrepancyTypeEnum,
+    )
+
+    sheets = [
+        # Matched count
+        {"item_code": "ITM-01", "book_quantity": 100, "physical_count_quantity": 100, "unit_cost_paise": 5000},
+        # Physical Shortage (pilferage / unrecorded issue)
+        {"item_code": "ITM-02", "book_quantity": 50, "physical_count_quantity": 40, "unit_cost_paise": 10000},
+        # Damaged stock (NRV test required)
+        {"item_code": "ITM-03", "book_quantity": 20, "physical_count_quantity": 20, "unit_cost_paise": 8000, "is_damaged_or_obsolete": True},
+    ]
+
+    res = InventoryCountEngine.reconcile_physical_counts("eng-01", sheets)
+    assert res.total_items_counted == 3
+    assert res.matched_items_count == 1
+    assert res.shortage_items_count == 1
+    assert res.obsolete_items_count == 1
+    assert res.records[1].discrepancy_type == InventoryDiscrepancyTypeEnum.PHYSICAL_SHORTAGE
+    assert res.records[2].discrepancy_type == InventoryDiscrepancyTypeEnum.DAMAGED_OR_OBSOLETE
+
+
+def test_fixed_asset_engine() -> None:
+    """Verify CARO 2020 3(i) Fixed Asset verification for ghost assets and negative NBV."""
+    from finauditpro.domain.fixed_asset_engine import AssetAnomalyTypeEnum, FixedAssetEngine
+
+    assets = [
+        # Valid asset
+        {"asset_tag": "FA-01", "asset_name": "CNC Lathe Machine", "gross_block_paise": 100000000, "accumulated_depreciation_paise": 20000000, "is_physically_verified": True},
+        # Negative NBV (Depreciation calculation error)
+        {"asset_tag": "FA-02", "asset_name": "Old Generator", "gross_block_paise": 50000000, "accumulated_depreciation_paise": 60000000, "is_physically_verified": True},
+        # Ghost Asset (Not located during physical verification)
+        {"asset_tag": "FA-03", "asset_name": "Executive Laptop #4", "gross_block_paise": 8000000, "accumulated_depreciation_paise": 2000000, "is_physically_verified": False},
+    ]
+
+    res = FixedAssetEngine.audit_fixed_asset_register("eng-01", assets)
+    assert res.total_assets_inspected == 3
+    assert res.clean_assets_count == 1
+    assert res.anomalous_assets_count == 2
+    assert res.records[1].anomaly_type == AssetAnomalyTypeEnum.NEGATIVE_NET_BOOK_VALUE
+    assert res.records[2].anomaly_type == AssetAnomalyTypeEnum.GHOST_ASSET_UNLOCATED
+

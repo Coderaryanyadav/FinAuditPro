@@ -201,3 +201,47 @@ def test_fixed_asset_engine() -> None:
     assert res.records[1].anomaly_type == AssetAnomalyTypeEnum.NEGATIVE_NET_BOOK_VALUE
     assert res.records[2].anomaly_type == AssetAnomalyTypeEnum.GHOST_ASSET_UNLOCATED
 
+
+
+def test_independence_conflict_engine() -> None:
+    """Verify team independence verification, holding limit breaches, and Section 144 prohibitions."""
+    from finauditpro.domain.independence_engine import (
+        IndependenceConflictEngine,
+        IndependenceThreatTypeEnum,
+    )
+
+    declarations = [
+        # Clean Member
+        {"user_id": "u-01", "user_name": "Audit Senior", "role": "Senior", "holding_face_value_paise": 5000000},  # ₹50,000 <= ₹2L
+        # Holding Limit Exceeded (> ₹2L)
+        {"user_id": "u-02", "user_name": "Audit Partner B", "role": "Partner", "holding_face_value_paise": 35000000},  # ₹3.5L > ₹2L
+        # Section 144 Prohibited Service
+        {"user_id": "u-03", "user_name": "Manager C", "role": "Manager", "has_prohibited_non_audit_services": True},
+    ]
+
+    res = IndependenceConflictEngine.evaluate_team_independence("firm-01", "eng-01", declarations)
+    assert res.total_declarations == 3
+    assert res.clean_count == 1
+    assert res.impaired_count == 2
+    assert res.declarations[1].threat_type == IndependenceThreatTypeEnum.FINANCIAL_INTEREST_EXCEEDS_LIMIT
+    assert res.declarations[2].threat_type == IndependenceThreatTypeEnum.SECTION_144_PROHIBITED_SERVICE
+    assert "IMPAIRED" in res.firm_compliance_status
+
+
+def test_deferred_tax_engine() -> None:
+    """Verify AS 22 / Ind AS 12 Deferred Tax calculation on depreciation and Section 43B disallowances."""
+    from finauditpro.domain.deferred_tax_engine import DeferredTaxEngine, TimingDifferenceTypeEnum
+
+    items = [
+        # Higher book depreciation than tax -> Future deductible -> DTA
+        {"item_name": "Plant & Machinery Depreciation", "difference_type": TimingDifferenceTypeEnum.DEPRECIATION_DIFFERENCE, "books_carrying_paise": 80000000, "tax_base_paise": 100000000},
+        # Section 43B statutory dues unpaid -> DTA
+        {"item_name": "Bonus Payable under Sec 43B", "difference_type": TimingDifferenceTypeEnum.SECTION_43B_DISALLOWANCE, "books_carrying_paise": 15000000, "tax_base_paise": 0},
+    ]
+
+    res = DeferredTaxEngine.calculate_deferred_tax("eng-01", 25.17, items)
+    assert len(res.items) == 2
+    assert res.net_deferred_tax_asset_paise > 0
+    assert res.items[1].is_dta is True
+
+

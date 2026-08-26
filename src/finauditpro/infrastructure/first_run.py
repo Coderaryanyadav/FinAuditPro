@@ -54,6 +54,12 @@ def _ensure_all_schema_columns(conn: sqlite3.Connection) -> None:
     cursor = conn.cursor()
 
 
+    # 0. users table
+    cursor.execute("PRAGMA table_info(users);")
+    user_cols = {row[1] for row in cursor.fetchall()}
+    if user_cols and "must_change_password" not in user_cols:
+        conn.execute("ALTER TABLE users ADD COLUMN must_change_password INTEGER DEFAULT 0;")
+
     # 1. engagements table
     cursor.execute("PRAGMA table_info(engagements);")
     eng_cols = {row[1] for row in cursor.fetchall()}

@@ -67,6 +67,29 @@ class AuthService:
                 must_change_password=user.must_change_password,
             )
 
+    def force_setup_credentials(
+        self, user_id: str, new_email: str, new_password: str
+    ) -> UserSession:
+        """Update username/email and password during mandatory first login setup."""
+        cleaned_email = new_email.strip().lower()
+        if not cleaned_email or "@" not in cleaned_email:
+            raise ValidationError("A valid email address is required.")
+        self.validate_password_complexity(new_password)
+        with self.db_manager.session_scope() as session:
+            repo = UserRepository(session)
+            user = repo.update_credentials(
+                user_id,
+                new_username=cleaned_email,
+                new_password=new_password,
+                must_change_password=False,
+            )
+            return UserSession(
+                user_id=user.id,
+                username=user.username,
+                role=user.role,
+                must_change_password=False,
+            )
+
     def force_change_password(self, user_id: str, new_password: str) -> UserSession:
         """Force update user password and clear must_change_password flag."""
         self.validate_password_complexity(new_password)

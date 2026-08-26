@@ -199,3 +199,32 @@ def test_forced_password_reset_flow(db_env):
     # 5. New password works and must_change_password is False
     subsequent_session = auth_svc.authenticate("admin@finauditpro.com", new_pwd)
     assert subsequent_session.must_change_password is False
+
+
+def test_forced_email_and_password_setup_flow(db_env):
+    auth_svc = AuthService(db_env)
+
+    # Initial admin login
+    session = auth_svc.authenticate("admin@finauditpro.com", "Admin@123")
+    assert session.must_change_password is True
+
+    # Reject invalid email
+    with pytest.raises(ValidationError, match="valid email"):
+        auth_svc.force_setup_credentials(session.user_id, "invalidemail", "SecurePass#2026")
+
+    # Successfully set custom email and master password
+    custom_email = "lead.partner@auditfirm.com"
+    custom_pwd = "PartnerMaster#2026"
+    updated = auth_svc.force_setup_credentials(session.user_id, custom_email, custom_pwd)
+    assert updated.username == custom_email
+    assert updated.must_change_password is False
+
+    # Default login fails
+    with pytest.raises(ValidationError, match="Invalid username or password"):
+        auth_svc.authenticate("admin@finauditpro.com", "Admin@123")
+
+    # Custom email and password authenticate successfully
+    new_login = auth_svc.authenticate(custom_email, custom_pwd)
+    assert new_login.username == custom_email
+    assert new_login.role == RoleEnum.ADMINISTRATOR
+    assert new_login.must_change_password is False

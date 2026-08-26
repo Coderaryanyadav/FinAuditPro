@@ -105,19 +105,38 @@ class UserRepository:
         )
         return self.add(user)
 
+    def update_credentials(
+        self,
+        user_id: str,
+        new_username: str | None = None,
+        new_password: str | None = None,
+        must_change_password: bool = False,
+    ) -> User:
+        """Update username/email, password hash, and must_change_password flag."""
+        model = self.session.get(UserModel, user_id)
+        if not model:
+            raise ValueError(f"User with ID '{user_id}' not found.")
+        if new_username:
+            cleaned = new_username.strip().lower()
+            existing = self.get_by_username(cleaned)
+            if existing and existing.id != user_id:
+                raise ValueError(f"Username '{cleaned}' is already taken.")
+            model.username = cleaned
+        if new_password:
+            pwd_hash, salt = hash_password(new_password)
+            model.password_hash = pwd_hash
+            model.salt = salt
+        model.must_change_password = must_change_password
+        self.session.flush()
+        return self._to_entity(model)
+
     def update_password(
         self, user_id: str, new_password: str, must_change_password: bool = False
     ) -> User:
         """Update password hash, generate fresh salt, and update must_change_password flag."""
-        model = self.session.get(UserModel, user_id)
-        if not model:
-            raise ValueError(f"User with ID '{user_id}' not found.")
-        pwd_hash, salt = hash_password(new_password)
-        model.password_hash = pwd_hash
-        model.salt = salt
-        model.must_change_password = must_change_password
-        self.session.flush()
-        return self._to_entity(model)
+        return self.update_credentials(
+            user_id, new_password=new_password, must_change_password=must_change_password
+        )
 
     def seed_default_admin_if_empty(self) -> User | None:
         """Seed default admin user (admin@finauditpro.com / Admin@123) if users table is empty."""

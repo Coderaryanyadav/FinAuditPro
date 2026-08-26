@@ -24,6 +24,16 @@ class AuthService:
             repo = UserRepository(session)
             return repo.seed_default_admin_if_empty()
 
+    def reset_to_default_admin(self) -> None:
+        """Reset default administrator credentials."""
+        with self.db_manager.session_scope() as session:
+            repo = UserRepository(session)
+            user = repo.get_by_username("admin@finauditpro.com")
+            if user:
+                repo.update_credentials(user.id, new_password="Admin@123", must_change_password=False)  # noqa: S106
+            else:
+                repo.create_user_with_password("admin@finauditpro.com", "Admin@123", must_change_password=False)
+
     @staticmethod
     def validate_password_complexity(password: str) -> None:
         """Validate password meets enterprise security standards."""

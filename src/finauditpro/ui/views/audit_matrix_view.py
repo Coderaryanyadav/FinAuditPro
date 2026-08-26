@@ -150,9 +150,20 @@ class AuditMatrixView(QWidget):
         layout.setSpacing(12)
 
         hdr = QHBoxLayout()
-        hdr.addWidget(QLabel("Qualitative Risk Register & Assertion Mapping (SA 315)"))
+        title_lbl = QLabel("Qualitative Risk Register & Assertion Mapping (SA 315)")
+        title_lbl.setStyleSheet("font-size: 13px; font-weight: 700; color: #1E293B;")
+        hdr.addWidget(title_lbl)
         hdr.addStretch()
         btn = QPushButton("+ New Audit Risk")
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2563EB; color: #FFFFFF;
+                font-size: 12px; font-weight: 600;
+                border-radius: 6px; padding: 7px 16px; border: none;
+            }
+            QPushButton:hover { background-color: #1D4ED8; }
+        """)
         btn.clicked.connect(self._on_new_risk_clicked)
         hdr.addWidget(btn)
         layout.addLayout(hdr)
@@ -177,9 +188,20 @@ class AuditMatrixView(QWidget):
         layout.setSpacing(12)
 
         hdr = QHBoxLayout()
-        hdr.addWidget(QLabel("Structured Audit Procedures Execution Hub"))
+        title_lbl = QLabel("Structured Audit Procedures Execution Hub")
+        title_lbl.setStyleSheet("font-size: 13px; font-weight: 700; color: #1E293B;")
+        hdr.addWidget(title_lbl)
         hdr.addStretch()
         btn = QPushButton("+ New Procedure")
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2563EB; color: #FFFFFF;
+                font-size: 12px; font-weight: 600;
+                border-radius: 6px; padding: 7px 16px; border: none;
+            }
+            QPushButton:hover { background-color: #1D4ED8; }
+        """)
         btn.clicked.connect(self._on_new_proc_clicked)
         hdr.addWidget(btn)
         layout.addLayout(hdr)
@@ -204,9 +226,20 @@ class AuditMatrixView(QWidget):
         layout.setSpacing(12)
 
         hdr = QHBoxLayout()
-        hdr.addWidget(QLabel("Unified Findings Directory Across All Sources"))
+        title_lbl = QLabel("Unified Findings Directory Across All Sources")
+        title_lbl.setStyleSheet("font-size: 13px; font-weight: 700; color: #1E293B;")
+        hdr.addWidget(title_lbl)
         hdr.addStretch()
         btn = QPushButton("+ Log Finding")
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2563EB; color: #FFFFFF;
+                font-size: 12px; font-weight: 600;
+                border-radius: 6px; padding: 7px 16px; border: none;
+            }
+            QPushButton:hover { background-color: #1D4ED8; }
+        """)
         btn.clicked.connect(self._on_new_finding_clicked)
         hdr.addWidget(btn)
         layout.addLayout(hdr)

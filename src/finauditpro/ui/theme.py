@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QPushButton,
+    QSizePolicy,
     QVBoxLayout,
     QWidget,
 )
@@ -252,26 +253,27 @@ class EmptyStateWidget(QFrame):
         self.setObjectName("emptyStateWidget")
         self.setStyleSheet("QFrame#emptyStateWidget { background-color: #FAFBFC; border: 1.5px dashed #CBD5E1; border-radius: 8px; }")
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 24, 20, 24)
-        layout.setSpacing(8)
+        layout.setContentsMargins(24, 28, 24, 28)
+        layout.setSpacing(10)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(EmptyStateIconWidget(), alignment=Qt.AlignmentFlag.AlignCenter)
         t_lbl = QLabel(title)
         t_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        t_lbl.setStyleSheet("font-size: 14px; font-weight: 700; color: #0F172A; border: none; background: transparent;")
+        t_lbl.setStyleSheet("font-size: 15px; font-weight: 700; color: #0F172A; border: none; background: transparent;")
         layout.addWidget(t_lbl)
         d_lbl = QLabel(description)
         d_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         d_lbl.setWordWrap(True)
-        d_lbl.setStyleSheet("font-size: 12px; color: #64748B; border: none; background: transparent; padding: 2px 10px;")
+        d_lbl.setStyleSheet("font-size: 13px; color: #64748B; border: none; background: transparent; padding: 4px 16px 8px 16px;")
+        d_lbl.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.MinimumExpanding)
         layout.addWidget(d_lbl)
 
         if action_text and action_callback:
             btn = QPushButton(action_text)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 13px; font-weight: 600; border-radius: 6px; padding: 7px 18px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
+            btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 13px; font-weight: 600; border-radius: 6px; padding: 8px 20px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
             btn.clicked.connect(action_callback)
-            layout.addSpacing(4)
+            layout.addSpacing(6)
             layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
 

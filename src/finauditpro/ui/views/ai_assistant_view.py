@@ -188,36 +188,38 @@ class AIAssistantView(QWidget):
         splitter.setStyleSheet("QSplitter::handle { background-color: #E2E8F0; width: 1px; }")
 
         # Column 1: Evidence Sources & Prompts
-        col1 = CardWidget("EVIDENCE & PROMPTS")
+        col1 = CardWidget("EVIDENCE SOURCES & ICAI PROMPTS")
         c1_layout = col1.content_layout
+
+        src_hdr = QLabel("LINKED AUDIT EVIDENCE (SA 500)")
+        src_hdr.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748B; letter-spacing: 0.5px;")
+        c1_layout.addWidget(src_hdr)
 
         self.doc_sources_list = QListWidget()
         self.doc_sources_list.setStyleSheet(
-            "QListWidget { border: 1px solid #E2E8F0; border-radius: 6px; background-color: #F8FAFC; }"
+            "QListWidget { border: 1px solid #E2E8F0; border-radius: 6px; background-color: #F8FAFC; padding: 4px; font-size: 12px; } QListWidget::item { padding: 6px 8px; border-radius: 4px; color: #1E293B; } QListWidget::item:hover { background-color: #EFF6FF; }"
         )
         c1_layout.addWidget(self.doc_sources_list, 1)
 
-        p_lbl = QLabel("ICAI PROMPT LIBRARY")
-        p_lbl.setStyleSheet(
-            "font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 0.5px; margin-top: 6px;"
-        )
+        p_lbl = QLabel("ICAI STATUTORY PROMPT LIBRARY")
+        p_lbl.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; margin-top: 6px;")
         c1_layout.addWidget(p_lbl)
 
         prompt_scroll = QScrollArea()
         prompt_scroll.setWidgetResizable(True)
         prompt_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        prompt_scroll.setFixedHeight(190)
+        prompt_scroll.setFixedHeight(180)
         prompt_widget = QWidget()
         pw_layout = QVBoxLayout(prompt_widget)
         pw_layout.setContentsMargins(0, 0, 0, 0)
-        pw_layout.setSpacing(6)
+        pw_layout.setSpacing(5)
 
         for title_str, prompt_str in PROMPT_LIBRARY:
-            btn = QPushButton(title_str)
+            btn = QPushButton(f"✨ {title_str}")
             btn.setToolTip(prompt_str)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(
-                "QPushButton { background-color: #FFFFFF; color: #2563EB; font-size: 11px; font-weight: 600; border: 1px solid #BFDBFE; border-radius: 6px; padding: 6px 10px; text-align: left; } QPushButton:hover { background-color: #EFF6FF; border-color: #60A5FA; }"
+                "QPushButton { background-color: #FFFFFF; color: #1D4ED8; font-size: 11px; font-weight: 600; border: 1px solid #BFDBFE; border-radius: 6px; padding: 6px 10px; text-align: left; } QPushButton:hover { background-color: #EFF6FF; border-color: #3B82F6; }"
             )
             btn.clicked.connect(lambda checked=False, p=prompt_str: self._on_prompt_pill_clicked(p))
             pw_layout.addWidget(btn)
@@ -227,25 +229,25 @@ class AIAssistantView(QWidget):
         splitter.addWidget(col1)
 
         # Column 2: Chat & Reasoning
-        col2 = CardWidget("INVESTIGATION COPILOT")
+        col2 = CardWidget("AUDIT INVESTIGATION COPILOT")
         c2_layout = col2.content_layout
 
         self.chat_display = QTextEdit()
         self.chat_display.setReadOnly(True)
         self.chat_display.setPlaceholderText(
-            "FinAuditPro AI Copilot\n\nAsk questions about financial evidence, verify statutory CARO 2020 clauses, or analyze trial balance anomalies."
+            "✦ FinAuditPro AI Statutory Copilot\n\nAsk questions about financial evidence, verify statutory CARO 2020 clauses, analyze trial balance anomalies, or click any prompt pill below."
         )
         self.chat_display.setStyleSheet(
-            "QTextEdit { border: 1px solid #E2E8F0; border-radius: 6px; background-color: #FAFBFC; padding: 12px; font-size: 13px; color: #0F172A; line-height: 1.5; }"
+            "QTextEdit { border: 1px solid #E2E8F0; border-radius: 8px; background-color: #FFFFFF; padding: 14px; font-size: 13px; color: #0F172A; line-height: 1.6; }"
         )
         c2_layout.addWidget(self.chat_display, 1)
 
         self.reasoning_display = QTextEdit()
         self.reasoning_display.setReadOnly(True)
-        self.reasoning_display.setMaximumHeight(58)
+        self.reasoning_display.setMaximumHeight(54)
         self.reasoning_display.setPlaceholderText("Model reasoning tokens (<think>)...")
         self.reasoning_display.setStyleSheet(
-            "QTextEdit { border: 1px solid #FDE68A; border-radius: 6px; background-color: #FFFBEB; padding: 6px 10px; font-size: 11px; color: #92400E; font-family: 'SF Mono', Menlo, Consolas, monospace; }"
+            "QTextEdit { border: 1px solid #FDE68A; border-radius: 6px; background-color: #FFFDF5; padding: 6px 10px; font-size: 11px; color: #92400E; font-family: 'SF Mono', Menlo, monospace; }"
         )
         c2_layout.addWidget(self.reasoning_display)
 
@@ -255,13 +257,9 @@ class AIAssistantView(QWidget):
             pbtn = QPushButton(pill)
             pbtn.setCursor(Qt.CursorShape.PointingHandCursor)
             pbtn.setStyleSheet(
-                "QPushButton { background-color: #EFF6FF; color: #2563EB; font-size: 11px; font-weight: 600; border: 1px solid #BFDBFE; border-radius: 4px; padding: 3px 8px; } QPushButton:hover { background-color: #DBEAFE; }"
+                "QPushButton { background-color: #F1F5F9; color: #334155; font-size: 11px; font-weight: 600; border: 1px solid #CBD5E1; border-radius: 4px; padding: 4px 10px; } QPushButton:hover { background-color: #E2E8F0; color: #0F172A; }"
             )
-            pbtn.clicked.connect(
-                lambda checked=False, p=pill: self._on_prompt_pill_clicked(
-                    f"Analyze {p} in financial records."
-                )
-            )
+            pbtn.clicked.connect(lambda checked=False, p=pill: self._on_prompt_pill_clicked(f"Analyze {p} in financial records."))
             pills_row.addWidget(pbtn)
         pills_row.addStretch()
         c2_layout.addLayout(pills_row)

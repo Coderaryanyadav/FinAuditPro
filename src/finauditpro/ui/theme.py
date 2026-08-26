@@ -200,8 +200,54 @@ class RiskBadge(QLabel):
         self.setStyleSheet(f"font-size: 11px; font-weight: 500; border-radius: 4px; padding: 2px 8px; {st}")
 
 
+class EmptyStateIconWidget(QWidget):
+    """Clean vector icon for EmptyState cards with professional audit shield emblem."""
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setFixedSize(44, 44)
+
+    def paintEvent(self, event: Any) -> None:
+        from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # Background circular badge
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QColor("#EFF6FF"))
+        painter.drawEllipse(2, 2, 40, 40)
+
+        # Border ring
+        pen_ring = QPen(QColor("#DBEAFE"), 1.5)
+        painter.setPen(pen_ring)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+        painter.drawEllipse(2, 2, 40, 40)
+
+        # Audit shield path
+        path = QPainterPath()
+        path.moveTo(22, 11)
+        path.lineTo(31, 14)
+        path.lineTo(31, 23)
+        path.cubicTo(31, 29, 27, 33, 22, 35)
+        path.cubicTo(17, 33, 13, 29, 13, 23)
+        path.lineTo(13, 14)
+        path.closeSubpath()
+
+        painter.setPen(QPen(QColor("#2563EB"), 1.8, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
+        painter.setBrush(QColor("#FFFFFF"))
+        painter.drawPath(path)
+
+        # Checkmark inside shield
+        chk = QPainterPath()
+        chk.moveTo(18, 23)
+        chk.lineTo(21, 26)
+        chk.lineTo(26, 19)
+        painter.setPen(QPen(QColor("#2563EB"), 2.0, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
+        painter.drawPath(chk)
+
+
 class EmptyStateWidget(QFrame):
-    def __init__(self, title: str, description: str, action_text: str = "", action_callback: object = None, glyph: str = "◇", parent: QWidget | None = None) -> None:
+    def __init__(self, title: str, description: str, action_text: str = "", action_callback: object = None, glyph: str = "", parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setObjectName("emptyStateWidget")
         self.setStyleSheet("QFrame#emptyStateWidget { background-color: #FAFBFC; border: 1.5px dashed #CBD5E1; border-radius: 8px; }")
@@ -209,10 +255,7 @@ class EmptyStateWidget(QFrame):
         layout.setContentsMargins(20, 24, 20, 24)
         layout.setSpacing(8)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        g_lbl = QLabel(glyph)
-        g_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        g_lbl.setStyleSheet("font-size: 18px; color: #64748B; background: #E2E8F0; border-radius: 14px; min-width: 28px; max-width: 28px; min-height: 28px; max-height: 28px;")
-        layout.addWidget(g_lbl, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(EmptyStateIconWidget(), alignment=Qt.AlignmentFlag.AlignCenter)
         t_lbl = QLabel(title)
         t_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         t_lbl.setStyleSheet("font-size: 14px; font-weight: 700; color: #0F172A; border: none; background: transparent;")

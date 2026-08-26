@@ -10,7 +10,7 @@
 [![PySide6](https://img.shields.io/badge/PySide6-6.8-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://www.qt.io/)
 [![SQLite WAL](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 [![LM Studio](https://img.shields.io/badge/LM%20Studio-Air--Gapped%20AI-4F46E5?style=for-the-badge&logo=openai&logoColor=white)](https://lmstudio.ai/)
-[![Tests](https://img.shields.io/badge/Tests-147%2F147%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-151%2F151%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
 [![Type Checked](https://img.shields.io/badge/MyPy-Strict%20Passed-blue?style=for-the-badge&logo=python)](pyproject.toml)
 [![Code Style](https://img.shields.io/badge/Code%20Style-Ruff-black?style=for-the-badge&logo=ruff)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
@@ -370,9 +370,10 @@ python scripts/development/run_1000_verifications.py
 python scripts/maintenance/vacuum_and_reindex.py
 ```
 
-**Test Suite Status**: **147 passed (100%)** across domain calculations,
+**Test Suite Status**: **151 passed (100%)** across domain calculations,
 security hardening, multi-tenant database isolation, maker-checker sign-offs,
-FTS5 search, SA 530 MUS sampling, SA 550 related parties, and multi-year roll-forward tie-outs.
+FTS5 search, SA 530 MUS sampling, SA 550 related parties, 3-way PO-GRN match,
+cut-off testing, BRS stale checks, X.509 DSC signing, and multi-year roll-forward tie-outs.
 
 ---
 

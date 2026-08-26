@@ -302,19 +302,17 @@ class DashboardView(QWidget):
             self.lbl_zero_risk.setText(" No risk exposure identified")
             self.lbl_zero_risk.setStyleSheet("font-size: 12px; font-weight: 600; color: #15803D; padding: 10px; border: none; background: transparent;")
 
-        if all_engagements:
-            e_active = all_engagements[0]
-            c_name = next((c.name for c in clients if c.id == e_active.client_id), "—")
-            audit_t = e_active.audit_type.value if hasattr(e_active.audit_type, "value") else str(e_active.audit_type)
-            status_v = e_active.status.value if hasattr(e_active.status, "value") else str(e_active.status)
-            self.lbl_context_text.setText(f"{c_name} · FY {e_active.financial_year}")
-            self.lbl_audit_type.setText(audit_t)
-            self.status_badge.setText(status_v)
-            self.act_title.setText(f"Execute audit procedures for {c_name}")
-            self.act_desc.setText("Review qualitative risks, execute substantive test procedures, and calculate materiality.")
-            self.btn_go.setText("Open Audit Matrix →")
-            step_active_idx = 3
-        elif clients:
+        # True database-driven audit workflow progress computation
+        step_active_idx = 0
+        if not clients:
+            self.lbl_context_text.setText("No active engagement — Ready for setup")
+            self.lbl_audit_type.setText("Statutory Audit")
+            self.status_badge.setText("Setup")
+            self.act_title.setText("Register your first audit client")
+            self.act_desc.setText("Add a client entity to begin statutory audit planning, materiality assessment, and ledger scrutiny.")
+            self.btn_go.setText("+ Create Client →")
+            step_active_idx = 0
+        elif not all_engagements:
             self.lbl_context_text.setText(f"{clients[0].name} — Ready to create engagement")
             self.lbl_audit_type.setText("Statutory Audit")
             self.status_badge.setText("Setup")
@@ -323,17 +321,39 @@ class DashboardView(QWidget):
             self.btn_go.setText("+ Create Engagement →")
             step_active_idx = 2
         else:
-            self.lbl_context_text.setText("No active engagement — Ready for setup")
-            self.lbl_audit_type.setText("Statutory Audit")
-            self.status_badge.setText("Setup")
-            self.act_title.setText("Register your first audit client")
-            self.act_desc.setText("Add a client entity to begin statutory audit planning, materiality assessment, and ledger scrutiny.")
-            self.btn_go.setText("+ Create Client →")
-            step_active_idx = 0
+            e_active = self.current_engagement or all_engagements[0]
+            c_name = next((c.name for c in clients if c.id == e_active.client_id), "—")
+            audit_t = e_active.audit_type.value if hasattr(e_active.audit_type, "value") else str(e_active.audit_type)
+            status_v = e_active.status.value if hasattr(e_active.status, "value") else str(e_active.status)
+            self.lbl_context_text.setText(f"{c_name} · FY {e_active.financial_year}")
+            self.lbl_audit_type.setText(audit_t)
+            self.status_badge.setText(status_v)
 
+            # Check materiality assessment
+            mat = self.audit_matrix_service.get_latest_materiality(e_active.id) if hasattr(self.audit_matrix_service, "get_latest_materiality") else None
+            if not mat:
+                step_active_idx = 3
+                self.act_title.setText(f"Set materiality benchmark for {c_name}")
+                self.act_desc.setText("Calculate overall & performance materiality (SA 320) to establish testing thresholds.")
+                self.btn_go.setText("Calculate Materiality →")
+            elif status_v.lower() in ("completed", "signed off", "locked"):
+                step_active_idx = 5
+                self.act_title.setText(f"Audit completed for {c_name}")
+                self.act_desc.setText("All procedures concluded, reports generated, and working papers sealed.")
+                self.btn_go.setText("View Final Reports →")
+            else:
+                step_active_idx = 4
+                self.act_title.setText(f"Execute audit procedures for {c_name}")
+                self.act_desc.setText("Review risks, execute substantive test procedures, and inspect working papers.")
+                self.btn_go.setText("Open Audit Matrix →")
+
+        step_names = ["Client", "FY", "Engagement", "Materiality", "Documentation", "Completion"]
         for i, slbl in enumerate(self.step_widgets):
             is_done = i < step_active_idx
             is_active = i == step_active_idx
+            s_name = step_names[i] if i < len(step_names) else ""
+            prefix = "✓ " if is_done else ("● " if is_active else "○ ")
+            slbl.setText(f"{prefix}{s_name}")
             bg = "#F0FDF4" if is_done else ("#EFF6FF" if is_active else "#F8FAFC")
             fg = "#15803D" if is_done else ("#1D4ED8" if is_active else "#94A3B8")
             bd = "#BBF7D0" if is_done else ("#BFDBFE" if is_active else "#E2E8F0")

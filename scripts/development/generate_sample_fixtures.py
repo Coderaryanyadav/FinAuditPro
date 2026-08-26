@@ -172,4 +172,5 @@ def generate_all_test_fixtures(output_dir: Path) -> None:
 
 
 if __name__ == "__main__":
-    generate_all_test_fixtures(Path("sample_test_fixtures"))
+    generate_all_test_fixtures(Path("sample"))
+

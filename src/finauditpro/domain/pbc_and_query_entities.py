@@ -118,3 +118,88 @@ DEFAULT_STATUTORY_PBC_TEMPLATES: list[dict[str, Any]] = [
         "period": "Annual",
     },
 ]
+
+
+class ConfirmationTypeEnum(StrEnum):
+    BANK = "Bank Balance & Facilities (SA 505)"
+    DEBTOR = "Trade Debtor / Customer Balance (SA 505)"
+    CREDITOR = "Trade Creditor / Vendor Balance (SA 505)"
+    LEGAL = "Legal Counsel / Pending Litigation (SA 505)"
+    BORROWING = "Lender / Long-Term Loan Balance (SA 505)"
+
+
+class ConfirmationStatusEnum(StrEnum):
+    DRAFT = "Draft Letter"
+    SENT = "Dispatched to Third Party"
+    RECEIVED_AGREED = "Response Received (Confirmed / Agreed)"
+    RECEIVED_DISPUTED = "Response Received (Discrepancy / Disputed)"
+    NO_RESPONSE = "No Response (Requires Alternative Procedures)"
+    CLEARED = "Cleared & Documented"
+
+
+@dataclass
+class ExternalConfirmation:
+    """SA 505 Third-Party External Confirmation entity."""
+
+    id: str
+    engagement_id: str
+    confirmation_type: ConfirmationTypeEnum
+    third_party_name: str
+    account_reference: str | None = None
+    book_balance_paise: int = 0
+    as_of_date: str = "2026-03-31"
+    contact_email: str | None = None
+    contact_address: str | None = None
+    status: ConfirmationStatusEnum = ConfirmationStatusEnum.DRAFT
+    dispatched_date: str | None = None
+    response_date: str | None = None
+    confirmed_balance_paise: int | None = None
+    discrepancy_paise: int = 0
+    discrepancy_explanation: str | None = None
+    alternative_procedures_note: str | None = None
+    linked_working_paper_id: str | None = None
+    created_at: datetime = field(default_factory=utc_now)
+    updated_at: datetime = field(default_factory=utc_now)
+
+    def record_response(
+        self,
+        confirmed_balance_paise: int,
+        response_date: str,
+        explanation: str | None = None,
+    ) -> None:
+        self.confirmed_balance_paise = confirmed_balance_paise
+        self.response_date = response_date
+        self.discrepancy_paise = abs(self.book_balance_paise - confirmed_balance_paise)
+        self.discrepancy_explanation = explanation
+
+        if self.discrepancy_paise == 0:
+            self.status = ConfirmationStatusEnum.RECEIVED_AGREED
+        else:
+            self.status = ConfirmationStatusEnum.RECEIVED_DISPUTED
+        self.updated_at = utc_now()
+
+
+# Standard ICAI SA 505 Confirmation Letter Templates
+DEFAULT_SA505_CONFIRMATION_TEMPLATES: list[dict[str, Any]] = [
+    {
+        "type": ConfirmationTypeEnum.BANK,
+        "title": "Standard Bank Balance & Credit Facilities Confirmation",
+        "description": "Requests confirmation of all operative current accounts, fixed deposits, bank guarantees, letters of credit, and securities hypothecated.",
+    },
+    {
+        "type": ConfirmationTypeEnum.DEBTOR,
+        "title": "Positive Trade Receivables / Customer Balance Confirmation",
+        "description": "Direct positive confirmation of trade receivable balances as of the balance sheet date per SA 505.",
+    },
+    {
+        "type": ConfirmationTypeEnum.CREDITOR,
+        "title": "Trade Payables / Vendor Statement Confirmation",
+        "description": "Requests vendor ledger statement and confirmed outstanding dues including MSME status.",
+    },
+    {
+        "type": ConfirmationTypeEnum.LEGAL,
+        "title": "Legal Counsel Inquiry (Claims, Litigations & Contingent Liabilities)",
+        "description": "Inquiry letter to company legal advisors regarding pending suits, tax appeals, arbitration proceedings, and estimated liabilities.",
+    },
+]
+

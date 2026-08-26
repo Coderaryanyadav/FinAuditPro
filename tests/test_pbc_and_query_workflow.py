@@ -105,3 +105,36 @@ def test_audit_query_and_escalation_workflow(db_mgr: DatabaseManager) -> None:
     assert escalated_query.escalated_finding_id == finding.id
     assert finding.amount_paise == 145000000
     assert finding.title == "Disputed Debtor Balance Unprovided"
+
+
+def test_sa505_confirmation_lifecycle(db_mgr: DatabaseManager) -> None:
+    """Verify SA 505 third-party balance confirmation seeding, response logging, and discrepancy calculation."""
+    from finauditpro.domain.pbc_and_query_entities import ConfirmationStatusEnum
+
+    service = DocumentRequestService(db_mgr)
+    eng_id = "test-eng-pbc-01"
+
+    # 1. Seed SA 505 templates
+    confs = service.seed_default_confirmations(eng_id)
+    assert len(confs) == 4
+    assert confs[0].status == ConfirmationStatusEnum.DRAFT
+
+    # 2. Record response with discrepancy
+    c1 = confs[0]
+    c1.book_balance_paise = 50000000  # ₹5,00,000.00
+    with db_mgr.session_scope() as session:
+        from finauditpro.infrastructure.persistence.repositories.document_request_repository import (
+            ExternalConfirmationRepository,
+        )
+        ExternalConfirmationRepository(session).update(c1)
+
+    updated = service.record_confirmation_response(
+        confirmation_id=c1.id,
+        confirmed_balance_paise=48000000,  # ₹4,80,000.00 (Discrepancy: ₹20,000.00)
+        response_date="2026-03-31",
+        explanation="Bank charges of ₹20,000 not yet recorded in client books.",
+    )
+    assert updated.status == ConfirmationStatusEnum.RECEIVED_DISPUTED
+    assert updated.discrepancy_paise == 2000000
+    assert updated.discrepancy_explanation == "Bank charges of ₹20,000 not yet recorded in client books."
+

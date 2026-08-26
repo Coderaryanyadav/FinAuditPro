@@ -100,22 +100,27 @@ class PBCTrackerView(QWidget):
         # 1. Header & Actions
         header_row = QHBoxLayout()
         title_box = QVBoxLayout()
-        title = QLabel("Client Document Requests (PBC Tracker)")
+        title = QLabel("Client Document Requests (PBC) & SA 505 Confirmations")
         title.setStyleSheet("font-size: 20px; font-weight: bold; color: #0f172a;")
-        subtitle = QLabel("Track, follow up, and verify Provided By Client (PBC) statutory evidence and schedules.")
+        subtitle = QLabel("Track, follow up, and verify Provided By Client (PBC) statutory evidence and SA 505 Third-Party External Confirmations.")
         subtitle.setStyleSheet("font-size: 13px; color: #64748B;")
         title_box.addWidget(title)
         title_box.addWidget(subtitle)
         header_row.addLayout(title_box)
         header_row.addStretch()
 
-        self.btn_seed = QPushButton("Auto-Seed Statutory PBC Package")
-        self.btn_seed.setStyleSheet("background-color: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 500; padding: 6px 12px;")
+        self.btn_seed_conf = QPushButton("✉️ Seed SA 505 Letters")
+        self.btn_seed_conf.setStyleSheet("background-color: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; font-weight: 600; padding: 6px 12px; border-radius: 6px;")
+        self.btn_seed_conf.clicked.connect(self._on_seed_confirmations)
+        header_row.addWidget(self.btn_seed_conf)
+
+        self.btn_seed = QPushButton("⚡ Auto-Seed Statutory PBC")
+        self.btn_seed.setStyleSheet("background-color: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 500; padding: 6px 12px; border-radius: 6px;")
         self.btn_seed.clicked.connect(self._on_seed_pbc)
         header_row.addWidget(self.btn_seed)
 
         self.btn_new = QPushButton("+ New Request")
-        self.btn_new.setStyleSheet("background-color: #2563eb; color: white; font-weight: bold; padding: 6px 14px;")
+        self.btn_new.setStyleSheet("background-color: #2563eb; color: white; font-weight: bold; padding: 6px 14px; border-radius: 6px;")
         self.btn_new.clicked.connect(self._on_new_request)
         header_row.addWidget(self.btn_new)
         layout.addLayout(header_row)
@@ -126,12 +131,16 @@ class PBCTrackerView(QWidget):
         self.card_total = MetricCard("TOTAL REQUESTED", "0", "Standard audit items", accent_color="#2563eb")
         self.card_pending = MetricCard("PENDING CLIENT", "0", "Awaiting upload", accent_color="#f59e0b")
         self.card_review = MetricCard("UNDER REVIEW", "0", "Received / verifying", accent_color="#8b5cf6")
-        self.card_accepted = MetricCard("ACCEPTED", "0", "Evidence verified", accent_color="#10b981")
+        self.card_accepted = MetricCard("ACCEPTED / CONFIRMED", "0", "Evidence verified", accent_color="#10b981")
         for c in [self.card_total, self.card_pending, self.card_review, self.card_accepted]:
             self.metrics_row.addWidget(c)
         layout.addLayout(self.metrics_row)
 
-        # 3. Main Table Card
+        # 3. Segmented Tab Selection
+        from PySide6.QtWidgets import QTabWidget
+        self.tabs = QTabWidget()
+
+        # Tab 1: PBC Document Directory
         table_card = CardWidget("PBC AUDIT REQUEST DIRECTORY")
         self.table = QTableWidget()
         self.table.setColumnCount(6)
@@ -151,10 +160,33 @@ class PBCTrackerView(QWidget):
             action_text="Auto-Seed Statutory PBC Package",
             action_callback=self._on_seed_pbc,
         )
-
         table_card.content_layout.addWidget(self.table)
         table_card.content_layout.addWidget(self.empty_state)
-        layout.addWidget(table_card, stretch=1)
+        self.tabs.addTab(table_card, "📋 Client Document Requests (PBC)")
+
+        # Tab 2: SA 505 External Confirmations
+        conf_card = CardWidget("SA 505 THIRD-PARTY BALANCE CONFIRMATIONS")
+        self.conf_table = QTableWidget()
+        self.conf_table.setColumnCount(6)
+        self.conf_table.setHorizontalHeaderLabels(["TYPE / PARTY", "REF / MANDATE", "BOOK BAL (₹)", "CONFIRMED BAL (₹)", "STATUS", "ACTIONS"])
+        self.conf_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        for c in range(1, 6):
+            self.conf_table.horizontalHeader().setSectionResizeMode(c, QHeaderView.ResizeMode.ResizeToContents)
+        self.conf_table.verticalHeader().setVisible(False)
+        self.conf_table.setAlternatingRowColors(True)
+        self.conf_table.setStyleSheet("QTableWidget { border: 1px solid #E2E8F0; border-radius: 6px; }")
+
+        self.conf_empty = EmptyStateWidget(
+            title="No external confirmations logged",
+            description="Generate standard SA 505 bank and debtor balance confirmation requests.",
+            action_text="✉️ Seed SA 505 Letters",
+            action_callback=self._on_seed_confirmations,
+        )
+        conf_card.content_layout.addWidget(self.conf_table)
+        conf_card.content_layout.addWidget(self.conf_empty)
+        self.tabs.addTab(conf_card, "✉️ SA 505 External Confirmations")
+
+        layout.addWidget(self.tabs, stretch=1)
 
     def set_active_engagement(self, engagement_id: str | None) -> None:
         self.active_engagement_id = engagement_id
@@ -165,8 +197,12 @@ class PBCTrackerView(QWidget):
             self.table.setVisible(False)
             self.empty_state.setVisible(True)
             self.table.setRowCount(0)
+            self.conf_table.setVisible(False)
+            self.conf_empty.setVisible(True)
+            self.conf_table.setRowCount(0)
             return
 
+        # 1. Refresh PBC Requests Table
         requests = self.pbc_service.list_requests(self.active_engagement_id)
         has_reqs = len(requests) > 0
         self.table.setVisible(has_reqs)
@@ -205,16 +241,66 @@ class PBCTrackerView(QWidget):
             self.table.setItem(row, 2, contact_item)
             self.table.setItem(row, 3, due_item)
             self.table.setItem(row, 4, status_item)
+            self.table.setCellWidget(row, 5, self._make_action_widget(req))
 
-            action_widget = self._make_action_widget(req)
-            self.table.setCellWidget(row, 5, action_widget)
+        # 2. Refresh SA 505 Confirmations Table
+        confs = self.pbc_service.list_confirmations_for_engagement(self.active_engagement_id)
+        has_confs = len(confs) > 0
+        self.conf_table.setVisible(has_confs)
+        self.conf_empty.setVisible(not has_confs)
+        self.conf_table.setRowCount(len(confs))
+
+        for row, conf in enumerate(confs):
+            c_type_str = conf.confirmation_type.value if hasattr(conf.confirmation_type, "value") else str(conf.confirmation_type)
+            p_name = conf.third_party_name
+            self.conf_table.setItem(row, 0, QTableWidgetItem(f"{p_name}\n({c_type_str[:30]}...)"))
+            self.conf_table.setItem(row, 1, QTableWidgetItem(conf.account_reference or "Ref / Mandate"))
+            self.conf_table.setItem(row, 2, QTableWidgetItem(f"₹{conf.book_balance_paise / 100:,.2f}"))
+            conf_amt_str = f"₹{conf.confirmed_balance_paise / 100:,.2f}" if conf.confirmed_balance_paise is not None else "—"
+            self.conf_table.setItem(row, 3, QTableWidgetItem(conf_amt_str))
+
+            c_status_str = conf.status.value if hasattr(conf.status, "value") else str(conf.status)
+            s_item = QTableWidgetItem(f"• {c_status_str}")
+            if "Agreed" in c_status_str or "Cleared" in c_status_str:
+                s_item.setForeground(Qt.GlobalColor.darkGreen)
+            elif "Dispute" in c_status_str:
+                s_item.setForeground(Qt.GlobalColor.red)
+            else:
+                s_item.setForeground(Qt.GlobalColor.darkBlue)
+            self.conf_table.setItem(row, 4, s_item)
+
+            btn_log = QPushButton("Log Reply")
+            btn_log.setStyleSheet("font-size: 11px; padding: 3px 8px;")
+            btn_log.clicked.connect(lambda _, cid=conf.id: self._on_log_conf_reply(cid))
+            self.conf_table.setCellWidget(row, 5, btn_log)
+
+    def _on_log_conf_reply(self, conf_id: str) -> None:
+        from PySide6.QtWidgets import QInputDialog
+        amt_str, ok1 = QInputDialog.getText(self, "Record Third-Party Confirmation", "Enter confirmed balance amount in ₹ (e.g. 500000.00):")
+        if not ok1 or not amt_str.strip():
+            return
+        try:
+            amt_float = float(amt_str.replace(",", "").strip())
+            amt_paise = int(round(amt_float * 100))
+        except ValueError:
+            QMessageBox.warning(self, "Invalid Amount", "Please enter a valid numeric rupee amount.")
+            return
+
+        notes, _ = QInputDialog.getText(self, "Record Confirmation Notes", "Enter discrepancy explanation or verification notes (optional):")
+        self.pbc_service.record_confirmation_response(
+            confirmation_id=conf_id,
+            confirmed_balance_paise=amt_paise,
+            response_date="2026-03-31",
+            explanation=notes.strip() if notes else None,
+        )
+        QMessageBox.information(self, "Response Recorded", "Third-party balance confirmation response successfully logged per SA 505.")
+        self.refresh()
 
     def _make_action_widget(self, req: DocumentRequest) -> QWidget:
         w = QWidget()
         lay = QHBoxLayout(w)
         lay.setContentsMargins(4, 2, 4, 2)
         lay.setSpacing(6)
-
         combo = QComboBox()
         for s in DocumentRequestStatusEnum:
             combo.addItem(s.value, s)
@@ -241,6 +327,14 @@ class PBCTrackerView(QWidget):
         QMessageBox.information(self, "PBC Package Seeded", "Standard ICAI statutory PBC document requests initialized.")
         self.refresh()
 
+    def _on_seed_confirmations(self) -> None:
+        if not self.active_engagement_id:
+            QMessageBox.warning(self, "No Active Audit", "Please select an active engagement first.")
+            return
+        created = self.pbc_service.seed_default_confirmations(self.active_engagement_id)
+        QMessageBox.information(self, "SA 505 Letters Seeded", f"Successfully generated {len(created)} standard third-party external balance confirmation requests.")
+        self.refresh()
+
     def _on_new_request(self) -> None:
         if not self.active_engagement_id:
             QMessageBox.warning(self, "No Active Audit", "Please select an active engagement first.")
@@ -257,3 +351,4 @@ class PBCTrackerView(QWidget):
                 due_date=data["due_date"],
             )
             self.refresh()
+

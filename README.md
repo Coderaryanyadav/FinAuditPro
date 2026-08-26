@@ -370,7 +370,7 @@ python scripts/development/run_1000_verifications.py
 python scripts/maintenance/vacuum_and_reindex.py
 ```
 
-**Test Suite Status**: **140 passed (100%)** across domain calculations,
+**Test Suite Status**: **141 passed (100%)** across domain calculations,
 security hardening, multi-tenant database isolation, maker-checker sign-offs,
 FTS5 search, and multi-year roll-forward tie-outs.
 

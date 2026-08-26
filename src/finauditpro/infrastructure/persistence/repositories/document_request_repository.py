@@ -1,6 +1,7 @@
 """Repository for Client Document Requests (PBC) persistence."""
 
 import json
+from typing import Any
 from uuid import uuid4
 
 from sqlalchemy import select
@@ -107,3 +108,128 @@ class DocumentRequestRepository:
             self.session.flush()
             return True
         return False
+
+
+class ExternalConfirmationRepository:
+    """Repository handling CRUD and queries for SA 505 third-party external confirmations."""
+
+    def __init__(self, session: Session) -> None:
+        self.session = session
+
+    def _to_entity(self, m: Any) -> Any:
+        from finauditpro.domain.pbc_and_query_entities import (
+            ConfirmationStatusEnum,
+            ConfirmationTypeEnum,
+            ExternalConfirmation,
+        )
+        try:
+            c_type = ConfirmationTypeEnum(m.confirmation_type)
+        except ValueError:
+            c_type = ConfirmationTypeEnum.BANK
+        try:
+            c_status = ConfirmationStatusEnum(m.status)
+        except ValueError:
+            c_status = ConfirmationStatusEnum.DRAFT
+
+        return ExternalConfirmation(
+            id=m.id,
+            engagement_id=m.engagement_id,
+            confirmation_type=c_type,
+            third_party_name=m.third_party_name,
+            account_reference=m.account_reference,
+            book_balance_paise=m.book_balance_paise,
+            as_of_date=m.as_of_date,
+            contact_email=m.contact_email,
+            contact_address=m.contact_address,
+            status=c_status,
+            dispatched_date=m.dispatched_date,
+            response_date=m.response_date,
+            confirmed_balance_paise=m.confirmed_balance_paise,
+            discrepancy_paise=m.discrepancy_paise,
+            discrepancy_explanation=m.discrepancy_explanation,
+            alternative_procedures_note=m.alternative_procedures_note,
+            linked_working_paper_id=m.linked_working_paper_id,
+            created_at=m.created_at,
+            updated_at=m.updated_at,
+        )
+
+    def add(self, entity: Any) -> Any:
+        from finauditpro.infrastructure.persistence.pbc_and_query_models import (
+            ExternalConfirmationModel,
+        )
+        if not entity.id:
+            entity.id = str(uuid4())
+        model = ExternalConfirmationModel(
+            id=entity.id,
+            engagement_id=entity.engagement_id,
+            confirmation_type=entity.confirmation_type.value if hasattr(entity.confirmation_type, "value") else str(entity.confirmation_type),
+            third_party_name=entity.third_party_name,
+            account_reference=entity.account_reference,
+            book_balance_paise=entity.book_balance_paise,
+            as_of_date=entity.as_of_date,
+            contact_email=entity.contact_email,
+            contact_address=entity.contact_address,
+            status=entity.status.value if hasattr(entity.status, "value") else str(entity.status),
+            dispatched_date=entity.dispatched_date,
+            response_date=entity.response_date,
+            confirmed_balance_paise=entity.confirmed_balance_paise,
+            discrepancy_paise=entity.discrepancy_paise,
+            discrepancy_explanation=entity.discrepancy_explanation,
+            alternative_procedures_note=entity.alternative_procedures_note,
+            linked_working_paper_id=entity.linked_working_paper_id,
+            created_at=entity.created_at,
+            updated_at=entity.updated_at,
+        )
+        self.session.add(model)
+        self.session.flush()
+        return self._to_entity(model)
+
+    def get(self, confirmation_id: str) -> Any | None:
+        from finauditpro.infrastructure.persistence.pbc_and_query_models import (
+            ExternalConfirmationModel,
+        )
+        stmt = select(ExternalConfirmationModel).where(ExternalConfirmationModel.id == confirmation_id)
+        model = self.session.execute(stmt).scalar_one_or_none()
+        return self._to_entity(model) if model else None
+
+    def list_by_engagement(self, engagement_id: str) -> list[Any]:
+        from finauditpro.infrastructure.persistence.pbc_and_query_models import (
+            ExternalConfirmationModel,
+        )
+        stmt = (
+            select(ExternalConfirmationModel)
+            .where(ExternalConfirmationModel.engagement_id == engagement_id)
+            .order_by(ExternalConfirmationModel.created_at.asc())
+        )
+        models = self.session.execute(stmt).scalars().all()
+        return [self._to_entity(m) for m in models]
+
+    def update(self, entity: Any) -> Any:
+        from finauditpro.infrastructure.persistence.pbc_and_query_models import (
+            ExternalConfirmationModel,
+        )
+        stmt = select(ExternalConfirmationModel).where(ExternalConfirmationModel.id == entity.id)
+        model = self.session.execute(stmt).scalar_one_or_none()
+        if not model:
+            raise ValueError(f"ExternalConfirmation '{entity.id}' not found.")
+
+        model.confirmation_type = entity.confirmation_type.value if hasattr(entity.confirmation_type, "value") else str(entity.confirmation_type)
+        model.third_party_name = entity.third_party_name
+        model.account_reference = entity.account_reference
+        model.book_balance_paise = entity.book_balance_paise
+        model.as_of_date = entity.as_of_date
+        model.contact_email = entity.contact_email
+        model.contact_address = entity.contact_address
+        model.status = entity.status.value if hasattr(entity.status, "value") else str(entity.status)
+        model.dispatched_date = entity.dispatched_date
+        model.response_date = entity.response_date
+        model.confirmed_balance_paise = entity.confirmed_balance_paise
+        model.discrepancy_paise = entity.discrepancy_paise
+        model.discrepancy_explanation = entity.discrepancy_explanation
+        model.alternative_procedures_note = entity.alternative_procedures_note
+        model.linked_working_paper_id = entity.linked_working_paper_id
+        model.updated_at = utc_now()
+
+        self.session.flush()
+        return self._to_entity(model)
+

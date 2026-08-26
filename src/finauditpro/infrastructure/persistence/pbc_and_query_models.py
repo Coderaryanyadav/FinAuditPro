@@ -60,3 +60,28 @@ class AuditQueryModel(Base):
     escalated_finding_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("audit_findings.id", ondelete="SET NULL"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+
+
+class ExternalConfirmationModel(Base):
+    __tablename__ = "external_confirmations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    engagement_id: Mapped[str] = mapped_column(String(36), ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False, index=True)
+    confirmation_type: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    third_party_name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    account_reference: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    book_balance_paise: Mapped[int] = mapped_column(nullable=False, default=0)
+    as_of_date: Mapped[str] = mapped_column(String(20), nullable=False, default="2026-03-31")
+    contact_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    contact_address: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="Draft Letter", index=True)
+    dispatched_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    response_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    confirmed_balance_paise: Mapped[int | None] = mapped_column(nullable=True)
+    discrepancy_paise: Mapped[int] = mapped_column(nullable=False, default=0)
+    discrepancy_explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
+    alternative_procedures_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    linked_working_paper_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("working_papers.id", ondelete="SET NULL"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+

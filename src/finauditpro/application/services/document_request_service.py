@@ -1,5 +1,6 @@
 """Application service managing Client Document Request (PBC) workflows."""
 
+from typing import Any
 from uuid import uuid4
 
 from finauditpro.domain.clock import utc_now
@@ -158,3 +159,84 @@ class DocumentRequestService:
                 )
                 return saved
             return req
+
+    # SA 505 External Confirmation Operations
+    def seed_default_confirmations(self, engagement_id: str, actor: str = "Auditor") -> list[Any]:
+        """Seed default SA 505 statutory external balance confirmation requests."""
+        from finauditpro.domain.pbc_and_query_entities import (
+            DEFAULT_SA505_CONFIRMATION_TEMPLATES,
+            ConfirmationStatusEnum,
+            ExternalConfirmation,
+        )
+        from finauditpro.infrastructure.persistence.repositories.document_request_repository import (
+            ExternalConfirmationRepository,
+        )
+
+        created = []
+        with self.db_manager.session_scope() as session:
+            repo = ExternalConfirmationRepository(session)
+            existing = repo.list_by_engagement(engagement_id)
+            if existing:
+                return existing
+
+            for tpl in DEFAULT_SA505_CONFIRMATION_TEMPLATES:
+                c = ExternalConfirmation(
+                    id=str(uuid4()),
+                    engagement_id=engagement_id,
+                    confirmation_type=tpl["type"],
+                    third_party_name=tpl["title"],
+                    account_reference="Ref / Mandate",
+                    book_balance_paise=0,
+                    status=ConfirmationStatusEnum.DRAFT,
+                )
+                created.append(repo.add(c))
+
+            AuditEventRepository(session).add(
+                AuditEvent(
+                    engagement_id=engagement_id,
+                    actor=actor,
+                    action="SA 505 Confirmations Seeded",
+                    details=f"Initialized {len(created)} standard SA 505 external balance confirmation letters.",
+                )
+            )
+        return created
+
+    def list_confirmations_for_engagement(self, engagement_id: str) -> list[Any]:
+        from finauditpro.infrastructure.persistence.repositories.document_request_repository import (
+            ExternalConfirmationRepository,
+        )
+        with self.db_manager.session_scope() as session:
+            repo = ExternalConfirmationRepository(session)
+            return repo.list_by_engagement(engagement_id)
+
+    def record_confirmation_response(
+        self,
+        confirmation_id: str,
+        confirmed_balance_paise: int,
+        response_date: str,
+        explanation: str | None = None,
+        actor: str = "Auditor",
+    ) -> Any:
+        from finauditpro.infrastructure.persistence.repositories.document_request_repository import (
+            ExternalConfirmationRepository,
+        )
+        with self.db_manager.session_scope() as session:
+            repo = ExternalConfirmationRepository(session)
+            conf = repo.get(confirmation_id)
+            if not conf:
+                raise ValueError(f"Confirmation '{confirmation_id}' not found.")
+
+            conf.record_response(confirmed_balance_paise, response_date, explanation)
+            saved = repo.update(conf)
+
+            status_val = conf.status.value if hasattr(conf.status, "value") else str(conf.status)
+            AuditEventRepository(session).add(
+                AuditEvent(
+                    engagement_id=conf.engagement_id,
+                    actor=actor,
+                    action="SA 505 Confirmation Response Recorded",
+                    details=f"Recorded response for '{conf.third_party_name}': {status_val} (Discrepancy: ₹{conf.discrepancy_paise / 100:,.2f})",
+                )
+            )
+            return saved
+

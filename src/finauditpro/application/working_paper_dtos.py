@@ -50,7 +50,7 @@ class ClearReviewNoteDTO:
 @dataclass(frozen=True)
 class SignOffDTO:
     working_paper_id: str
-    level: SignOffLevelEnum
+    level: SignOffLevelEnum | str
     user_id: str
     user_role: str
     note: str | None = None

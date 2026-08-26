@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
 from finauditpro.application.services.client_service import ClientService
 from finauditpro.application.services.engagement_service import EngagementService
 from finauditpro.application.services.firm_service import FirmService
+from finauditpro.application.services.audit_matrix_service import AuditMatrixService
 from finauditpro.domain.clock import utc_now
 from finauditpro.domain.entities import Client, Engagement, Firm
 from finauditpro.ui.theme import CardWidget, MetricCard, StatusBadge
@@ -40,12 +41,14 @@ class DashboardView(QWidget):
         firm_service: FirmService,
         client_service: ClientService,
         engagement_service: EngagementService,
+        audit_matrix_service: AuditMatrixService,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
         self.firm_service = firm_service
         self.client_service = client_service
         self.engagement_service = engagement_service
+        self.audit_matrix_service = audit_matrix_service
 
         self.current_firm: Firm | None = None
         self.current_client: Client | None = None
@@ -312,6 +315,29 @@ class DashboardView(QWidget):
         completed_cnt = sum(1 for e in all_engagements if str(getattr(e, "status", "")).lower() in ("completed", "signed off", "locked"))
         self.card_completed.set_value(str(completed_cnt))
 
+        # Dynamically compute open findings and high risk cases
+        total_open_findings = 0
+        total_high_risk = 0
+        has_risk_exposure = False
+        for eng in all_engagements:
+            findings = self.audit_matrix_service.list_findings_for_engagement(eng.id)
+            total_open_findings += sum(1 for f in findings if getattr(f, "status", "") != "Closed")
+            risks = self.audit_matrix_service.list_risks_for_engagement(eng.id)
+            for rk in risks:
+                has_risk_exposure = True
+                if getattr(rk.inherent_risk, "value", str(rk.inherent_risk)).lower() == "high":
+                    total_high_risk += 1
+
+        self.card_pending.set_value(str(total_open_findings))
+        self.card_high_risk.set_value(str(total_high_risk))
+        
+        if has_risk_exposure:
+            self.lbl_zero_risk.setText(f"⚠ {total_high_risk} high-risk areas identified")
+            self.lbl_zero_risk.setStyleSheet("font-size: 12px; font-weight: 600; color: #DC2626; padding: 10px; border: none; background: transparent;")
+        else:
+            self.lbl_zero_risk.setText("✓  No risk exposure identified")
+            self.lbl_zero_risk.setStyleSheet("font-size: 12px; font-weight: 600; color: #15803D; padding: 10px; border: none; background: transparent;")
+
         if all_engagements:
             e_active = all_engagements[0]
             c_name = next((c.name for c in clients if c.id == e_active.client_id), "—")
@@ -336,12 +362,21 @@ class DashboardView(QWidget):
             c_item = QTableWidgetItem(c_name)
             c_item.setData(Qt.ItemDataRole.UserRole, eng.id)
 
+            # Determine risk dynamically
+            eng_risks = self.audit_matrix_service.list_risks_for_engagement(eng.id)
+            if any(getattr(r.inherent_risk, "value", str(r.inherent_risk)).lower() == "high" for r in eng_risks):
+                risk_lbl = "● High"
+            elif any(getattr(r.inherent_risk, "value", str(r.inherent_risk)).lower() == "medium" for r in eng_risks):
+                risk_lbl = "● Medium"
+            else:
+                risk_lbl = "● Normal"
+
             items = [
                 c_item,
                 QTableWidgetItem(f"FY {eng.financial_year}"),
                 QTableWidgetItem(audit_t),
                 QTableWidgetItem(f"● {status_val}"),
-                QTableWidgetItem("● Normal"),
+                QTableWidgetItem(risk_lbl),
                 QTableWidgetItem("Open →"),
             ]
             for col, item in enumerate(items):

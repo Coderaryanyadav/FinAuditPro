@@ -42,7 +42,11 @@ class SignOffDialog(QDialog):
 
         # 1. Prominent Legal Disclaimer Banner
         disclaimer_box = QGroupBox("LEGAL & STATUTORY SIGN-OFF DISCLAIMER")
-        disclaimer_box.setStyleSheet("QGroupBox { font-weight: bold; color: #f59e0b; }")
+        disclaimer_box.setStyleSheet(
+            "QGroupBox { font-weight: bold; color: #b45309; background-color: #fef3c7; "
+            "border: 1px solid #fde68a; border-radius: 8px; margin-top: 10px; padding: 12px; } "
+            "QGroupBox::title { subcontrol-origin: margin; left: 12px; padding: 0 4px; color: #92400e; }"
+        )
         disc_layout = QVBoxLayout(disclaimer_box)
 
         disc_text = QLabel(
@@ -53,7 +57,7 @@ class SignOffDialog(QDialog):
             "• It confers no external legal validity on any report or financial statement."
         )
         disc_text.setWordWrap(True)
-        disc_text.setStyleSheet("color: #e2e8f0; font-size: 12px;")
+        disc_text.setStyleSheet("color: #78350f; font-size: 12px; background: transparent; border: none;")
         disc_layout.addWidget(disc_text)
         layout.addWidget(disclaimer_box)
 
@@ -94,7 +98,16 @@ class SignOffDialog(QDialog):
     def _on_sign_off_clicked(self) -> None:
         user_id = self.user_id_input.text().strip()
         user_role = self.role_input.currentText()
-        level = self.level_combo.currentData()
+        raw_level = self.level_combo.currentData()
+        if isinstance(raw_level, SignOffLevelEnum):
+            level = raw_level
+        elif isinstance(raw_level, str):
+            try:
+                level = SignOffLevelEnum(raw_level)
+            except ValueError:
+                level = SignOffLevelEnum[raw_level] if raw_level in SignOffLevelEnum.__members__ else SignOffLevelEnum.REVIEWED
+        else:
+            level = SignOffLevelEnum.REVIEWED
         note = self.note_input.text().strip()
 
         if not user_id:

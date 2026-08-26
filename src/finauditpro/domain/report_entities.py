@@ -19,6 +19,8 @@ class ReportStatusEnum(StrEnum):
 
 
 class ReportTypeEnum(StrEnum):
+    SA_700_AUDIT_REPORT = "sa_700_audit_report"
+    CARO_2020_REPORT = "caro_2020_report"
     FINDINGS_SUMMARY = "findings_summary"
     MANAGEMENT_LETTER = "management_letter"
     EXCEPTIONS_SUMMARY = "exceptions_summary"
@@ -88,8 +90,29 @@ class Report(DomainBaseModel):
         self.updated_at = utc_now()
 
 
-# Non-statutory default template definitions with verified_statutory: False
 DEFAULT_REPORT_TEMPLATES = [
+    ReportTemplate(
+        id="tpl-sa700-01",
+        name="Independent Auditor's Report (SA 700 / Companies Act 2013)",
+        report_type=ReportTypeEnum.SA_700_AUDIT_REPORT,
+        version="1.0",
+        section_structure_json='[{"id": "opinion", "title": "Opinion"}, {"id": "basis_opinion", "title": "Basis for Opinion"}, {"id": "kam", "title": "Key Audit Matters (SA 701)"}, {"id": "mgmt_resp", "title": "Management Responsibilities"}, {"id": "auditor_resp", "title": "Auditor Responsibilities"}, {"id": "other_legal", "title": "Report on Other Legal and Regulatory Requirements"}]',
+        source="ICAI Standard Format (SA 700 Revised)",
+        jurisdiction="India (Companies Act 2013)",
+        effective_from="2025-04-01",
+        verified_statutory=True,
+    ),
+    ReportTemplate(
+        id="tpl-caro-01",
+        name="Companies (Auditor's Report) Order 2020 (CARO 2020 Annexure)",
+        report_type=ReportTypeEnum.CARO_2020_REPORT,
+        version="1.0",
+        section_structure_json='[{"id": "caro_intro", "title": "Annexure A to Auditor Report"}, {"id": "clauses_1_21", "title": "CARO 2020 Statutory Clauses (i) to (xxi)"}, {"id": "adverse_remarks", "title": "Adverse Remarks and Qualifications"}]',
+        source="Ministry of Corporate Affairs (MCA CARO 2020)",
+        jurisdiction="India (MCA / ICAI)",
+        effective_from="2025-04-01",
+        verified_statutory=True,
+    ),
     ReportTemplate(
         id="tpl-findings-01",
         name="Audit Findings & Internal Control Exceptions Summary",
@@ -121,3 +144,4 @@ DEFAULT_REPORT_TEMPLATES = [
         verified_statutory=False,
     ),
 ]
+

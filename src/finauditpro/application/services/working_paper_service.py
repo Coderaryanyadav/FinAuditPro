@@ -229,6 +229,22 @@ class WorkingPaperService:
 
     def sign_off_working_paper(self, dto: SignOffDTO) -> SignOffRecord:
         with self.db_manager.session_scope() as session:
+            from finauditpro.application.security.rbac import RBACManager, UserSession
+            from finauditpro.domain.entities import RoleEnum
+            role = RoleEnum.PARTNER if "partner" in dto.user_role.lower() else (RoleEnum.MANAGER if "manager" in dto.user_role.lower() else RoleEnum.SENIOR if "senior" in dto.user_role.lower() else RoleEnum.ASSOCIATE)
+
+            if isinstance(dto.level, SignOffLevelEnum):
+                level_enum = dto.level
+            else:
+                try:
+                    level_enum = SignOffLevelEnum(dto.level)
+                except ValueError:
+                    level_enum = SignOffLevelEnum[dto.level] if str(dto.level) in SignOffLevelEnum.__members__ else SignOffLevelEnum.REVIEWED
+            level_val = getattr(level_enum, "value", str(level_enum))
+
+            req_perm = "engagement:signoff" if level_enum == SignOffLevelEnum.FINAL_SIGN_OFF else "audit:review"
+            RBACManager(UserSession(user_id=dto.user_id, username=dto.user_id, role=role)).require_permission(req_perm)
+
             wp_repo = WorkingPaperRepository(session)
             wp = wp_repo.get_working_paper(dto.working_paper_id)
             if not wp:
@@ -238,21 +254,21 @@ class WorkingPaperService:
             open_notes = wp_repo.count_open_review_notes(wp.id)
             if open_notes > 0:
                 raise ValidationError(f"Audit Quality Violation: Cannot sign off Working Paper '{wp.index_reference}' while {open_notes} open review notes exist.")
-            if dto.level == SignOffLevelEnum.FINAL_SIGN_OFF and wp.preparer_id == dto.user_id:
+            if level_enum == SignOffLevelEnum.FINAL_SIGN_OFF and wp.preparer_id == dto.user_id:
                 raise ValidationError(f"Segregation of Duties Violation: Preparer '{wp.preparer_id}' cannot perform final sign-off on own workpaper.")
 
             sections, links = wp_repo.get_sections(wp.id), wp_repo.get_links(wp.id)
             chash = self.compute_content_hash(wp, sections, links)
             wp.content_hash = chash
-            if dto.level == SignOffLevelEnum.REVIEWED:
+            if level_enum == SignOffLevelEnum.REVIEWED:
                 wp.transition_to(WorkingPaperStatusEnum.REVIEWED)
             else:
                 wp.transition_to(WorkingPaperStatusEnum.SIGNED_OFF)
                 wp.is_locked = True
             wp_repo.update_working_paper(wp)
 
-            saved_signoff = wp_repo.add_sign_off(SignOffRecord(working_paper_id=wp.id, level=dto.level, user_id=dto.user_id, user_role=dto.user_role, content_hash=chash, note=dto.note))
-            AuditEventRepository(session).add(AuditEvent(engagement_id=wp.engagement_id, actor=dto.user_id, action=f"Working Paper {dto.level.value}", details=f"Signed off '{wp.index_reference}' ({dto.level.value}) by {dto.user_role} {dto.user_id}. Content Hash: {chash[:16]}..."))
+            saved_signoff = wp_repo.add_sign_off(SignOffRecord(working_paper_id=wp.id, level=level_enum, user_id=dto.user_id, user_role=dto.user_role, content_hash=chash, note=dto.note))
+            AuditEventRepository(session).add(AuditEvent(engagement_id=wp.engagement_id, actor=dto.user_id, action=f"Working Paper {level_val}", details=f"Signed off '{wp.index_reference}' ({level_val}) by {dto.user_role} {dto.user_id}. Content Hash: {chash[:16]}..."))
             return saved_signoff
 
     def verify_integrity(self, wp_id: str) -> tuple[bool, str]:

@@ -150,26 +150,20 @@ class MockLocalAIProvider(BaseAIProvider):
 
     def generate_text(self, prompt: str, system_prompt: str = "") -> str:
         return (
-            f"[FinAuditPro Local AI Response]\n\n"
-            f"Based on the retrieved engagement evidence context:\n{prompt[:300]}..."
+            "AI Copilot isn't configured yet. Connect a local LM Studio server to enable this feature."
         )
 
     def generate_structured_observation(
         self, prompt: str, citations: list[AICitation]
     ) -> AIStructuredObservation:
         return AIStructuredObservation(
-            title=f"Structured Observation: {prompt[:45]}",
-            observation=(
-                f"Audit analysis of '{prompt}' reveals key evidence-grounded findings.\n"
-                f"The attached document evidence confirms compliance with accounting principles and statutory rules."
-            ),
-            citations=citations,
-            risk_severity="High"
-            if any("risk" in c.excerpt.lower() for c in citations)
-            else "Medium",
-            recommended_procedure="Perform substantive verification of supporting voucher documentation.",
-            confidence_score=0.92,
-            is_ai_generated=True,
+            title="AI Copilot Not Configured",
+            observation="AI Copilot isn't configured yet. Connect a local LM Studio server to enable this feature.",
+            citations=[],
+            risk_severity="Low",
+            recommended_procedure="None",
+            confidence_score=0.0,
+            is_ai_generated=False,
         )
 
     def embed_text(self, text: str) -> list[float]:

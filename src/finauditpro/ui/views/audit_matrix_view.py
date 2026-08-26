@@ -98,9 +98,9 @@ class AuditMatrixView(QWidget):
 
         metrics = QHBoxLayout()
         metrics.setSpacing(10)
-        self.card_overall = MetricCard("OVERALL MATERIALITY", "₹ 0.00", "Benchmark × 1%", accent_color="#2563EB")
-        self.card_performance = MetricCard("PERFORMANCE MATERIALITY", "₹ 0.00", "75% of OM", accent_color="#16A34A")
-        self.card_trivial = MetricCard("CLEARLY TRIVIAL", "₹ 0.00", "5% of OM", accent_color="#D97706")
+        self.card_overall = MetricCard("OVERALL MATERIALITY", "Not Set", "Benchmark × 1%", accent_color="#2563EB")
+        self.card_performance = MetricCard("PERFORMANCE MATERIALITY", "Not Set", "75% of OM", accent_color="#16A34A")
+        self.card_trivial = MetricCard("CLEARLY TRIVIAL", "Not Set", "5% of OM", accent_color="#D97706")
         for c in (self.card_overall, self.card_performance, self.card_trivial):
             metrics.addWidget(c)
         layout.addLayout(metrics)
@@ -215,7 +215,7 @@ class AuditMatrixView(QWidget):
     def refresh(self) -> None:
         if not self.current_engagement or not self.planning_service:
             for c in (self.card_overall, self.card_performance, self.card_trivial):
-                c.set_value("₹ 0.00")
+                c.set_value("Not Set")
             for t, e in ((self.risks_table, self.risks_empty), (self.procs_table, self.procs_empty), (self.findings_table, self.findings_empty)):
                 t.setVisible(False)
                 e.setVisible(True)

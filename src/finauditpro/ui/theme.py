@@ -133,13 +133,13 @@ class MetricCard(QFrame):
         layout.setContentsMargins(14, 10, 14, 10)
         layout.setSpacing(2)
         self.title_lbl = QLabel(title)
-        self.title_lbl.setStyleSheet("font-size: 10px; font-weight: 700; color: #64748B; border: none; background: transparent; letter-spacing: 0.5px;")
+        self.title_lbl.setStyleSheet("font-size: 11px; font-weight: 600; color: #64748B; border: none; background: transparent; letter-spacing: 0.5px;")
         self.value_lbl = QLabel(value)
-        self.value_lbl.setStyleSheet("font-size: 26px; font-weight: 800; color: #0F172A; border: none; background: transparent; letter-spacing: -0.6px;")
+        self.value_lbl.setStyleSheet("font-size: 24px; font-weight: 600; color: #0F172A; border: none; background: transparent; letter-spacing: -0.6px;")
         sub_row = QHBoxLayout()
         sub_row.setContentsMargins(0, 0, 0, 0)
         self.sub_lbl = QLabel(subtitle)
-        self.sub_lbl.setStyleSheet("font-size: 11px; color: #94A3B8; border: none; background: transparent;")
+        self.sub_lbl.setStyleSheet("font-size: 12px; color: #94A3B8; border: none; background: transparent;")
         sub_row.addWidget(self.sub_lbl)
         if action_text:
             sub_row.addStretch()
@@ -161,8 +161,8 @@ class MetricCard(QFrame):
 
 
 class Fonts:
-    FAMILY = "'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif"
-    FAMILY_MONO = "'SF Mono', 'Menlo', 'Consolas', monospace"
+    FAMILY = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
+    FAMILY_MONO = "'JetBrains Mono', 'SF Mono', 'Menlo', 'Consolas', monospace"
 
 
 class StatusBadge(QLabel):
@@ -186,7 +186,7 @@ class StatusBadge(QLabel):
             style = "color: #1D4ED8; background: #DBEAFE; border: 1px solid #BFDBFE;"
         else:
             style = "color: #475569; background: #F1F5F9; border: 1px solid #E2E8F0;"
-        self.setStyleSheet(f"font-size: 11px; font-weight: 600; border-radius: 4px; padding: 2px 8px; {style}")
+        self.setStyleSheet(f"font-size: 11px; font-weight: 500; border-radius: 4px; padding: 2px 8px; {style}")
 
 
 class RiskBadge(QLabel):
@@ -197,7 +197,7 @@ class RiskBadge(QLabel):
         elif "medium" in rl or "moderate" in rl: st = "color: #D97706; background: #FEF3C7; border: 1px solid #FDE68A;"
         elif "low" in rl: st = "color: #15803D; background: #DCFCE7; border: 1px solid #BBF7D0;"
         else: st = "color: #64748B; background: #F1F5F9; border: 1px solid #E2E8F0;"
-        self.setStyleSheet(f"font-size: 11px; font-weight: 600; border-radius: 4px; padding: 2px 8px; {st}")
+        self.setStyleSheet(f"font-size: 11px; font-weight: 500; border-radius: 4px; padding: 2px 8px; {st}")
 
 
 class EmptyStateWidget(QFrame):
@@ -215,17 +215,19 @@ class EmptyStateWidget(QFrame):
         layout.addWidget(g_lbl, alignment=Qt.AlignmentFlag.AlignCenter)
         t_lbl = QLabel(title)
         t_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        t_lbl.setStyleSheet("font-size: 15px; font-weight: 700; color: #0F172A; border: none; background: transparent;")
+        t_lbl.setStyleSheet("font-size: 15px; font-weight: 600; color: #0F172A; border: none; background: transparent;")
         layout.addWidget(t_lbl)
         d_lbl = QLabel(description)
         d_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         d_lbl.setWordWrap(True)
-        d_lbl.setStyleSheet("font-size: 12px; color: #64748B; max-width: 440px; border: none; background: transparent; line-height: 1.4;")
+        d_lbl.setMaximumWidth(680)
+        d_lbl.setStyleSheet("font-size: 12px; color: #64748B; border: none; background: transparent; line-height: 1.4;")
         layout.addWidget(d_lbl, alignment=Qt.AlignmentFlag.AlignCenter)
+
         if action_text and action_callback:
             btn = QPushButton(action_text)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
+            btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 13px; font-weight: 500; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
             btn.clicked.connect(action_callback)
             layout.addSpacing(4)
             layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -242,7 +244,7 @@ class LoadingStateWidget(QFrame):
         lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl.setStyleSheet("font-size: 20px;")
         msg = QLabel(message)
-        msg.setStyleSheet("font-size: 13px; font-weight: 600; color: #64748B;")
+        msg.setStyleSheet("font-size: 13px; font-weight: 500; color: #64748B;")
         layout.addWidget(lbl, alignment=Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(msg, alignment=Qt.AlignmentFlag.AlignCenter)
 
@@ -263,7 +265,7 @@ class ErrorStateWidget(QFrame):
         layout.addWidget(m_lbl, alignment=Qt.AlignmentFlag.AlignCenter)
         if retry_callback:
             btn = QPushButton("Retry")
-            btn.setStyleSheet("background-color: #DC2626; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 6px 14px;")
+            btn.setStyleSheet("background-color: #DC2626; color: #FFFFFF; font-size: 13px; font-weight: 500; border-radius: 6px; padding: 6px 14px;")
             btn.clicked.connect(retry_callback)
             layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
@@ -279,7 +281,7 @@ class PageHeader(QFrame):
         left_v.setSpacing(2)
 
         self.title_lbl = QLabel(title)
-        self.title_lbl.setStyleSheet("font-size: 20px; font-weight: 700; color: #0F172A; letter-spacing: -0.4px; border: none; background: transparent;")
+        self.title_lbl.setStyleSheet("font-size: 22px; font-weight: 600; color: #0F172A; letter-spacing: -0.4px; border: none; background: transparent;")
         left_v.addWidget(self.title_lbl)
         if subtitle:
             self.subtitle_lbl = QLabel(subtitle)
@@ -291,7 +293,7 @@ class PageHeader(QFrame):
             self.action_btn = QPushButton(action_text)
             self.action_btn.setObjectName("primaryButton")
             self.action_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            self.action_btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
+            self.action_btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 13px; font-weight: 500; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
             self.action_btn.clicked.connect(action_callback)
             self.action_layout.addWidget(self.action_btn, alignment=Qt.AlignmentFlag.AlignVCenter)
 

@@ -248,8 +248,11 @@ def run_1000_verifications() -> int:
         from finauditpro.ui.views.settings_view import SettingsView
         from finauditpro.ui.views.working_paper_view import WorkingPaperView
 
+        audit_matrix_service = AuditMatrixService(db_manager)
+        dash = DashboardView(firm_service, client_service, service, audit_matrix_service)
+        dash.set_firm(firm_service.list_firms()[0])
         views = [
-            DashboardView(firm_service, client_service, service),
+            dash,
             DocumentView(doc_service),
             FinancialDataView(client_service, service, fin_service),
             AuditMatrixView(service),

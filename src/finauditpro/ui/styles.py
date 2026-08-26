@@ -9,7 +9,9 @@ from PySide6.QtWidgets import QGraphicsDropShadowEffect, QWidget
 GLOBAL_QSS = """
 /* ── BASE RESET ─────────────────────────────────────────────────────────── */
 * {
-    font-family: 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
     color: #0F172A;
     outline: none;
 }
@@ -28,8 +30,34 @@ QFrame {
 }
 
 /* ── APP BACKGROUND ──────────────────────────────────────────────────────── */
-QMainWindow, QDialog { background-color: #F8FAFC; }
+QMainWindow { background-color: #F8FAFC; }
+QDialog { background-color: #FFFFFF; }
 #appBg, QWidget#dashboardMain, QFrame#dashboardMainBody, QScrollArea#dashboardMainScroll, QStackedWidget { background-color: #F8FAFC; }
+
+/* ── FORM INPUTS & CONTROLS ──────────────────────────────────────────────── */
+QLineEdit, QTextEdit, QPlainTextEdit, QDateEdit, QDateTimeEdit {
+    background-color: #FFFFFF;
+    color: #0F172A;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    selection-background-color: #EFF6FF;
+    selection-color: #2563EB;
+}
+QLineEdit:hover, QTextEdit:hover, QPlainTextEdit:hover, QDateEdit:hover, QDateTimeEdit:hover {
+    border-color: #CBD5E1;
+}
+QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus, QDateEdit:focus, QDateTimeEdit:focus {
+    border-color: #2563EB;
+    background-color: #FFFFFF;
+}
+QLineEdit:disabled, QTextEdit:disabled, QPlainTextEdit:disabled, QDateEdit:disabled, QDateTimeEdit:disabled {
+    background-color: #F8FAFC;
+    color: #94A3B8;
+    border-color: #F1F5F9;
+}
+
 QScrollArea, QScrollArea > QWidget, QScrollArea #qt_scrollarea_viewport {
     background-color: #F8FAFC; border: none;
 }
@@ -70,11 +98,11 @@ QLabel#sidebarLogoBadge {
     font-weight: 800;
 }
 QLabel#sidebarAppTitle {
-    font-size: 15px; font-weight: 800;
+    font-size: 15px; font-weight: 600;
     color: #0F172A; border: none; letter-spacing: -0.3px;
 }
 QLabel#sidebarSectionLabel {
-    font-size: 10px; font-weight: 700;
+    font-size: 11px; font-weight: 600;
     color: #94A3B8;
     padding: 12px 10px 4px 10px; border: none;
     letter-spacing: 0.8px; text-transform: uppercase;
@@ -87,7 +115,7 @@ QLabel#userAvatar {
     background-color: #2563EB; color: #FFFFFF;
     border-radius: 13px; font-weight: 800; font-size: 11px; border: none;
 }
-QLabel#userName { font-size: 12px; font-weight: 700; color: #0F172A; border: none; }
+QLabel#userName { font-size: 13px; font-weight: 600; color: #0F172A; border: none; }
 QLabel#userRole { font-size: 11px; color: #64748B; border: none; }
 
 /* Nav buttons with thin blue left indicator */
@@ -199,8 +227,8 @@ QComboBox#clientSelectorCombo QAbstractItemView::item:selected {
 
 /* ── BUTTONS ─────────────────────────────────────────────────────────────── */
 QPushButton {
-    font-size: 12px; padding: 6px 14px;
-    border-radius: 6px; font-weight: 600;
+    font-size: 13px; padding: 6px 14px;
+    border-radius: 6px; font-weight: 500;
     border: 1px solid #E2E8F0;
     color: #374151;
     background-color: #FFFFFF;
@@ -211,7 +239,7 @@ QPushButton:disabled { color: #94A3B8; background-color: #F8FAFC; border-color: 
 
 QPushButton#primaryBtn, QPushButton#primaryButton {
     background-color: #2563EB; color: #FFFFFF;
-    font-size: 12px; font-weight: 600; border-radius: 6px;
+    font-size: 13px; font-weight: 500; border-radius: 6px;
     padding: 7px 16px; border: none;
 }
 QPushButton#primaryBtn:hover, QPushButton#primaryButton:hover {
@@ -231,11 +259,11 @@ QFrame#needsAttentionPanel, QFrame#auditWorkspacePanel {
 }
 
 QLabel#metricTitle {
-    color: #64748B; font-size: 10px; font-weight: 700;
+    color: #64748B; font-size: 11px; font-weight: 600;
     border: none; background: transparent; letter-spacing: 0.5px;
 }
 QLabel#metricValue {
-    color: #0F172A; font-size: 28px; font-weight: 800;
+    color: #0F172A; font-size: 24px; font-weight: 600;
     border: none; background: transparent; letter-spacing: -0.6px;
 }
 
@@ -262,8 +290,8 @@ QTableWidget::item:selected, QTableView::item:selected {
 QHeaderView::section {
     background-color: #FAFBFC;
     color: #64748B;
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 11px;
+    font-weight: 600;
     letter-spacing: 0.5px;
     border: none;
     border-bottom: 1px solid #E2E8F0;

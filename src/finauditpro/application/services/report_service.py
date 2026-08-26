@@ -67,6 +67,17 @@ class ReportService:
         with self.db_manager.session_scope() as session:
             matrix_repo = AuditMatrixRepository(session)
             wp_repo = WorkingPaperRepository(session)
+            eng_repo = EngagementRepository(session)
+            eng = eng_repo.get_by_id(engagement_id)
+            client_name, client_pan, client_cin, fy = "Client Entity", "", "", "2025-26"
+            if eng:
+                fy = str(eng.financial_year)
+                from finauditpro.infrastructure.persistence.repositories import ClientRepository
+                cli = ClientRepository(session).get_by_id(eng.client_id)
+                if cli:
+                    client_name = cli.name
+                    client_pan = getattr(cli, "pan", "") or ""
+                    client_cin = getattr(cli, "cin", "") or ""
 
             # 1. Findings
             findings = matrix_repo.list_findings_for_engagement(engagement_id)
@@ -130,12 +141,17 @@ class ReportService:
 
             return {
                 "engagement_id": engagement_id,
+                "client_name": client_name,
+                "client_pan": client_pan,
+                "client_cin": client_cin,
+                "financial_year": fy,
                 "as_of": utc_now().isoformat(),
                 "findings": findings_data,
                 "risks": risks_data,
                 "materiality": mat_data,
                 "working_papers": wp_data,
             }
+
 
     def generate_report(self, dto: GenerateReportDTO) -> Report:
         """Assemble report data, compute content hash digest, and render PDF artifact."""
@@ -300,10 +316,16 @@ class ReportService:
     def approve_report(self, dto: ApproveReportDTO) -> Report:
         """Approve report, removing draft watermark and recording legal disclaimer."""
         with self.db_manager.session_scope() as session:
+            from finauditpro.application.security.rbac import RBACManager, UserSession
+            from finauditpro.domain.entities import RoleEnum
+            role = RoleEnum.PARTNER if "partner" in dto.approver_role.lower() else (RoleEnum.MANAGER if "manager" in dto.approver_role.lower() else RoleEnum.ASSOCIATE)
+            RBACManager(UserSession(user_id=dto.approved_by, username=dto.approved_by, role=role)).require_permission("engagement:signoff")
+
             report_repo = ReportRepository(session)
             report = report_repo.get_report(dto.report_id)
             if not report:
                 raise EntityNotFoundError("Report", dto.report_id)
+
 
             report.transition_to(ReportStatusEnum.APPROVED)
             report.approved_by = dto.approved_by

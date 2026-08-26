@@ -98,9 +98,7 @@ class ComplianceView(QWidget):
             stats_layout.addWidget(c)
         main_layout.addLayout(stats_layout)
 
-        # 3. Tabs: CARO 2020 vs Form 3CD
         tabs = QTabWidget()
-        tabs.setStyleSheet("QTabWidget::pane { border: 1px solid #E2E8F0; background-color: #FFFFFF; border-radius: 8px; } QTabBar::tab { font-size: 12px; font-weight: 600; padding: 8px 18px; color: #64748B; border: none; background: transparent; } QTabBar::tab:selected { color: #2563EB; border-bottom: 2px solid #2563EB; font-weight: 700; }")
 
         # CARO 2020 Tab
         caro_tab = QWidget()

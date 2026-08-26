@@ -5,7 +5,7 @@ Planning & Execution Core: SA 320 Materiality, SA 315 Risk Register, Procedures,
 
 from typing import Any
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QComboBox,
     QFormLayout,
@@ -58,7 +58,6 @@ class AuditMatrixView(QWidget):
         layout.addWidget(self.header)
 
         self.tabs = QTabWidget()
-        self.tabs.setStyleSheet("QTabWidget::pane { border: 1px solid #E2E8F0; background-color: #FFFFFF; border-radius: 8px; } QTabBar::tab { font-size: 12px; font-weight: 600; padding: 8px 18px; color: #64748B; border: none; background: transparent; } QTabBar::tab:selected { color: #2563EB; border-bottom: 2px solid #2563EB; font-weight: 700; }")
 
         self.tab_mat, self.tab_risks, self.tab_procs, self.tab_findings = QWidget(), QWidget(), QWidget(), QWidget()
         self._init_materiality_tab()
@@ -79,19 +78,48 @@ class AuditMatrixView(QWidget):
 
         card = CardWidget("SA 320 AUDIT MATERIALITY CALCULATION ENGINE")
         form = QFormLayout()
-        form.setSpacing(8)
+        form.setSpacing(12)
+        form.setLabelAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+
+        field_style = """
+            QLineEdit, QComboBox {
+                border: 1.5px solid #CBD5E1; border-radius: 6px;
+                padding: 7px 12px; font-size: 13px; color: #0F172A; background: #FFFFFF;
+                min-width: 320px;
+            }
+            QLineEdit:focus, QComboBox:focus { border-color: #2563EB; background: #FFFFFF; }
+            QLineEdit::placeholder { color: #94A3B8; }
+        """
 
         self.bm_combo = QComboBox()
+        self.bm_combo.setStyleSheet(field_style)
         for opt in BENCHMARK_GUIDANCE_OPTIONS:
             self.bm_combo.addItem(f"{opt.benchmark_type.value} ({opt.default_overall_pct}%)", opt.benchmark_type)
 
         self.bm_amount_input = QLineEdit()
         self.bm_amount_input.setPlaceholderText("Enter benchmark amount in INR...")
+        self.bm_amount_input.setStyleSheet(field_style)
+
         calc_btn = QPushButton("Calculate & Save Materiality")
+        calc_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        calc_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2563EB; color: #FFFFFF;
+                font-size: 13px; font-weight: 600;
+                border-radius: 6px; padding: 8px 20px; border: none;
+            }
+            QPushButton:hover { background-color: #1D4ED8; }
+            QPushButton:pressed { background-color: #1E40AF; }
+        """)
         calc_btn.clicked.connect(self._on_calculate_materiality)
 
-        form.addRow("Benchmark Type:", self.bm_combo)
-        form.addRow("Amount (INR):", self.bm_amount_input)
+        def make_lbl(t: str) -> QLabel:
+            lbl = QLabel(t)
+            lbl.setStyleSheet("font-size: 13px; font-weight: 600; color: #334155;")
+            return lbl
+
+        form.addRow(make_lbl("Benchmark Type:"), self.bm_combo)
+        form.addRow(make_lbl("Amount (INR):"), self.bm_amount_input)
         form.addRow("", calc_btn)
         card.content_layout.addLayout(form)
         layout.addWidget(card)

@@ -199,25 +199,25 @@ class AIAssistantView(QWidget):
 
         p_lbl = QLabel("ICAI PROMPT LIBRARY")
         p_lbl.setStyleSheet(
-            "font-size: 10px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; margin-top: 4px;"
+            "font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 0.5px; margin-top: 6px;"
         )
         c1_layout.addWidget(p_lbl)
 
         prompt_scroll = QScrollArea()
         prompt_scroll.setWidgetResizable(True)
         prompt_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        prompt_scroll.setFixedHeight(160)
+        prompt_scroll.setFixedHeight(190)
         prompt_widget = QWidget()
         pw_layout = QVBoxLayout(prompt_widget)
         pw_layout.setContentsMargins(0, 0, 0, 0)
-        pw_layout.setSpacing(4)
+        pw_layout.setSpacing(6)
 
         for title_str, prompt_str in PROMPT_LIBRARY:
             btn = QPushButton(title_str)
             btn.setToolTip(prompt_str)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet(
-                "QPushButton { background-color: #F8FAFC; color: #2563EB; font-size: 11px; font-weight: 600; border: 1px solid #BFDBFE; border-radius: 4px; padding: 5px 8px; text-align: left; }"
+                "QPushButton { background-color: #FFFFFF; color: #2563EB; font-size: 11px; font-weight: 600; border: 1px solid #BFDBFE; border-radius: 6px; padding: 6px 10px; text-align: left; } QPushButton:hover { background-color: #EFF6FF; border-color: #60A5FA; }"
             )
             btn.clicked.connect(lambda checked=False, p=prompt_str: self._on_prompt_pill_clicked(p))
             pw_layout.addWidget(btn)
@@ -236,26 +236,26 @@ class AIAssistantView(QWidget):
             "FinAuditPro AI Copilot\n\nAsk questions about financial evidence, verify statutory CARO 2020 clauses, or analyze trial balance anomalies."
         )
         self.chat_display.setStyleSheet(
-            "QTextEdit { border: 1px solid #E2E8F0; border-radius: 6px; background-color: #F8FAFC; padding: 10px; font-size: 13px; color: #0F172A; }"
+            "QTextEdit { border: 1px solid #E2E8F0; border-radius: 6px; background-color: #FAFBFC; padding: 12px; font-size: 13px; color: #0F172A; line-height: 1.5; }"
         )
         c2_layout.addWidget(self.chat_display, 1)
 
         self.reasoning_display = QTextEdit()
         self.reasoning_display.setReadOnly(True)
-        self.reasoning_display.setMaximumHeight(65)
+        self.reasoning_display.setMaximumHeight(58)
         self.reasoning_display.setPlaceholderText("Model reasoning tokens (<think>)...")
         self.reasoning_display.setStyleSheet(
-            "QTextEdit { border: 1px solid #FDE68A; border-radius: 4px; background-color: #FFFBEB; padding: 4px; font-size: 11px; color: #92400E; }"
+            "QTextEdit { border: 1px solid #FDE68A; border-radius: 6px; background-color: #FFFBEB; padding: 6px 10px; font-size: 11px; color: #92400E; font-family: 'SF Mono', Menlo, Consolas, monospace; }"
         )
         c2_layout.addWidget(self.reasoning_display)
 
         pills_row = QHBoxLayout()
-        pills_row.setSpacing(4)
+        pills_row.setSpacing(6)
         for pill in QUICK_PILLS:
             pbtn = QPushButton(pill)
             pbtn.setCursor(Qt.CursorShape.PointingHandCursor)
             pbtn.setStyleSheet(
-                "QPushButton { background-color: #F1F5F9; color: #2563EB; font-size: 10px; font-weight: 600; border: 1px solid #E2E8F0; border-radius: 4px; padding: 2px 6px; }"
+                "QPushButton { background-color: #EFF6FF; color: #2563EB; font-size: 11px; font-weight: 600; border: 1px solid #BFDBFE; border-radius: 4px; padding: 3px 8px; } QPushButton:hover { background-color: #DBEAFE; }"
             )
             pbtn.clicked.connect(
                 lambda checked=False, p=pill: self._on_prompt_pill_clicked(
@@ -273,14 +273,14 @@ class AIAssistantView(QWidget):
             "Ask AI Copilot about evidence, SA 500 compliance, or GST anomalies..."
         )
         self.qa_input.setStyleSheet(
-            "QLineEdit { border: 1px solid #CBD5E1; border-radius: 6px; padding: 7px 10px; font-size: 12px; background: #FFFFFF; }"
+            "QLineEdit { border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 8px 12px; font-size: 13px; background: #FFFFFF; color: #0F172A; } QLineEdit:focus { border-color: #2563EB; }"
         )
         self.qa_input.returnPressed.connect(self._on_ask_clicked)
 
         btn_send = QPushButton("Send →")
         btn_send.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_send.setStyleSheet(
-            "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 14px; border: none; }"
+            "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 8px 18px; border: none; } QPushButton:hover { background-color: #1D4ED8; }"
         )
         btn_send.clicked.connect(self._on_ask_clicked)
 
@@ -299,12 +299,12 @@ class AIAssistantView(QWidget):
             "No anomalies flagged.\n\nExecute prompts or run an ICAI scan to generate evidence references."
         )
         self.findings_display.setStyleSheet(
-            "QTextEdit { border: 1px solid #E2E8F0; border-radius: 6px; background-color: #FFFFFF; padding: 10px; font-size: 12px; color: #334155; }"
+            "QTextEdit { border: 1px solid #E2E8F0; border-radius: 6px; background-color: #FFFFFF; padding: 12px; font-size: 12px; color: #334155; }"
         )
         c3_layout.addWidget(self.findings_display, 1)
         splitter.addWidget(col3)
 
-        splitter.setSizes([240, 460, 300])
+        splitter.setSizes([260, 500, 320])
         main_layout.addWidget(splitter, 1)
 
         self.refresh_provider_status()

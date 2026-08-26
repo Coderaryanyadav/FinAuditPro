@@ -192,8 +192,29 @@ class MainWindow(QMainWindow):
         self.eng_selector_combo = _tag(QComboBox(), "clientSelectorCombo"); self.eng_selector_combo.setMinimumWidth(280)
         self.eng_selector_combo.currentIndexChanged.connect(self._on_header_engagement_changed)
         btn_new_audit = _tag(QPushButton("+ New Engagement"), "primaryBtn"); btn_new_audit.clicked.connect(self._on_new_engagement)
-        self.btn_copilot_toggle = QPushButton("AI Copilot")
-        self.btn_copilot_toggle.setStyleSheet("QPushButton { background: #1e293b; color: #38bdf8; border: 1px solid #0284c7; border-radius: 6px; padding: 6px 14px; font-weight: 600; font-size: 13px; } QPushButton:hover { background: #0369a1; color: #ffffff; }")
+        self.btn_copilot_toggle = QPushButton("AI Copilot ⌘K")
+        self.btn_copilot_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_copilot_toggle.setStyleSheet("""
+            QPushButton {
+                background-color: #0F172A;
+                color: #38BDF8;
+                border: 1px solid #334155;
+                border-radius: 6px;
+                padding: 6px 14px;
+                font-weight: 600;
+                font-size: 12px;
+                letter-spacing: 0.2px;
+            }
+            QPushButton:hover {
+                background-color: #1E293B;
+                color: #7DD3FC;
+                border-color: #0284C7;
+            }
+            QPushButton:pressed {
+                background-color: #0284C7;
+                color: #FFFFFF;
+            }
+        """)
         self.btn_copilot_toggle.clicked.connect(self._toggle_ai_drawer)
         for hw in (act_lbl, self.eng_selector_combo): h_layout.addWidget(hw)
         h_layout.addSpacing(6); h_layout.addWidget(btn_new_audit); h_layout.addSpacing(6); h_layout.addWidget(self.btn_copilot_toggle)
@@ -233,7 +254,7 @@ class MainWindow(QMainWindow):
         self.view_ai_assistant = AIAssistantView(self.ai_service, self.document_service, self.engagement_service)
         self.view_working_papers, self.view_reports = WorkingPaperView(self.engagement_service, self.working_paper_service), ReportView(self.engagement_service, self.report_service)
         self.view_pbc, self.view_queries = PBCTrackerView(self.pbc_service), AuditQueryView(self.query_service)
-        self.view_archival, self.view_roll_forward, self.view_settings = ArchivalView(self.db_manager), RollForwardView(self.db_manager), SettingsView()
+        self.view_archival, self.view_roll_forward, self.view_settings = ArchivalView(self.db_manager), RollForwardView(self.db_manager), SettingsView(auth_service=self.auth_service)
 
         views = (
             self.view_dashboard, self.view_pbc, self.view_audit_matrix, self.view_financial_data,

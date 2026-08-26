@@ -96,6 +96,7 @@ class GSTVerificationView(QWidget):
             action_callback=self._run_matching,
         )
 
+        self.table.setVisible(False)
         self.table_card.content_layout.addWidget(self.table)
         self.table_card.content_layout.addWidget(self.empty_state)
         main_layout.addWidget(self.table_card)

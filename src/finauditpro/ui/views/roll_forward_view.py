@@ -96,6 +96,7 @@ class RollForwardView(QWidget):
             action_callback=self._confirm_tie_out,
         )
 
+        self.tieout_table.setVisible(False)
         self.table_card.content_layout.addWidget(self.tieout_table)
         self.table_card.content_layout.addWidget(self.empty_state)
         layout.addWidget(self.table_card)

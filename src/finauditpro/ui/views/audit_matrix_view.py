@@ -177,6 +177,7 @@ class AuditMatrixView(QWidget):
         self.risks_table.setAlternatingRowColors(True)
 
         self.risks_empty = EmptyStateWidget("No audit risks recorded", "Log qualitative risks mapped to assertions per SA 315.", "+ New Audit Risk", self._on_new_risk_clicked)
+        self.risks_table.setVisible(False)
         card.content_layout.addWidget(self.risks_table)
         card.content_layout.addWidget(self.risks_empty)
         layout.addWidget(card)
@@ -191,17 +192,10 @@ class AuditMatrixView(QWidget):
         title_lbl = QLabel("Structured Audit Procedures Execution Hub")
         title_lbl.setStyleSheet("font-size: 13px; font-weight: 700; color: #1E293B;")
         hdr.addWidget(title_lbl)
-        hdr.addStretch()
+        btn_qss = "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }"
         btn = QPushButton("+ New Procedure")
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn.setStyleSheet("""
-            QPushButton {
-                background-color: #2563EB; color: #FFFFFF;
-                font-size: 12px; font-weight: 600;
-                border-radius: 6px; padding: 7px 16px; border: none;
-            }
-            QPushButton:hover { background-color: #1D4ED8; }
-        """)
+        btn.setStyleSheet(btn_qss)
         btn.clicked.connect(self._on_new_proc_clicked)
         hdr.addWidget(btn)
         layout.addLayout(hdr)
@@ -215,6 +209,7 @@ class AuditMatrixView(QWidget):
         self.procs_table.setAlternatingRowColors(True)
 
         self.procs_empty = EmptyStateWidget("No audit procedures scheduled", "Create substantive tests or analytical procedures.", "+ New Procedure", self._on_new_proc_clicked)
+        self.procs_table.setVisible(False)
         card.content_layout.addWidget(self.procs_table)
         card.content_layout.addWidget(self.procs_empty)
         layout.addWidget(card)
@@ -232,14 +227,7 @@ class AuditMatrixView(QWidget):
         hdr.addStretch()
         btn = QPushButton("+ Log Finding")
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn.setStyleSheet("""
-            QPushButton {
-                background-color: #2563EB; color: #FFFFFF;
-                font-size: 12px; font-weight: 600;
-                border-radius: 6px; padding: 7px 16px; border: none;
-            }
-            QPushButton:hover { background-color: #1D4ED8; }
-        """)
+        btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: none; } QPushButton:hover { background-color: #1D4ED8; }")
         btn.clicked.connect(self._on_new_finding_clicked)
         hdr.addWidget(btn)
         layout.addLayout(hdr)
@@ -253,6 +241,7 @@ class AuditMatrixView(QWidget):
         self.findings_table.setAlternatingRowColors(True)
 
         self.findings_empty = EmptyStateWidget("No audit findings logged", "Promote flagged exceptions or log audit findings.", "+ Log Finding", self._on_new_finding_clicked)
+        self.findings_table.setVisible(False)
         card.content_layout.addWidget(self.findings_table)
         card.content_layout.addWidget(self.findings_empty)
         layout.addWidget(card)

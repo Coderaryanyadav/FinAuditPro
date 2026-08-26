@@ -134,6 +134,7 @@ class FinancialDataView(QWidget):
             action_callback=self._on_run_analytics_clicked,
         )
 
+        self.exceptions_table.setVisible(False)
         self.exceptions_card.content_layout.addWidget(self.exceptions_table)
         self.exceptions_card.content_layout.addWidget(self.exceptions_empty)
         layout.addWidget(self.exceptions_card)
@@ -162,6 +163,7 @@ class FinancialDataView(QWidget):
             action_callback=self._on_import_clicked,
         )
 
+        self.records_table.setVisible(False)
         self.records_card.content_layout.addWidget(self.records_table)
         self.records_card.content_layout.addWidget(self.records_empty)
         layout.addWidget(self.records_card)

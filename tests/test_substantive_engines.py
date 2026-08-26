@@ -321,4 +321,32 @@ def test_roc_secretarial_engine() -> None:
     assert res.records[1].discrepancy_type == ROCDiscrepancyTypeEnum.UNREGISTERED_CHARGE_ON_ASSETS
 
 
+def test_group_audit_engine() -> None:
+    """Verify SA 600 Group Audit component significance benchmark (>15%) and component materiality allocation."""
+    from finauditpro.domain.group_audit_engine import (
+        ComponentTypeEnum,
+        GroupAuditEngine,
+    )
+
+    comps = [
+        # Significant subsidiary (50% of revenue)
+        {"component_name": "Apex Manufacturing Ltd", "revenue_paise": 5000000000, "assets_paise": 4000000000},
+        # Non-significant subsidiary (5% of revenue)
+        {"component_name": "Apex Small Spares LLP", "revenue_paise": 500000000, "assets_paise": 400000000},
+    ]
+
+    res = GroupAuditEngine.analyze_group_structure(
+        engagement_id="eng-group-01",
+        overall_group_materiality_paise=100000000,  # ₹1 Cr Group Materiality
+        components_data=comps,
+    )
+
+    assert res.total_components_count == 2
+    assert res.significant_components_count == 1
+    assert res.components[0].component_type == ComponentTypeEnum.SUBSIDIARY_SIGNIFICANT
+    assert res.components[1].component_type == ComponentTypeEnum.SUBSIDIARY_NON_SIGNIFICANT
+    assert res.components[0].component_materiality_paise > res.components[1].component_materiality_paise
+
+
+
 

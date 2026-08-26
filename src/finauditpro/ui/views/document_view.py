@@ -70,7 +70,7 @@ class DocumentView(QWidget):
             "Search full text (FTS5) for keywords (e.g. GST, Bank Balance, Invoice)..."
         )
         self.search_input.setStyleSheet(
-            "QLineEdit { border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px 10px; font-size: 12px; background: #FFFFFF; }"
+            "QLineEdit { border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 7px 12px; font-size: 13px; background: #FFFFFF; color: #0F172A; }"
             "QLineEdit:focus { border-color: #2563EB; }"
         )
         self.search_input.returnPressed.connect(self._on_search)

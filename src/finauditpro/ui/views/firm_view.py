@@ -63,7 +63,7 @@ class FirmView(QWidget):
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Search firms by name, registration (FRN), or PAN...")
         self.search_input.setStyleSheet(
-            "QLineEdit { border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px 10px; font-size: 12px; background: #FFFFFF; }"
+            "QLineEdit { border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 7px 12px; font-size: 13px; background: #FFFFFF; color: #0F172A; }"
             "QLineEdit:focus { border-color: #2563EB; }"
         )
         self.search_input.textChanged.connect(self._filter_firms)

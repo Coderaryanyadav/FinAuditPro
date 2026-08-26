@@ -1,0 +1,4 @@
+Invoice Number,Invoice Date,Supplier GSTIN,Supplier Name,Taxable Value (INR),Tax Amount (INR),ITC Eligibility
+INV-001,2025-04-10,27AAACB1234F1Z5,ABC Tech MSME,100000.0,18000.0,Eligible
+INV-002,2025-06-12,27AAACB1234F1Z5,ABC Tech MSME,50000.0,9000.0,Ineligible Sec 17(5)
+INV-003,2025-09-18,27XYZAB9999F1Z1,Zenith Logistics Ltd,200000.0,36000.0,Eligible

@@ -1,0 +1,7 @@
+Voucher Number,Date,Account Name,Amount (INR),Transaction Type,Narration,User ID
+V-1001,2025-04-10,Raw Material Purchases,450000.0,Debit,Purchase from ABC Tech MSME,acc_user1
+V-1002,2025-05-15,Employee Salaries,1250000.0,Debit,Monthly salary disbursement,hr_admin
+V-1003,2025-08-20,Plant & Machinery,5000000.0,Debit,Capitalization of CNC Machine,partner_ca
+V-1004,2025-11-25,Raw Material Purchases,450000.0,Debit,Duplicate payment test voucher,acc_user2
+V-1005,2026-03-28,Revenue from Operations,1000000.0,Credit,Invoice S-101 sales to Alpha Corp,sales_team
+V-1006,2026-03-31,Sundry Debtors,1800000.0,Debit,Year-end debtor closing balance,acc_user1

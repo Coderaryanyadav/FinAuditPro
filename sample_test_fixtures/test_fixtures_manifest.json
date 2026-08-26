@@ -1,0 +1,36 @@
+{
+  "manifest_version": "2.0.0",
+  "description": "Statutory audit sample test fixtures for FinAuditPro enterprise test suite.",
+  "files": [
+    {
+      "filename": "sample_trial_balance_fy24_25.xlsx",
+      "format": "XLSX",
+      "purpose": "Trial Balance ingestion & Schedule III classification"
+    },
+    {
+      "filename": "sample_general_ledger_vouchers.csv",
+      "format": "CSV",
+      "purpose": "Benford analysis, duplicate payment, and cut-off testing"
+    },
+    {
+      "filename": "sample_gstr2b_inward_supplies.csv",
+      "format": "CSV",
+      "purpose": "GSTR-2B vs Purchase register 3-way reconciliation"
+    },
+    {
+      "filename": "sample_bank_reconciliation_statement.xlsx",
+      "format": "XLSX",
+      "purpose": "BRS stale cheque (>90d) and delayed banking analytics"
+    },
+    {
+      "filename": "sample_fixed_asset_register.xlsx",
+      "format": "XLSX",
+      "purpose": "CARO 2020 Clause 3(i) and negative NBV anomaly testing"
+    },
+    {
+      "filename": "sample_statutory_engagement_letter.pdf",
+      "format": "PDF",
+      "purpose": "FTS5 OCR indexing, Evidence DAG, and Bounding Box viewer testing"
+    }
+  ]
+}

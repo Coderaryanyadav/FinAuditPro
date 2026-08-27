@@ -66,27 +66,34 @@ QScrollArea, QScrollArea > QWidget, QScrollArea #qt_scrollarea_viewport {
 QCheckBox {
     spacing: 8px;
     color: #0F172A;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 500;
     background: transparent;
 }
 QCheckBox::indicator {
     width: 18px;
     height: 18px;
-    border-radius: 4px;
-    border: 1px solid #CBD5E1;
-    background-color: #FFFFFF;
-}
-QCheckBox::indicator:hover {
-    border-color: #2563EB;
+    image: url(src/finauditpro/assets/icons/checkbox_unchecked.png);
 }
 QCheckBox::indicator:checked {
-    background-color: #2563EB;
-    border-color: #2563EB;
-    image: url("data:image/svg+xml;utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='white'%20stroke-width='3'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpolyline%20points='20%206%209%2017%204%2012'%3E%3C/polyline%3E%3C/svg%3E");
+    image: url(src/finauditpro/assets/icons/checkbox_checked.png);
 }
-QCheckBox::indicator:disabled {
-    background-color: #F1F5F9;
-    border-color: #E2E8F0;
+
+/* ── RADIO BUTTON ────────────────────────────────────────────────────────── */
+QRadioButton {
+    spacing: 8px;
+    color: #0F172A;
+    font-size: 13px;
+    font-weight: 500;
+    background: transparent;
+}
+QRadioButton::indicator {
+    width: 18px;
+    height: 18px;
+    image: url(src/finauditpro/assets/icons/radio_unchecked.png);
+}
+QRadioButton::indicator:checked {
+    image: url(src/finauditpro/assets/icons/radio_checked.png);
 }
 
 /* ── SCROLLBARS ──────────────────────────────────────────────────────────── */

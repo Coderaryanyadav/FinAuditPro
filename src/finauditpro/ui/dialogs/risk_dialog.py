@@ -1,10 +1,7 @@
 """Dialog for creating and editing Audit Risks."""
 
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QCheckBox,
-    QComboBox,
     QDialog,
     QFormLayout,
     QHBoxLayout,
@@ -21,6 +18,7 @@ from finauditpro.application.audit_planning_dtos import CreateRiskDTO
 from finauditpro.application.services.audit_planning_service import AuditPlanningService
 from finauditpro.domain.audit_matrix_entities import AssertionEnum, AuditRisk, RiskSeverityEnum
 from finauditpro.domain.entities import Engagement
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 
 class RiskDialog(QDialog):

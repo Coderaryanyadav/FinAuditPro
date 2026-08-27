@@ -1,10 +1,7 @@
 """Client creation and editing dialog."""
 
 from PySide6.QtCore import Qt
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
-    QComboBox,
     QDialog,
     QFormLayout,
     QHBoxLayout,
@@ -20,6 +17,7 @@ from finauditpro.application.dtos import CreateClientDTO, UpdateClientDTO
 from finauditpro.application.services.client_service import ClientService
 from finauditpro.domain.entities import Client, EntityTypeEnum, Firm
 from finauditpro.domain.exceptions import DomainError
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 
 class ClientDialog(QDialog):

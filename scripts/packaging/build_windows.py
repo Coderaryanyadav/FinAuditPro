@@ -49,7 +49,7 @@ def build_windows_app() -> Path:
     print("=" * 60)
 
     # 1. Ensure icons exist
-    icons_dir = PROJECT_ROOT / "assets" / "icons"
+    icons_dir = PROJECT_ROOT / "src" / "finauditpro" / "assets" / "icons"
     if not (icons_dir / "FinAuditPro.ico").exists():
         print("Icons missing. Generating application icons...")
         from scripts.packaging.generate_icons import generate_all_icons

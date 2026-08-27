@@ -3,10 +3,7 @@
 from typing import Any
 
 from PySide6.QtCore import QThread, Signal
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
-    QComboBox,
     QDialog,
     QFormLayout,
     QGroupBox,
@@ -23,6 +20,7 @@ from PySide6.QtWidgets import (
 
 from finauditpro.application.report_dtos import GenerateReportDTO
 from finauditpro.application.services.report_service import ReportService
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 
 class ReportWorkerThread(QThread):

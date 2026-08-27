@@ -1,8 +1,6 @@
 """Client Document Request (PBC) Tracker workspace view."""
 
 from PySide6.QtCore import Qt
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -23,6 +21,7 @@ from PySide6.QtWidgets import (
 from finauditpro.application.services.document_request_service import DocumentRequestService
 from finauditpro.domain.pbc_and_query_entities import DocumentRequest, DocumentRequestStatusEnum
 from finauditpro.ui.theme import CardWidget, MetricCard
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 
 class NewPBCRequestDialog(QDialog):
@@ -139,9 +138,8 @@ class PBCTrackerView(QWidget):
         layout.addLayout(self.metrics_row)
 
         # 3. Segmented Tab Selection
-        from finauditpro.ui.widgets.custom_combo import CustomComboBox
-        from PySide6.QtWidgets import QTabWidget
         from PySide6.QtCore import Qt
+        from PySide6.QtWidgets import QTabWidget
         self.tabs = QTabWidget()
         self.tabs.setUsesScrollButtons(True)
         self.tabs.setElideMode(Qt.TextElideMode.ElideNone)
@@ -283,7 +281,6 @@ class PBCTrackerView(QWidget):
             self.conf_table.setCellWidget(row, 5, btn_log)
 
     def _on_log_conf_reply(self, conf_id: str) -> None:
-        from finauditpro.ui.widgets.custom_combo import CustomComboBox
         from PySide6.QtWidgets import QInputDialog
         amt_str, ok1 = QInputDialog.getText(self, "Record Third-Party Confirmation", "Enter confirmed balance amount in ₹ (e.g. 500000.00):")
         if not ok1 or not amt_str.strip():

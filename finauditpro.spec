@@ -51,9 +51,9 @@ hiddenimports += collect_submodules("finauditpro")
 
 datas = []
 # Include application icons and resources
-icons_dir = PROJECT_ROOT / "assets" / "icons"
+icons_dir = SRC_DIR / "finauditpro" / "assets" / "icons"
 if icons_dir.exists():
-    datas.append((str(icons_dir), "assets/icons"))
+    datas.append((str(icons_dir), "finauditpro/assets/icons"))
 
 a = Analysis(
     [str(SRC_DIR / "finauditpro" / "__main__.py")],

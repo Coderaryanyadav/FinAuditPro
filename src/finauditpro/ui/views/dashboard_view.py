@@ -2,8 +2,6 @@
 Active Engagement Audit Command Center Dashboard View for FinAuditPro.
 Precision UI/UX Polish & Production-Grade Finish.
 """
-
-
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QFrame,
@@ -30,12 +28,10 @@ from finauditpro.ui.theme import CardWidget, MetricCard, StatusBadge
 
 class DashboardView(QWidget):
     """Enterprise Audit Command Center Overview Dashboard View."""
-
     engagement_selected = Signal(str)
     navigate_to_clients = Signal()
     navigate_to_engagements = Signal()
     navigate_to_matrix = Signal()
-
     def __init__(
         self,
         firm_service: FirmService,
@@ -49,45 +45,34 @@ class DashboardView(QWidget):
         self.client_service = client_service
         self.engagement_service = engagement_service
         self.audit_matrix_service = audit_matrix_service
-
         self.current_firm: Firm | None = None
         self.current_client: Client | None = None
         self.current_engagement: Engagement | None = None
-
         self._init_ui()
-
     def set_firm(self, firm: Firm | None) -> None:
         self.current_firm = firm
         self.refresh_dashboard()
-
     def _init_ui(self) -> None:
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
-
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setStyleSheet("background-color: #F8FAFC; border: none;")
-
         body = QWidget()
         body.setStyleSheet("background-color: #F8FAFC;")
         body_layout = QVBoxLayout(body)
         body_layout.setContentsMargins(24, 16, 24, 24)
         body_layout.setSpacing(12)
-
-        # 1. Page Header — strong engagement context
         hdr = QFrame()
         hdr.setStyleSheet("background: transparent; border: none;")
         hdr_l = QHBoxLayout(hdr)
         hdr_l.setContentsMargins(0, 0, 0, 0)
-
         left_v = QVBoxLayout()
         left_v.setSpacing(3)
-
         title_lbl = QLabel("Audit Overview")
         title_lbl.setStyleSheet("font-size: 22px; font-weight: 700; color: #0F172A; border: none; background: transparent;")
-
         ctx_row = QHBoxLayout()
         ctx_row.setSpacing(8)
         self.lbl_context_text = QLabel("AUDIT OVERVIEW - FY 2025-26")
@@ -100,21 +85,16 @@ class DashboardView(QWidget):
         for w in (self.lbl_context_text, self.lbl_audit_type, self.status_badge, self.lbl_pct_text):
             ctx_row.addWidget(w)
         ctx_row.addStretch()
-
         left_v.addWidget(title_lbl)
         left_v.addLayout(ctx_row)
         hdr_l.addLayout(left_v)
         hdr_l.addStretch()
-
-        # Live Executive Date & Time Pill Badge
         dt_badge = QFrame(); dt_badge.setStyleSheet("QFrame { background-color: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; padding: 4px 10px; }")
         dt_l = QHBoxLayout(dt_badge); dt_l.setContentsMargins(0, 0, 0, 0); dt_l.setSpacing(6)
         cal_icon = QLabel("📅"); cal_icon.setStyleSheet("font-size: 13px; border: none; background: transparent;")
         self.date_lbl = QLabel(utc_now().strftime("%a, %d %b %Y")); self.date_lbl.setStyleSheet("font-size: 13px; font-weight: 600; color: #334155; border: none; background: transparent;")
         dt_l.addWidget(cal_icon); dt_l.addWidget(self.date_lbl)
         hdr_l.addWidget(dt_badge, alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight); body_layout.addWidget(hdr)
-
-        # 2. Row 1: Workflow Stepper (60%) + Needs Attention (40%)
         row1 = QHBoxLayout(); row1.setSpacing(12)
         ws_card = CardWidget("AUDIT WORKFLOW"); ws_v = QVBoxLayout(); ws_v.setSpacing(8)
         stepper = QHBoxLayout(); stepper.setSpacing(0)
@@ -130,15 +110,12 @@ class DashboardView(QWidget):
             slbl.setStyleSheet(f"background-color: {bg}; color: {fg}; font-size: 11px; font-weight: {fw}; border: 1px solid {bd}; border-radius: 4px; padding: 5px 2px;")
             stepper.addWidget(slbl, stretch=1)
             self.step_widgets.append(slbl)
-
             if i < len(self.steps_data) - 1:
                 conn = QFrame()
                 conn.setFixedSize(16, 2)
                 conn.setStyleSheet("background-color: #CBD5E1; border: none;")
                 stepper.addWidget(conn)
-
         ws_v.addLayout(stepper)
-
         act_frame = QFrame()
         act_frame.setStyleSheet("background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 8px 12px;")
         act_l = QHBoxLayout(act_frame)
@@ -154,7 +131,6 @@ class DashboardView(QWidget):
         act_v.addWidget(act_hdr)
         act_v.addWidget(self.act_title)
         act_v.addWidget(self.act_desc)
-
         self.btn_go = QPushButton("Create Client →")
         self.btn_go.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_go.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 14px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }")
@@ -165,7 +141,6 @@ class DashboardView(QWidget):
         ws_v.addWidget(act_frame)
         ws_card.content_layout.addLayout(ws_v)
         row1.addWidget(ws_card, 6)
-
         att_card = CardWidget("NEEDS ATTENTION")
         att_v = QVBoxLayout()
         att_v.setContentsMargins(0, 4, 0, 4)
@@ -177,27 +152,21 @@ class DashboardView(QWidget):
         att_l = QHBoxLayout(self.att_row)
         att_l.setContentsMargins(0, 0, 0, 0)
         att_l.setSpacing(10)
-
         self.att_dot = QLabel("✓")
         self.att_dot.setFixedSize(24, 24)
         self.att_dot.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.att_dot.setStyleSheet("font-size: 14px; font-weight: 700; color: #16A34A; background: #DCFCE7; border-radius: 12px;")
-        
         self.att_txt = QLabel("All clear — no open findings or critical items require attention")
         self.att_txt.setStyleSheet("font-size: 13px; font-weight: 500; color: #334155; border: none; background: transparent;")
         self.att_txt.setWordWrap(True)
-        
         att_l.addStretch()
         att_l.addWidget(self.att_dot, alignment=Qt.AlignmentFlag.AlignVCenter)
         att_l.addWidget(self.att_txt, alignment=Qt.AlignmentFlag.AlignVCenter)
         att_l.addStretch()
-        
         att_v.addWidget(self.att_row)
         att_card.content_layout.addLayout(att_v)
         row1.addWidget(att_card, 4)
         body_layout.addLayout(row1)
-
-        # 3. Row 2: 4 KPI Cards (Equally distributed)
         stats = QHBoxLayout(); stats.setSpacing(12)
         self.card_clients = MetricCard("TOTAL CLIENTS", "0", "Registered clients", accent_color="#0284C7", action_text="View →")
         self.card_clients.clicked.connect(lambda: self.navigate_to_clients.emit())
@@ -209,21 +178,16 @@ class DashboardView(QWidget):
         for card_w in (self.card_clients, self.card_completed, self.card_pending, self.card_high_risk):
             stats.addWidget(card_w, stretch=1)
         body_layout.addLayout(stats)
-
-        # 4. Row 3: Audit Progress + Risk Exposure
         row3 = QHBoxLayout(); row3.setSpacing(12)
         trend_card = CardWidget("AUDIT PROGRESS"); trend_v = QVBoxLayout()
         trend_txt = QLabel("No completed audits yet\nComplete your first engagement to begin tracking progress.")
         trend_txt.setAlignment(Qt.AlignmentFlag.AlignCenter); trend_txt.setStyleSheet("font-size: 12px; color: #94A3B8; padding: 10px; border: none; background: transparent; line-height: 1.4;")
         trend_v.addWidget(trend_txt); trend_card.content_layout.addLayout(trend_v)
-
         risk_card = CardWidget("RISK EXPOSURE"); self.risk_v = QVBoxLayout(); self.risk_v.setSpacing(4)
         self.lbl_zero_risk = QLabel(" No risk exposure identified")
         self.lbl_zero_risk.setAlignment(Qt.AlignmentFlag.AlignCenter); self.lbl_zero_risk.setStyleSheet("font-size: 12px; font-weight: 600; color: #15803D; padding: 10px; border: none; background: transparent;")
         self.risk_v.addWidget(self.lbl_zero_risk); risk_card.content_layout.addLayout(self.risk_v)
         row3.addWidget(trend_card, 6); row3.addWidget(risk_card, 4); body_layout.addLayout(row3)
-
-        # 5. Row 4: Recent Audit Engagements (content-driven height)
         table_card = CardWidget("RECENT AUDIT ENGAGEMENTS")
         self.table_projects = QTableWidget(); self.table_projects.setColumnCount(6)
         self.table_projects.setHorizontalHeaderLabels(["CLIENT", "FINANCIAL YEAR", "TYPE", "STATUS", "RISK", "ACTION"])
@@ -235,7 +199,6 @@ class DashboardView(QWidget):
         self.table_projects.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table_projects.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.table_projects.itemClicked.connect(self._on_table_click); self.table_projects.setVisible(False)
-
         from finauditpro.ui.theme import EmptyStateWidget
         self.recent_empty = EmptyStateWidget(
             title="No audit engagements registered",
@@ -246,15 +209,10 @@ class DashboardView(QWidget):
         table_card.content_layout.addWidget(self.table_projects)
         table_card.content_layout.addWidget(self.recent_empty)
         body_layout.addWidget(table_card)
-
-        # Absorb remaining viewport space so cards don't stretch
         body_layout.addStretch(1)
-
         scroll.setWidget(body)
         main_layout.addWidget(scroll)
-
         self.refresh_dashboard()
-
     def _on_table_click(self, item: QTableWidgetItem) -> None:
         row = item.row()
         name_item = self.table_projects.item(row, 0)
@@ -263,7 +221,6 @@ class DashboardView(QWidget):
             if eng_id:
                 self.engagement_selected.emit(eng_id)
                 self.navigate_to_matrix.emit()
-
     def _on_continue_setup_clicked(self) -> None:
         if self.current_engagement:
             self.navigate_to_matrix.emit()
@@ -271,18 +228,14 @@ class DashboardView(QWidget):
             self.navigate_to_engagements.emit()
         else:
             self.navigate_to_clients.emit()
-
     def refresh_dashboard(self) -> None:
         clients = self.client_service.list_clients_for_firm(self.current_firm.id) if self.current_firm else (self.client_service.list_all_clients() if hasattr(self.client_service, "list_all_clients") else [])
         self.card_clients.set_value(str(len(clients)))
         all_engagements: list[Engagement] = []
         for c in clients:
             all_engagements.extend(self.engagement_service.list_engagements_for_client(c.id))
-
         completed_cnt = sum(1 for e in all_engagements if str(getattr(e, "status", "")).lower() in ("completed", "signed off", "locked"))
         self.card_completed.set_value(str(completed_cnt))
-
-        # Dynamically compute open findings and high risk cases
         total_open_findings = 0
         total_high_risk = 0
         has_risk_exposure = False
@@ -294,18 +247,14 @@ class DashboardView(QWidget):
                 has_risk_exposure = True
                 if getattr(rk.inherent_risk, "value", str(rk.inherent_risk)).lower() == "high":
                     total_high_risk += 1
-
         self.card_pending.set_value(str(total_open_findings))
         self.card_high_risk.set_value(str(total_high_risk))
-
         if has_risk_exposure:
             self.lbl_zero_risk.setText(f"{total_high_risk} high-risk areas identified")
             self.lbl_zero_risk.setStyleSheet("font-size: 12px; font-weight: 600; color: #DC2626; padding: 10px; border: none; background: transparent;")
         else:
             self.lbl_zero_risk.setText(" No risk exposure identified")
             self.lbl_zero_risk.setStyleSheet("font-size: 12px; font-weight: 600; color: #15803D; padding: 10px; border: none; background: transparent;")
-
-        # True database-driven audit workflow progress computation
         step_active_idx = 0
         if not clients:
             self.lbl_context_text.setText("No active engagement — Ready for setup")
@@ -331,8 +280,6 @@ class DashboardView(QWidget):
             self.lbl_context_text.setText(f"{c_name} · FY {e_active.financial_year}")
             self.lbl_audit_type.setText(audit_t)
             self.status_badge.setText(status_v)
-
-            # Check materiality assessment
             mat = self.audit_matrix_service.get_latest_materiality(e_active.id) if hasattr(self.audit_matrix_service, "get_latest_materiality") else None
             if not mat:
                 step_active_idx = 3
@@ -349,7 +296,6 @@ class DashboardView(QWidget):
                 self.act_title.setText(f"Execute audit procedures for {c_name}")
                 self.act_desc.setText("Review risks, execute substantive test procedures, and inspect working papers.")
                 self.btn_go.setText("Open Audit Matrix →")
-
         step_names = ["Client", "FY", "Engagement", "Materiality", "Documentation", "Completion"]
         for i, slbl in enumerate(self.step_widgets):
             is_done = i < step_active_idx
@@ -362,10 +308,8 @@ class DashboardView(QWidget):
             bd = "#BBF7D0" if is_done else ("#BFDBFE" if is_active else "#E2E8F0")
             fw = "600" if (is_done or is_active) else "500"
             slbl.setStyleSheet(f"background-color: {bg}; color: {fg}; font-size: 11px; font-weight: {fw}; border: 1px solid {bd}; border-radius: 4px; padding: 5px 2px;")
-
         self.table_projects.setRowCount(0)
         client_map = {c.id: c.name for c in clients}
-
         for idx, eng in enumerate(all_engagements[:10]):
             self.table_projects.insertRow(idx)
             c_name = client_map.get(eng.client_id, "—")
@@ -373,8 +317,6 @@ class DashboardView(QWidget):
             status_val = eng.status.value if hasattr(eng.status, "value") else str(eng.status)
             c_item = QTableWidgetItem(c_name)
             c_item.setData(Qt.ItemDataRole.UserRole, eng.id)
-
-            # Determine risk dynamically
             eng_risks = self.audit_matrix_service.list_risks_for_engagement(eng.id)
             if any(getattr(r.inherent_risk, "value", str(r.inherent_risk)).lower() == "high" for r in eng_risks):
                 risk_lbl = "● High"
@@ -382,7 +324,6 @@ class DashboardView(QWidget):
                 risk_lbl = "● Medium"
             else:
                 risk_lbl = "● Normal"
-
             items = [
                 c_item,
                 QTableWidgetItem(f"FY {eng.financial_year}"),

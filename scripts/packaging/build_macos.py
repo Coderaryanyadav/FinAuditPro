@@ -29,7 +29,7 @@ def build_macos_app() -> Path:
     print("=" * 60)
 
     # 1. Ensure icons are generated
-    icons_dir = PROJECT_ROOT / "assets" / "icons"
+    icons_dir = PROJECT_ROOT / "src" / "finauditpro" / "assets" / "icons"
     if not (icons_dir / "FinAuditPro.icns").exists():
         print("Icons missing. Generating application icons...")
         from scripts.packaging.generate_icons import generate_all_icons
@@ -128,7 +128,7 @@ def create_dmg(app_path: Path) -> Path:
 
     if use_dmgbuild:
         print("  Using dmgbuild for native drag-and-drop presentation...")
-        icon_path = PROJECT_ROOT / "assets" / "icons" / "FinAuditPro.icns"
+        icon_path = PROJECT_ROOT / "src" / "finauditpro" / "assets" / "icons" / "FinAuditPro.icns"
 
         dmg_settings = f"""
 filename = '{dmg_path}'
@@ -173,7 +173,7 @@ default_view = 'icon-view'
         os.symlink("/Applications", staging_dir / "Applications")
 
         # Copy Volume Icon if available
-        icns_file = PROJECT_ROOT / "assets" / "icons" / "FinAuditPro.icns"
+        icns_file = PROJECT_ROOT / "src" / "finauditpro" / "assets" / "icons" / "FinAuditPro.icns"
         if icns_file.exists():
             shutil.copy2(icns_file, staging_dir / ".VolumeIcon.icns")
 

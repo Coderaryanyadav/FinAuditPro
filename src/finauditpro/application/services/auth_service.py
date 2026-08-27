@@ -90,11 +90,11 @@ class AuthService:
 
             if not verify_password(password, user.password_hash, user.salt):
                 raise ValidationError("Invalid username or password.")
-                
+
             if user.is_totp_enabled:
                 if not totp_token:
                     raise ValidationError("TOTP_REQUIRED")
-                if not self.verify_totp_token(user.totp_secret, totp_token):
+                if not user.totp_secret or not self.verify_totp_token(user.totp_secret, totp_token):
                     raise ValidationError("Invalid 2FA token.")
 
             return UserSession(
@@ -114,18 +114,52 @@ class AuthService:
         self.validate_password_complexity(new_password)
         with self.db_manager.session_scope() as session:
             repo = UserRepository(session)
-            user = repo.update_credentials(
-                user_id,
+            user = repo.get_by_id(user_id)
+            if not user:
+                raise ValidationError("User not found.")
+            existing = repo.get_by_username(cleaned_email)
+            if existing and existing.id != user_id:
+                raise ValidationError(f"Email {cleaned_email} is already registered to another account.")
+            updated = repo.update_credentials(
+                user_id=user_id,
                 new_username=cleaned_email,
                 new_password=new_password,
                 must_change_password=False,
             )
             return UserSession(
-                user_id=user.id,
-                username=user.username,
-                role=user.role,
+                user_id=updated.id,
+                username=updated.username,
+                role=updated.role,
                 must_change_password=False,
             )
+
+    def update_user_password(
+        self, user_id: str, old_password: str, new_password: str
+    ) -> UserSession:
+        """Verify existing password and set new password."""
+        self.validate_password_complexity(new_password)
+        with self.db_manager.session_scope() as session:
+            repo = UserRepository(session)
+            user = repo.get_by_id(user_id)
+            if not user:
+                raise ValidationError("User not found.")
+            if not verify_password(old_password, user.password_hash, user.salt):
+                raise ValidationError("Current password does not match.")
+            updated = repo.update_password(
+                user_id=user_id, new_password=new_password, must_change_password=False
+            )
+            return UserSession(
+                user_id=updated.id,
+                username=updated.username,
+                role=updated.role,
+                must_change_password=False,
+            )
+
+    def change_password(
+        self, user_id: str, old_password: str, new_password: str
+    ) -> UserSession:
+        """Change user password after verifying current credentials."""
+        return self.update_user_password(user_id, old_password, new_password)
 
     def force_change_password(self, user_id: str, new_password: str) -> UserSession:
         """Force update user password and clear must_change_password flag."""
@@ -137,26 +171,6 @@ class AuthService:
                 user_id=user.id,
                 username=user.username,
                 role=user.role,
-                must_change_password=False,
-            )
-
-    def change_password(
-        self, user_id: str, old_password: str, new_password: str
-    ) -> UserSession:
-        """Change user password after verifying current credentials."""
-        self.validate_password_complexity(new_password)
-        with self.db_manager.session_scope() as session:
-            repo = UserRepository(session)
-            user = repo.get_by_id(user_id)
-            if not user:
-                raise ValidationError("User not found.")
-            if not verify_password(old_password, user.password_hash, user.salt):
-                raise ValidationError("Current password is incorrect.")
-            updated_user = repo.update_password(user_id, new_password, must_change_password=False)
-            return UserSession(
-                user_id=updated_user.id,
-                username=updated_user.username,
-                role=updated_user.role,
                 must_change_password=False,
             )
 
@@ -176,7 +190,7 @@ class AuthService:
             )
 
     def list_users(self) -> list[User]:
-        """List all registered users."""
+        """Return list of all registered users."""
         with self.db_manager.session_scope() as session:
             repo = UserRepository(session)
             return repo.list_all()
@@ -184,26 +198,26 @@ class AuthService:
     def generate_totp_secret(self) -> str:
         """Generate a new secure TOTP base32 secret."""
         import pyotp
-        return pyotp.random_base32()
+        return str(pyotp.random_base32())
 
     def get_totp_uri(self, secret: str, username: str) -> str:
         """Generate provisioning URI for QR code generation."""
         import pyotp
-        return pyotp.totp.TOTP(secret).provisioning_uri(
+        return str(pyotp.totp.TOTP(secret).provisioning_uri(
             name=username, issuer_name="FinAuditPro"
-        )
+        ))
 
     def verify_totp_token(self, secret: str, token: str) -> bool:
         """Verify a 6-digit TOTP token against a secret."""
         import pyotp
         totp = pyotp.TOTP(secret)
-        return totp.verify(token)
+        return bool(totp.verify(token))
 
     def enable_totp(self, user_id: str, secret: str, token: str) -> bool:
         """Verify token and permanently enable TOTP for the user."""
         if not self.verify_totp_token(secret, token):
             raise ValidationError("Invalid 2FA token.")
-        
+
         with self.db_manager.session_scope() as session:
             from finauditpro.infrastructure.persistence.models import UserModel
             model = session.get(UserModel, user_id)
@@ -224,3 +238,9 @@ class AuthService:
             model.totp_secret = None
             model.is_totp_enabled = False
             session.flush()
+
+    def is_totp_enabled_for_user(self, user_id: str) -> bool:
+        """Check if 2FA is active for given user ID without direct persistence calls from UI."""
+        with self.db_manager.session_scope() as session:
+            user = UserRepository(session).get_by_id(user_id)
+            return bool(user and user.is_totp_enabled)

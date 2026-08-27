@@ -2,7 +2,6 @@
 FinAuditPro Enterprise — Design System Tokens, Theme Manager & UI Kit
 Single source of truth for visual tokens, typography, badges, INR currency formatting, and empty/loading states.
 """
-
 from typing import Any
 
 from PySide6.QtCore import QObject, Qt, Signal
@@ -38,8 +37,6 @@ def format_inr(val: Any) -> str:
         return f"{'-' if neg else ''}₹{res}.{dec_part}"
     except Exception:
         return f"₹{val}"
-
-
 class LightColors:
     BG_BASE, BG_SURFACE, BG_ELEVATED, BG_SUBTLE, BG_HOVER = "#F8FAFC", "#FFFFFF", "#FFFFFF", "#F1F5F9", "#E2E8F0"
     BORDER_DEFAULT, BORDER_STRONG, BORDER_FOCUS = "#E2E8F0", "#CBD5E1", "#2563EB"
@@ -50,8 +47,6 @@ class LightColors:
     DANGER, DANGER_SUBTLE = "#DC2626", "rgba(220, 38, 38, 0.1)"
     INFO, INFO_SUBTLE = "#4F46E5", "rgba(79, 70, 229, 0.1)"
     NAV_BG, NAV_BORDER, NAV_TEXT, NAV_TEXT_ACTIVE, NAV_ACTIVE_BG = "#FFFFFF", "#E2E8F0", "#475569", "#2563EB", "#EFF6FF"
-
-
 class DarkColors:
     BG_BASE, BG_SURFACE, BG_ELEVATED, BG_SUBTLE, BG_HOVER = "#0F172A", "#1E293B", "#334155", "#1E293B", "#334155"
     BORDER_DEFAULT, BORDER_STRONG, BORDER_FOCUS = "#334155", "#475569", "#3B82F6"
@@ -62,41 +57,29 @@ class DarkColors:
     DANGER, DANGER_SUBTLE = "#EF4444", "rgba(239, 68, 68, 0.15)"
     INFO, INFO_SUBTLE = "#6366F1", "rgba(99, 102, 241, 0.15)"
     NAV_BG, NAV_BORDER, NAV_TEXT, NAV_TEXT_ACTIVE, NAV_ACTIVE_BG = "#0F172A", "#1E293B", "#94A3B8", "#3B82F6", "rgba(59, 130, 246, 0.18)"
-
-
 Colors = LightColors
-
-
 class ThemeManager(QObject):
     theme_changed = Signal(bool)
     _instance: Any = None
-
     def __new__(cls) -> "ThemeManager":
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._is_dark = False
         return cls._instance  # type: ignore[no-any-return]
-
     @property
-
     def is_dark(self) -> bool:
         return bool(getattr(self, "_is_dark", False))
-
     @property
     def tokens(self) -> Any:
         return DarkColors if self.is_dark else LightColors
-
     def set_dark_mode(self, enabled: bool) -> None:
         if getattr(self, "_is_dark", False) != enabled:
             self._is_dark = enabled
             global Colors
             Colors = DarkColors if enabled else LightColors  # type: ignore[assignment]
             self.theme_changed.emit(enabled)
-
     def toggle_theme(self) -> None:
         self.set_dark_mode(not self.is_dark)
-
-
 class CardWidget(QFrame):
     def __init__(self, title: str | None = None, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -118,11 +101,8 @@ class CardWidget(QFrame):
         self.content_layout.setContentsMargins(0, 0, 0, 0)
         self.content_layout.setSpacing(6)
         layout.addWidget(self.content_widget)
-
-
 class MetricCard(QFrame):
     clicked = Signal()
-
     def __init__(self, title: str, value: str, subtitle: str = "", accent_color: str = "#2563EB", action_text: str = "", parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setObjectName("metricCard")
@@ -152,30 +132,21 @@ class MetricCard(QFrame):
         layout.addWidget(self.title_lbl)
         layout.addWidget(self.value_lbl)
         layout.addLayout(sub_row)
-
     def mousePressEvent(self, event: Any) -> None:
         super().mousePressEvent(event)
         self.clicked.emit()
-
     def set_value(self, val: str) -> None:
         self.value_lbl.setText(val)
-
-
-
 class Fonts:
     FAMILY = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
-    FAMILY_MONO = "'JetBrains Mono', 'SF Mono', 'Menlo', 'Consolas', monospace"
-
-
+    FAMILY_MONO = "'JetBrains Mono', 'Menlo', 'Consolas', monospace"
 class StatusBadge(QLabel):
     def __init__(self, text: str, status_type: str = "info", parent: QWidget | None = None) -> None:
         super().__init__(text, parent)
         self._update_style(status_type)
-
     def set_status(self, text: str, status_type: str = "info") -> None:
         self.setText(text)
         self._update_style(status_type)
-
     def _update_style(self, status_type: str) -> None:
         st = status_type.lower()
         if st in ("success", "completed", "signed off", "matched", "ready", "indexed", "compliant", "verified", "tied out"):
@@ -189,8 +160,6 @@ class StatusBadge(QLabel):
         else:
             style = "color: #475569; background: #F1F5F9; border: 1px solid #E2E8F0;"
         self.setStyleSheet(f"font-size: 11px; font-weight: 500; border-radius: 4px; padding: 2px 8px; {style}")
-
-
 class RiskBadge(QLabel):
     def __init__(self, risk_level: str, parent: QWidget | None = None) -> None:
         super().__init__(f"● {risk_level}", parent)
@@ -200,40 +169,28 @@ class RiskBadge(QLabel):
         elif "low" in rl: st = "color: #15803D; background: #DCFCE7; border: 1px solid #BBF7D0;"
         else: st = "color: #64748B; background: #F1F5F9; border: 1px solid #E2E8F0;"
         self.setStyleSheet(f"font-size: 11px; font-weight: 500; border-radius: 4px; padding: 2px 8px; {st}")
-
-
 class FinAuditLogoWidget(QWidget):
     """Universal vector brand emblem for FinAuditPro — scalable for headers, sidebars, and app icons."""
-
     def __init__(self, size: int = 30, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.size = size
         self.setFixedSize(size, size)
-
     def paintEvent(self, event: Any) -> None:
         from PySide6.QtCore import QRectF
         from PySide6.QtGui import QBrush, QColor, QLinearGradient, QPainter, QPainterPath, QPen
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-
         s = float(self.size)
         r = s * 0.22
-
-        # Rounded Squircle base with linear gradient
         grad = QLinearGradient(0, 0, s, s)
         grad.setColorAt(0.0, QColor("#3B82F6"))
         grad.setColorAt(1.0, QColor("#1D4ED8"))
-
         path_bg = QPainterPath()
         path_bg.addRoundedRect(QRectF(0, 0, s, s), r, r)
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(QBrush(grad))
         painter.drawPath(path_bg)
-
-        # Scale factor relative to 30px reference
         sf = s / 30.0
-
-        # Geometric Audit Shield
         shield = QPainterPath()
         shield.moveTo(15.0 * sf, 6.5 * sf)
         shield.lineTo(22.5 * sf, 9.5 * sf)
@@ -242,12 +199,9 @@ class FinAuditLogoWidget(QWidget):
         shield.cubicTo(10.5 * sf, 24.0 * sf, 7.5 * sf, 21.0 * sf, 7.5 * sf, 16.5 * sf)
         shield.lineTo(7.5 * sf, 9.5 * sf)
         shield.closeSubpath()
-
         painter.setPen(QPen(QColor(255, 255, 255, 220), 1.5 * sf, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
         painter.setBrush(QColor(255, 255, 255, 40))
         painter.drawPath(shield)
-
-        # Crisp Inner Checkmark
         chk = QPainterPath()
         chk.moveTo(11.5 * sf, 15.5 * sf)
         chk.lineTo(14.0 * sf, 18.0 * sf)
@@ -255,32 +209,22 @@ class FinAuditLogoWidget(QWidget):
         painter.setPen(QPen(QColor("#FFFFFF"), 2.0 * sf, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
         painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawPath(chk)
-
-
 class EmptyStateIconWidget(QWidget):
     """Clean vector icon for EmptyState cards with professional audit shield emblem."""
-
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setFixedSize(44, 44)
-
     def paintEvent(self, event: Any) -> None:
         from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-
-        # Background circular badge
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(QColor("#EFF6FF"))
         painter.drawEllipse(2, 2, 40, 40)
-
-        # Border ring
         pen_ring = QPen(QColor("#DBEAFE"), 1.5)
         painter.setPen(pen_ring)
         painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawEllipse(2, 2, 40, 40)
-
-        # Audit shield path
         path = QPainterPath()
         path.moveTo(22, 11)
         path.lineTo(31, 14)
@@ -289,20 +233,15 @@ class EmptyStateIconWidget(QWidget):
         path.cubicTo(17, 33, 13, 29, 13, 23)
         path.lineTo(13, 14)
         path.closeSubpath()
-
         painter.setPen(QPen(QColor("#2563EB"), 1.8, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
         painter.setBrush(QColor("#FFFFFF"))
         painter.drawPath(path)
-
-        # Checkmark inside shield
         chk = QPainterPath()
         chk.moveTo(18, 23)
         chk.lineTo(21, 26)
         chk.lineTo(26, 19)
         painter.setPen(QPen(QColor("#2563EB"), 2.0, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
         painter.drawPath(chk)
-
-
 class EmptyStateWidget(QFrame):
     def __init__(self, title: str, description: str, action_text: str = "", action_callback: object = None, glyph: str = "", parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -314,19 +253,16 @@ class EmptyStateWidget(QFrame):
         layout.setSpacing(12)
         layout.addStretch()
         layout.addWidget(EmptyStateIconWidget(), alignment=Qt.AlignmentFlag.AlignCenter)
-        
         t_lbl = QLabel(title)
         t_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         t_lbl.setStyleSheet("font-size: 17px; font-weight: 700; color: #0F172A; border: none; background: transparent; padding-bottom: 2px;")
         layout.addWidget(t_lbl)
-        
         d_lbl = QLabel(description)
         d_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         d_lbl.setWordWrap(True)
         d_lbl.setStyleSheet("font-size: 14px; color: #64748B; border: none; background: transparent; padding-bottom: 4px;")
         d_lbl.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         layout.addWidget(d_lbl)
-
         if action_text and action_callback:
             btn = QPushButton(action_text)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -334,10 +270,7 @@ class EmptyStateWidget(QFrame):
             btn.clicked.connect(action_callback)
             layout.addSpacing(6)
             layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
-
         layout.addStretch()
-
-
 class LoadingStateWidget(QFrame):
     def __init__(self, message: str = "Loading audit records...", parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -352,8 +285,6 @@ class LoadingStateWidget(QFrame):
         msg.setStyleSheet("font-size: 13px; font-weight: 500; color: #64748B;")
         layout.addWidget(lbl, alignment=Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(msg, alignment=Qt.AlignmentFlag.AlignCenter)
-
-
 class ErrorStateWidget(QFrame):
     def __init__(self, title: str = "Unable to load data", message: str = "Local audit database could not be queried. No changes were made.", retry_callback: object = None, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -373,8 +304,6 @@ class ErrorStateWidget(QFrame):
             btn.setStyleSheet("background-color: #DC2626; color: #FFFFFF; font-size: 13px; font-weight: 500; border-radius: 6px; padding: 6px 14px;")
             btn.clicked.connect(retry_callback)
             layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
-
-
 class PageHeader(QFrame):
     def __init__(self, title: str, subtitle: str = "", action_text: str = "", action_callback: object = None, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -384,7 +313,6 @@ class PageHeader(QFrame):
         self.action_layout.setSpacing(12)
         left_v = QVBoxLayout()
         left_v.setSpacing(2)
-
         self.title_lbl = QLabel(title)
         self.title_lbl.setStyleSheet("font-size: 22px; font-weight: 600; color: #0F172A; border: none; background: transparent;")
         left_v.addWidget(self.title_lbl)
@@ -401,4 +329,3 @@ class PageHeader(QFrame):
             self.action_btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 13px; font-weight: 500; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }")
             self.action_btn.clicked.connect(action_callback)
             self.action_layout.addWidget(self.action_btn, alignment=Qt.AlignmentFlag.AlignVCenter)
-

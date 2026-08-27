@@ -387,7 +387,7 @@ class UserModel(Base):
     role: Mapped[str] = mapped_column(String(50), nullable=False, default="Associate")
     is_active: Mapped[bool] = mapped_column(nullable=False, default=True)
     must_change_password: Mapped[bool] = mapped_column(nullable=False, default=False)
-    totp_secret: Mapped[str] = mapped_column(String(32), nullable=True)
+    totp_secret: Mapped[str | None] = mapped_column(String(32), nullable=True)
     is_totp_enabled: Mapped[bool] = mapped_column(nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)

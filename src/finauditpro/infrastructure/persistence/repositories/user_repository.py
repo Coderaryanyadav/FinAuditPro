@@ -147,3 +147,14 @@ class UserRepository:
         stmt = select(UserModel).limit(1)
         first_user = self.session.scalars(stmt).first()
         return first_user is None
+
+    def seed_default_admin_if_empty(self) -> User | None:
+        """Seed default administrator if users table is empty."""
+        if self.is_empty():
+            return self.create_user_with_password(
+                username="admin@finauditpro.com",
+                password="Admin@123",  # noqa: S106
+                role=RoleEnum.ADMINISTRATOR,
+                must_change_password=True,
+            )
+        return None

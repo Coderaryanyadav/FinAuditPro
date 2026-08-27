@@ -1,10 +1,7 @@
 """Engagement creation and editing dialog."""
 
 from PySide6.QtCore import Qt
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
-    QComboBox,
     QDialog,
     QFormLayout,
     QHBoxLayout,
@@ -26,6 +23,7 @@ from finauditpro.domain.entities import (
     Firm,
 )
 from finauditpro.domain.exceptions import DomainError
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 
 class EngagementDialog(QDialog):

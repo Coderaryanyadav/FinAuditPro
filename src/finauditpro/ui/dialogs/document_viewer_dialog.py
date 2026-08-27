@@ -5,10 +5,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
-    QComboBox,
     QDialog,
     QFormLayout,
     QHBoxLayout,
@@ -32,6 +29,7 @@ from finauditpro.application.services.document_service import (
 )
 from finauditpro.domain.document_entities import DocumentCategoryEnum
 from finauditpro.ui.theme import CardWidget
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 try:
     from PySide6.QtPdf import QPdfDocument

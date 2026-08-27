@@ -67,7 +67,7 @@ class ReopenDialog(QDialog):
 
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
-        confirm_btn = QPushButton("Authorize & Reopen")
+        confirm_btn = QPushButton("Authorize && Reopen")
         confirm_btn.setStyleSheet(
             "background-color: #DC2626; color: white; font-weight: 600; padding: 6px 14px; border-radius: 6px;"
         )
@@ -120,7 +120,7 @@ class ArchivalView(QWidget):
         hdr_layout.addLayout(left_v)
         hdr_layout.addStretch()
 
-        self.close_wizard_btn = QPushButton("Close & Seal Engagement")
+        self.close_wizard_btn = QPushButton("Close && Seal Engagement")
         self.close_wizard_btn.setStyleSheet(
             "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }"
         )

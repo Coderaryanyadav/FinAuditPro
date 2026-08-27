@@ -134,8 +134,8 @@ class WorkingPaperView(QWidget):
         self.preview_card = CardWidget("DOCUMENT EVIDENCE & TESTING PREVIEW")
         self.preview_text = QTextEdit()
         self.preview_text.setReadOnly(True)
-        self.preview_text.setStyleSheet("QTextEdit { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; color: #334155; font-family: 'SF Mono', monospace; font-size: 12px; padding: 12px; }")
-        from PySide6.QtGui import QPalette, QColor
+        self.preview_text.setStyleSheet("QTextEdit { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; color: #334155; font-family: monospace; font-size: 12px; padding: 12px; }")
+        from PySide6.QtGui import QColor, QPalette
         pal = self.preview_text.palette()
         pal.setColor(QPalette.ColorRole.PlaceholderText, QColor("#94A3B8"))
         self.preview_text.setPalette(pal)

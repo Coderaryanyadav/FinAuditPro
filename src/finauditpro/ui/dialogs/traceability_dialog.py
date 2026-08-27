@@ -85,7 +85,7 @@ class TraceabilityDialog(QDialog):
                 border: 1px solid #334155;
                 border-radius: 6px;
                 color: #e2e8f0;
-                font-family: 'SF Mono', Menlo, Consolas, monospace;
+                font-family: Menlo, Consolas, monospace;
                 font-size: 11px;
                 padding: 10px;
             }

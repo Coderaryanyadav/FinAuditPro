@@ -31,6 +31,8 @@ def db_env(tmp_path):
     db_file = tmp_path / "test_auth.db"
     db_manager = DatabaseManager(str(db_file))
     db_manager.create_tables()
+    with db_manager.session_scope() as session:
+        UserRepository(session).seed_default_admin_if_empty()
     return db_manager
 
 
@@ -43,8 +45,10 @@ def test_password_hashing_and_verification():
     assert verify_password("WrongPassword", h, salt) is False
 
 
-def test_user_repository_and_default_admin(db_env):
-    with db_env.session_scope() as session:
+def test_user_repository_and_default_admin(tmp_path):
+    db_manager = DatabaseManager(str(tmp_path / "fresh_admin.db"))
+    db_manager.create_tables()
+    with db_manager.session_scope() as session:
         repo = UserRepository(session)
         admin = repo.seed_default_admin_if_empty()
         assert admin is not None

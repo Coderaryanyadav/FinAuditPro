@@ -1,10 +1,7 @@
 """Dialog for creating and configuring Audit Procedures."""
 
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QCheckBox,
-    QComboBox,
     QDialog,
     QFormLayout,
     QHBoxLayout,
@@ -21,6 +18,7 @@ from finauditpro.application.audit_planning_dtos import CreateProcedureDTO
 from finauditpro.application.services.audit_planning_service import AuditPlanningService
 from finauditpro.domain.audit_matrix_entities import AssertionEnum, AuditProcedure, AuditRisk
 from finauditpro.domain.entities import Engagement
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 
 class ProcedureDialog(QDialog):

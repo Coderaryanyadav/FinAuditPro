@@ -223,9 +223,9 @@ class OnboardingDialog(QDialog):
         )
         self.btn_submit.clicked.connect(self._handle_onboarding)
         fl.addWidget(self.btn_submit)
-        
+
         rl.addWidget(form)
-        
+
         root.addWidget(left, stretch=4)
         root.addWidget(right_bg, stretch=5)
 
@@ -234,11 +234,11 @@ class OnboardingDialog(QDialog):
         email = self.input_user.text().strip()
         pwd = self.input_pass.text()
         cpwd = self.input_cpass.text()
-        
+
         if not email or not pwd:
             QMessageBox.warning(self, "Validation Error", "Email and password are required.")
             return
-            
+
         if pwd != cpwd:
             QMessageBox.warning(self, "Validation Error", "Passwords do not match.")
             return

@@ -1,9 +1,6 @@
 """Dialog for logging structured Audit Findings."""
 
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
-    QComboBox,
     QDialog,
     QFormLayout,
     QHBoxLayout,
@@ -27,6 +24,7 @@ from finauditpro.domain.audit_matrix_entities import (
     RiskSeverityEnum,
 )
 from finauditpro.domain.entities import Engagement
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 
 class FindingDialog(QDialog):

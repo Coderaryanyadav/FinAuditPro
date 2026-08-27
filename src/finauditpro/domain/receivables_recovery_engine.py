@@ -61,7 +61,7 @@ class ReceivablesRecoveryEngine:
     ) -> DebtorRecoverySummary:
         """Tie out March 31st debtor balances against subsequent bank clearance entries."""
         # Index receipts by debtor_code
-        receipt_map = {}
+        receipt_map: dict[str, int] = {}
         for r in subsequent_receipts:
             code = r.get("debtor_code", "").strip().upper()
             amt = int(r.get("receipt_amount_paise", r.get("receipt_amount", 0) * 100))

@@ -6,10 +6,7 @@ Planning & Execution Core: SA 320 Materiality, SA 315 Risk Register, Procedures,
 from typing import Any
 
 from PySide6.QtCore import Qt, Signal
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
-    QComboBox,
     QFormLayout,
     QHBoxLayout,
     QHeaderView,
@@ -33,6 +30,7 @@ from finauditpro.ui.dialogs.procedure_dialog import ProcedureDialog
 from finauditpro.ui.dialogs.risk_dialog import RiskDialog
 from finauditpro.ui.dialogs.traceability_dialog import TraceabilityDialog
 from finauditpro.ui.theme import CardWidget, EmptyStateWidget, MetricCard, PageHeader
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 
 class AuditMatrixView(QWidget):

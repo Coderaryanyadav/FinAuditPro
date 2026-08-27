@@ -170,6 +170,6 @@ def generate_all_icons(output_dir: Path) -> dict[str, Path]:
 
 if __name__ == "__main__":
     project_root = Path(__file__).resolve().parent.parent.parent
-    target_dir = project_root / "assets" / "icons"
+    target_dir = project_root / "src" / "finauditpro" / "assets" / "icons"
     print(f"Generating FinAuditPro application icons into: {target_dir}")
     generate_all_icons(target_dir)

@@ -1,9 +1,6 @@
 """Sign-off dialog with explicit legal disclaimers and content hash binding."""
 
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
-    QComboBox,
     QDialog,
     QFormLayout,
     QGroupBox,
@@ -20,6 +17,7 @@ from finauditpro.application.security.rbac import UserSession
 from finauditpro.application.services.working_paper_service import WorkingPaperService
 from finauditpro.application.working_paper_dtos import SignOffDTO
 from finauditpro.domain.working_paper_entities import SignOffLevelEnum, WorkingPaper
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 
 class SignOffDialog(QDialog):
@@ -104,7 +102,7 @@ class SignOffDialog(QDialog):
 
         # 3. Actions
         btn_box = QHBoxLayout()
-        btn_sign = QPushButton("Execute Sign-Off & Lock Paper")
+        btn_sign = QPushButton("Execute Sign-Off && Lock Paper")
         btn_sign.setStyleSheet("background-color: #10b981; color: white; font-weight: bold;")
         btn_sign.clicked.connect(self._on_sign_off_clicked)
 

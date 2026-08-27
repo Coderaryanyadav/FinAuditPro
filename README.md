@@ -375,8 +375,9 @@ security hardening, multi-tenant database isolation, maker-checker sign-offs,
 FTS5 search, SA 530 MUS sampling, SA 550 related parties, 3-way PO-GRN match,
 cut-off testing, BRS stale checks, ghost employee scan, inventory test-counts,
 fixed asset register, SQM 1 independence registry, AS 22 deferred tax schedules,
-trade receivables recovery tie-out, board minutes contradiction scan, MCA/ROC secretarial reconciliation,
-SA 600 group audit component materiality, X.509 DSC signing, and multi-year roll-forward tie-outs.
+trade receivables recovery tie-out, board minutes contradiction scan, MCA/ROC
+secretarial reconciliation, SA 600 group audit component materiality, X.509 DSC
+signing, and multi-year roll-forward tie-outs.
 
 ---
 
@@ -472,8 +473,18 @@ Full documentation is available in the [`docs/`](docs/) directory:
 
 ---
 
-## Security & Air-Gap Guarantee
+## Security, Statutory Compliance & Air-Gap Guarantee
 
+- **ICAI Code of Ethics & DPDP Act 2023 Compliance**: FinAuditPro is engineered
+  for absolute statutory confidentiality. It makes **zero outbound internet
+  connections**, ensuring client financial records never touch third-party cloud
+  infrastructure.
+- **Zero Hallucination Tolerance**: Materiality thresholds, Benford
+  distributions, variances, and ledger anomalies are computed via pure
+  deterministic Python math—never delegated to LLMs.
+- **Auditor as the Sole Decision Maker**: AI recommendations are explicitly
+  tagged `[AI Advisory]` and require mandatory human sign-off; the system
+  prevents silent overwrites or autonomous audit opinions.
 - **Fail-Closed RBAC**: Fine-grained role permissions (`Partner`, `Manager`,
   `Senior`, `Staff`) strictly enforced at the application service layer.
 - **Read-Only Archive Protection**: Sealed archives lock SQLite connections in
@@ -495,5 +506,5 @@ details.
 <br>
 
 <div align="center">
-  <sub>Built with ❤️ for Indian Statutory Audit Practice by <b>Aryan Yadav</b>, <b>Jeet Shah</b>, and <b>Hitansh Jasani</b></sub>
+  <sub>Built for Indian Statutory Audit Practice by <b>Aryan Yadav</b>, <b>Jeet Shah</b>, and <b>Hitansh Jasani</b></sub>
 </div>

@@ -4,7 +4,6 @@ Apple-grade macOS & Linear enterprise desktop UI design system.
 """
 
 from PySide6.QtGui import QColor
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import QGraphicsDropShadowEffect, QWidget
 
 GLOBAL_QSS = """

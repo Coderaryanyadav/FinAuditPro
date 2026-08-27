@@ -4,10 +4,7 @@ Enterprise client directory with search, entity filters, and responsive empty st
 """
 
 from PySide6.QtCore import Qt, Signal
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
-    QComboBox,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -25,6 +22,7 @@ from finauditpro.application.services.firm_service import FirmService
 from finauditpro.domain.entities import Client, Firm
 from finauditpro.ui.dialogs.client_dialog import ClientDialog
 from finauditpro.ui.theme import CardWidget, EmptyStateWidget, PageHeader
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 
 class ClientView(QWidget):

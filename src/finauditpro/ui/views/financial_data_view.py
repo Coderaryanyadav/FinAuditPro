@@ -6,10 +6,7 @@ Enterprise analytics hub for trial balance imports, exception scanning, and find
 from typing import Any
 
 from PySide6.QtCore import Qt, Signal
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
-    QComboBox,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -26,6 +23,7 @@ from finauditpro.domain.entities import Engagement
 from finauditpro.domain.financial_entities import FinancialDataset
 from finauditpro.ui.dialogs.import_dataset_dialog import ImportDatasetDialog
 from finauditpro.ui.theme import CardWidget, EmptyStateWidget, PageHeader, format_inr
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 
 class FinancialDataView(QWidget):

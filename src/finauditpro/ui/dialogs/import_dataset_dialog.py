@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -25,6 +23,7 @@ from finauditpro.application.services.financial_service import FinancialService,
 from finauditpro.domain.entities import Engagement
 from finauditpro.domain.financial_entities import DatasetTypeEnum, FinancialDataset
 from finauditpro.ui.theme import CardWidget
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 
 class ImportDatasetDialog(QDialog):

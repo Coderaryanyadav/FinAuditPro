@@ -171,7 +171,7 @@ class ChangePasswordDialog(QDialog):
             btn_cancel.clicked.connect(self.reject)
             btn_layout.addWidget(btn_cancel)
 
-        self.btn_save = QPushButton("Save Credentials & Access Workspace →")
+        self.btn_save = QPushButton("Save Credentials && Access Workspace →")
         self.btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_save.setStyleSheet("""
             QPushButton {

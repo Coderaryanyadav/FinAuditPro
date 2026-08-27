@@ -4,10 +4,7 @@ Enterprise directory with audit lifecycle filters, status badges, and responsive
 """
 
 from PySide6.QtCore import Qt, Signal
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 from PySide6.QtWidgets import (
-    QComboBox,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -26,6 +23,7 @@ from finauditpro.application.services.firm_service import FirmService
 from finauditpro.domain.entities import Client, Engagement, Firm
 from finauditpro.ui.dialogs.engagement_dialog import EngagementDialog
 from finauditpro.ui.theme import CardWidget, EmptyStateWidget, PageHeader
+from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 
 class EngagementView(QWidget):

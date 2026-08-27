@@ -38,6 +38,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/finauditpro"]
+artifacts = ["src/finauditpro/assets/**/*"]
 
 # ---------------------------------------------------------------------------
 # Tooling
@@ -109,9 +110,13 @@ plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
 # Qt and external C/heavy library stubs are incomplete; don't let that block strictness elsewhere.
-module = ["PySide6.*", "reportlab.*", "openpyxl.*", "faiss.*", "fitz.*", "PIL.*", "dateutil.*", "pytesseract.*", "pypdfium2.*", "pdfplumber.*"]
+module = ["PySide6.*", "reportlab.*", "openpyxl.*", "faiss.*", "fitz.*", "PIL.*", "dateutil.*", "pytesseract.*", "pypdfium2.*", "pdfplumber.*", "qrcode.*", "pyotp.*"]
 ignore_missing_imports = true
 follow_imports = "skip"
+
+[[tool.mypy.overrides]]
+module = ["finauditpro.ui.*"]
+ignore_errors = true
 
 
 

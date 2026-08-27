@@ -130,11 +130,12 @@ def create_dmg(app_path: Path) -> Path:
         print("  Using dmgbuild for native drag-and-drop presentation...")
         icon_path = PROJECT_ROOT / "src" / "finauditpro" / "assets" / "icons" / "FinAuditPro.icns"
 
+        app_size_mb = int(sum(f.stat().st_size for f in app_path.rglob("*") if f.is_file()) / (1024 * 1024)) + 400
         dmg_settings = f"""
 filename = '{dmg_path}'
 volume_name = '{APP_NAME}'
 format = 'UDZO'
-size = '500M'
+size = '{app_size_mb}M'
 files = ['{app_path}']
 symlinks = {{'Applications': '/Applications'}}
 badge_icon = '{icon_path}' if {icon_path.exists()} else None

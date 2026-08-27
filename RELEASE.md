@@ -6,13 +6,13 @@ This document describes the reproducible production release pipeline for **FinAu
 
 ## 1. Overview & Release Artifacts
 
-For each release tag (e.g. `v1.0.0`), the automated build system produces:
+For each release tag (e.g. `v1.2.0`), the automated build system produces:
 
 | Platform | Format | Artifact | Description |
 | :--- | :--- | :--- | :--- |
-| **macOS** | `.dmg` | `FinAuditPro-1.0.0-macOS-arm64.dmg` | Drag-and-drop installer with Applications shortcut and icon |
-| **Windows** | `.exe` | `FinAuditPro-Setup-1.0.0-x64.exe` | Inno Setup standalone offline installer |
-| **Windows (Portable)** | `.zip` | `FinAuditPro-1.0.0-Windows-x64.zip` | Standalone portable zero-install directory |
+| **macOS** | `.dmg` | `FinAuditPro-1.2.0-macOS-arm64.dmg` | Drag-and-drop installer with Applications shortcut and icon |
+| **Windows** | `.exe` | `FinAuditPro-Setup-1.2.0-x64.exe` | Inno Setup standalone offline installer |
+| **Windows (Portable)** | `.zip` | `FinAuditPro-1.2.0-Windows-x64.zip` | Standalone portable zero-install directory |
 | **Checksums** | `.txt` | `SHA256SUMS.txt` | Cryptographic SHA-256 validation manifest |
 | **Manifest** | `.json` | `release_manifest.json` | Machine-readable build provenance and metadata |
 
@@ -97,8 +97,8 @@ To publish a new production release:
 1. Update version in `src/finauditpro/version.py` and `pyproject.toml`.
 2. Commit and tag the commit:
    ```bash
-   git tag -a v1.0.0 -m "Release v1.0.0"
-   git push origin v1.0.0
+   git tag -a v1.2.0 -m "Release v1.2.0"
+   git push origin v1.2.0
    ```
 3. GitHub Actions will:
    - Run tests on macOS and Windows runners
@@ -109,10 +109,10 @@ To publish a new production release:
 
 ---
 
-## 6. Release Notes Template (v1.0.0)
+## 6. Release Notes Template (v1.2.0)
 
 ```markdown
-### FinAuditPro v1.0.0 — Enterprise Audit Operating System
+### FinAuditPro v1.2.0 — Enterprise Audit Operating System
 
 FinAuditPro is an offline-first, air-gapped audit intelligence platform tailored for Indian statutory audits, CARO 2020 compliance, and ICAI Standards on Auditing.
 

@@ -285,14 +285,14 @@ Pre-built, standalone release packages are available on the
 
 ### 🍏 macOS (Apple Silicon & Intel)
 
-1. Download `FinAuditPro-1.0.0-macOS-arm64.dmg` (or Intel `x86_64`).
+1. Download `FinAuditPro-1.2.0-macOS-arm64.dmg` (or Intel `x86_64`).
 2. Double-click the DMG to open the installer.
 3. Drag **FinAuditPro** into your **Applications** folder.
 4. Launch FinAuditPro from Launchpad or Spotlight.
 
 ### 🪟 Windows (64-bit)
 
-1. Download `FinAuditPro-Setup-1.0.0-x64.exe` (or standalone portable `.zip`).
+1. Download `FinAuditPro-Setup-1.2.0-x64.exe` (or standalone portable `.zip`).
 2. Run the installer wizard (or extract portable folder).
 3. Launch **FinAuditPro** from your Start Menu or Desktop shortcut.
 
@@ -317,7 +317,7 @@ Pre-built, standalone release packages are available on the
 
 ### Installation & Launch
 
-````bash
+```bash
 # 1. Clone the repository
 git clone https://github.com/Coderaryanyadav/FinAuditPro.git
 cd FinAuditPro
@@ -338,10 +338,9 @@ pip install -r requirements-dev.txt
 # 4. Run automated pre-flight system diagnostics
 python scripts/development/automated_system_check.py
 
-```bash
 # 5. Launch the desktop application
 python -m finauditpro
-````
+```
 
 > **Default Administrator Credentials:**
 >
@@ -354,7 +353,7 @@ python -m finauditpro
 ## Automated Verification & Diagnostics
 
 ```bash
-# Run the complete test suite (138/138 passing)
+# Run the complete test suite (161/161 passing)
 pytest tests/ -v
 
 # Run strict static type checking
@@ -370,7 +369,7 @@ python scripts/development/run_1000_verifications.py
 python scripts/maintenance/vacuum_and_reindex.py
 ```
 
-**Test Suite Status**: **160 passed (100%)** across domain calculations,
+**Test Suite Status**: **161 passed (100%)** across domain calculations,
 security hardening, multi-tenant database isolation, maker-checker sign-offs,
 FTS5 search, SA 530 MUS sampling, SA 550 related parties, 3-way PO-GRN match,
 cut-off testing, BRS stale checks, ghost employee scan, inventory test-counts,
@@ -402,16 +401,19 @@ FinAuditPro/
 │
 ├── src/
 │   └── finauditpro/               # 4-Layer Domain-Driven Architecture Source Tree
-│       ├── __init__.py            # Package root (__version__ = "1.0.0")
+│       ├── __init__.py            # Package root (__version__ = "1.2.0")
 │       ├── __main__.py            # Desktop GUI & headless CLI entry point
+│       ├── version.py             # Single source of truth application metadata
 │       ├── domain/                # Pure entities, value objects & calculation rules
 │       ├── application/           # Application services, DTOs & security coordinators
 │       ├── infrastructure/        # SQLite ORM, migrations 1..9, OCR, FAISS & ReportLab
+│       ├── assets/                # Package bundled icons and static visual resources
+│       │   └── icons/             # Multi-resolution ICNS, ICO, and PNG assets
 │       └── ui/                    # PySide6 desktop views, dialogs & neutral dark theme
+│           └── resources.py       # Standard importlib.resources icon loader
 │
-├── tests/                         # 130-Test Automated QA Verification Suite
+├── tests/                         # 161-Test Automated QA Verification Suite
 │   ├── fixtures/                  # Synthetic audit test spreadsheets & datasets
-│   ├── conftest.py                # Shared fixtures & test database managers
 │   └── test_*.py                  # Unit, integration, security & architecture tests
 │
 ├── docs/                          # Structured Technical & Statutory Documentation

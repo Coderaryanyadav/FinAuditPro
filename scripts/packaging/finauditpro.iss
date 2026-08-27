@@ -2,7 +2,7 @@
 ; Builds single-file standalone offline installer
 
 #define MyAppName "FinAuditPro"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "FinAuditPro Team"
 #define MyAppURL "https://github.com/Coderaryanyadav/FinAuditPro"
 #define MyAppExeName "FinAuditPro.exe"

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-08-27
+
+### Changed
+- **Package Assets Relocation**: Moved application static assets from root `assets/` to `src/finauditpro/assets/` using standard Python `importlib.resources` for robust asset resolution across source and standalone PyInstaller bundles.
+- **Canonical OS Data Path Decoupling**: Fully decoupled runtime database to standard OS directories (`~/Library/Application Support/FinAuditPro/db/` on macOS, `%APPDATA%\FinAuditPro\db\` on Windows) and eliminated root database creation.
+- **Packaging Pipeline Streamlining**: Updated `finauditpro.spec`, `build_macos.py`, and Windows packaging scripts for automated asset and icon packaging into native `.app` and standalone DMG bundles.
+- **Architecture & Strict Typing Enhancements**: Resolved UI layer isolation boundaries, added type safety across substantive domain engines, and expanded test suite to 161 passing tests.
+
+---
+
+## [1.1.0] - 2026-08-26
+
+### Added
+- **Vector Branding & Custom UI Controls**: Added custom combo box delegate and standardized navigation typography.
+- **Extended Forensic Verifications**: 15-stage 1,000-point forensic runner for substantive analytics and statutory validations.
+
+---
+
 ## [1.0.0] - 2026-08-26
 
 ### Added

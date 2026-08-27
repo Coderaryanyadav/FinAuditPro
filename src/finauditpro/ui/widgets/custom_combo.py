@@ -12,6 +12,38 @@ class CustomComboBox(QComboBox):
         super().__init__(parent)
         self.setItemDelegate(QStyledItemDelegate(self))
 
+        self.setStyleSheet("""
+            QComboBox {
+                border: 1px solid #CBD5E1;
+                border-radius: 6px;
+                padding: 6px 30px 6px 12px;
+                font-size: 13px;
+                color: #0F172A;
+                background-color: #FFFFFF;
+                min-height: 22px;
+            }
+            QComboBox:hover {
+                border-color: #94A3B8;
+            }
+            QComboBox:focus {
+                border-color: #2563EB;
+                background-color: #FFFFFF;
+            }
+            QComboBox::drop-down {
+                subcontrol-origin: padding;
+                subcontrol-position: center right;
+                width: 26px;
+                border: none;
+                background: transparent;
+            }
+            QComboBox::down-arrow {
+                image: url(src/finauditpro/assets/icons/chevron_down.png);
+                width: 14px;
+                height: 14px;
+                margin-right: 8px;
+            }
+        """)
+
         # Ensure popup listview has forced pure white background and slate text
         view = self.view()
         if view:

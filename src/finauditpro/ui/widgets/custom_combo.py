@@ -55,5 +55,4 @@ class CustomComboBox(QComboBox):
     def mousePressEvent(self, event: QMouseEvent) -> None:
         if self.count() == 1 and self.itemData(0) is None:
             self.empty_clicked.emit()
-            return
         super().mousePressEvent(event)

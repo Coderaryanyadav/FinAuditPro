@@ -156,18 +156,12 @@ class AuditMatrixView(QWidget):
         title_lbl.setStyleSheet("font-size: 13px; font-weight: 700; color: #1E293B;")
         hdr.addWidget(title_lbl)
         hdr.addStretch()
-        btn = QPushButton("+ New Audit Risk")
-        btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn.setStyleSheet("""
-            QPushButton {
-                background-color: #2563EB; color: #FFFFFF;
-                font-size: 12px; font-weight: 600;
-                border-radius: 6px; padding: 7px 16px; border: 1px solid transparent;
-            }
-            QPushButton:hover { background-color: #1D4ED8; }
-        """)
-        btn.clicked.connect(self._on_new_risk_clicked)
-        hdr.addWidget(btn)
+        self.btn_new_risk = QPushButton("+ New Audit Risk")
+        self.btn_new_risk.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_new_risk.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }")
+        self.btn_new_risk.clicked.connect(self._on_new_risk_clicked)
+        self.btn_new_risk.setVisible(False)
+        hdr.addWidget(self.btn_new_risk)
         layout.addLayout(hdr)
 
         card = CardWidget()
@@ -194,12 +188,13 @@ class AuditMatrixView(QWidget):
         title_lbl = QLabel("Structured Audit Procedures Execution Hub")
         title_lbl.setStyleSheet("font-size: 13px; font-weight: 700; color: #1E293B;")
         hdr.addWidget(title_lbl)
-        btn_qss = "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }"
-        btn = QPushButton("+ New Procedure")
-        btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn.setStyleSheet(btn_qss)
-        btn.clicked.connect(self._on_new_proc_clicked)
-        hdr.addWidget(btn)
+        hdr.addStretch()
+        self.btn_new_proc = QPushButton("+ New Procedure")
+        self.btn_new_proc.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_new_proc.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }")
+        self.btn_new_proc.clicked.connect(self._on_new_proc_clicked)
+        self.btn_new_proc.setVisible(False)
+        hdr.addWidget(self.btn_new_proc)
         layout.addLayout(hdr)
 
         card = CardWidget()
@@ -227,11 +222,12 @@ class AuditMatrixView(QWidget):
         title_lbl.setStyleSheet("font-size: 13px; font-weight: 700; color: #1E293B;")
         hdr.addWidget(title_lbl)
         hdr.addStretch()
-        btn = QPushButton("+ Log Finding")
-        btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }")
-        btn.clicked.connect(self._on_new_finding_clicked)
-        hdr.addWidget(btn)
+        self.btn_new_finding = QPushButton("+ Log Finding")
+        self.btn_new_finding.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_new_finding.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }")
+        self.btn_new_finding.clicked.connect(self._on_new_finding_clicked)
+        self.btn_new_finding.setVisible(False)
+        hdr.addWidget(self.btn_new_finding)
         layout.addLayout(hdr)
 
         card = CardWidget()
@@ -296,7 +292,7 @@ class AuditMatrixView(QWidget):
 
         r_fn = getattr(self.planning_service, "list_risks", None) or getattr(self.planning_service, "list_risks_for_engagement", None)
         risks = r_fn(self.current_engagement.id) if r_fn else []
-        self._populate_table(self.risks_table, self.risks_empty, len(risks))
+        self._populate_table(self.risks_table, self.risks_empty, len(risks), self.btn_new_risk)
         for r, rk in enumerate(risks):
             self.risks_table.setItem(r, 0, QTableWidgetItem(rk.risk_code))
             self.risks_table.setItem(r, 1, QTableWidgetItem(getattr(rk, "title", rk.risk_code)))
@@ -311,7 +307,7 @@ class AuditMatrixView(QWidget):
 
         p_fn = getattr(self.planning_service, "list_procedures", None) or getattr(self.planning_service, "list_procedures_for_engagement", None)
         procs = p_fn(self.current_engagement.id) if p_fn else []
-        self._populate_table(self.procs_table, self.procs_empty, len(procs))
+        self._populate_table(self.procs_table, self.procs_empty, len(procs), self.btn_new_proc)
         for r, p in enumerate(procs):
             self.procs_table.setItem(r, 0, QTableWidgetItem(p.procedure_code))
             self.procs_table.setItem(r, 1, QTableWidgetItem(p.objective))
@@ -322,7 +318,7 @@ class AuditMatrixView(QWidget):
 
         f_fn = getattr(self.planning_service, "list_findings", None) or getattr(self.planning_service, "list_findings_for_engagement", None)
         findings = f_fn(self.current_engagement.id) if f_fn else []
-        self._populate_table(self.findings_table, self.findings_empty, len(findings))
+        self._populate_table(self.findings_table, self.findings_empty, len(findings), self.btn_new_finding)
         for r, f in enumerate(findings):
             src_val = f.source.value if hasattr(f.source, "value") else str(f.source)
             self.findings_table.setItem(r, 0, QTableWidgetItem(src_val.upper()))
@@ -336,10 +332,12 @@ class AuditMatrixView(QWidget):
             bg.clicked.connect(lambda _, fid=f.id: self._open_traceability(fid))
             self.findings_table.setCellWidget(r, 6, bg)
 
-    def _populate_table(self, table: QTableWidget, empty: QWidget, count: int) -> None:
+    def _populate_table(self, table: QTableWidget, empty: QWidget, count: int, btn: QPushButton | None = None) -> None:
         table.setVisible(count > 0)
         empty.setVisible(count == 0)
         table.setRowCount(count)
+        if btn is not None:
+            btn.setVisible(count > 0)
 
     def _open_traceability(self, finding_id: str) -> None:
         if self.current_engagement and self.traceability_service:

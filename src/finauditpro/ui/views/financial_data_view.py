@@ -90,9 +90,17 @@ class FinancialDataView(QWidget):
         )
 
         self.dataset_combo = CustomComboBox()
-        self.dataset_combo.setMinimumWidth(280)
+        self.dataset_combo.setMinimumWidth(320)
+        self.dataset_combo.setStyleSheet(
+            "QComboBox { border: 1px solid #CBD5E1; border-radius: 6px; padding: 7px 30px 7px 12px; font-size: 13px; color: #0F172A; background-color: #FFFFFF; min-height: 22px; }"
+            "QComboBox:hover { border-color: #94A3B8; }"
+            "QComboBox:focus { border-color: #2563EB; }"
+            "QComboBox::drop-down { subcontrol-origin: padding; subcontrol-position: center right; width: 26px; border: none; background: transparent; }"
+            "QComboBox::down-arrow { image: url(src/finauditpro/assets/icons/chevron_down.png); width: 14px; height: 14px; margin-right: 8px; }"
+        )
         self.dataset_combo.addItem("— No Datasets Imported —", None)
         self.dataset_combo.currentIndexChanged.connect(self._on_dataset_changed)
+        self.dataset_combo.empty_clicked.connect(self._on_import_clicked)
 
         self.run_analytics_btn = QPushButton("⚡ Run Deterministic Analytics")
         self.run_analytics_btn.setObjectName("primaryButton")

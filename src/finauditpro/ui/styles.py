@@ -291,6 +291,7 @@ QPushButton#primaryBtn, QPushButton#primaryButton {
 }
 QPushButton#primaryBtn:hover, QPushButton#primaryButton:hover { background-color: #1D4ED8; }
 QPushButton#primaryBtn:pressed, QPushButton#primaryButton:pressed { background-color: #1E40AF; }
+QPushButton#primaryBtn:disabled, QPushButton#primaryButton:disabled { background-color: #F1F5F9; color: #94A3B8; border: 1px solid #E2E8F0; }
 
 /* ── CONTENT CARDS ───────────────────────────────────────────────────────── */
 QFrame#contentCard, QFrame#cardFrame, QFrame#metricCard,

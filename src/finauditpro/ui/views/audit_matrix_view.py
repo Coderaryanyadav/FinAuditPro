@@ -85,17 +85,16 @@ class AuditMatrixView(QWidget):
         form.setSpacing(12)
         form.setLabelAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
 
-        field_style = """
-            QLineEdit {
-                border: 1px solid #CBD5E1; border-radius: 6px;
-                padding: 7px 12px; font-size: 13px; color: #0F172A; background: #FFFFFF;
-                min-width: 320px;
-            }
-            QLineEdit:focus { border-color: #2563EB; background: #FFFFFF; }
-            QLineEdit::placeholder { color: #94A3B8; }
-        """
+        field_style = (
+            "QLineEdit, QComboBox { border: 1px solid #CBD5E1; border-radius: 6px; padding: 7px 12px; font-size: 13px; color: #0F172A; background-color: #FFFFFF; min-width: 320px; }"
+            "QLineEdit:focus, QComboBox:focus { border-color: #2563EB; background-color: #FFFFFF; }"
+            "QLineEdit::placeholder { color: #94A3B8; }"
+            "QComboBox::drop-down { subcontrol-origin: padding; subcontrol-position: center right; width: 26px; border: none; background: transparent; }"
+            "QComboBox::down-arrow { image: url(src/finauditpro/assets/icons/chevron_down.png); width: 14px; height: 14px; margin-right: 8px; }"
+        )
 
         self.bm_combo = CustomComboBox()
+        self.bm_combo.setStyleSheet(field_style)
         for opt in BENCHMARK_GUIDANCE_OPTIONS:
             self.bm_combo.addItem(f"{opt.benchmark_type.value} ({opt.default_overall_pct}%)", opt.benchmark_type)
 

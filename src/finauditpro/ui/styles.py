@@ -216,61 +216,59 @@ QTabBar::tab:selected {
 QComboBox {
     border: 1px solid #CBD5E1;
     border-radius: 6px;
-    padding: 6px 12px;
+    padding: 6px 30px 6px 12px;
     font-size: 13px;
     background-color: #FFFFFF;
     color: #0F172A;
-    min-height: 24px;
+    min-height: 26px;
 }
+QComboBox:hover { border-color: #94A3B8; }
 QComboBox:focus { border-color: #2563EB; }
 
 QComboBox::drop-down {
     subcontrol-origin: padding;
-    subcontrol-position: top right;
-    width: 24px;
-    border-left-width: 0px;
+    subcontrol-position: center right;
+    width: 26px;
+    border: none;
+    background: transparent;
 }
 
 QComboBox::down-arrow {
-    image: none;
-    width: 0px;
-    height: 0px;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 5px solid #64748B;
-    margin-right: 10px;
+    image: url(src/finauditpro/assets/icons/chevron_down.png);
+    width: 14px;
+    height: 14px;
+    margin-right: 8px;
 }
 
-QComboBox QAbstractItemView {
+QComboBox QAbstractItemView, QComboBox QListView {
     background-color: #FFFFFF;
+    color: #0F172A;
     border: 1px solid #CBD5E1;
-    border-radius: 4px;
+    border-radius: 6px;
     selection-background-color: #EFF6FF;
     selection-color: #2563EB;
     outline: none;
-    color: #0F172A;
+    padding: 4px;
 }
 
-QComboBox QAbstractItemView::item {
+QComboBox QAbstractItemView::item, QComboBox QListView::item {
     border: 1px solid transparent;
-    background-color: transparent;
+    background-color: #FFFFFF;
     color: #0F172A;
     min-height: 28px;
     padding: 6px 12px;
+    border-radius: 4px;
 }
 
-QComboBox QAbstractItemView::item:selected {
-    background-color: #EFF6FF;
-}
-
-QComboBox QAbstractItemView::item:hover {
-    background-color: #F8FAFC;
+QComboBox QAbstractItemView::item:hover, QComboBox QListView::item:hover {
+    background-color: #F1F5F9;
     color: #0F172A;
 }
 
-QComboBox QAbstractItemView::item:selected {
+QComboBox QAbstractItemView::item:selected, QComboBox QListView::item:selected {
     background-color: #EFF6FF;
     color: #2563EB;
+    font-weight: 600;
 }
 
 

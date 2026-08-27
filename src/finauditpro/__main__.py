@@ -17,6 +17,7 @@ from finauditpro.infrastructure.first_run import initialize_database
 from finauditpro.infrastructure.persistence.database import get_default_db_path
 from finauditpro.ui.main_window import MainWindow
 from finauditpro.ui.resources import get_app_icon
+from finauditpro.ui.styles import GLOBAL_QSS
 
 
 def main() -> None:
@@ -40,6 +41,7 @@ def main() -> None:
     app = QApplication(sys.argv)
     app.setApplicationName("FinAuditPro")
     app.setOrganizationName("FinAuditPro")
+    app.setStyleSheet(GLOBAL_QSS)
 
     app.setWindowIcon(get_app_icon())
     window = MainWindow(db_manager)

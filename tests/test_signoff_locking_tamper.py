@@ -60,6 +60,17 @@ def test_signoff_content_hash_binding_and_tamper_detection(setup_tamper_env) -> 
     )
 
     # 1. Execute Sign-off
+    wp_svc.prepare_working_paper(wp.id, "Senior Auditor")
+    wp_svc.submit_for_review(wp.id, "Senior Auditor")
+    wp_svc.start_review(wp.id, "Partner User")
+    wp_svc.sign_off_working_paper(
+        SignOffDTO(
+            working_paper_id=wp.id,
+            level=SignOffLevelEnum.REVIEWED,
+            user_id="Partner User",
+            user_role="Partner",
+        )
+    )
     signoff = wp_svc.sign_off_working_paper(
         SignOffDTO(
             working_paper_id=wp.id,
@@ -102,6 +113,17 @@ def test_reopen_locked_working_paper_preserves_version_history(setup_tamper_env)
         )
     )
 
+    wp_svc.prepare_working_paper(wp.id, "Preparer A")
+    wp_svc.submit_for_review(wp.id, "Preparer A")
+    wp_svc.start_review(wp.id, "Partner B")
+    wp_svc.sign_off_working_paper(
+        SignOffDTO(
+            working_paper_id=wp.id,
+            level=SignOffLevelEnum.REVIEWED,
+            user_id="Partner B",
+            user_role="Partner",
+        )
+    )
     wp_svc.sign_off_working_paper(
         SignOffDTO(
             working_paper_id=wp.id,

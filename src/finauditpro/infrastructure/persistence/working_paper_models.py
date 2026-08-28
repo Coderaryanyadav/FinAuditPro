@@ -108,3 +108,25 @@ class SignOffRecordModel(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, nullable=False
     )
+
+
+class WorkingPaperVersionModel(Base):
+    __tablename__ = "working_paper_historical_versions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    working_paper_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("working_papers.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    area: Mapped[str] = mapped_column(String(100), nullable=False)
+    status: Mapped[str] = mapped_column(String(50), nullable=False)
+    conclusion: Mapped[str] = mapped_column(Text, nullable=False)
+    preparer_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    reviewer_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    content_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    sections_json: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+

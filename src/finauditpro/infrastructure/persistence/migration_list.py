@@ -298,6 +298,37 @@ from finauditpro.infrastructure.persistence.migration_sqls import (
 )
 
 
+MIGRATION_010_SQL = """
+CREATE TABLE IF NOT EXISTS engagement_members (
+    id TEXT PRIMARY KEY,
+    engagement_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    role TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY(engagement_id) REFERENCES engagements(id) ON DELETE CASCADE,
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE(engagement_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS working_paper_historical_versions (
+    id TEXT PRIMARY KEY,
+    working_paper_id TEXT NOT NULL,
+    version INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    area TEXT NOT NULL,
+    status TEXT NOT NULL,
+    conclusion TEXT NOT NULL,
+    preparer_id TEXT NOT NULL,
+    reviewer_id TEXT,
+    content_hash TEXT,
+    sections_json TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY(working_paper_id) REFERENCES working_papers(id) ON DELETE CASCADE
+);
+"""
+
+
 def migration_009_fn(conn: sqlite3.Connection) -> None:
     cursor = conn.cursor()
     cursor.execute("PRAGMA table_info(engagements);")
@@ -318,4 +349,5 @@ def get_all_migrations() -> list[tuple[int, str, Any]]:
         (7, "007_create_reporting_tables", MIGRATION_007_SQL),
         (8, "008_create_archival_and_retention_tables", MIGRATION_008_SQL),
         (9, "009_create_roll_forward_tables", migration_009_fn),
+        (10, "010_create_engagement_members_table", MIGRATION_010_SQL),
     ]

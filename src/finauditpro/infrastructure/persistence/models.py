@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 from typing import Any, cast
 
-from sqlalchemy import DateTime, ForeignKey, String, Text
+from sqlalchemy import DateTime, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from finauditpro.domain.clock import utc_now
@@ -391,4 +391,22 @@ class UserModel(Base):
     is_totp_enabled: Mapped[bool] = mapped_column(nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+
+
+class EngagementMemberModel(Base):
+    __tablename__ = "engagement_members"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    engagement_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    user_id: Mapped[str] = mapped_column(
+        String(255), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    role: Mapped[str] = mapped_column(String(50), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+
+    __table_args__ = (UniqueConstraint("engagement_id", "user_id", name="uq_eng_user"),)
+
 

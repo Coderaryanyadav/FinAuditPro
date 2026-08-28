@@ -90,3 +90,7 @@ logs/
 test_exports/
 tmp/
 temp/
+
+# Cryptographic and lock state files
+.secret_salt.bin
+.lockout.json

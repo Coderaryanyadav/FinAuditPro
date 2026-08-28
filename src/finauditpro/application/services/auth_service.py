@@ -72,7 +72,15 @@ class AuthService:
             )
 
     def authenticate(self, username: str, password: str, totp_token: str | None = None) -> UserSession:
-        """Verify username and password against database and return UserSession."""
+        """Verify username and password against database and return UserSession with lockout protection."""
+        from finauditpro.infrastructure.security.lockout import (
+            check_lockout,
+            clear_failed_attempts,
+            record_failed_attempt,
+        )
+
+        check_lockout()
+
         cleaned_user = username.strip().lower()
         if not cleaned_user or not password:
             raise ValidationError("Username and password are required.")
@@ -81,6 +89,7 @@ class AuthService:
             repo = UserRepository(session)
             user = repo.get_by_username(cleaned_user)
             if not user:
+                record_failed_attempt()
                 raise ValidationError("Invalid username or password.")
 
             if not user.is_active:
@@ -89,14 +98,17 @@ class AuthService:
                 )
 
             if not verify_password(password, user.password_hash, user.salt):
+                record_failed_attempt()
                 raise ValidationError("Invalid username or password.")
 
             if user.is_totp_enabled:
                 if not totp_token:
                     raise ValidationError("TOTP_REQUIRED")
                 if not user.totp_secret or not self.verify_totp_token(user.totp_secret, totp_token):
+                    record_failed_attempt()
                     raise ValidationError("Invalid 2FA token.")
 
+            clear_failed_attempts()
             return UserSession(
                 user_id=user.id,
                 username=user.username,

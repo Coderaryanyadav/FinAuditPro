@@ -39,4 +39,4 @@ def test_initialize_database_runs_all_migrations(tmp_path) -> None:
         res = session.execute(
             __import__("sqlalchemy").text("SELECT COUNT(*) FROM schema_migrations")
         ).scalar()
-        assert res == 9
+        assert res == 10

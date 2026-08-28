@@ -235,17 +235,34 @@ class WorkingPaperView(QWidget):
 
             btn_notes = QPushButton("Notes")
             btn_notes.clicked.connect(lambda _, wpid=wp.id: self._open_notes(wpid))
+            act_layout.addWidget(btn_notes)
 
-            btn_sign = QPushButton("Sign Off")
-            btn_sign.setEnabled(not wp.is_locked)
-            btn_sign.clicked.connect(lambda _, wpid=wp.id: self._open_signoff(wpid))
+            from finauditpro.domain.working_paper_entities import WorkingPaperStatusEnum
+            if wp.status in (WorkingPaperStatusEnum.DRAFT, WorkingPaperStatusEnum.RETURNED):
+                btn_submit = QPushButton("Submit")
+                btn_submit.clicked.connect(lambda _, wpid=wp.id: self._submit_wp(wpid))
+                act_layout.addWidget(btn_submit)
+            elif wp.status in (WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW, WorkingPaperStatusEnum.RESUBMITTED):
+                btn_review = QPushButton("Review")
+                btn_review.clicked.connect(lambda _, wpid=wp.id: self._start_review(wpid))
+                act_layout.addWidget(btn_review)
+            elif wp.status == WorkingPaperStatusEnum.UNDER_REVIEW:
+                btn_return = QPushButton("Return")
+                btn_return.clicked.connect(lambda _, wpid=wp.id: self._return_wp(wpid))
+                act_layout.addWidget(btn_return)
+
+                btn_sign = QPushButton("Sign Off")
+                btn_sign.clicked.connect(lambda _, wpid=wp.id: self._open_signoff(wpid))
+                act_layout.addWidget(btn_sign)
+            elif wp.status in (WorkingPaperStatusEnum.APPROVED, WorkingPaperStatusEnum.LOCKED):
+                btn_reopen = QPushButton("Reopen")
+                btn_reopen.clicked.connect(lambda _, wpid=wp.id: self._reopen_wp(wpid))
+                act_layout.addWidget(btn_reopen)
 
             btn_verify = QPushButton("Verify")
             btn_verify.clicked.connect(lambda _, wpid=wp.id: self._verify_hash(wpid))
-
-            act_layout.addWidget(btn_notes)
-            act_layout.addWidget(btn_sign)
             act_layout.addWidget(btn_verify)
+
             self.table.setCellWidget(r, 8, act_widget)
 
         self.table.setFixedHeight(max(1, len(wps)) * 36 + 32)
@@ -379,3 +396,47 @@ class WorkingPaperView(QWidget):
             QMessageBox.information(self, "Integrity Verified", msg)
         else:
             QMessageBox.critical(self, "TAMPER DETECTED", msg)
+
+    def _submit_wp(self, wp_id: str) -> None:
+        user_name = self.user_session.username if self.user_session else "Auditor"
+        try:
+            self.wp_service.submit_for_review(wp_id, user_name)
+            self.refresh()
+            self.wp_changed.emit()
+        except Exception as ex:
+            QMessageBox.critical(self, "Error", str(ex))
+
+    def _start_review(self, wp_id: str) -> None:
+        user_name = self.user_session.username if self.user_session else "Auditor"
+        try:
+            self.wp_service.start_review(wp_id, user_name)
+            self.refresh()
+            self.wp_changed.emit()
+        except Exception as ex:
+            QMessageBox.critical(self, "Error", str(ex))
+
+    def _return_wp(self, wp_id: str) -> None:
+        user_name = self.user_session.username if self.user_session else "Auditor"
+        try:
+            self.wp_service.return_working_paper(wp_id, user_name)
+            self.refresh()
+            self.wp_changed.emit()
+        except Exception as ex:
+            QMessageBox.critical(self, "Error", str(ex))
+
+    def _reopen_wp(self, wp_id: str) -> None:
+        from PySide6.QtWidgets import QInputDialog
+        user_name = self.user_session.username if self.user_session else "Auditor"
+        reason, ok = QInputDialog.getText(self, "Reopen Working Paper", "Enter reason for reopening:")
+        if ok and reason.strip():
+            from finauditpro.application.working_paper_dtos import ReopenWorkingPaperDTO
+            try:
+                self.wp_service.reopen_working_paper(ReopenWorkingPaperDTO(
+                    working_paper_id=wp_id,
+                    reopened_by=user_name,
+                    reason=reason.strip()
+                ))
+                self.refresh()
+                self.wp_changed.emit()
+            except Exception as ex:
+                QMessageBox.critical(self, "Error", str(ex))

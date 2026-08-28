@@ -3,20 +3,7 @@ from typing import Any
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeySequence, QShortcut
-from PySide6.QtWidgets import (
-    QButtonGroup,
-    QFrame,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QMainWindow,
-    QMenu,
-    QMessageBox,
-    QPushButton,
-    QStackedWidget,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QButtonGroup, QFrame, QHBoxLayout, QLabel, QLineEdit, QMainWindow, QMenu, QMessageBox, QPushButton, QStackedWidget, QVBoxLayout, QWidget
 
 from finauditpro.application.security.rbac import UserSession
 from finauditpro.application.services.audit_matrix_service import AuditMatrixService
@@ -36,45 +23,18 @@ from finauditpro.ui.dialogs.login_dialog import LoginDialog
 from finauditpro.ui.dialogs.onboarding_dialog import OnboardingDialog
 from finauditpro.ui.styles import GLOBAL_QSS
 from finauditpro.ui.theme import FinAuditLogoWidget
-from finauditpro.ui.views.ai_assistant_view import AIAssistantView
-from finauditpro.ui.views.ai_copilot_drawer import AICopilotDrawer
-from finauditpro.ui.views.archival_view import ArchivalView
-from finauditpro.ui.views.audit_matrix_view import AuditMatrixView
-from finauditpro.ui.views.audit_query_view import AuditQueryView
-from finauditpro.ui.views.client_view import ClientView
-from finauditpro.ui.views.compliance_view import ComplianceView
-from finauditpro.ui.views.dashboard_view import DashboardView
-from finauditpro.ui.views.document_view import DocumentView
-from finauditpro.ui.views.engagement_view import EngagementView
-from finauditpro.ui.views.financial_data_view import FinancialDataView
-from finauditpro.ui.views.firm_view import FirmView
-from finauditpro.ui.views.gst_verification_view import GSTVerificationView
-from finauditpro.ui.views.inspection_view import InspectionView
-from finauditpro.ui.views.pbc_tracker_view import PBCTrackerView
-from finauditpro.ui.views.report_view import ReportView
-from finauditpro.ui.views.roll_forward_view import RollForwardView
-from finauditpro.ui.views.settings_view import SettingsView
-from finauditpro.ui.views.working_paper_view import WorkingPaperView
 from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 NAV_ITEMS = [
     ("btn_dashboard", "Command Center", "WORKSPACE"),
-    ("btn_pbc", "Intake && PBC", "GUIDED PIPELINE"),
-    ("btn_audit_matrix", "Planning && SA 320", "GUIDED PIPELINE"),
-    ("btn_financial_data", "TB/GL && Scrutiny", "GUIDED PIPELINE"),
-    ("btn_working_papers", "Working Papers", "GUIDED PIPELINE"),
-    ("btn_reports", "Reports && Sign-Off", "GUIDED PIPELINE"),
-    ("btn_queries", "Client Queries", "FIELDWORK TOOLS"),
-    ("btn_documents", "Uploaded Evidence", "FIELDWORK TOOLS"),
-    ("btn_gst", "GST 2B Reconciler", "FIELDWORK TOOLS"),
-    ("btn_compliance", "Compliance Checklist", "FIELDWORK TOOLS"),
-    ("btn_inspection", "PRB Inspection Sandbox", "FIELDWORK TOOLS"),
-    ("btn_ai_assistant", "AI Copilot Lab", "FIELDWORK TOOLS"),
-    ("btn_clients", "Clients", "ADMINISTRATION"),
-    ("btn_engagements", "Engagements", "ADMINISTRATION"),
-    ("btn_firms", "Audit Firms", "ADMINISTRATION"),
-    ("btn_archival", "Archival && Sealing", "SYSTEM"),
-    ("btn_roll_forward", "Roll-Forward Tie-Out", "SYSTEM"),
+    ("btn_pbc", "Intake && PBC", "GUIDED PIPELINE"), ("btn_audit_matrix", "Planning && SA 320", "GUIDED PIPELINE"),
+    ("btn_financial_data", "TB/GL && Scrutiny", "GUIDED PIPELINE"), ("btn_working_papers", "Working Papers", "GUIDED PIPELINE"),
+    ("btn_reports", "Reports && Sign-Off", "GUIDED PIPELINE"), ("btn_queries", "Client Queries", "FIELDWORK TOOLS"),
+    ("btn_documents", "Uploaded Evidence", "FIELDWORK TOOLS"), ("btn_gst", "GST 2B Reconciler", "FIELDWORK TOOLS"),
+    ("btn_compliance", "Compliance Checklist", "FIELDWORK TOOLS"), ("btn_inspection", "PRB Inspection Sandbox", "FIELDWORK TOOLS"),
+    ("btn_ai_assistant", "AI Copilot Lab", "FIELDWORK TOOLS"), ("btn_clients", "Clients", "ADMINISTRATION"),
+    ("btn_engagements", "Engagements", "ADMINISTRATION"), ("btn_firms", "Audit Firms", "ADMINISTRATION"),
+    ("btn_archival", "Archival && Sealing", "SYSTEM"), ("btn_roll_forward", "Roll-Forward Tie-Out", "SYSTEM"),
     ("btn_settings", "Settings", "SYSTEM"),
 ]
 GUIDED_STEPS = [
@@ -108,7 +68,7 @@ class MainWindow(QMainWindow):
         self.sidebar_collapsed, self.pipeline_btns = False, []
         self.setWindowTitle("FinAuditPro — Guided Statutory Audit Operating System")
         self.resize(1440, 920); self.setStyleSheet(GLOBAL_QSS)
-        self._init_ui(); self._show_login_flow(); self._auto_select_initial_engagement()
+        self._init_ui(); self._setup_inactivity_timer(); self._show_login_flow(); self._auto_select_initial_engagement()
     @property
     def active_engagement_id(self) -> str | None:
         return self.current_engagement.id if self.current_engagement else None
@@ -200,18 +160,14 @@ class MainWindow(QMainWindow):
         p_layout.addStretch(); rc_layout.addWidget(pipeline_bar)
         body_layout = QHBoxLayout(); body_layout.setContentsMargins(0, 0, 0, 0); body_layout.setSpacing(0)
         self.stack = QStackedWidget(); self._init_views(); body_layout.addWidget(self.stack, stretch=1)
+        from finauditpro.ui.views.ai_copilot_drawer import AICopilotDrawer
         self.ai_drawer = AICopilotDrawer(self.ai_service, parent=self); self.ai_drawer.setVisible(False); self.ai_drawer.closed.connect(lambda: self.ai_drawer.setVisible(False))
         body_layout.addWidget(self.ai_drawer); rc_layout.addLayout(body_layout, stretch=1); main_layout.addWidget(right_container, stretch=1)
         self.btn_group.idClicked.connect(self._on_nav_clicked)
         self._register_shortcuts()
     def _register_shortcuts(self) -> None:
-        for seq in ("Ctrl+K", "Meta+K"): QShortcut(QKeySequence(seq), self, self._toggle_ai_drawer)
-        for seq in ("Ctrl+P", "Meta+P"): QShortcut(QKeySequence(seq), self, self._open_command_palette)
-        for seq in ("Ctrl+Q", "Meta+Q", "Alt+F4"): QShortcut(QKeySequence(seq), self, self.close)
-        for seq in ("Ctrl+W", "Meta+W"): QShortcut(QKeySequence(seq), self, self._handle_close_shortcut)
-        for seq in ("Ctrl+R", "Meta+R", "F5"): QShortcut(QKeySequence(seq), self, self._handle_refresh_shortcut)
-        for seq in ("Ctrl+,", "Meta+,"): QShortcut(QKeySequence(seq), self, lambda: self.btn_settings.click())
-        for seq in ("Ctrl+N", "Meta+N"): QShortcut(QKeySequence(seq), self, self._on_new_engagement)
+        for s, h in [(("Ctrl+K", "Meta+K"), self._toggle_ai_drawer), (("Ctrl+P", "Meta+P"), self._open_command_palette), (("Ctrl+Q", "Meta+Q", "Alt+F4"), self.close), (("Ctrl+W", "Meta+W"), self._handle_close_shortcut), (("Ctrl+R", "Meta+R", "F5"), self._handle_refresh_shortcut), (("Ctrl+,", "Meta+,"), lambda: self.btn_settings.click()), (("Ctrl+N", "Meta+N"), self._on_new_engagement), (("Ctrl+L", "Meta+L"), self._lock_workstation)]:
+            for seq in s: QShortcut(QKeySequence(seq), self, h)
     def _handle_close_shortcut(self) -> None:
         if self.ai_drawer.isVisible(): self.ai_drawer.setVisible(False)
         else: self.close()
@@ -224,6 +180,25 @@ class MainWindow(QMainWindow):
         if hasattr(self.view_clients, "_create_client"):
             self.view_clients._create_client()
     def _init_views(self) -> None:
+        from finauditpro.ui.views.dashboard_view import DashboardView
+        from finauditpro.ui.views.firm_view import FirmView
+        from finauditpro.ui.views.client_view import ClientView
+        from finauditpro.ui.views.engagement_view import EngagementView
+        from finauditpro.ui.views.document_view import DocumentView
+        from finauditpro.ui.views.financial_data_view import FinancialDataView
+        from finauditpro.ui.views.gst_verification_view import GSTVerificationView
+        from finauditpro.ui.views.compliance_view import ComplianceView
+        from finauditpro.ui.views.audit_matrix_view import AuditMatrixView
+        from finauditpro.ui.views.inspection_view import InspectionView
+        from finauditpro.ui.views.ai_assistant_view import AIAssistantView
+        from finauditpro.ui.views.working_paper_view import WorkingPaperView
+        from finauditpro.ui.views.report_view import ReportView
+        from finauditpro.ui.views.pbc_tracker_view import PBCTrackerView
+        from finauditpro.ui.views.audit_query_view import AuditQueryView
+        from finauditpro.ui.views.archival_view import ArchivalView
+        from finauditpro.ui.views.roll_forward_view import RollForwardView
+        from finauditpro.ui.views.settings_view import SettingsView
+
         self.view_dashboard = DashboardView(self.firm_service, self.client_service, self.engagement_service, self.audit_matrix_service)
         self.view_dashboard.navigate_to_clients.connect(lambda: self.btn_clients.click()); self.view_dashboard.navigate_to_engagements.connect(lambda: self.btn_engagements.click()); self.view_dashboard.navigate_to_matrix.connect(lambda: self.btn_audit_matrix.click()); self.view_dashboard.engagement_selected.connect(self.set_active_engagement)
         self.view_firms, self.view_clients = FirmView(self.firm_service), ClientView(self.firm_service, self.client_service)
@@ -249,6 +224,7 @@ class MainWindow(QMainWindow):
         self.btn_collapse.setText("▶" if self.sidebar_collapsed else "◀")
     def _show_profile_menu(self) -> None:
         menu = QMenu(self); menu.setStyleSheet("QMenu { background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 4px; font-size: 12px; }")
+        menu.addAction("Lock Workstation (Ctrl+L)", self._lock_workstation)
         menu.addAction("Edit Profile & Password", self._open_edit_profile_dialog)
         menu.addAction("System Settings", lambda: self.btn_settings.click())
         menu.addSeparator()
@@ -362,3 +338,60 @@ class MainWindow(QMainWindow):
     def _open_command_palette(self) -> None:
         from finauditpro.ui.dialogs.command_palette_dialog import CommandPaletteDialog
         dlg = CommandPaletteDialog(self); dlg.action_triggered.connect(lambda k, p: self.stack.setCurrentIndex(p) if k == "nav" and 0 <= p < self.stack.count() else None); dlg.exec()
+
+    def _setup_inactivity_timer(self) -> None:
+        import os
+        from PySide6.QtCore import QTimer, QObject, QEvent
+        from PySide6.QtWidgets import QApplication
+
+        # Timeout of 15 minutes by default (900,000 milliseconds)
+        timeout_env = os.environ.get("FINAUDITPRO_INACTIVITY_TIMEOUT_MS")
+        self.inactivity_timeout_ms = int(timeout_env) if timeout_env else 900_000
+
+        self.inactivity_timer = QTimer(self)
+        self.inactivity_timer.setInterval(self.inactivity_timeout_ms)
+        self.inactivity_timer.timeout.connect(self._lock_workstation)
+
+        # Global event filter capturing clicks and keys anywhere in the application
+        class InteractionFilter(QObject):
+            def __init__(self, timer: QTimer) -> None:
+                super().__init__()
+                self.timer = timer
+
+            def eventFilter(self, obj: QObject, event: QEvent) -> bool:
+                if event.type() in (
+                    QEvent.Type.MouseButtonPress,
+                    QEvent.Type.MouseButtonRelease,
+                    QEvent.Type.MouseMove,
+                    QEvent.Type.KeyPress,
+                    QEvent.Type.KeyRelease,
+                    QEvent.Type.Wheel
+                ):
+                    self.timer.start()
+                return False
+
+        self.interaction_filter = InteractionFilter(self.inactivity_timer)
+        QApplication.instance().installEventFilter(self.interaction_filter)
+        self.inactivity_timer.start()
+
+    def _lock_workstation(self) -> None:
+        """Securely lock the user session and cover the GUI with the LockScreenOverlay."""
+        if hasattr(self, "lock_screen_widget") and self.lock_screen_widget:
+            return
+
+        from finauditpro.application.security.rbac import RBACManager
+        from finauditpro.ui.widgets.lock_screen import LockScreenOverlay
+
+        rbac_manager = RBACManager(self.current_user_session)
+        rbac_manager.lock_session()
+
+        self.lock_screen_widget = LockScreenOverlay(self, rbac_manager)
+        self.inactivity_timer.stop()
+
+        def on_unlocked():
+            self.lock_screen_widget = None
+            self.inactivity_timer.start()
+
+        self.lock_screen_widget.unlocked.connect(on_unlocked)
+        self.lock_screen_widget.show()
+        self.lock_screen_widget.raise_()

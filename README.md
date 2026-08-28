@@ -267,7 +267,7 @@ flowchart TD
 
 > [!IMPORTANT]
 >
-> ### 🛡️ 100% Air-Gap & Confidentiality Guarantee
+> ### 100% Air-Gap & Confidentiality Guarantee
 >
 > **FinAuditPro** is engineered for statutory confidentiality. It makes **zero
 > outbound internet connections**. All document OCR processing, LLM inferences,
@@ -283,14 +283,14 @@ flowchart TD
 Pre-built, standalone release packages are available on the
 [GitHub Releases](https://github.com/Coderaryanyadav/FinAuditPro/releases) page:
 
-### 🍏 macOS (Apple Silicon & Intel)
+### macOS (Apple Silicon & Intel)
 
 1. Download `FinAuditPro-1.2.0-macOS-arm64.dmg` (or Intel `x86_64`).
 2. Double-click the DMG to open the installer.
 3. Drag **FinAuditPro** into your **Applications** folder.
 4. Launch FinAuditPro from Launchpad or Spotlight.
 
-### 🪟 Windows (64-bit)
+### Windows (64-bit)
 
 1. Download `FinAuditPro-Setup-1.2.0-x64.exe` (or standalone portable `.zip`).
 2. Run the installer wizard (or extract portable folder).

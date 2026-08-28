@@ -42,33 +42,33 @@ def build_macos_app() -> Path:
     # 3. Pre-build checks
     from scripts.packaging.verify_release import run_pre_build_checks
     if not run_pre_build_checks():
-        print("❌ Pre-build checks failed. Aborting build.")
+        print("[FAIL] Pre-build checks failed. Aborting build.")
         sys.exit(1)
 
     # 4. Invoke PyInstaller
     spec_path = PROJECT_ROOT / "finauditpro.spec"
-    print(f"\n📦 Executing PyInstaller with spec: {spec_path.name}...")
+    print(f"\n[BUILD] Executing PyInstaller with spec: {spec_path.name}...")
     run_command([sys.executable, "-m", "PyInstaller", str(spec_path), "--noconfirm"])
 
     app_path = PROJECT_ROOT / "dist" / "FinAuditPro.app"
     if not app_path.exists():
-        print(f"❌ ERROR: Expected application bundle not found at: {app_path}")
+        print(f"[FAIL] ERROR: Expected application bundle not found at: {app_path}")
         sys.exit(1)
 
-    print(f"✓ PyInstaller bundle created successfully: {app_path}")
+    print(f"[OK] PyInstaller bundle created successfully: {app_path}")
 
     # Smoke test the built binary in an isolated temporary data dir
-    print("\n🧪 Executing runtime smoke test on packaged binary...")
+    print("\n[TEST] Executing runtime smoke test on packaged binary...")
     binary_path = app_path / "Contents" / "MacOS" / "FinAuditPro"
     test_env = os.environ.copy()
     with tempfile.TemporaryDirectory() as tmp_data_dir:
         test_env["FINAUDITPRO_DATA_DIR"] = tmp_data_dir
         res = subprocess.run([str(binary_path), "--headless"], env=test_env, capture_output=True, text=True)
         if res.returncode != 0:
-            print(f"❌ Runtime smoke test failed with exit code {res.returncode}:")
+            print(f"[FAIL] Runtime smoke test failed with exit code {res.returncode}:")
             print(res.stderr or res.stdout)
             sys.exit(1)
-        print(f"✓ Runtime smoke test passed: {res.stdout.strip()}")
+        print(f"[OK] Runtime smoke test passed: {res.stdout.strip()}")
 
     return app_path
 
@@ -82,16 +82,16 @@ def sign_and_notarize(app_path: Path) -> None:
     password = os.environ.get("APPLE_PASSWORD")
 
     if not signing_id:
-        print("\n🔒 [Code Signing] No APPLE_SIGNING_IDENTITY found in environment.")
+        print("\n[SEC] [Code Signing] No APPLE_SIGNING_IDENTITY found in environment.")
         print("   Proceeding with ad-hoc signing for local execution.")
         try:
             run_command(["codesign", "--force", "--deep", "--sign", "-", str(app_path)])
-            print("   ✓ Ad-hoc codesign applied.")
+            print("   [OK] Ad-hoc codesign applied.")
         except Exception as e:
-            print(f"   ⚠ Ad-hoc codesign skipped: {e}")
+            print(f"   [WARN] Ad-hoc codesign skipped: {e}")
         return
 
-    print(f"\n🔒 [Code Signing] Signing bundle with Developer ID: '{signing_id}'...")
+    print(f"\n[SEC] [Code Signing] Signing bundle with Developer ID: '{signing_id}'...")
     run_command([
         "codesign",
         "--deep",
@@ -101,7 +101,7 @@ def sign_and_notarize(app_path: Path) -> None:
         "--sign", signing_id,
         str(app_path)
     ])
-    print("✓ Code signing complete. Verifying...")
+    print("[OK] Code signing complete. Verifying...")
     run_command(["codesign", "--verify", "--deep", "--strict", "--verbose=2", str(app_path)])
 
 
@@ -116,7 +116,7 @@ def create_dmg(app_path: Path) -> Path:
     if dmg_path.exists():
         dmg_path.unlink()
 
-    print(f"\n💿 Creating macOS Disk Image (DMG): {dmg_name}...")
+    print(f"\n[PACKAGE] Creating macOS Disk Image (DMG): {dmg_name}...")
 
     # Method 1: Try dmgbuild if available
     use_dmgbuild = False
@@ -153,11 +153,11 @@ default_view = 'icon-view'
 
         try:
             run_command([sys.executable, "-m", "dmgbuild", "-s", settings_file, APP_NAME, str(dmg_path)])
-            print(f"✓ Created DMG with dmgbuild: {dmg_path}")
+            print(f"[OK] Created DMG with dmgbuild: {dmg_path}")
             Path(settings_file).unlink(missing_ok=True)
             return dmg_path
         except Exception as ex:
-            print(f"  ⚠ dmgbuild encountered an error ({ex}), falling back to native hdiutil...")
+            print(f"  [WARN] dmgbuild encountered an error ({ex}), falling back to native hdiutil...")
             Path(settings_file).unlink(missing_ok=True)
 
     # Method 2: Native hdiutil fallback
@@ -189,14 +189,14 @@ default_view = 'icon-view'
             str(dmg_path)
         ])
 
-    print(f"✓ Created DMG with hdiutil: {dmg_path}")
+    print(f"[OK] Created DMG with hdiutil: {dmg_path}")
     return dmg_path
 
 
 def main() -> None:
     """Run full macOS build pipeline."""
     if sys.platform != "darwin":
-        print("❌ ERROR: scripts/packaging/build_macos.py must be run on a macOS host.")
+        print("[FAIL] ERROR: scripts/packaging/build_macos.py must be run on a macOS host.")
         sys.exit(1)
 
     app_path = build_macos_app()
@@ -204,12 +204,12 @@ def main() -> None:
     dmg_path = create_dmg(app_path)
 
     # Run post-build checks, manifest generation & checksums
-    print("\n🔍 Running Post-Build Verification...")
+    print("\n[OK] Running Post-Build Verification...")
     from scripts.packaging.verify_release import run_post_build_checks
     run_post_build_checks()
 
     print("\n" + "=" * 60)
-    print(" 🎉 macOS PRODUCTION BUILD COMPLETE!")
+    print("  macOS PRODUCTION BUILD COMPLETE!")
     print(f" Application: {app_path}")
     print(f" DMG Package: {dmg_path}")
     print(f" Checksums:   {PROJECT_ROOT / 'dist' / 'SHA256SUMS.txt'}")

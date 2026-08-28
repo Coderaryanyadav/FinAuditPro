@@ -158,7 +158,7 @@ flowchart LR
 
 # PART 2: Strategic Assessment of FinAuditPro
 
-### 🌟 Core Strengths (What Makes This Software Exceptional)
+### Core Strengths (What Makes This Software Exceptional)
 
 1. **True Air-Gapped Privacy & Confidentiality**:
    - Under ICAI Code of Ethics and statutory audit regulations, uploading
@@ -182,7 +182,7 @@ flowchart LR
 
 ---
 
-### 🚀 What Is Needed (High-Value Features to Build Next)
+### What Is Needed (High-Value Features to Build Next)
 
 |  Priority  | Feature / Subsystem                             | Description & Strategic Impact                                                                                                                                                        |
 | :--------: | :---------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -194,7 +194,7 @@ flowchart LR
 
 ---
 
-### 🚫 What Is NOT Needed (Features & Anti-Patterns to Avoid)
+### What Is NOT Needed (Features & Anti-Patterns to Avoid)
 
 | Anti-Pattern / Unneeded Feature                         | Why It Should NOT Be Added                                                                                                                                                                |
 | :------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

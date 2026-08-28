@@ -266,7 +266,7 @@ def run_1000_verifications() -> int:
         print(f"  ✓ All {len(views)} PySide6 Desktop Views Instantiated & Rendered Cleanly")
 
     except Exception as e:
-        print(f"\n❌ E2E VERIFICATION ERROR: {e}")
+        print(f"\n[FAIL] E2E VERIFICATION ERROR: {e}")
         import traceback
         traceback.print_exc()
         failures += 1

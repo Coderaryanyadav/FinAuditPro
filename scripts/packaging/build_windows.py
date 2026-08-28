@@ -62,35 +62,35 @@ def build_windows_app() -> Path:
     # 3. Pre-build checks
     from scripts.packaging.verify_release import run_pre_build_checks
     if not run_pre_build_checks():
-        print("❌ Pre-build checks failed. Aborting build.")
+        print("[FAIL] Pre-build checks failed. Aborting build.")
         sys.exit(1)
 
     # 4. Invoke PyInstaller
     spec_path = PROJECT_ROOT / "finauditpro.spec"
-    print(f"\n📦 Executing PyInstaller with spec: {spec_path.name}...")
+    print(f"\n[BUILD] Executing PyInstaller with spec: {spec_path.name}...")
     run_command([sys.executable, "-m", "PyInstaller", str(spec_path), "--noconfirm"])
 
     output_dir = PROJECT_ROOT / "dist" / "FinAuditPro"
     exe_path = output_dir / "FinAuditPro.exe"
     if not output_dir.exists() and not (PROJECT_ROOT / "dist" / "FinAuditPro.exe").exists():
-        print(f"❌ ERROR: Output executable not found at: {output_dir}")
+        print(f"[FAIL] ERROR: Output executable not found at: {output_dir}")
         sys.exit(1)
 
     target_exe = exe_path if exe_path.exists() else (PROJECT_ROOT / "dist" / "FinAuditPro.exe")
-    print(f"✓ PyInstaller bundle created successfully: {target_exe}")
+    print(f"[OK] PyInstaller bundle created successfully: {target_exe}")
 
     # Smoke test on Windows
-    print("\n🧪 Executing runtime smoke test on packaged Windows binary...")
+    print("\n[TEST] Executing runtime smoke test on packaged Windows binary...")
     test_env = os.environ.copy()
     import tempfile
     with tempfile.TemporaryDirectory() as tmp_data_dir:
         test_env["FINAUDITPRO_DATA_DIR"] = tmp_data_dir
         res = subprocess.run([str(target_exe), "--headless"], env=test_env, capture_output=True, text=True)
         if res.returncode != 0:
-            print(f"❌ Runtime smoke test failed with exit code {res.returncode}:")
+            print(f"[FAIL] Runtime smoke test failed with exit code {res.returncode}:")
             print(res.stderr or res.stdout)
             sys.exit(1)
-        print(f"✓ Runtime smoke test passed: {res.stdout.strip()}")
+        print(f"[OK] Runtime smoke test passed: {res.stdout.strip()}")
 
     return output_dir
 
@@ -103,15 +103,15 @@ def create_installer_or_archive(bundle_dir: Path) -> Path:
     iss_file = PROJECT_ROOT / "scripts" / "packaging" / "finauditpro.iss"
 
     if iscc and iss_file.exists():
-        print(f"\n💿 Inno Setup Compiler found: {iscc}")
+        print(f"\n[PACKAGE] Inno Setup Compiler found: {iscc}")
         print("   Compiling Windows Installer (Setup.exe)...")
         run_command([str(iscc), str(iss_file)])
         installer_name = f"{APP_NAME}-Setup-{__version__}-x64.exe"
         installer_path = PROJECT_ROOT / "dist" / installer_name
-        print(f"✓ Created Windows Installer: {installer_path}")
+        print(f"[OK] Created Windows Installer: {installer_path}")
         return installer_path
     else:
-        print("\n📦 Inno Setup not found. Creating standalone portable ZIP distribution...")
+        print("\n[BUILD] Inno Setup not found. Creating standalone portable ZIP distribution...")
         zip_name = f"{APP_NAME}-{__version__}-Windows-x64.zip"
         zip_path = PROJECT_ROOT / "dist" / zip_name
 
@@ -119,14 +119,14 @@ def create_installer_or_archive(bundle_dir: Path) -> Path:
             for item in bundle_dir.rglob("*"):
                 zf.write(item, arcname=f"{APP_NAME}/{item.relative_to(bundle_dir)}")
 
-        print(f"✓ Created standalone portable archive: {zip_path}")
+        print(f"[OK] Created standalone portable archive: {zip_path}")
         return zip_path
 
 
 def main() -> None:
     """Run full Windows build pipeline."""
     if sys.platform != "win32":
-        print("⚠ NOTICE: scripts/packaging/build_windows.py is designed for Windows runners.")
+        print("[WARN] NOTICE: scripts/packaging/build_windows.py is designed for Windows runners.")
         print("  On macOS/Linux, PyInstaller cannot cross-compile Windows native PE binaries.")
         print("  Use GitHub Actions or a Windows machine to build the Windows release.")
         sys.exit(1)
@@ -134,12 +134,12 @@ def main() -> None:
     bundle_dir = build_windows_app()
     artifact_path = create_installer_or_archive(bundle_dir)
 
-    print("\n🔍 Running Post-Build Verification...")
+    print("\n[OK] Running Post-Build Verification...")
     from scripts.packaging.verify_release import run_post_build_checks
     run_post_build_checks()
 
     print("\n" + "=" * 60)
-    print(" 🎉 Windows PRODUCTION BUILD COMPLETE!")
+    print("  Windows PRODUCTION BUILD COMPLETE!")
     print(f" Output:    {artifact_path}")
     print(f" Checksums: {PROJECT_ROOT / 'dist' / 'SHA256SUMS.txt'}")
     print("=" * 60)

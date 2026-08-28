@@ -63,7 +63,7 @@ class InspectionView(QWidget):
         # Integrity Banner
         self.banner = CardWidget("INSPECTION INTEGRITY STATUS")
         banner_layout = QHBoxLayout()
-        self.status_lbl = QLabel("🔒 READ-ONLY ENFORCED: Database locked against mutations. Full SHA-256 Merkle chain verified.")
+        self.status_lbl = QLabel("READ-ONLY ENFORCED: Database locked against mutations. Full SHA-256 Merkle chain verified.")
         self.status_lbl.setStyleSheet("color: #16A34A; font-weight: bold; font-size: 13px;")
         banner_layout.addWidget(self.status_lbl)
         self.banner.content_layout.addLayout(banner_layout)

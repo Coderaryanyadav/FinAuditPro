@@ -9,7 +9,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 def clean_build_artifacts() -> None:
     """Remove build directories and caches."""
-    print("🧹 Cleaning FinAuditPro build artifacts and caches...")
+    print("Cleaning FinAuditPro build artifacts and caches...")
 
     dirs_to_remove = [
         PROJECT_ROOT / "build",
@@ -38,7 +38,7 @@ def clean_build_artifacts() -> None:
         except Exception:
             pass
 
-    print("✓ Workspace is clean.")
+    print("[OK] Workspace is clean.")
 
 
 if __name__ == "__main__":

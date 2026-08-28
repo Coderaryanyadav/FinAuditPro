@@ -4,7 +4,7 @@ Welcome to the FinAuditPro documentation. FinAuditPro is an offline-first deskto
 
 ---
 
-## 📚 Master Documentation Map
+## Master Documentation Map
 
 ```text
 docs/
@@ -42,7 +42,7 @@ docs/
 
 ---
 
-## 🚀 Quick Links
+## Quick Links
 - **[Tier-1 Product Audit & Redesign Blueprint](product-audit-and-redesign.md)**
 - **[Comprehensive User Guide & Strategic Assessment](guide.md)**
 - **[Getting Started & Installation](installation.md)**

@@ -108,7 +108,7 @@ def generate_all_icons(output_dir: Path) -> dict[str, Path]:
     # 1. Master PNG
     master_png = output_dir / "finauditpro_icon.png"
     master.save(master_png, format="PNG")
-    print(f"  ✓ Saved master PNG: {master_png}")
+    print(f"  [OK] Saved master PNG: {master_png}")
 
     # Standard PNG sizes for Linux desktop & web
     for sz in (512, 256, 128, 64, 32, 16):
@@ -119,7 +119,7 @@ def generate_all_icons(output_dir: Path) -> dict[str, Path]:
     ico_path = output_dir / "FinAuditPro.ico"
     ico_sizes = [(256, 256), (128, 128), (64, 64), (48, 48), (32, 32), (16, 16)]
     master.save(ico_path, format="ICO", sizes=ico_sizes)
-    print(f"  ✓ Saved Windows ICO: {ico_path}")
+    print(f"  [OK] Saved Windows ICO: {ico_path}")
 
     # 3. macOS .icns
     icns_path = output_dir / "FinAuditPro.icns"
@@ -150,14 +150,14 @@ def generate_all_icons(output_dir: Path) -> dict[str, Path]:
                     check=True,
                     capture_output=True,
                 )
-                print(f"  ✓ Saved macOS ICNS (native iconutil): {icns_path}")
+                print(f"  [OK] Saved macOS ICNS (native iconutil): {icns_path}")
             except Exception as e:
-                print(f"  ⚠ iconutil fallback: {e}")
+                print(f"  [WARN] iconutil fallback: {e}")
                 master.save(icns_path, format="ICNS")
     else:
         try:
             master.save(icns_path, format="ICNS")
-            print(f"  ✓ Saved macOS ICNS (PIL): {icns_path}")
+            print(f"  [OK] Saved macOS ICNS (PIL): {icns_path}")
         except Exception:
             pass
 

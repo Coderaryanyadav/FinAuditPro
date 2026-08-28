@@ -210,19 +210,24 @@ class AIAssistantView(QWidget):
         prompt_scroll.setFrameShape(QFrame.Shape.NoFrame)
         prompt_scroll.setFixedHeight(180)
         prompt_widget = QWidget()
-        pw_layout = QVBoxLayout(prompt_widget)
-        pw_layout.setContentsMargins(0, 0, 0, 0)
-        pw_layout.setSpacing(5)
+        self.prompts_layout = QVBoxLayout(prompt_widget)
+        self.prompts_layout.setContentsMargins(0, 0, 0, 0)
+        self.prompts_layout.setSpacing(5)
 
         for title_str, prompt_str in PROMPT_LIBRARY:
-            btn = QPushButton(f"✨ {title_str}")
-            btn.setToolTip(prompt_str)
+            btn = QPushButton(title_str)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            btn.setStyleSheet(
-                "QPushButton { background-color: #FFFFFF; color: #1D4ED8; font-size: 11px; font-weight: 600; border: 1px solid #BFDBFE; border-radius: 6px; padding: 6px 10px; text-align: left; } QPushButton:hover { background-color: #EFF6FF; border-color: #3B82F6; }"
-            )
+            btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #F8FAFC; color: #1E293B;
+                    font-size: 11px; font-weight: 500;
+                    border: 1px solid #E2E8F0; border-radius: 6px;
+                    padding: 6px 12px; text-align: left;
+                }
+                QPushButton:hover { background-color: #EFF6FF; border-color: #93C5FD; color: #1D4ED8; }
+            """)
             btn.clicked.connect(lambda checked=False, p=prompt_str: self._on_prompt_pill_clicked(p))
-            pw_layout.addWidget(btn)
+            self.prompts_layout.addWidget(btn)
 
         prompt_scroll.setWidget(prompt_widget)
         c1_layout.addWidget(prompt_scroll)
@@ -235,7 +240,7 @@ class AIAssistantView(QWidget):
         self.chat_display = QTextEdit()
         self.chat_display.setReadOnly(True)
         self.chat_display.setPlaceholderText(
-            "✦ FinAuditPro AI Statutory Copilot\n\nAsk questions about financial evidence, verify statutory CARO 2020 clauses, analyze trial balance anomalies, or click any prompt pill below."
+            "FinAuditPro AI Statutory Copilot\n\nAsk questions about financial evidence, verify statutory CARO 2020 clauses, analyze trial balance anomalies, or click any prompt pill below."
         )
         self.chat_display.setStyleSheet(
             "QTextEdit { border: 1px solid #E2E8F0; border-radius: 8px; background-color: #FFFFFF; padding: 14px; font-size: 13px; color: #0F172A; }"

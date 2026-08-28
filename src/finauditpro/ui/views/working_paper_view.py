@@ -62,13 +62,13 @@ class WorkingPaperView(QWidget):
             action_text="+ New Working Paper",
             action_callback=self._on_new_wp_clicked,
         )
-        self.btn_scaffold_paf = QPushButton("🏛️ + Seed PAF")
+        self.btn_scaffold_paf = QPushButton("+ Seed PAF")
         self.btn_scaffold_paf.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_scaffold_paf.setStyleSheet("QPushButton { background: #FFFFFF; color: #0F766E; border: 1px solid #99F6E4; border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 12px; }")
         self.btn_scaffold_paf.clicked.connect(self._on_scaffold_paf_clicked)
         self.header.action_layout.addWidget(self.btn_scaffold_paf)
 
-        self.btn_scaffold = QPushButton("⚡ Auto-Generate Schedule III")
+        self.btn_scaffold = QPushButton("Auto-Generate Schedule III")
         self.btn_scaffold.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_scaffold.setStyleSheet("QPushButton { background: #FFFFFF; color: #1E293B; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 12px; }")
         self.btn_scaffold.clicked.connect(self._on_scaffold_clicked)
@@ -91,9 +91,9 @@ class WorkingPaperView(QWidget):
         filter_box = QHBoxLayout()
         filter_box.setSpacing(8)
         self.btn_group_filter = QButtonGroup(self)
-        self.radio_all = QRadioButton("📁 All Working Papers")
-        self.radio_paf = QRadioButton("🏛️ Permanent File (PAF)")
-        self.radio_caf = QRadioButton("📋 Current File (CAF)")
+        self.radio_all = QRadioButton("All Working Papers")
+        self.radio_paf = QRadioButton("Permanent File (PAF)")
+        self.radio_caf = QRadioButton("Current File (CAF)")
         self.radio_all.setChecked(True)
 
         for idx, rb in enumerate([self.radio_all, self.radio_paf, self.radio_caf]):
@@ -212,7 +212,7 @@ class WorkingPaperView(QWidget):
             is_paf = "Permanent" in cat_str
 
             self.table.setItem(r, 0, QTableWidgetItem(wp.index_reference))
-            cat_item = QTableWidgetItem("🏛️ PAF" if is_paf else "📋 CAF")
+            cat_item = QTableWidgetItem("PAF" if is_paf else "CAF")
             cat_item.setForeground(Qt.GlobalColor.darkCyan if is_paf else Qt.GlobalColor.darkBlue)
             self.table.setItem(r, 1, cat_item)
             self.table.setItem(r, 2, QTableWidgetItem(wp.title))

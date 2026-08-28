@@ -110,12 +110,12 @@ class PBCTrackerView(QWidget):
         header_row.addLayout(title_box)
         header_row.addStretch()
 
-        self.btn_seed_conf = QPushButton("✉️ Seed SA 505 Letters")
+        self.btn_seed_conf = QPushButton("+ Seed SA 505 Letters")
         self.btn_seed_conf.setStyleSheet("background-color: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; font-weight: 600; padding: 6px 12px; border-radius: 6px;")
         self.btn_seed_conf.clicked.connect(self._on_seed_confirmations)
         header_row.addWidget(self.btn_seed_conf)
 
-        self.btn_seed = QPushButton("⚡ Auto-Seed Statutory PBC")
+        self.btn_seed = QPushButton("Auto-Seed Statutory PBC")
         self.btn_seed.setStyleSheet("background-color: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 500; padding: 6px 12px; border-radius: 6px;")
         self.btn_seed.clicked.connect(self._on_seed_pbc)
         header_row.addWidget(self.btn_seed)
@@ -168,7 +168,7 @@ class PBCTrackerView(QWidget):
         )
         table_card.content_layout.addWidget(self.table)
         table_card.content_layout.addWidget(self.empty_state)
-        self.tabs.addTab(table_card, "📋 Client Document Requests (PBC)")
+        self.tabs.addTab(table_card, "Client Document Requests (PBC)")
 
         # Tab 2: SA 505 External Confirmations
         conf_card = CardWidget("SA 505 THIRD-PARTY BALANCE CONFIRMATIONS")
@@ -185,12 +185,12 @@ class PBCTrackerView(QWidget):
         self.conf_empty = EmptyStateWidget(
             title="No external confirmations logged",
             description="Generate standard SA 505 bank and debtor balance confirmation requests.",
-            action_text="✉️ Seed SA 505 Letters",
+            action_text="+ Seed SA 505 Letters",
             action_callback=self._on_seed_confirmations,
         )
         conf_card.content_layout.addWidget(self.conf_table)
         conf_card.content_layout.addWidget(self.conf_empty)
-        self.tabs.addTab(conf_card, "✉️ SA 505 External Confirmations")
+        self.tabs.addTab(conf_card, "SA 505 External Confirmations")
 
         layout.addWidget(self.tabs, stretch=1)
 

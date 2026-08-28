@@ -114,13 +114,13 @@ class TraceabilityDialog(QDialog):
 
         self.nodes_table.setRowCount(0)
         type_badges = {
-            "Finding": "🚨 Finding",
-            "Procedure": "⚙️ Procedure",
-            "Risk": "⚠️ Risk",
-            "Assertion": "🏷️ Assertion",
-            "DocumentPage": "📄 PDF Page",
-            "FinancialRow": "🔢 Ledger Row",
-            "WorkingPaper": "📋 Workpaper",
+            "Finding": "Finding",
+            "Procedure": "Procedure",
+            "Risk": "Risk",
+            "Assertion": "Assertion",
+            "DocumentPage": "PDF Page",
+            "FinancialRow": "Ledger Row",
+            "WorkingPaper": "Workpaper",
         }
 
         for row, node in enumerate(self.graph.nodes):

@@ -18,7 +18,7 @@ Article Assistants, and Engagement Partners
 | **Practitioner Empathy (CA Workflow)** |  **4 / 10 (D)**   |      9 / 10      | Built like a database management tool (CRUD tables) rather than a guided audit engagement pipeline.                    |
 | **AI Integration Flow**                |  **5 / 10 (C)**   |      9 / 10      | AI is sequestered in an isolated full-page tab instead of living as a persistent, in-context slide-over assistant.     |
 
-> ### 🚨 The Brutal Bottom Line:
+> ### The Brutal Bottom Line:
 >
 > **The engine is a Ferrari, but the dashboard is a maze of 15 unconnected
 > switches.**\
@@ -119,12 +119,12 @@ flowchart LR
 
 | Item to Remove / Refactor                         | Rationale                                                              | Replacement / Solution                                                                 |
 | :------------------------------------------------ | :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
-| ❌ **15-Item Flat Sidebar**                       | Overwhelms users; feels like an administrative database backend.       | Replace with **4-Phase Engagement Stepper** + Top Global Client/FY Bar.                |
-| ❌ **Full-Screen AI Tab**                         | Destroys workflow continuity by taking users away from their work.     | Replace with **Slide-Over AI Copilot Drawer (Cmd + K)** accessible anywhere.           |
-| ❌ **Separate "Audit Matrix" View**               | Disconnected from actual Trial Balance accounts.                       | Merge planning, materiality (SA 320), and risk register into **Phase 1: Planning**.    |
-| ❌ **Separate "GST" & "Compliance" Views**        | Fragmented statutory checklists.                                       | Embed them directly into statutory procedure working paper folders (`Statutory Dues`). |
-| ❌ **Separate "Roll-Forward" & "Archival" Views** | Clutters the daily workspace with annual once-per-year operations.     | Move into **Phase 4: Finalization & Engagement Closure Menu**.                         |
-| ❌ **Manual Database IDs in UI**                  | Exposing raw UUIDs or integer primary keys confuses non-technical CAs. | Display human-friendly identifiers: `FY 25-26 / STAT / 001`, `WP-CASH-01`.             |
+| **15-Item Flat Sidebar**                       | Overwhelms users; feels like an administrative database backend.       | Replace with **4-Phase Engagement Stepper** + Top Global Client/FY Bar.                |
+| **Full-Screen AI Tab**                         | Destroys workflow continuity by taking users away from their work.     | Replace with **Slide-Over AI Copilot Drawer (Cmd + K)** accessible anywhere.           |
+| **Separate "Audit Matrix" View**               | Disconnected from actual Trial Balance accounts.                       | Merge planning, materiality (SA 320), and risk register into **Phase 1: Planning**.    |
+| **Separate "GST" & "Compliance" Views**        | Fragmented statutory checklists.                                       | Embed them directly into statutory procedure working paper folders (`Statutory Dues`). |
+| **Separate "Roll-Forward" & "Archival" Views** | Clutters the daily workspace with annual once-per-year operations.     | Move into **Phase 4: Finalization & Engagement Closure Menu**.                         |
+| **Manual Database IDs in UI**                  | Exposing raw UUIDs or integer primary keys confuses non-technical CAs. | Display human-friendly identifiers: `FY 25-26 / STAT / 001`, `WP-CASH-01`.             |
 
 ---
 

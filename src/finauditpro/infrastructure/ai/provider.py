@@ -91,15 +91,15 @@ class LMStudioProvider(BaseAIProvider):
                     content = str(msg_obj.get("content", "") or "").strip()
 
                     if reasoning and content:
-                        return f"🧠 *DeepSeek R1 Reasoning Process:*\n> {reasoning}\n\n*Audit Conclusion:*\n{content}"
+                        return f"*DeepSeek R1 Reasoning Process:*\n> {reasoning}\n\n*Audit Conclusion:*\n{content}"
                     if content:
                         if "<think>" in content and "</think>" in content:
                             think_part, answer_part = content.split("</think>", 1)
                             think_clean = think_part.replace("<think>", "").strip()
-                            return f"🧠 *DeepSeek R1 Reasoning Process:*\n> {think_clean}\n\n*Audit Conclusion:*\n{answer_part.strip()}"
+                            return f"*DeepSeek R1 Reasoning Process:*\n> {think_clean}\n\n*Audit Conclusion:*\n{answer_part.strip()}"
                         return content
                     if reasoning:
-                        return f"🧠 *DeepSeek R1 Reasoning Process:*\n{reasoning}"
+                        return f"*DeepSeek R1 Reasoning Process:*\n{reasoning}"
                 return ""
         except Exception as ex:
             raise RuntimeError(f"LM Studio generation error: {ex}") from ex

@@ -43,7 +43,7 @@ def compute_sha256(file_path: Path) -> str:
 def scan_for_secrets() -> list[str]:
     """Scan workspace for accidentally committed credentials or development databases."""
     issues = []
-    print("🔒 [Pre-Build] Scanning workspace for secrets & sensitive files...")
+    print("[Pre-Build] Scanning workspace for secrets & sensitive files...")
 
     # Forbidden files
     forbidden_files = [".env", ".env.local", "id_rsa", "private.key"]
@@ -95,20 +95,20 @@ def run_pre_build_checks() -> bool:
     # 1. Version Consistency
     ok, ver_msg = verify_version_consistency()
     if not ok:
-        print(f"❌ FAIL: {ver_msg}")
+        print(f"[FAIL] {ver_msg}")
         return False
-    print(f"✓ Authoritative Version Verified: v{ver_msg}")
+    print(f"[OK] Authoritative Version Verified: v{ver_msg}")
 
     # 2. Secret Scan
     issues = scan_for_secrets()
     if issues:
-        print("❌ FAIL: Security issues detected:")
+        print("[FAIL] Security issues detected:")
         for iss in issues:
             print(f"   - {iss}")
         return False
-    print("✓ Zero committed secrets or credentials detected.")
+    print("[OK] Zero committed secrets or credentials detected.")
 
-    print("✓ Pre-build release audit passed.\n")
+    print("[OK] Pre-build release audit passed.\n")
     return True
 
 
@@ -120,7 +120,7 @@ def run_post_build_checks() -> bool:
 
     dist_dir = PROJECT_ROOT / "dist"
     if not dist_dir.exists():
-        print("❌ FAIL: dist/ directory does not exist. Run build script first.")
+        print("[FAIL] dist/ directory does not exist. Run build script first.")
         return False
 
     from finauditpro.version import APP_NAME, __version__
@@ -148,20 +148,20 @@ def run_post_build_checks() -> bool:
 
             if item.is_file():
                 checksum_lines.append(f"{sha}  {item.name}\n")
-                print(f"  ✓ Found artifact: {item.name} ({size_bytes / (1024 * 1024):.2f} MB)")
+                print(f"  [OK] Found artifact: {item.name} ({size_bytes / (1024 * 1024):.2f} MB)")
                 print(f"    SHA-256: {sha}")
             else:
-                print(f"  ✓ Found bundle: {item.name} ({size_bytes / (1024 * 1024):.2f} MB)")
+                print(f"  [OK] Found bundle: {item.name} ({size_bytes / (1024 * 1024):.2f} MB)")
 
     if not artifacts:
-        print("❌ FAIL: No release artifacts found in dist/")
+        print("[FAIL] No release artifacts found in dist/")
         return False
 
     # Write SHA256SUMS.txt
     if checksum_lines:
         sums_file = dist_dir / "SHA256SUMS.txt"
         sums_file.write_text("".join(checksum_lines), encoding="utf-8")
-        print(f"✓ Generated checksums manifest: {sums_file.name}")
+        print(f"[OK] Generated checksums manifest: {sums_file.name}")
 
     # Generate machine-readable release manifest
     manifest = {
@@ -178,7 +178,7 @@ def run_post_build_checks() -> bool:
 
     manifest_file = dist_dir / "release_manifest.json"
     manifest_file.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
-    print(f"✓ Generated release manifest: {manifest_file.name}")
+    print(f"[OK] Generated release manifest: {manifest_file.name}")
 
     print("=" * 60)
     print(" POST-BUILD VERIFICATION: ALL CHECKS PASSED")

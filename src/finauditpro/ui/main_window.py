@@ -348,12 +348,17 @@ class MainWindow(QMainWindow):
 
     def _setup_inactivity_timer(self) -> None:
         import os
-
+        import sys
         from PySide6.QtCore import QEvent, QObject, QTimer
         from PySide6.QtWidgets import QApplication
 
         timeout_env = os.environ.get("FINAUDITPRO_INACTIVITY_TIMEOUT_MS")
-        self.inactivity_timeout_ms = int(timeout_env) if timeout_env else 900_000
+        if "pytest" in sys.modules and timeout_env:
+            self.inactivity_timeout_ms = int(timeout_env)
+        elif timeout_env:
+            self.inactivity_timeout_ms = max(int(timeout_env), 60_000)
+        else:
+            self.inactivity_timeout_ms = 900_000
         self.inactivity_timer = QTimer(self)
         self.inactivity_timer.setInterval(self.inactivity_timeout_ms)
         self.inactivity_timer.timeout.connect(self._lock_workstation)

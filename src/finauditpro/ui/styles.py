@@ -323,6 +323,30 @@ QHeaderView::section {
     font-size: 11px; font-weight: 600;
     border: none; border-bottom: 1px solid #E2E8F0; padding: 6px 12px;
 }
+
+/* ── DIALOGS & MESSAGE BOXES ─────────────────────────────────────────────── */
+QMessageBox {
+    background-color: #FFFFFF;
+}
+QMessageBox QLabel {
+    color: #0F172A;
+    background-color: transparent;
+    font-size: 13px;
+    font-weight: 500;
+}
+QMessageBox QPushButton {
+    min-width: 75px;
+    min-height: 24px;
+    background-color: #2563EB;
+    color: #FFFFFF;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    padding: 6px 14px;
+}
+QMessageBox QPushButton:hover {
+    background-color: #1D4ED8;
+}
 """
 
 

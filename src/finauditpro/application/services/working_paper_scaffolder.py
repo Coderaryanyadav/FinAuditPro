@@ -108,3 +108,77 @@ def scaffold_schedule_iii_working_papers(db_manager, engagement_id: str, prepare
                 )
             )
     return created
+
+
+def resolve_user_role(session, engagement_id: str, username: str) -> str:
+    """Resolve active role for a username within engagement scope, falling back to global role."""
+    from finauditpro.infrastructure.persistence.models import (
+        EngagementMemberModel,
+        EngagementModel,
+        UserModel,
+    )
+
+    user = session.query(UserModel).filter(UserModel.username == username).first()
+    if not user:
+        u_lower = username.lower()
+        if "partner" in u_lower:
+            return "Partner"
+        if "manager" in u_lower:
+            return "Manager"
+        if "senior" in u_lower:
+            return "Senior"
+        if "admin" in u_lower:
+            return "Administrator"
+        return "Associate"
+
+    member = (
+        session.query(EngagementMemberModel)
+        .filter(
+            EngagementMemberModel.engagement_id == engagement_id,
+            EngagementMemberModel.user_id == user.id,
+        )
+        .first()
+    )
+    if member:
+        return member.role
+
+    eng = session.query(EngagementModel).filter(EngagementModel.id == engagement_id).first()
+    if eng:
+        team = eng.assigned_team
+        if username in team or user.id in team or not team:
+            return user.role
+
+    return user.role
+
+
+def archive_working_paper_version(session, wp: WorkingPaper) -> None:
+    """Snapshot and persist historical version of a working paper before modification."""
+    import json
+    from uuid import uuid4
+    from finauditpro.domain.clock import utc_now
+    from finauditpro.infrastructure.persistence.working_paper_models import WorkingPaperVersionModel
+
+    wp_repo = WorkingPaperRepository(session)
+    sections = wp_repo.get_sections(wp.id)
+    sections_data = [
+        {"title": s.title, "content_markdown": s.content_markdown, "section_order": s.section_order}
+        for s in sections
+    ]
+
+    version_model = WorkingPaperVersionModel(
+        id=str(uuid4()),
+        working_paper_id=wp.id,
+        version=wp.version,
+        title=wp.title,
+        area=wp.area,
+        status=wp.status.value if hasattr(wp.status, "value") else str(wp.status),
+        conclusion=wp.conclusion,
+        preparer_id=wp.preparer_id,
+        reviewer_id=wp.reviewer_id,
+        content_hash=wp.content_hash,
+        sections_json=json.dumps(sections_data),
+        created_at=utc_now(),
+    )
+    session.add(version_model)
+    session.flush()
+

@@ -3,7 +3,20 @@ from typing import Any
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeySequence, QShortcut
-from PySide6.QtWidgets import QButtonGroup, QFrame, QHBoxLayout, QLabel, QLineEdit, QMainWindow, QMenu, QMessageBox, QPushButton, QStackedWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QButtonGroup,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMenu,
+    QMessageBox,
+    QPushButton,
+    QStackedWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 from finauditpro.application.security.rbac import UserSession
 from finauditpro.application.services.audit_matrix_service import AuditMatrixService
@@ -180,25 +193,24 @@ class MainWindow(QMainWindow):
         if hasattr(self.view_clients, "_create_client"):
             self.view_clients._create_client()
     def _init_views(self) -> None:
-        from finauditpro.ui.views.dashboard_view import DashboardView
-        from finauditpro.ui.views.firm_view import FirmView
-        from finauditpro.ui.views.client_view import ClientView
-        from finauditpro.ui.views.engagement_view import EngagementView
-        from finauditpro.ui.views.document_view import DocumentView
-        from finauditpro.ui.views.financial_data_view import FinancialDataView
-        from finauditpro.ui.views.gst_verification_view import GSTVerificationView
-        from finauditpro.ui.views.compliance_view import ComplianceView
-        from finauditpro.ui.views.audit_matrix_view import AuditMatrixView
-        from finauditpro.ui.views.inspection_view import InspectionView
         from finauditpro.ui.views.ai_assistant_view import AIAssistantView
-        from finauditpro.ui.views.working_paper_view import WorkingPaperView
-        from finauditpro.ui.views.report_view import ReportView
-        from finauditpro.ui.views.pbc_tracker_view import PBCTrackerView
-        from finauditpro.ui.views.audit_query_view import AuditQueryView
         from finauditpro.ui.views.archival_view import ArchivalView
+        from finauditpro.ui.views.audit_matrix_view import AuditMatrixView
+        from finauditpro.ui.views.audit_query_view import AuditQueryView
+        from finauditpro.ui.views.client_view import ClientView
+        from finauditpro.ui.views.compliance_view import ComplianceView
+        from finauditpro.ui.views.dashboard_view import DashboardView
+        from finauditpro.ui.views.document_view import DocumentView
+        from finauditpro.ui.views.engagement_view import EngagementView
+        from finauditpro.ui.views.financial_data_view import FinancialDataView
+        from finauditpro.ui.views.firm_view import FirmView
+        from finauditpro.ui.views.gst_verification_view import GSTVerificationView
+        from finauditpro.ui.views.inspection_view import InspectionView
+        from finauditpro.ui.views.pbc_tracker_view import PBCTrackerView
+        from finauditpro.ui.views.report_view import ReportView
         from finauditpro.ui.views.roll_forward_view import RollForwardView
         from finauditpro.ui.views.settings_view import SettingsView
-
+        from finauditpro.ui.views.working_paper_view import WorkingPaperView
         self.view_dashboard = DashboardView(self.firm_service, self.client_service, self.engagement_service, self.audit_matrix_service)
         self.view_dashboard.navigate_to_clients.connect(lambda: self.btn_clients.click()); self.view_dashboard.navigate_to_engagements.connect(lambda: self.btn_engagements.click()); self.view_dashboard.navigate_to_matrix.connect(lambda: self.btn_audit_matrix.click()); self.view_dashboard.engagement_selected.connect(self.set_active_engagement)
         self.view_firms, self.view_clients = FirmView(self.firm_service), ClientView(self.firm_service, self.client_service)
@@ -346,6 +358,7 @@ class MainWindow(QMainWindow):
 
     def _setup_inactivity_timer(self) -> None:
         import os
+
         from PySide6.QtCore import QEvent, QObject, QTimer
         from PySide6.QtWidgets import QApplication
 

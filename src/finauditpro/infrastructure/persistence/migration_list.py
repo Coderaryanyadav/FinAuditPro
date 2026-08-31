@@ -297,7 +297,6 @@ from finauditpro.infrastructure.persistence.migration_sqls import (
     MIGRATION_009_SQL,
 )
 
-
 MIGRATION_010_SQL = """
 CREATE TABLE IF NOT EXISTS engagement_members (
     id TEXT PRIMARY KEY,

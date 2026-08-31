@@ -1,8 +1,9 @@
 """Lockout protection manager for failed authentication attempts."""
 
 import json
-from datetime import datetime, UTC, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
+
 from finauditpro.domain.exceptions import ValidationError
 from finauditpro.infrastructure.first_run import get_app_data_dir
 
@@ -59,7 +60,7 @@ def record_failed_attempt() -> None:
         "attempts": attempts,
         "lockout_until": lockout_until
     }
-    
+
     # Write with strict owner-only file permissions using descriptor open
     import os
     flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC

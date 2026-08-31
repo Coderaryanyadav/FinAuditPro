@@ -56,18 +56,15 @@ class EngagementModel(Base):
     assigned_team_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
-
     firm: Mapped["FirmModel"] = relationship("FirmModel", back_populates="engagements")
     client: Mapped["ClientModel"] = relationship("ClientModel", back_populates="engagements")
     documents: Mapped[list["DocumentModel"]] = relationship("DocumentModel", back_populates="engagement", cascade="all, delete-orphan")
     financial_datasets: Mapped[list["FinancialDatasetModel"]] = relationship("FinancialDatasetModel", back_populates="engagement", cascade="all, delete-orphan")
-
     def __init__(self, **kwargs: Any) -> None:
         team = kwargs.pop("assigned_team", None)
         super().__init__(**kwargs)
         if team is not None:
             self.assigned_team = team
-
 
     @property
     def assigned_team(self) -> list[str]:
@@ -136,7 +133,6 @@ class ExtractedTableModel(Base):
     bbox_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
     document: Mapped["DocumentModel"] = relationship("DocumentModel", back_populates="tables")
-
 DocumentTableModel = ExtractedTableModel
 
 class EvidenceLinkModel(Base):
@@ -189,7 +185,6 @@ class FinancialDatasetModel(Base):
             return cast(dict[str, Any], json.loads(self.column_mappings_json))
         except Exception:
             return {}
-
 
 class MaterialityAssessmentModel(Base):
     __tablename__ = "materiality_assessments"
@@ -284,7 +279,6 @@ class AuditFindingModel(Base):
     prior_engagement_finding_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
-
 FindingModel = AuditFindingModel
 
 class AuditEvidenceModel(Base):
@@ -392,21 +386,12 @@ class UserModel(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
 
-
 class EngagementMemberModel(Base):
     __tablename__ = "engagement_members"
-
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    engagement_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False, index=True
-    )
-    user_id: Mapped[str] = mapped_column(
-        String(255), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
-    )
+    engagement_id: Mapped[str] = mapped_column(String(36), ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id: Mapped[str] = mapped_column(String(255), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     role: Mapped[str] = mapped_column(String(50), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
-
     __table_args__ = (UniqueConstraint("engagement_id", "user_id", name="uq_eng_user"),)
-
-

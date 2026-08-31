@@ -68,7 +68,7 @@ class MainWindow(QMainWindow):
         self.sidebar_collapsed, self.pipeline_btns = False, []
         self.setWindowTitle("FinAuditPro — Guided Statutory Audit Operating System")
         self.resize(1440, 920); self.setStyleSheet(GLOBAL_QSS)
-        self._init_ui(); self._setup_inactivity_timer(); self._show_login_flow(); self._auto_select_initial_engagement()
+        self._init_ui(); self._show_login_flow(); self._setup_inactivity_timer(); self._auto_select_initial_engagement()
     @property
     def active_engagement_id(self) -> str | None:
         return self.current_engagement.id if self.current_engagement else None
@@ -93,7 +93,7 @@ class MainWindow(QMainWindow):
     def _init_ui(self) -> None:
         central = _tag(QWidget(), "appBg"); self.setCentralWidget(central)
         main_layout = QHBoxLayout(central); main_layout.setContentsMargins(0, 0, 0, 0); main_layout.setSpacing(0)
-        self.sidebar = _tag(QFrame(), "dashboardSidebar"); self.sidebar.setFixedWidth(230)
+        self.sidebar = _tag(QFrame(), "dashboardSidebar"); self.sidebar.setFixedWidth(240)
         sb_layout = QVBoxLayout(self.sidebar); sb_layout.setContentsMargins(10, 14, 10, 14); sb_layout.setSpacing(3)
         logo_row = QHBoxLayout()
         logo_box = FinAuditLogoWidget(size=30)
@@ -115,7 +115,7 @@ class MainWindow(QMainWindow):
         prof = _tag(QFrame(), "sidebarProfileFrame")
         prof.setCursor(Qt.CursorShape.PointingHandCursor)
         prof.mousePressEvent = lambda e: self.btn_settings.click()
-        pf_l = QHBoxLayout(prof); pf_l.setContentsMargins(4, 8, 4, 4)
+        pf_l = QHBoxLayout(prof); pf_l.setContentsMargins(4, 6, 4, 4)
         av = _tag(QLabel("CA"), "userAvatar"); av.setFixedSize(28, 28); av.setAlignment(Qt.AlignmentFlag.AlignCenter)
         u_info = QVBoxLayout(); u_info.setSpacing(0)
         self.lbl_user_name = _tag(QLabel("Partner"), "userName")
@@ -339,34 +339,27 @@ class MainWindow(QMainWindow):
         from finauditpro.ui.dialogs.command_palette_dialog import CommandPaletteDialog
         dlg = CommandPaletteDialog(self); dlg.action_triggered.connect(lambda k, p: self.stack.setCurrentIndex(p) if k == "nav" and 0 <= p < self.stack.count() else None); dlg.exec()
 
+    def resizeEvent(self, event: Any) -> None:
+        super().resizeEvent(event)
+        if hasattr(self, "lock_screen_widget") and self.lock_screen_widget:
+            self.lock_screen_widget.setGeometry(self.rect())
+
     def _setup_inactivity_timer(self) -> None:
         import os
-        from PySide6.QtCore import QTimer, QObject, QEvent
+        from PySide6.QtCore import QEvent, QObject, QTimer
         from PySide6.QtWidgets import QApplication
 
-        # Timeout of 15 minutes by default (900,000 milliseconds)
         timeout_env = os.environ.get("FINAUDITPRO_INACTIVITY_TIMEOUT_MS")
         self.inactivity_timeout_ms = int(timeout_env) if timeout_env else 900_000
-
         self.inactivity_timer = QTimer(self)
         self.inactivity_timer.setInterval(self.inactivity_timeout_ms)
         self.inactivity_timer.timeout.connect(self._lock_workstation)
 
-        # Global event filter capturing clicks and keys anywhere in the application
         class InteractionFilter(QObject):
             def __init__(self, timer: QTimer) -> None:
-                super().__init__()
-                self.timer = timer
-
+                super().__init__(); self.timer = timer
             def eventFilter(self, obj: QObject, event: QEvent) -> bool:
-                if event.type() in (
-                    QEvent.Type.MouseButtonPress,
-                    QEvent.Type.MouseButtonRelease,
-                    QEvent.Type.MouseMove,
-                    QEvent.Type.KeyPress,
-                    QEvent.Type.KeyRelease,
-                    QEvent.Type.Wheel
-                ):
+                if event.type() in (QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease, QEvent.Type.MouseMove, QEvent.Type.KeyPress, QEvent.Type.KeyRelease, QEvent.Type.Wheel):
                     self.timer.start()
                 return False
 
@@ -378,14 +371,13 @@ class MainWindow(QMainWindow):
         """Securely lock the user session and cover the GUI with the LockScreenOverlay."""
         if hasattr(self, "lock_screen_widget") and self.lock_screen_widget:
             return
-
         from finauditpro.application.security.rbac import RBACManager
         from finauditpro.ui.widgets.lock_screen import LockScreenOverlay
 
         rbac_manager = RBACManager(self.current_user_session)
         rbac_manager.lock_session()
-
         self.lock_screen_widget = LockScreenOverlay(self, rbac_manager)
+        self.lock_screen_widget.setGeometry(self.rect())
         self.inactivity_timer.stop()
 
         def on_unlocked():

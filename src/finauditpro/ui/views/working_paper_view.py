@@ -1,6 +1,7 @@
 """Working Papers Workspace View for FinAuditPro. Maker-Checker control, review notes, and cryptographic tamper verification."""
 
 from typing import Any
+
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QPalette
 from PySide6.QtWidgets import (

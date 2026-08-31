@@ -149,8 +149,8 @@ QLabel#userAvatar {
     background-color: #2563EB; color: #FFFFFF;
     border-radius: 15px; font-weight: 800; font-size: 12px; border: none;
 }
-QLabel#userName { font-size: 14px; font-weight: 600; color: #0F172A; border: none; }
-QLabel#userRole { font-size: 12px; color: #64748B; border: none; }
+QLabel#userName { font-size: 13px; font-weight: 600; color: #0F172A; border: none; }
+QLabel#userRole { font-size: 11px; font-weight: 500; color: #64748B; border: none; }
 
 /* Nav buttons with thin blue left indicator */
 QPushButton#navButton {

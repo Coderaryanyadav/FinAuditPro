@@ -1,11 +1,11 @@
 """Helper to scaffold Permanent Audit Files and Schedule III working papers."""
 
+from finauditpro.domain.entities import AuditEvent
 from finauditpro.domain.working_paper_entities import (
     WorkingPaper,
     WorkingPaperSection,
     WorkingPaperStatusEnum,
 )
-from finauditpro.domain.entities import AuditEvent
 from finauditpro.infrastructure.persistence.repositories import AuditEventRepository
 from finauditpro.infrastructure.persistence.repositories.working_paper_repository import (
     WorkingPaperRepository,
@@ -155,6 +155,7 @@ def archive_working_paper_version(session, wp: WorkingPaper) -> None:
     """Snapshot and persist historical version of a working paper before modification."""
     import json
     from uuid import uuid4
+
     from finauditpro.domain.clock import utc_now
     from finauditpro.infrastructure.persistence.working_paper_models import WorkingPaperVersionModel
 

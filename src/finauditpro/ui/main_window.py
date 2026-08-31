@@ -4,18 +4,8 @@ from typing import Any
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
-    QButtonGroup,
-    QFrame,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QMainWindow,
-    QMenu,
-    QMessageBox,
-    QPushButton,
-    QStackedWidget,
-    QVBoxLayout,
-    QWidget,
+    QButtonGroup, QFrame, QHBoxLayout, QLabel, QLineEdit, QMainWindow,
+    QMenu, QMessageBox, QPushButton, QStackedWidget, QVBoxLayout, QWidget,
 )
 
 from finauditpro.application.security.rbac import UserSession
@@ -231,7 +221,7 @@ class MainWindow(QMainWindow):
         if self.ai_drawer.isVisible(): self.ai_drawer.inp_query.setFocus()
     def _toggle_sidebar(self) -> None:
         self.sidebar_collapsed = not self.sidebar_collapsed
-        self.sidebar.setFixedWidth(64 if self.sidebar_collapsed else 230)
+        self.sidebar.setFixedWidth(64 if self.sidebar_collapsed else 240)
         self.logo_name.setVisible(not self.sidebar_collapsed)
         self.btn_collapse.setText("▶" if self.sidebar_collapsed else "◀")
     def _show_profile_menu(self) -> None:

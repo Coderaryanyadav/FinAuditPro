@@ -58,19 +58,23 @@ class RBACManager:
         if self.current_session:
             self.current_session.is_locked = True
 
-    def unlock_session(self, passcode: str | None = None) -> None:
+    def unlock_session(
+        self, passcode: str | None = None, *, _biometric_verified: bool = False
+    ) -> None:
         """Unlock the session by re-verifying passcode (or biometric validation)."""
         if self.current_session:
-            if passcode is not None:
-                from finauditpro.infrastructure.security.encryption import initialize_session_cipher
-
-                try:
-                    initialize_session_cipher(passcode)
-                    self.current_session.is_locked = False
-                except Exception as ex:
-                    raise ValueError("Incorrect passcode. Failed to unlock session.") from ex
-            else:
+            if _biometric_verified:
                 self.current_session.is_locked = False
+                return
+            if not passcode or not passcode.strip():
+                raise ValueError("Passcode is required to unlock session.")
+            from finauditpro.infrastructure.security.encryption import initialize_session_cipher
+
+            try:
+                initialize_session_cipher(passcode)
+                self.current_session.is_locked = False
+            except Exception as ex:
+                raise ValueError("Incorrect passcode. Failed to unlock session.") from ex
 
     def is_biometrics_supported(self) -> bool:
         """Check if biometric authentication is available on this system."""
@@ -87,7 +91,7 @@ class RBACManager:
             from finauditpro.infrastructure.security.biometrics import authenticate_with_biometrics
 
             if authenticate_with_biometrics(reason):
-                self.unlock_session(None)
+                self.unlock_session(None, _biometric_verified=True)
                 return True
         except Exception:
             pass

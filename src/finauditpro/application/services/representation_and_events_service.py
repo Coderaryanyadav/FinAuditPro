@@ -237,21 +237,29 @@ class RepresentationAndEventsService:
                 for c in entity.clauses
             ],
             is_chronologically_valid=entity.is_chronologically_valid,
+            created_at=entity.created_at,
             chronology_validation_msg=entity.chronology_validation_msg,
         )
 
     def _to_subseq_dto(self, entity: SubsequentEvent) -> SubsequentEventDTO:
+        proc_str = (
+            entity.procedure_applied.value
+            if hasattr(entity.procedure_applied, "value")
+            else str(entity.procedure_applied)
+        )
         return SubsequentEventDTO(
             id=entity.id,
             engagement_id=entity.engagement_id,
             event_date=entity.event_date,
-            event_type=entity.event_type.value,
+            event_type=entity.event_type.value if hasattr(entity.event_type, "value") else str(entity.event_type),
             description=entity.description,
             estimated_amount_paise=entity.estimated_amount_paise,
             accounting_treatment=entity.accounting_treatment,
             is_adjusted_in_fs=entity.is_adjusted_in_fs,
             is_disclosed_in_notes=entity.is_disclosed_in_notes,
-            procedure_applied=entity.procedure_applied,
+            working_paper_ref=entity.working_paper_ref,
+            procedure_applied=proc_str,
             auditor_conclusion=entity.auditor_conclusion,
+            created_at=entity.created_at,
             identified_by=entity.identified_by,
         )

@@ -16,6 +16,7 @@ from finauditpro.application.audit_adjustment_dtos import (
     SubmitAJEDTO,
     UpdateAJEDTO,
 )
+from finauditpro.application.security.engagement_lock_guard import assert_engagement_not_locked
 from finauditpro.application.security.security_context import SecurityContext
 from finauditpro.domain.account_mapping_entities import AccountTypeEnum
 from finauditpro.domain.audit_adjustment_entities import (
@@ -70,11 +71,16 @@ class AuditAdjustmentService:
         )
         return (user.id if user else user_session.user_id, role_val)
 
+    def _assert_not_locked(self, session: Any, engagement_id: str) -> None:
+        eng = EngagementRepository(session).get_by_id(engagement_id)
+        if not eng:
+            raise EntityNotFoundError("Engagement", engagement_id)
+        assert_engagement_not_locked(eng)
+
     def create_adjustment(self, dto: CreateAJEDTO) -> AuditJournalEntry:
         """Create a new Draft Audit Adjusting Journal Entry with strict double-entry validation."""
         with self.db_manager.session_scope() as session:
-            if not EngagementRepository(session).get_by_id(dto.engagement_id):
-                raise EntityNotFoundError("Engagement", dto.engagement_id)
+            self._assert_not_locked(session, dto.engagement_id)
 
             actor_id, _ = self._get_trusted_user(session)
             aje_repo = AuditAdjustmentRepository(session)
@@ -132,6 +138,7 @@ class AuditAdjustmentService:
     def update_draft_adjustment(self, dto: UpdateAJEDTO) -> AuditJournalEntry:
         """Update an existing draft or rejected AJE with strict double-entry validation."""
         with self.db_manager.session_scope() as session:
+            self._assert_not_locked(session, dto.engagement_id)
             aje_repo = AuditAdjustmentRepository(session)
             entry = aje_repo.get_entry_by_id(dto.entry_id)
             if not entry or entry.engagement_id != dto.engagement_id:
@@ -186,6 +193,7 @@ class AuditAdjustmentService:
     def delete_draft_adjustment(self, engagement_id: str, entry_id: str) -> bool:
         """Delete a draft AJE permanently."""
         with self.db_manager.session_scope() as session:
+            self._assert_not_locked(session, engagement_id)
             aje_repo = AuditAdjustmentRepository(session)
             entry = aje_repo.get_entry_by_id(entry_id)
             if not entry or entry.engagement_id != engagement_id:
@@ -214,6 +222,7 @@ class AuditAdjustmentService:
     def submit_adjustment(self, dto: SubmitAJEDTO) -> AuditJournalEntry:
         """Submit a draft AJE for review."""
         with self.db_manager.session_scope() as session:
+            self._assert_not_locked(session, dto.engagement_id)
             aje_repo = AuditAdjustmentRepository(session)
             entry = aje_repo.get_entry_by_id(dto.entry_id)
             if not entry or entry.engagement_id != dto.engagement_id:
@@ -225,6 +234,7 @@ class AuditAdjustmentService:
     def review_adjustment(self, dto: ReviewAJEDTO) -> AuditJournalEntry:
         """Review an AJE (Approve or Reject) enforcing Maker-Checker segregation of duties."""
         with self.db_manager.session_scope() as session:
+            self._assert_not_locked(session, dto.engagement_id)
             aje_repo = AuditAdjustmentRepository(session)
             entry = aje_repo.get_entry_by_id(dto.entry_id)
             if not entry or entry.engagement_id != dto.engagement_id:
@@ -263,6 +273,7 @@ class AuditAdjustmentService:
     def apply_adjustment(self, dto: ApplyAJEDTO) -> AuditJournalEntry:
         """Apply an approved AJE to the engagement's financial figures."""
         with self.db_manager.session_scope() as session:
+            self._assert_not_locked(session, dto.engagement_id)
             aje_repo = AuditAdjustmentRepository(session)
             entry = aje_repo.get_entry_by_id(dto.entry_id)
             if not entry or entry.engagement_id != dto.engagement_id:
@@ -274,6 +285,7 @@ class AuditAdjustmentService:
     def reverse_adjustment(self, dto: ReverseAJEDTO) -> AuditJournalEntry:
         """Create a mirrored reversing AJE to reverse an approved/applied adjustment while preserving audit history."""
         with self.db_manager.session_scope() as session:
+            self._assert_not_locked(session, dto.engagement_id)
             aje_repo = AuditAdjustmentRepository(session)
             orig = aje_repo.get_entry_by_id(dto.entry_id)
             if not orig or orig.engagement_id != dto.engagement_id:

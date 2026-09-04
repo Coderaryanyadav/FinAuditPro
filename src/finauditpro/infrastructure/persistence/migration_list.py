@@ -300,6 +300,8 @@ from finauditpro.infrastructure.persistence.migration_sqls import (
 )
 from finauditpro.infrastructure.persistence.migration_sqls_c import MIGRATION_013_SQL
 from finauditpro.infrastructure.persistence.migration_sqls_d import MIGRATION_014_SQL
+from finauditpro.infrastructure.persistence.migration_sqls_e import MIGRATION_015_SQL
+from finauditpro.infrastructure.persistence.migration_sqls_f import MIGRATION_016_SQL
 
 MIGRATION_010_SQL = """
 CREATE TABLE IF NOT EXISTS engagement_members (
@@ -357,4 +359,6 @@ def get_all_migrations() -> list[tuple[int, str, Any]]:
         (12, "012_create_core_audit_engine_tables", MIGRATION_012_SQL),
         (13, "013_create_financial_statements_caro_tax_tables", MIGRATION_013_SQL),
         (14, "014_create_audit_completion_tables", MIGRATION_014_SQL),
+        (15, "015_create_audit_reporting_phase_e_tables", MIGRATION_015_SQL),
+        (16, "016_create_continuous_audit_phase_f_tables", MIGRATION_016_SQL),
     ]

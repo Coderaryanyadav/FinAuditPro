@@ -125,3 +125,79 @@ class FinalAnalyticalReviewModel(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
     )
+
+
+class CompletionChecklistItemModel(Base):
+    __tablename__ = "completion_checklist_items"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    engagement_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    category: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    is_applicable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="Not Started")
+    supporting_ref: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    reviewer: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
+    )
+
+
+class RelatedPartyCompletionModel(Base):
+    __tablename__ = "related_party_completions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    engagement_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
+    register_reviewed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    undisclosed_transactions_identified: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
+    arms_length_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    schedule_iii_disclosed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    auditor_conclusion: Mapped[str] = mapped_column(Text, nullable=False)
+    reviewer: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    is_completed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
+    )
+
+
+class SA240CompletionModel(Base):
+    __tablename__ = "sa240_completions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    engagement_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
+    management_override_tested: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    journal_entry_testing_completed: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True
+    )
+    revenue_recognition_presumption_addressed: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True
+    )
+    risk_indicators_identified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    auditor_conclusion: Mapped[str] = mapped_column(Text, nullable=False)
+    reviewer: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    is_completed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
+    )
+
+
+FraudCompletionModel = SA240CompletionModel  # ignore

@@ -78,4 +78,51 @@ CREATE TABLE IF NOT EXISTS final_analytical_reviews (
     FOREIGN KEY(engagement_id) REFERENCES engagements(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_far_eng ON final_analytical_reviews(engagement_id);
+
+CREATE TABLE IF NOT EXISTS completion_checklist_items (
+    id TEXT PRIMARY KEY,
+    engagement_id TEXT NOT NULL,
+    category TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    is_applicable INTEGER NOT NULL DEFAULT 1,
+    status TEXT NOT NULL DEFAULT 'Not Started',
+    supporting_ref TEXT,
+    reviewer TEXT,
+    notes TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY(engagement_id) REFERENCES engagements(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_cci_eng_cat ON completion_checklist_items(engagement_id, category);
+
+CREATE TABLE IF NOT EXISTS related_party_completions (
+    id TEXT PRIMARY KEY,
+    engagement_id TEXT NOT NULL UNIQUE,
+    register_reviewed INTEGER NOT NULL DEFAULT 1,
+    undisclosed_transactions_identified INTEGER NOT NULL DEFAULT 0,
+    arms_length_verified INTEGER NOT NULL DEFAULT 1,
+    schedule_iii_disclosed INTEGER NOT NULL DEFAULT 1,
+    auditor_conclusion TEXT NOT NULL,
+    reviewer TEXT,
+    is_completed INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY(engagement_id) REFERENCES engagements(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS sa240_completions (
+    id TEXT PRIMARY KEY,
+    engagement_id TEXT NOT NULL UNIQUE,
+    management_override_tested INTEGER NOT NULL DEFAULT 1,
+    journal_entry_testing_completed INTEGER NOT NULL DEFAULT 1,
+    revenue_recognition_presumption_addressed INTEGER NOT NULL DEFAULT 1,
+    risk_indicators_identified INTEGER NOT NULL DEFAULT 0,
+    auditor_conclusion TEXT NOT NULL,
+    reviewer TEXT,
+    is_completed INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY(engagement_id) REFERENCES engagements(id) ON DELETE CASCADE
+);
 """

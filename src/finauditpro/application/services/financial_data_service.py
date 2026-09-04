@@ -5,6 +5,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from finauditpro.application.financial_dtos import ImportDatasetDTO, InspectFileResultDTO
+from finauditpro.application.security.engagement_lock_guard import assert_engagement_not_locked
 from finauditpro.domain.entities import AuditEvent
 from finauditpro.domain.exceptions import EntityNotFoundError
 from finauditpro.domain.financial_entities import FinancialDataset, FinancialRecord
@@ -93,8 +94,10 @@ class FinancialDataService:
 
         with self.db_manager.session_scope() as session:
             eng_repo = EngagementRepository(session)
-            if not eng_repo.get_by_id(dto.engagement_id):
+            eng = eng_repo.get_by_id(dto.engagement_id)
+            if not eng:
                 raise EntityNotFoundError("Engagement", dto.engagement_id)
+            assert_engagement_not_locked(eng)
 
         content_hash = calculate_sha256(path)
 

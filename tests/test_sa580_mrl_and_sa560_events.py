@@ -35,6 +35,23 @@ def test_sa580_service_mrl_lifecycle(tmp_path: any) -> None:
     db_path = tmp_path / "test_mrl.db"
     db_manager = initialize_database(db_path)
 
+    with db_manager.session_scope() as session:
+        from finauditpro.domain.entities import AuditTypeEnum, Client, Engagement, EngagementStatusEnum, Firm
+        from finauditpro.infrastructure.persistence.repositories import ClientRepository, EngagementRepository, FirmRepository
+        firm = Firm(id="firm-mrl", name="Test Firm")
+        FirmRepository(session).add(firm)
+        client = Client(id="client-mrl", firm_id=firm.id, name="Test Client")
+        ClientRepository(session).add(client)
+        eng = Engagement(
+            id="eng-mrl-1",
+            firm_id=firm.id,
+            client_id=client.id,
+            financial_year="2025-26",
+            audit_type=AuditTypeEnum.STATUTORY_AUDIT,
+            status=EngagementStatusEnum.AUDIT_PROCEDURES,
+        )
+        EngagementRepository(session).add(eng)
+
     SecurityContext.set_current_user("auditor-1", RoleEnum.SENIOR_AUDITOR)
     service = AuditCompletionService(db_manager)
 
@@ -66,6 +83,23 @@ def test_sa580_service_mrl_lifecycle(tmp_path: any) -> None:
 def test_sa560_subsequent_events_log(tmp_path: any) -> None:
     db_path = tmp_path / "test_subseq.db"
     db_manager = initialize_database(db_path)
+
+    with db_manager.session_scope() as session:
+        from finauditpro.domain.entities import AuditTypeEnum, Client, Engagement, EngagementStatusEnum, Firm
+        from finauditpro.infrastructure.persistence.repositories import ClientRepository, EngagementRepository, FirmRepository
+        firm = Firm(id="firm-subseq", name="Test Firm")
+        FirmRepository(session).add(firm)
+        client = Client(id="client-subseq", firm_id=firm.id, name="Test Client")
+        ClientRepository(session).add(client)
+        eng = Engagement(
+            id="eng-subseq-1",
+            firm_id=firm.id,
+            client_id=client.id,
+            financial_year="2025-26",
+            audit_type=AuditTypeEnum.STATUTORY_AUDIT,
+            status=EngagementStatusEnum.AUDIT_PROCEDURES,
+        )
+        EngagementRepository(session).add(eng)
 
     SecurityContext.set_current_user("auditor-1", RoleEnum.SENIOR_AUDITOR)
     service = AuditCompletionService(db_manager)

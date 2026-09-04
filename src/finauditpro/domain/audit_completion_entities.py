@@ -160,6 +160,7 @@ class MRLStatusEnum(StrEnum):
     DRAFT = "Draft Representation Letter"
     DISPATCHED = "Dispatched to Management"
     SIGNED_AND_OBTAINED = "Signed Representation Letter Obtained"
+    SIGNED_BY_MANAGEMENT = "Signed by Management"
     REFUSED_BY_MANAGEMENT = "Refused by Management (Scope Limitation)"
 
 
@@ -181,6 +182,8 @@ class MRLClause(DomainBaseModel):
     text_content: str = Field(...)
     is_mandatory: bool = Field(default=True)
     is_accepted_by_management: bool = Field(default=True)
+    is_modified: bool = Field(default=False)
+    specific_facts: str | None = Field(default=None)
 
 
 class ManagementRepresentationLetter(DomainBaseModel):
@@ -195,8 +198,10 @@ class ManagementRepresentationLetter(DomainBaseModel):
     signed_date: str | None = Field(default=None)
     signatory_name: str | None = Field(default=None)
     signatory_designation: str | None = Field(default=None)
+    audit_report_date: str | None = Field(default=None)
     clauses: list[MRLClause] = Field(default_factory=list)
     is_chronologically_valid: bool = Field(default=True)
+    chronology_validation_msg: str | None = Field(default=None)
     created_at: str = Field(default_factory=lambda: utc_now().isoformat())
 
 
@@ -210,6 +215,8 @@ class SubsequentEventTypeEnum(StrEnum):
     TYPE_II_NON_ADJUSTING = (
         "Type II: Non-Adjusting Event (Conditions arising after Balance Sheet date)"
     )
+    ADJUSTING = "Type I: Adjusting Event (Conditions existing at Balance Sheet date)"
+    NON_ADJUSTING = "Type II: Non-Adjusting Event (Conditions arising after Balance Sheet date)"
 
 
 class SubsequentEventProcedureEnum(StrEnum):
@@ -233,10 +240,11 @@ class SubsequentEvent(DomainBaseModel):
     is_adjusted_in_fs: bool = Field(default=False)
     is_disclosed_in_notes: bool = Field(default=False)
     working_paper_ref: str | None = Field(default=None)
-    procedure_applied: SubsequentEventProcedureEnum = Field(
+    procedure_applied: str | SubsequentEventProcedureEnum = Field(
         default=SubsequentEventProcedureEnum.MANAGEMENT_INQUIRY
     )
     auditor_conclusion: str = Field(default="")
+    identified_by: str = Field(default="Auditor")
     created_at: str = Field(default_factory=lambda: utc_now().isoformat())
 
 

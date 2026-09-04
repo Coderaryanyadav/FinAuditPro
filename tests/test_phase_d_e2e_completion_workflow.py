@@ -28,6 +28,7 @@ from finauditpro.domain.entities import (
     Client,
     Engagement,
     EngagementStatusEnum,
+    Firm,
     User,
 )
 from finauditpro.domain.financial_entities import (
@@ -38,8 +39,10 @@ from finauditpro.domain.financial_entities import (
 from finauditpro.infrastructure.first_run import initialize_database
 from finauditpro.infrastructure.persistence.repositories import (
     AuditMatrixRepository,
+    ClientRepository,
     EngagementRepository,
     FinancialDataRepository,
+    FirmRepository,
     UserRepository,
 )
 from finauditpro.infrastructure.persistence.repositories.core_audit_engine_repository import (
@@ -60,6 +63,8 @@ def test_phase_d_comprehensive_audit_completion_workflow(tmp_path: any) -> None:
             User(
                 id=str(uuid4()),
                 username="partner_ak",
+                password_hash="h",
+                salt="s",
                 display_name="CA Ananya Kapoor (Partner)",
                 role=RoleEnum.PARTNER,
             )
@@ -68,21 +73,28 @@ def test_phase_d_comprehensive_audit_completion_workflow(tmp_path: any) -> None:
             User(
                 id=str(uuid4()),
                 username="senior_ca",
+                password_hash="h",
+                salt="s",
                 display_name="CA Rahul Mehta (Senior)",
                 role=RoleEnum.SENIOR,
             )
         )
 
-        fin_repo = FinancialDataRepository(session)
-        client = fin_repo.add_client(
-            Client(
-                name="ABC Manufacturing Pvt Ltd",
-                pan_number="AABCA1234F",
-                cin_number="U29100MH2015PTC123456",
-            )
+        firm = Firm(id="firm-abc", name="ABC Audit LLP")
+        FirmRepository(session).add(firm)
+
+        client = Client(
+            id="client-abc",
+            firm_id=firm.id,
+            name="ABC Manufacturing Pvt Ltd",
+            pan_number="AABCA1234F",
+            cin_number="U29100MH2015PTC123456",
         )
+        ClientRepository(session).add(client)
+
         eng = Engagement(
             id=eng_id,
+            firm_id=firm.id,
             client_id=client.id,
             title="Statutory Audit FY 2025-26",
             financial_year="2025-26",
@@ -91,6 +103,7 @@ def test_phase_d_comprehensive_audit_completion_workflow(tmp_path: any) -> None:
         )
         EngagementRepository(session).add(eng)
 
+        fin_repo = FinancialDataRepository(session)
         dataset_id = str(uuid4())
         fin_repo.add_dataset(
             FinancialDataset(

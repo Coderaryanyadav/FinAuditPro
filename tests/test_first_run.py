@@ -35,8 +35,8 @@ def test_initialize_database_runs_all_migrations(tmp_path) -> None:
     assert db_manager is not None
 
     with db_manager.session_scope() as session:
-        # Check that migration history table exists and has 14 entries
+        # Check that migration history table exists and has 15 entries
         res = session.execute(
             __import__("sqlalchemy").text("SELECT COUNT(*) FROM schema_migrations")
         ).scalar()
-        assert res == 14
+        assert res == 16

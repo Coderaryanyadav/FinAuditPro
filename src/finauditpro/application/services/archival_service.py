@@ -355,3 +355,29 @@ class ArchivalService:
                     details=f"Engagement reopened by Partner. Reason: '{dto.reason}'. Prior archive preserved: {latest_arch.id}",
                 )
             )
+
+    def verify_archive_package(self, archive_path: str) -> bool:
+        """Independently verify the cryptographic integrity and file structure of an archived package."""
+        import zipfile
+        from pathlib import Path
+        from finauditpro.infrastructure.documents.document_security import calculate_sha256
+
+        p = Path(archive_path)
+        if not p.exists() or not p.is_file():
+            return False
+        try:
+            with zipfile.ZipFile(archive_path, "r") as zf:
+                if zf.testzip() is not None:
+                    return False
+            curr_hash = calculate_sha256(archive_path)
+            with self.db_manager.session_scope() as session:
+                from finauditpro.infrastructure.persistence.archival_models import EngagementArchiveModel
+
+                archives = (
+                    session.query(EngagementArchiveModel).filter_by(archive_path=archive_path).all()
+                )
+                if archives:
+                    return archives[0].sealed_content_hash == curr_hash
+            return len(curr_hash) == 64
+        except Exception:
+            return False

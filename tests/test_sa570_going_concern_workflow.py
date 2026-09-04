@@ -77,6 +77,27 @@ def test_sa570_service_rbac_partner_signoff(tmp_path: any) -> None:
     db_path = tmp_path / "test_sa570.db"
     db_manager = initialize_database(db_path)
 
+    with db_manager.session_scope() as session:
+        from finauditpro.domain.entities import AuditTypeEnum, Client, Engagement, EngagementStatusEnum, Firm
+        from finauditpro.infrastructure.persistence.repositories import (
+            ClientRepository,
+            EngagementRepository,
+            FirmRepository,
+        )
+        firm = Firm(id="firm-570", name="Test Firm")
+        FirmRepository(session).add(firm)
+        client = Client(id="client-570", firm_id=firm.id, name="Test Client")
+        ClientRepository(session).add(client)
+        eng = Engagement(
+            id="eng-test-570",
+            firm_id=firm.id,
+            client_id=client.id,
+            financial_year="2025-26",
+            audit_type=AuditTypeEnum.STATUTORY_AUDIT,
+            status=EngagementStatusEnum.AUDIT_PROCEDURES,
+        )
+        EngagementRepository(session).add(eng)
+
     service = AuditCompletionService(db_manager)
 
     # 1. Senior Auditor cannot do partner sign-off

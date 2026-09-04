@@ -71,6 +71,16 @@ class AuditJournalEntry(DomainBaseModel):
                 f"AJE '{self.aje_number}' must have at least two journal lines (debit and credit)."
             )
 
+        for line in self.lines:
+            if line.debit_paise > 0 and line.credit_paise > 0:
+                raise ValidationError(
+                    f"Line {line.line_no} in AJE '{self.aje_number}' cannot have both debit (₹{line.debit_paise / 100:,.2f}) and credit (₹{line.credit_paise / 100:,.2f}) amounts."
+                )
+            if line.debit_paise == 0 and line.credit_paise == 0:
+                raise ValidationError(
+                    f"Line {line.line_no} in AJE '{self.aje_number}' must have a non-zero debit or credit amount."
+                )
+
         tot_dr = sum(line.debit_paise for line in self.lines)
         tot_cr = sum(line.credit_paise for line in self.lines)
 

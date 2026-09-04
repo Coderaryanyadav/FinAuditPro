@@ -22,6 +22,7 @@ from finauditpro.application.working_paper_dtos import (
     RespondReviewNoteDTO,
     SignOffDTO,
 )
+from finauditpro.application.security.engagement_lock_guard import assert_engagement_not_locked
 from finauditpro.domain.clock import utc_now
 from finauditpro.domain.entities import AuditEvent
 from finauditpro.domain.exceptions import EntityNotFoundError, ValidationError
@@ -87,8 +88,10 @@ class WorkingPaperService:
 
     def create_working_paper(self, dto: CreateWorkingPaperDTO) -> WorkingPaper:
         with self.db_manager.session_scope() as session:
-            if not EngagementRepository(session).get_by_id(dto.engagement_id):
+            eng = EngagementRepository(session).get_by_id(dto.engagement_id)
+            if not eng:
                 raise EntityNotFoundError("Engagement", dto.engagement_id)
+            assert_engagement_not_locked(eng)
             try:
                 f_cat = FileCategoryEnum(dto.file_category)
             except Exception:

@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from finauditpro.application.security.engagement_lock_guard import assert_engagement_not_locked
 from finauditpro.domain.document_entities import (
     Document,
     DocumentCategoryEnum,
@@ -89,8 +90,10 @@ class DocumentService:
 
         with self.db_manager.session_scope() as session:
             eng_repo = EngagementRepository(session)
-            if not eng_repo.get_by_id(dto.engagement_id):
+            eng = eng_repo.get_by_id(dto.engagement_id)
+            if not eng:
                 raise EntityNotFoundError("Engagement", dto.engagement_id)
+            assert_engagement_not_locked(eng)
 
             # Check if identical hash already exists in engagement (Dedup Check)
             doc_repo = DocumentRepository(session)
@@ -285,6 +288,10 @@ class DocumentService:
             raise ValidationError("Evidence link title cannot be empty.")
 
         with self.db_manager.session_scope() as session:
+            eng_repo = EngagementRepository(session)
+            eng = eng_repo.get_by_id(dto.engagement_id)
+            assert_engagement_not_locked(eng)
+
             doc_repo = DocumentRepository(session)
             doc = doc_repo.get_by_id(dto.document_id)
             if not doc:
@@ -348,6 +355,9 @@ class DocumentService:
             doc = repo.get_by_id(document_id)
             if not doc:
                 return False
+
+            eng = EngagementRepository(session).get_by_id(doc.engagement_id)
+            assert_engagement_not_locked(eng)
 
             success = repo.soft_delete(document_id)
             if success:

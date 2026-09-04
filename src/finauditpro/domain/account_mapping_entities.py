@@ -20,6 +20,7 @@ class AccountTypeEnum(StrEnum):
     LIABILITY = "Liability"
     EQUITY = "Equity"
     INCOME = "Income"
+    REVENUE = "Income"
     EXPENSE = "Expense"
 
 

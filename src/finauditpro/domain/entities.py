@@ -18,6 +18,7 @@ class RoleEnum(StrEnum):
     SENIOR_AUDITOR = "Senior"
     ASSOCIATE = "Associate"
     ADMINISTRATOR = "Administrator"
+    ADMIN = "Administrator"
 
 
 class AuditTypeEnum(StrEnum):

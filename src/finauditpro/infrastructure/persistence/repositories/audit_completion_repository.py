@@ -189,6 +189,8 @@ class AuditCompletionRepository:
             return None
         return self._to_mrl_domain(model)
 
+    get_mrl_by_id = get_mrl
+
     def get_mrl_by_number(
         self, engagement_id: str, mrl_number: str
     ) -> ManagementRepresentationLetter | None:
@@ -272,6 +274,8 @@ class AuditCompletionRepository:
         self.session.flush()
         return event
 
+    save_subsequent_event = add_subsequent_event
+
     def list_subsequent_events(self, engagement_id: str) -> list[SubsequentEvent]:
         models = (
             self.session.query(SubsequentEventModel)
@@ -279,24 +283,26 @@ class AuditCompletionRepository:
             .order_by(SubsequentEventModel.event_date.asc())
             .all()
         )
-        return [
-            SubsequentEvent(
+        events = []
+        for m in models:
+            et = next((e for e in SubsequentEventTypeEnum if e.value == m.event_type or e.name == m.event_type), SubsequentEventTypeEnum.TYPE_I_ADJUSTING)
+            proc = next((p for p in SubsequentEventProcedureEnum if p.value == m.procedure_applied or p.name == m.procedure_applied), SubsequentEventProcedureEnum.MANAGEMENT_INQUIRY)
+            events.append(SubsequentEvent(
                 id=m.id,
                 engagement_id=m.engagement_id,
                 event_date=m.event_date,
-                event_type=SubsequentEventTypeEnum(m.event_type),
+                event_type=et,
                 description=m.description,
                 estimated_amount_paise=m.estimated_amount_paise,
                 accounting_treatment=m.accounting_treatment,
                 is_adjusted_in_fs=m.is_adjusted_in_fs,
                 is_disclosed_in_notes=m.is_disclosed_in_notes,
                 working_paper_ref=m.working_paper_ref,
-                procedure_applied=SubsequentEventProcedureEnum(m.procedure_applied),
+                procedure_applied=proc,
                 auditor_conclusion=m.auditor_conclusion,
                 created_at=m.created_at.isoformat(),
-            )
-            for m in models
-        ]
+            ))
+        return events
 
     # ==========================================
     # SA 520: Final Analytical Review

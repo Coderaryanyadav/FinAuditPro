@@ -287,6 +287,10 @@ def execute_update_content(
     wp = wp_repo.get_working_paper(wp_id)
     if not wp:
         raise EntityNotFoundError("WorkingPaper", wp_id)
+    from finauditpro.application.security.engagement_lock_guard import assert_engagement_not_locked
+    from finauditpro.infrastructure.persistence.repositories import EngagementRepository
+    eng = EngagementRepository(session).get_by_id(wp.engagement_id)
+    assert_engagement_not_locked(eng)
     if wp.is_locked:
         raise ValidationError("Working Paper is locked and cannot be edited.")
     role = resolve_user_role(session, wp.engagement_id, editor_id)
@@ -332,6 +336,10 @@ def execute_raise_review_note(session, dto) -> ReviewNote:
     wp = wp_repo.get_working_paper(dto.working_paper_id)
     if not wp:
         raise EntityNotFoundError("WorkingPaper", dto.working_paper_id)
+    from finauditpro.application.security.engagement_lock_guard import assert_engagement_not_locked
+    from finauditpro.infrastructure.persistence.repositories import EngagementRepository
+    eng = EngagementRepository(session).get_by_id(wp.engagement_id)
+    assert_engagement_not_locked(eng)
     note = ReviewNote(
         working_paper_id=dto.working_paper_id,
         section_id=dto.section_id,
@@ -401,6 +409,10 @@ def execute_clear_review_note(session, dto) -> ReviewNote:
     wp = wp_repo.get_working_paper(n_model.working_paper_id)
     if not wp:
         raise EntityNotFoundError("WorkingPaper", n_model.working_paper_id)
+    from finauditpro.application.security.engagement_lock_guard import assert_engagement_not_locked
+    from finauditpro.infrastructure.persistence.repositories import EngagementRepository
+    eng = EngagementRepository(session).get_by_id(wp.engagement_id)
+    assert_engagement_not_locked(eng)
     cleared_by = getattr(dto, "cleared_by", getattr(dto, "reviewer", "Reviewer"))
     role = resolve_user_role(session, wp.engagement_id, cleared_by)
     if cleared_by != n_model.raised_by and role not in ("Manager", "Partner"):

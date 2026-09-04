@@ -118,6 +118,8 @@ class MRLClauseDTO:
     text_content: str
     is_mandatory: bool = True
     is_accepted_by_management: bool = True
+    is_modified: bool = False
+    specific_facts: str | None = None
 
 
 @dataclass(frozen=True)
@@ -134,6 +136,8 @@ class ManagementRepresentationLetterDTO:
     clauses: list[MRLClauseDTO]
     is_chronologically_valid: bool
     created_at: str
+    audit_report_date: str | None = None
+    chronology_validation_msg: str | None = None
 
 
 @dataclass(frozen=True)
@@ -151,6 +155,7 @@ class SubsequentEventDTO:
     procedure_applied: str
     auditor_conclusion: str
     created_at: str
+    identified_by: str | None = None
 
 
 @dataclass(frozen=True)

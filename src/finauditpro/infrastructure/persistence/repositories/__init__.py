@@ -30,6 +30,9 @@ from finauditpro.infrastructure.persistence.repositories.roll_forward_repository
 from finauditpro.infrastructure.persistence.repositories.user_repository import (
     UserRepository,
 )
+from finauditpro.infrastructure.persistence.repositories.continuous_audit_repository import (
+    ContinuousAuditRepository,
+)
 from finauditpro.infrastructure.persistence.repositories.working_paper_repository import (
     WorkingPaperRepository,
 )
@@ -39,6 +42,7 @@ __all__ = [
     "AuditEventRepository",
     "AuditMatrixRepository",
     "ClientRepository",
+    "ContinuousAuditRepository",
     "DocumentRepository",
     "EngagementRepository",
     "EvidenceRepository",

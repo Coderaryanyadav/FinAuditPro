@@ -68,9 +68,15 @@ def test_pdf_generation_header_and_watermark(setup_pdf_env) -> None:
     # Verify standard PDF magic header
     assert pdf_bytes.startswith(b"%PDF")
 
-    # Verify DRAFT watermark using pypdf reader
-    from pypdf import PdfReader
+    # Verify DRAFT watermark using pymupdf or pypdf reader
+    try:
+        import pymupdf
 
-    reader = PdfReader(pdf_path)
-    extracted = "".join(page.extract_text() for page in reader.pages)
+        doc = pymupdf.open(pdf_path)
+        extracted = "".join(page.get_text() for page in doc)
+    except ImportError:
+        from pypdf import PdfReader
+
+        reader = PdfReader(pdf_path)
+        extracted = "".join(page.extract_text() for page in reader.pages)
     assert "DRAFT" in extracted

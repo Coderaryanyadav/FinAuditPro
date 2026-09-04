@@ -60,7 +60,9 @@ class ROCSecretarialEngine:
         cls,
         engagement_id: str,
         filings: list[dict[str, Any]],
-        books_schedule: dict[str, int],  # e.g. {"paid_up_capital_paise": 100000000, "secured_loans_paise": 500000000}
+        books_schedule: dict[
+            str, int
+        ],  # e.g. {"paid_up_capital_paise": 100000000, "secured_loans_paise": 500000000}
     ) -> ROCValidationSummary:
         """Reconcile Form MGT-7, AOC-4, DPT-3, and CHG-1 against balance sheet disclosures."""
         records = []
@@ -86,7 +88,7 @@ class ROCSecretarialEngine:
                 if abs(rep_val - cap_books) > 100:
                     disc = ROCDiscrepancyTypeEnum.SHARE_CAPITAL_MISMATCH
                     is_comp = False
-                    rem = f"MGT-7 Paid-up capital (₹{rep_val/100:,.2f}) differs from Balance Sheet (₹{cap_books/100:,.2f})."
+                    rem = f"MGT-7 Paid-up capital (₹{rep_val / 100:,.2f}) differs from Balance Sheet (₹{cap_books / 100:,.2f})."
                     disc_cnt += 1
                 else:
                     comp_cnt += 1
@@ -95,7 +97,7 @@ class ROCSecretarialEngine:
                 if rep_val < sec_loans:
                     disc = ROCDiscrepancyTypeEnum.UNREGISTERED_CHARGE_ON_ASSETS
                     is_comp = False
-                    rem = f"Registered CHG-1 charges (₹{rep_val/100:,.2f}) are lower than secured borrowings (₹{sec_loans/100:,.2f})."
+                    rem = f"Registered CHG-1 charges (₹{rep_val / 100:,.2f}) are lower than secured borrowings (₹{sec_loans / 100:,.2f})."
                     disc_cnt += 1
                 else:
                     comp_cnt += 1

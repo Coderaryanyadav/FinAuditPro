@@ -67,9 +67,7 @@ class ClientView(QWidget):
         f_layout.setSpacing(10)
 
         s_lbl = QLabel("Search:")
-        s_lbl.setStyleSheet(
-            "font-size: 11px; font-weight: 700; color: #64748B;"
-        )
+        s_lbl.setStyleSheet("font-size: 11px; font-weight: 700; color: #64748B;")
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Search clients by name, PAN, GSTIN, or industry...")
         self.search_input.setStyleSheet(
@@ -79,9 +77,7 @@ class ClientView(QWidget):
         self.search_input.textChanged.connect(self._apply_filters)
 
         type_lbl = QLabel("Entity:")
-        type_lbl.setStyleSheet(
-            "font-size: 12px; font-weight: 700; color: #475569;"
-        )
+        type_lbl.setStyleSheet("font-size: 12px; font-weight: 700; color: #475569;")
         self.type_combo = CustomComboBox()
         self.type_combo.setMinimumWidth(180)
         self.type_combo.addItems(
@@ -98,7 +94,9 @@ class ClientView(QWidget):
 
         clear_btn = QPushButton("Clear")
         clear_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        clear_btn.setStyleSheet("QPushButton { background-color: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 14px; font-weight: 500; } QPushButton:hover { background-color: #F1F5F9; color: #1E293B; border-color: #94A3B8; }")
+        clear_btn.setStyleSheet(
+            "QPushButton { background-color: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 14px; font-weight: 500; } QPushButton:hover { background-color: #F1F5F9; color: #1E293B; border-color: #94A3B8; }"
+        )
         clear_btn.clicked.connect(self.search_input.clear)
 
         f_layout.addWidget(s_lbl)
@@ -150,7 +148,6 @@ class ClientView(QWidget):
         layout.addStretch(1)
 
         self.refresh()
-
 
     def set_firm(self, firm: Firm | None) -> None:
         self.current_firm = firm
@@ -268,4 +265,3 @@ class ClientView(QWidget):
                             self.client_selected.emit(dialog.result_client.id)
                 except Exception as ex:
                     QMessageBox.critical(self, "Error", f"Could not load client: {ex}")
-

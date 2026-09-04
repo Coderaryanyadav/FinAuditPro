@@ -34,6 +34,7 @@ from finauditpro.ui.widgets.custom_combo import CustomComboBox
 try:
     from PySide6.QtPdf import QPdfDocument
     from PySide6.QtPdfWidgets import QPdfView
+
     QT_PDF_AVAILABLE = True
 except ImportError:
     QT_PDF_AVAILABLE = False
@@ -42,7 +43,9 @@ except ImportError:
 class DocumentViewerDialog(QDialog):
     """Dialog for inspecting native document pages, extracted text, OCR metrics, tables, and evidence links."""
 
-    def __init__(self, document_service: DocumentService, document_id: str, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, document_service: DocumentService, document_id: str, parent: QWidget | None = None
+    ) -> None:
         super().__init__(parent)
         self.document_service = document_service
         self.document_id = document_id
@@ -94,7 +97,12 @@ class DocumentViewerDialog(QDialog):
 
         # Tabbed Viewer Body
         self.tabs = QTabWidget()
-        self.text_tab, self.preview_tab, self.table_tab, self.evidence_tab = QWidget(), QWidget(), QWidget(), QWidget()
+        self.text_tab, self.preview_tab, self.table_tab, self.evidence_tab = (
+            QWidget(),
+            QWidget(),
+            QWidget(),
+            QWidget(),
+        )
         self._init_text_tab()
         self._init_preview_tab()
         self._init_table_tab()
@@ -132,7 +140,9 @@ class DocumentViewerDialog(QDialog):
         self.page_combo.currentIndexChanged.connect(self._on_page_changed)
 
         self.provenance_badge = QLabel("")
-        self.provenance_badge.setStyleSheet("font-size: 11px; font-weight: 700; color: #2563EB; padding-left: 12px;")
+        self.provenance_badge.setStyleSheet(
+            "font-size: 11px; font-weight: 700; color: #2563EB; padding-left: 12px;"
+        )
         page_box.addWidget(page_lbl)
         page_box.addWidget(self.page_combo)
         page_box.addWidget(self.provenance_badge)
@@ -141,7 +151,9 @@ class DocumentViewerDialog(QDialog):
 
         self.text_edit = QTextEdit()
         self.text_edit.setReadOnly(True)
-        self.text_edit.setStyleSheet("QTextEdit { background-color: #F8FAFC; color: #0F172A; font-family: monospace; font-size: 12px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 12px; }")
+        self.text_edit.setStyleSheet(
+            "QTextEdit { background-color: #F8FAFC; color: #0F172A; font-family: monospace; font-size: 12px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 12px; }"
+        )
         t_layout.addWidget(self.text_edit, stretch=1)
         self._load_page_text(1)
 
@@ -155,10 +167,22 @@ class DocumentViewerDialog(QDialog):
             pdf_view = QPdfView(self)
             pdf_view.setDocument(pdf_doc)
             p_layout.addWidget(pdf_view, stretch=1)
-        elif stored_file.is_file() and stored_file.suffix.lower() in (".png", ".jpg", ".jpeg", ".bmp"):
+        elif stored_file.is_file() and stored_file.suffix.lower() in (
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".bmp",
+        ):
             pixmap = QPixmap(str(stored_file))
             lbl = QLabel()
-            lbl.setPixmap(pixmap.scaled(700, 500, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            lbl.setPixmap(
+                pixmap.scaled(
+                    700,
+                    500,
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                )
+            )
             lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
             p_layout.addWidget(lbl, stretch=1)
         else:
@@ -179,7 +203,9 @@ class DocumentViewerDialog(QDialog):
         if not self.details.tables:
             self.table_widget.setRowCount(1)
             self.table_widget.setColumnCount(1)
-            self.table_widget.setItem(0, 0, QTableWidgetItem("No structured tables extracted from document."))
+            self.table_widget.setItem(
+                0, 0, QTableWidgetItem("No structured tables extracted from document.")
+            )
             return
         try:
             rows = json.loads(self.details.tables[0].rows_json)
@@ -198,8 +224,17 @@ class DocumentViewerDialog(QDialog):
         ev_layout.setContentsMargins(12, 12, 12, 12)
         self.evidence_table = QTableWidget()
         self.evidence_table.setColumnCount(4)
-        self.evidence_table.setHorizontalHeaderLabels(["Page", "Target Type", "Title / Target", "Snippet"])
-        for c, mode in enumerate([QHeaderView.ResizeMode.ResizeToContents, QHeaderView.ResizeMode.ResizeToContents, QHeaderView.ResizeMode.ResizeToContents, QHeaderView.ResizeMode.Stretch]):
+        self.evidence_table.setHorizontalHeaderLabels(
+            ["Page", "Target Type", "Title / Target", "Snippet"]
+        )
+        for c, mode in enumerate(
+            [
+                QHeaderView.ResizeMode.ResizeToContents,
+                QHeaderView.ResizeMode.ResizeToContents,
+                QHeaderView.ResizeMode.ResizeToContents,
+                QHeaderView.ResizeMode.Stretch,
+            ]
+        ):
             self.evidence_table.horizontalHeader().setSectionResizeMode(c, mode)
         ev_layout.addWidget(self.evidence_table, stretch=1)
         self._refresh_evidence_table()
@@ -220,7 +255,11 @@ class DocumentViewerDialog(QDialog):
             return
         page_data = self.details.pages[page_num - 1]
         text = page_data.extracted_text
-        source = page_data.text_source.value if hasattr(page_data.text_source, "value") else str(page_data.text_source)
+        source = (
+            page_data.text_source.value
+            if hasattr(page_data.text_source, "value")
+            else str(page_data.text_source)
+        )
         conf = page_data.confidence_score or 1.0
         self.provenance_badge.setText(f"Source: {source} | OCR Confidence: {conf:.0%}")
         self.text_edit.setText(text if text else "[Empty Page]")
@@ -238,7 +277,12 @@ class DocumentViewerDialog(QDialog):
     def _on_link_evidence_clicked(self) -> None:
         page_num = self.page_combo.currentData() or 1
         sel_text = self.text_edit.textCursor().selectedText()
-        dialog = LinkEvidenceDialog(document_name=self.details.document.filename, page_number=page_num, selected_snippet=sel_text, parent=self)
+        dialog = LinkEvidenceDialog(
+            document_name=self.details.document.filename,
+            page_number=page_num,
+            selected_snippet=sel_text,
+            parent=self,
+        )
         if dialog.exec() == QDialog.DialogCode.Accepted:
             dto = CreateEvidenceLinkDTO(
                 engagement_id=self.details.document.engagement_id,
@@ -252,13 +296,21 @@ class DocumentViewerDialog(QDialog):
             self.details.evidence_links.append(saved_link)
             self._refresh_evidence_table()
             self.tabs.setCurrentWidget(self.evidence_tab)
-            QMessageBox.information(self, "Evidence Linked", "Page successfully linked as audit evidence.")
+            QMessageBox.information(
+                self, "Evidence Linked", "Page successfully linked as audit evidence."
+            )
 
 
 class LinkEvidenceDialog(QDialog):
     """Dialog for defining evidence link title, target type, and snippet."""
 
-    def __init__(self, document_name: str, page_number: int, selected_snippet: str = "", parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        document_name: str,
+        page_number: int,
+        selected_snippet: str = "",
+        parent: QWidget | None = None,
+    ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Link Page as Audit Evidence")
         self.resize(500, 300)

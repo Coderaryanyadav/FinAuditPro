@@ -85,8 +85,8 @@ class MinutesContradictionEngine:
                 if tot_borrowings > limit_p:
                     sev = ContradictionSeverityEnum.BORROWING_LIMIT_BREACH
                     rem = (
-                        f"Actual borrowings ₹{tot_borrowings/100:,.2f} exceed authorized Section 180(1)(c) limit "
-                        f"of ₹{limit_p/100:,.2f}. Special Resolution in General Meeting required."
+                        f"Actual borrowings ₹{tot_borrowings / 100:,.2f} exceed authorized Section 180(1)(c) limit "
+                        f"of ₹{limit_p / 100:,.2f}. Special Resolution in General Meeting required."
                     )
                     contra_cnt += 1
                 else:

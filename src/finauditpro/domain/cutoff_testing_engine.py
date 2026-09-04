@@ -39,7 +39,9 @@ class CutOffTestItem(DomainBaseModel):
     amount_paise: int = Field(default=0, ge=0)
     transaction_type: str = Field(...)  # Sales / Purchases / Returns
     period_classification: CutOffPeriodEnum = Field(...)
-    exception_type: CutOffExceptionTypeEnum = Field(default=CutOffExceptionTypeEnum.OK_CORRECT_PERIOD)
+    exception_type: CutOffExceptionTypeEnum = Field(
+        default=CutOffExceptionTypeEnum.OK_CORRECT_PERIOD
+    )
     audit_finding_remark: str = Field(default="")
     created_at: str = Field(default_factory=lambda: utc_now().isoformat())
 
@@ -81,13 +83,19 @@ class CutOffTestingEngine:
             doc_d = datetime.strptime(doc_d_str, "%Y-%m-%d").date()
             disp_d = datetime.strptime(disp_d_str, "%Y-%m-%d").date()
 
-            period = CutOffPeriodEnum.PRE_YEAR_END if doc_d <= y_end else CutOffPeriodEnum.POST_YEAR_END
+            period = (
+                CutOffPeriodEnum.PRE_YEAR_END if doc_d <= y_end else CutOffPeriodEnum.POST_YEAR_END
+            )
             exc_type = CutOffExceptionTypeEnum.OK_CORRECT_PERIOD
             remark = "Proper accounting period cut-off."
 
-            if txn_type == "Returns" and period == CutOffPeriodEnum.POST_YEAR_END and (doc_d - y_end).days <= 15:
+            if (
+                txn_type == "Returns"
+                and period == CutOffPeriodEnum.POST_YEAR_END
+                and (doc_d - y_end).days <= 15
+            ):
                 exc_type = CutOffExceptionTypeEnum.POST_YEAR_END_SALES_RETURN
-                remark = f"Sales return of ₹{amt/100:,.2f} booked {(doc_d - y_end).days} days post year-end. Possible inflation of revenue."
+                remark = f"Sales return of ₹{amt / 100:,.2f} booked {(doc_d - y_end).days} days post year-end. Possible inflation of revenue."
                 exc_cnt += 1
                 tot_exc_val += amt
             elif txn_type == "Sales" and disp_d <= y_end and doc_d > y_end:

@@ -41,7 +41,9 @@ class FinancialDataRepository:
             id=model.id,
             engagement_id=model.engagement_id,
             dataset_name=model.dataset_name,
-            dataset_type=DatasetTypeEnum(model.dataset_type) if model.dataset_type in DatasetTypeEnum._value2member_map_ else DatasetTypeEnum.GENERAL_LEDGER,
+            dataset_type=DatasetTypeEnum(model.dataset_type)
+            if model.dataset_type in DatasetTypeEnum._value2member_map_
+            else DatasetTypeEnum.GENERAL_LEDGER,
             filename=model.dataset_name,
             content_hash=model.content_hash,
             stored_path=model.file_path,
@@ -60,7 +62,9 @@ class FinancialDataRepository:
             id=dataset.id,
             engagement_id=dataset.engagement_id,
             dataset_name=dataset.dataset_name,
-            dataset_type=dataset.dataset_type.value if hasattr(dataset.dataset_type, "value") else str(dataset.dataset_type),
+            dataset_type=dataset.dataset_type.value
+            if hasattr(dataset.dataset_type, "value")
+            else str(dataset.dataset_type),
             version=1,
             file_path=dataset.stored_path,
             content_hash=dataset.content_hash,
@@ -99,7 +103,11 @@ class FinancialDataRepository:
         self.add_ledger_entries(entries)
 
     def list_datasets_by_engagement(self, engagement_id: str) -> list[FinancialDataset]:
-        stmt = select(FinancialDatasetModel).where(FinancialDatasetModel.engagement_id == engagement_id).order_by(FinancialDatasetModel.created_at.desc())
+        stmt = (
+            select(FinancialDatasetModel)
+            .where(FinancialDatasetModel.engagement_id == engagement_id)
+            .order_by(FinancialDatasetModel.created_at.desc())
+        )
         return [self._to_dataset_entity(m) for m in self.session.scalars(stmt).all()]
 
     def get_datasets_by_engagement(self, engagement_id: str) -> list[FinancialDataset]:
@@ -135,7 +143,7 @@ class FinancialDataRepository:
                 severity=getattr(a, "severity", "Medium"),
                 title=f"Anomaly at Row {getattr(a, 'row_index', 1)}",
                 description=getattr(a, "rationale", ""),
-                implicated_rows=[getattr(a, 'row_index', 1)],
+                implicated_rows=[getattr(a, "row_index", 1)],
                 computed_evidence=getattr(a, "rationale", ""),
             )
             for a in anomalies
@@ -168,7 +176,6 @@ class FinancialDataRepository:
                 )
         return anomalies
 
-
     def add_ledger_entries(self, entries: list[LedgerEntry]) -> None:
         models = [
             LedgerEntryModel(
@@ -193,7 +200,11 @@ class FinancialDataRepository:
         self.session.flush()
 
     def get_ledger_entries(self, dataset_id: str) -> list[LedgerEntry]:
-        stmt = select(LedgerEntryModel).where(LedgerEntryModel.dataset_id == dataset_id).order_by(LedgerEntryModel.source_row_no.asc())
+        stmt = (
+            select(LedgerEntryModel)
+            .where(LedgerEntryModel.dataset_id == dataset_id)
+            .order_by(LedgerEntryModel.source_row_no.asc())
+        )
         return [
             LedgerEntry(
                 id=m.id,
@@ -237,7 +248,11 @@ class FinancialDataRepository:
         self.session.flush()
 
     def get_trial_balance_lines(self, dataset_id: str) -> list[TrialBalanceLine]:
-        stmt = select(TrialBalanceLineModel).where(TrialBalanceLineModel.dataset_id == dataset_id).order_by(TrialBalanceLineModel.source_row_no.asc())
+        stmt = (
+            select(TrialBalanceLineModel)
+            .where(TrialBalanceLineModel.dataset_id == dataset_id)
+            .order_by(TrialBalanceLineModel.source_row_no.asc())
+        )
         return [
             TrialBalanceLine(
                 id=m.id,
@@ -279,7 +294,11 @@ class FinancialDataRepository:
         self.session.flush()
 
     def get_bank_transactions(self, dataset_id: str) -> list[BankTransaction]:
-        stmt = select(BankTransactionModel).where(BankTransactionModel.dataset_id == dataset_id).order_by(BankTransactionModel.source_row_no.asc())
+        stmt = (
+            select(BankTransactionModel)
+            .where(BankTransactionModel.dataset_id == dataset_id)
+            .order_by(BankTransactionModel.source_row_no.asc())
+        )
         return [
             BankTransaction(
                 id=m.id,
@@ -321,7 +340,11 @@ class FinancialDataRepository:
         self.session.flush()
 
     def list_exceptions_by_dataset(self, dataset_id: str) -> list[ExceptionItem]:
-        stmt = select(ExceptionItemModel).where(ExceptionItemModel.dataset_id == dataset_id).order_by(ExceptionItemModel.created_at.desc())
+        stmt = (
+            select(ExceptionItemModel)
+            .where(ExceptionItemModel.dataset_id == dataset_id)
+            .order_by(ExceptionItemModel.created_at.desc())
+        )
         return [
             ExceptionItem(
                 id=m.id,
@@ -331,9 +354,13 @@ class FinancialDataRepository:
                 severity=m.severity,
                 title=m.title,
                 description=m.description,
-                implicated_rows=json.loads(m.implicated_rows_json) if m.implicated_rows_json else [],
+                implicated_rows=json.loads(m.implicated_rows_json)
+                if m.implicated_rows_json
+                else [],
                 computed_evidence=m.computed_evidence,
-                status=ExceptionStatusEnum(m.status) if m.status in ExceptionStatusEnum._value2member_map_ else ExceptionStatusEnum.OPEN,
+                status=ExceptionStatusEnum(m.status)
+                if m.status in ExceptionStatusEnum._value2member_map_
+                else ExceptionStatusEnum.OPEN,
                 reviewer=m.reviewer,
                 created_at=m.created_at,
                 updated_at=m.updated_at,
@@ -364,7 +391,11 @@ class FinancialDataRepository:
         return finding
 
     def list_findings_by_engagement(self, engagement_id: str) -> list[Finding]:
-        stmt = select(FindingModel).where(FindingModel.engagement_id == engagement_id).order_by(FindingModel.created_at.desc())
+        stmt = (
+            select(FindingModel)
+            .where(FindingModel.engagement_id == engagement_id)
+            .order_by(FindingModel.created_at.desc())
+        )
         return [
             Finding(
                 id=m.id,
@@ -378,7 +409,6 @@ class FinancialDataRepository:
                 source=m.source,
                 ai_generated=m.is_ai_generated,
                 status=m.status,
-
                 preparer=m.preparer,
                 reviewer=m.reviewer,
                 created_at=m.created_at,

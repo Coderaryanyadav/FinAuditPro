@@ -202,4 +202,3 @@ DEFAULT_SA505_CONFIRMATION_TEMPLATES: list[dict[str, Any]] = [
         "description": "Inquiry letter to company legal advisors regarding pending suits, tax appeals, arbitration proceedings, and estimated liabilities.",
     },
 ]
-

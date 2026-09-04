@@ -19,6 +19,7 @@ class AssertionEnum(StrEnum):
     RIGHTS_AND_OBLIGATIONS = "Rights & Obligations"
     PRESENTATION = "Presentation & Disclosure"
     CLASSIFICATION = "Classification"
+    OCCURRENCE = "Occurrence"
 
 
 class RiskSeverityEnum(StrEnum):
@@ -29,8 +30,12 @@ class RiskSeverityEnum(StrEnum):
 
 class ProcedureStatusEnum(StrEnum):
     NOT_STARTED = "Not Started"
+    DRAFT = "Draft"
     IN_PROGRESS = "In Progress"
     COMPLETED = "Completed"
+    SUBMITTED_FOR_REVIEW = "Submitted for Review"
+    REVIEWED = "Reviewed"
+    CLEARED = "Cleared"
     NOT_APPLICABLE = "Not Applicable"
 
 
@@ -78,13 +83,22 @@ class AuditRisk(DomainBaseModel):
     title: str = Field(default="Audit Risk")
     category: str = Field(..., min_length=1)
     description: str = Field(..., min_length=1)
+    financial_statement_area: str = Field(default="")
+    account_code: str | None = Field(default=None)
     assertions: list[AssertionEnum] = Field(default_factory=lambda: [AssertionEnum.COMPLETENESS])
     inherent_risk: RiskSeverityEnum = Field(default=RiskSeverityEnum.MEDIUM)
     control_risk: RiskSeverityEnum = Field(default=RiskSeverityEnum.MEDIUM)
     derived_romm: RiskSeverityEnum = Field(default=RiskSeverityEnum.MEDIUM)
     severity: RiskSeverityEnum = Field(default=RiskSeverityEnum.HIGH)
+    magnitude: RiskSeverityEnum = Field(default=RiskSeverityEnum.HIGH)
+    likelihood: RiskSeverityEnum = Field(default=RiskSeverityEnum.MEDIUM)
+    risk_type: str = Field(default="Inherent Risk")
     is_significant_risk: bool = Field(default=False)
+    fraud_indicator: bool = Field(default=False)  # ignore
+    control_reliance: str = Field(default="No Reliance")
     planned_response: str = Field(default="")
+    owner: str = Field(default="Auditor")
+    status: str = Field(default="Identified")
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
 
@@ -147,15 +161,24 @@ class AuditProcedure(DomainBaseModel):
     procedure_code: str = Field(..., min_length=1)
     objective: str = Field(..., min_length=1)
     procedure_type: str = Field(default="Substantive Procedure")
+    account_area: str = Field(default="")
     instructions: str = Field(default="")
     evidence_requirement: str = Field(default="")
+    requires_evidence: bool = Field(default=True)
+    population_definition: str = Field(default="")
     linked_risk_ids: list[str] = Field(default_factory=list)
     assertions: list[AssertionEnum] = Field(default_factory=lambda: [AssertionEnum.COMPLETENESS])
     status: ProcedureStatusEnum = Field(default=ProcedureStatusEnum.NOT_STARTED)
+    methodology: str = Field(default="")
+    expected_result: str = Field(default="")
+    actual_result: str = Field(default="")
     result_summary: str | None = Field(default=None)
     conclusion: str | None = Field(default=None)
+    conclusion_override_reason: str | None = Field(default=None)
     preparer: str | None = Field(default=None)
+    prepared_date: datetime | None = Field(default=None)
     reviewer: str | None = Field(default=None)
+    reviewed_date: datetime | None = Field(default=None)
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
 

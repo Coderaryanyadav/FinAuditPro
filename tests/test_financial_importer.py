@@ -75,8 +75,10 @@ def test_import_real_trial_balance_fixture() -> None:
 
     res = FinancialImporter.import_trial_balance("ds-tb-101", rows, mappings)
     assert res.total_rows == len(rows)
-    assert len(res.valid_rows) > 0
-    assert len(res.errors) == 0
+    assert len(res.valid_rows) == len(rows)
+    assert res.summary is not None
+    assert res.summary.total_debit_paise > 0
+    assert res.summary.total_credit_paise > 0
 
 
 def test_import_real_general_ledger_fixture() -> None:

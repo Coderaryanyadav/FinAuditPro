@@ -71,7 +71,9 @@ class GoingConcernEngine:
             ]
         )
 
-        if has_negative_net_worth or (has_operating_losses and has_negative_operating_cashflow and has_debt_maturity_unfunded):
+        if has_negative_net_worth or (
+            has_operating_losses and has_negative_operating_cashflow and has_debt_maturity_unfunded
+        ):
             return (
                 SolvencyRiskLevelEnum.CRITICAL_GOING_CONCERN_RISK,
                 True,

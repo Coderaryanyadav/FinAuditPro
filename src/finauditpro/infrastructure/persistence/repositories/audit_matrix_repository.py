@@ -34,13 +34,21 @@ class AuditMatrixRepository:
     def __init__(self, session: Session) -> None:
         self.session = session
 
-    def _to_risk_entity(self, model: AuditRiskModel) -> AuditRisk:
+    def _parse_assertions(self, raw_json: str | None) -> list[AssertionEnum]:
+        if not raw_json:
+            return [AssertionEnum.COMPLETENESS]
         try:
-            raw_assertions = json.loads(model.assertions_json)
-            assertions = [AssertionEnum(a) for a in raw_assertions]
+            raw_list = json.loads(raw_json)
+            parsed = [
+                AssertionEnum(a) if a in AssertionEnum._value2member_map_ else AssertionEnum[a]
+                for a in raw_list
+                if a in AssertionEnum._value2member_map_ or hasattr(AssertionEnum, a)
+            ]
+            return parsed if parsed else [AssertionEnum.COMPLETENESS]
         except Exception:
-            assertions = [AssertionEnum.COMPLETENESS]
+            return [AssertionEnum.COMPLETENESS]
 
+    def _to_risk_entity(self, model: AuditRiskModel) -> AuditRisk:
         return AuditRisk(
             id=model.id,
             engagement_id=model.engagement_id,
@@ -48,7 +56,7 @@ class AuditMatrixRepository:
             title=model.title or f"Risk {model.risk_code}",
             category=model.category,
             description=model.description,
-            assertions=assertions,
+            assertions=self._parse_assertions(model.assertions_json),
             inherent_risk=RiskSeverityEnum(model.inherent_risk),
             control_risk=RiskSeverityEnum(model.control_risk),
             derived_romm=RiskSeverityEnum(model.derived_romm),
@@ -80,12 +88,6 @@ class AuditMatrixRepository:
 
     def _to_procedure_entity(self, model: AuditProcedureModel) -> AuditProcedure:
         try:
-            raw_assertions = json.loads(model.assertions_json)
-            assertions = [AssertionEnum(a) for a in raw_assertions]
-        except Exception:
-            assertions = [AssertionEnum.COMPLETENESS]
-
-        try:
             linked_risks = json.loads(model.linked_risks_json)
         except Exception:
             linked_risks = []
@@ -98,22 +100,23 @@ class AuditMatrixRepository:
             procedure_type=model.procedure_type,
             instructions=model.instructions,
             evidence_requirement=model.evidence_requirement or "",
+            requires_evidence=(model.evidence_requirement != "NOT_REQUIRED"),
             linked_risk_ids=linked_risks,
-            assertions=assertions,
+            assertions=self._parse_assertions(model.assertions_json),
             status=ProcedureStatusEnum(model.status),
             result_summary=model.result_summary,
             conclusion=model.conclusion,
             preparer=model.preparer,
+            prepared_date=model.updated_at if model.preparer else None,
             reviewer=model.reviewer,
+            reviewed_date=model.updated_at if model.reviewer else None,
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
 
     def _to_finding_entity(self, model: AuditFindingModel) -> AuditFinding:
         source_val = (
-            model.source
-            if model.source in FindingSourceEnum._value2member_map_
-            else FindingSourceEnum.MANUAL
+            model.source if model.source in FindingSourceEnum._value2member_map_ else "manual"
         )
         return AuditFinding(
             id=model.id,
@@ -187,8 +190,7 @@ class AuditMatrixRepository:
             .where(AuditRiskModel.engagement_id == engagement_id)
             .order_by(AuditRiskModel.risk_code.asc())
         )
-        models = self.session.scalars(stmt).all()
-        return [self._to_risk_entity(m) for m in models]
+        return [self._to_risk_entity(m) for m in self.session.scalars(stmt).all()]
 
     def add_materiality(self, mat: MaterialityAssessment) -> MaterialityAssessment:
         model = MaterialityAssessmentModel(
@@ -225,14 +227,15 @@ class AuditMatrixRepository:
         model = self.session.scalars(stmt).first()
         return self._to_materiality_entity(model) if model else None
 
+    get_materiality = get_latest_materiality
+
     def list_materiality_history(self, engagement_id: str) -> list[MaterialityAssessment]:
         stmt = (
             select(MaterialityAssessmentModel)
             .where(MaterialityAssessmentModel.engagement_id == engagement_id)
             .order_by(MaterialityAssessmentModel.version.desc())
         )
-        models = self.session.scalars(stmt).all()
-        return [self._to_materiality_entity(m) for m in models]
+        return [self._to_materiality_entity(m) for m in self.session.scalars(stmt).all()]
 
     def add_procedure(self, proc: AuditProcedure) -> AuditProcedure:
         model = AuditProcedureModel(
@@ -242,7 +245,8 @@ class AuditMatrixRepository:
             objective=proc.objective,
             procedure_type=proc.procedure_type,
             instructions=proc.instructions,
-            evidence_requirement=proc.evidence_requirement,
+            evidence_requirement=proc.evidence_requirement
+            or ("REQUIRED" if proc.requires_evidence else "NOT_REQUIRED"),
             linked_risks_json=json.dumps(proc.linked_risk_ids),
             assertions_json=json.dumps([a.value for a in proc.assertions]),
             status=proc.status.value,
@@ -280,8 +284,7 @@ class AuditMatrixRepository:
             .where(AuditProcedureModel.engagement_id == engagement_id)
             .order_by(AuditProcedureModel.procedure_code.asc())
         )
-        models = self.session.scalars(stmt).all()
-        return [self._to_procedure_entity(m) for m in models]
+        return [self._to_procedure_entity(m) for m in self.session.scalars(stmt).all()]
 
     def add_finding(self, finding: AuditFinding) -> AuditFinding:
         model = AuditFindingModel(
@@ -335,8 +338,7 @@ class AuditMatrixRepository:
             .where(AuditFindingModel.engagement_id == engagement_id)
             .order_by(AuditFindingModel.created_at.desc())
         )
-        models = self.session.scalars(stmt).all()
-        return [self._to_finding_entity(m) for m in models]
+        return [self._to_finding_entity(m) for m in self.session.scalars(stmt).all()]
 
     def add_evidence(self, evidence: AuditEvidence) -> AuditEvidence:
         model = AuditEvidenceModel(
@@ -363,8 +365,7 @@ class AuditMatrixRepository:
             .where(AuditEvidenceModel.finding_id == finding_id)
             .order_by(AuditEvidenceModel.created_at.asc())
         )
-        models = self.session.scalars(stmt).all()
-        return [self._to_evidence_entity(m) for m in models]
+        return [self._to_evidence_entity(m) for m in self.session.scalars(stmt).all()]
 
     def list_evidence_for_procedure(self, procedure_id: str) -> list[AuditEvidence]:
         stmt = (
@@ -372,8 +373,7 @@ class AuditMatrixRepository:
             .where(AuditEvidenceModel.procedure_id == procedure_id)
             .order_by(AuditEvidenceModel.created_at.asc())
         )
-        models = self.session.scalars(stmt).all()
-        return [self._to_evidence_entity(m) for m in models]
+        return [self._to_evidence_entity(m) for m in self.session.scalars(stmt).all()]
 
     def list_evidence_for_engagement(self, engagement_id: str) -> list[AuditEvidence]:
         stmt = (
@@ -381,5 +381,4 @@ class AuditMatrixRepository:
             .where(AuditEvidenceModel.engagement_id == engagement_id)
             .order_by(AuditEvidenceModel.created_at.desc())
         )
-        models = self.session.scalars(stmt).all()
-        return [self._to_evidence_entity(m) for m in models]
+        return [self._to_evidence_entity(m) for m in self.session.scalars(stmt).all()]

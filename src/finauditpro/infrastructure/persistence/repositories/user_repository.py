@@ -73,6 +73,9 @@ class UserRepository:
         self.session.flush()
         return self._to_entity(model)
 
+    add_user = add
+
+
     def get_by_id(self, user_id: str) -> User | None:
         model = self.session.get(UserModel, user_id)
         return self._to_entity(model) if model else None

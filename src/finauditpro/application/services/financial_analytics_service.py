@@ -109,8 +109,9 @@ class FinancialAnalyticsService:
     def list_analytics_results_for_engagement(self, engagement_id: str) -> list[AnalyticsResult]:
         with self.db_manager.session_scope() as session:
             repo = FinancialDataRepository(session)
-            return cast(list[AnalyticsResult], repo.list_analytics_results_for_engagement(engagement_id))
-
+            return cast(
+                list[AnalyticsResult], repo.list_analytics_results_for_engagement(engagement_id)
+            )
 
     def list_flagged_anomalies_for_engagement(self, engagement_id: str) -> list[FlaggedAnomaly]:
         with self.db_manager.session_scope() as session:

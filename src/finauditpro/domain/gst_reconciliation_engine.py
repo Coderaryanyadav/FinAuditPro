@@ -67,7 +67,10 @@ class GSTReconciliationEngine:
         # Index GSTR-2B by (GSTIN, Normalized Invoice Number)
         b2_map = {}
         for g in gstr2b_invoices:
-            k = (g.get("vendor_gstin", "").strip().upper(), g.get("invoice_number", "").strip().upper())
+            k = (
+                g.get("vendor_gstin", "").strip().upper(),
+                g.get("invoice_number", "").strip().upper(),
+            )
             b2_map[k] = g
 
         reconciled_records = []
@@ -106,7 +109,7 @@ class GSTReconciliationEngine:
                 g_tax = int(matched_2b.get("tax_paise", matched_2b.get("tax_amount", 0) * 100))
                 if abs(b_tax - g_tax) > 100:  # > ₹1 tolerance
                     status = MatchStatusEnum.AMOUNT_MISMATCH
-                    rationale = f"Books tax (₹{b_tax/100:,.2f}) differs from 2B tax (₹{g_tax/100:,.2f})."
+                    rationale = f"Books tax (₹{b_tax / 100:,.2f}) differs from 2B tax (₹{g_tax / 100:,.2f})."
                     itc_avail = False
                     mismatch_cnt += 1
                     at_risk_itc += abs(b_tax - g_tax)
@@ -116,7 +119,6 @@ class GSTReconciliationEngine:
                     itc_avail = True
                     matched_cnt += 1
                     eligible_2b_itc += b_tax
-
 
             g_taxable_val = int(matched_2b.get("taxable_paise", 0)) if matched_2b else 0
             g_tax_val = int(matched_2b.get("tax_paise", 0)) if matched_2b else 0

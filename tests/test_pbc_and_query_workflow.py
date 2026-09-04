@@ -21,6 +21,7 @@ def db_mgr(tmp_path: Path) -> DatabaseManager:
         EngagementModel,
         FirmModel,
     )
+
     db = DatabaseManager(db_path=tmp_path / "test_pbc_query.db")
     db.create_tables()
     with db.session_scope() as session:
@@ -28,8 +29,15 @@ def db_mgr(tmp_path: Path) -> DatabaseManager:
         session.add(firm)
         client = ClientModel(id="client-01", firm_id="firm-01", name="Test Client Corp")
         session.add(client)
-        eng1 = EngagementModel(id="test-eng-pbc-01", firm_id="firm-01", client_id="client-01", financial_year="2025-26")
-        eng2 = EngagementModel(id="test-eng-query-01", firm_id="firm-01", client_id="client-01", financial_year="2025-26")
+        eng1 = EngagementModel(
+            id="test-eng-pbc-01", firm_id="firm-01", client_id="client-01", financial_year="2025-26"
+        )
+        eng2 = EngagementModel(
+            id="test-eng-query-01",
+            firm_id="firm-01",
+            client_id="client-01",
+            financial_year="2025-26",
+        )
         session.add_all([eng1, eng2])
     return db
 
@@ -56,7 +64,9 @@ def test_pbc_request_lifecycle(db_mgr: DatabaseManager) -> None:
     assert req.title == "Custom Board Resolutions"
 
     # 3. Status transitions
-    updated = service.update_status(req.id, DocumentRequestStatusEnum.UNDER_REVIEW, reviewer_notes="Received via portal")
+    updated = service.update_status(
+        req.id, DocumentRequestStatusEnum.UNDER_REVIEW, reviewer_notes="Received via portal"
+    )
     assert updated.status == DocumentRequestStatusEnum.UNDER_REVIEW
     assert updated.reviewer_notes == "Received via portal"
 
@@ -126,6 +136,7 @@ def test_sa505_confirmation_lifecycle(db_mgr: DatabaseManager) -> None:
         from finauditpro.infrastructure.persistence.repositories.document_request_repository import (
             ExternalConfirmationRepository,
         )
+
         ExternalConfirmationRepository(session).update(c1)
 
     updated = service.record_confirmation_response(
@@ -136,5 +147,7 @@ def test_sa505_confirmation_lifecycle(db_mgr: DatabaseManager) -> None:
     )
     assert updated.status == ConfirmationStatusEnum.RECEIVED_DISPUTED
     assert updated.discrepancy_paise == 2000000
-    assert updated.discrepancy_explanation == "Bank charges of ₹20,000 not yet recorded in client books."
-
+    assert (
+        updated.discrepancy_explanation
+        == "Bank charges of ₹20,000 not yet recorded in client books."
+    )

@@ -36,7 +36,9 @@ class PredecessorCommunication(DomainBaseModel):
     predecessor_partner_name: str = Field(default="")
     predecessor_email: str = Field(default="")
     predecessor_address: str = Field(default="")
-    communication_mode: CommunicationModeEnum = Field(default=CommunicationModeEnum.REGISTERED_POST_AD)
+    communication_mode: CommunicationModeEnum = Field(
+        default=CommunicationModeEnum.REGISTERED_POST_AD
+    )
     dispatch_date: str = Field(default="")
     tracking_reference: str = Field(default="")
     status: NOCStatusEnum = Field(default=NOCStatusEnum.PENDING_DISPATCH)
@@ -54,7 +56,9 @@ class SA210EngagementLetter(DomainBaseModel):
     engagement_id: str = Field(...)
     client_name: str = Field(...)
     financial_year: str = Field(...)
-    scope_of_audit: str = Field(default="Statutory Audit under Section 139 & 143 of Companies Act, 2013")
+    scope_of_audit: str = Field(
+        default="Statutory Audit under Section 139 & 143 of Companies Act, 2013"
+    )
     management_responsibilities: str = Field(
         default="Preparation and fair presentation of financial statements, internal financial controls, and unrestricted access to records."
     )

@@ -1,7 +1,6 @@
 """Unit and E2E tests for Phase 2 Maker-Checker review controls and versioning."""
 
 import pytest
-import json
 
 from finauditpro.application.services.client_service import ClientService, CreateClientDTO
 from finauditpro.application.services.engagement_service import (
@@ -11,17 +10,17 @@ from finauditpro.application.services.engagement_service import (
 from finauditpro.application.services.firm_service import CreateFirmDTO, FirmService
 from finauditpro.application.services.working_paper_service import WorkingPaperService
 from finauditpro.application.working_paper_dtos import (
-    CreateWorkingPaperDTO,
-    SignOffDTO,
-    ReopenWorkingPaperDTO,
-    CreateReviewNoteDTO,
     ClearReviewNoteDTO,
+    CreateReviewNoteDTO,
+    CreateWorkingPaperDTO,
+    ReopenWorkingPaperDTO,
+    SignOffDTO,
 )
+from finauditpro.domain.exceptions import ValidationError
 from finauditpro.domain.working_paper_entities import (
     SignOffLevelEnum,
     WorkingPaperStatusEnum,
 )
-from finauditpro.domain.exceptions import ValidationError, InvalidStateTransitionError
 from finauditpro.infrastructure.persistence.database import DatabaseManager
 from finauditpro.infrastructure.persistence.migration_list import get_all_migrations
 from finauditpro.infrastructure.persistence.migrations import MigrationRunner
@@ -43,9 +42,10 @@ def setup_maker_checker_env(tmp_path):
 
     firm = firm_svc.create_firm(CreateFirmDTO(name="CA Firm"))
     client = client_svc.create_client(CreateClientDTO(firm_id=firm.id, name="Client Co"))
-    
+
     # Create users in database first
     from finauditpro.infrastructure.persistence.repositories.user_repository import UserRepository
+
     with db_manager.session_scope() as session:
         user_repo = UserRepository(session)
         user_repo.create_user_with_password("usera@cafirm.com", "Password@123", role="Associate")
@@ -56,7 +56,7 @@ def setup_maker_checker_env(tmp_path):
     eng_x = eng_svc.create_engagement(
         CreateEngagementDTO(firm_id=firm.id, client_id=client.id, financial_year="2025-26")
     )
-    
+
     # Engagement Y (User A is Reviewer, User B is Preparer)
     eng_y = eng_svc.create_engagement(
         CreateEngagementDTO(firm_id=firm.id, client_id=client.id, financial_year="2026-27")
@@ -216,7 +216,7 @@ def test_versioning_and_historical_archive_on_return_and_reopen(setup_maker_chec
     wp_svc.prepare_working_paper(wp.id, "usera@cafirm.com")
     wp_svc.submit_for_review(wp.id, "usera@cafirm.com")
     wp_svc.start_review(wp.id, "userb@cafirm.com")
-    
+
     wp_svc.sign_off_working_paper(
         SignOffDTO(
             working_paper_id=wp.id,
@@ -259,7 +259,12 @@ def test_versioning_and_historical_archive_on_return_and_reopen(setup_maker_chec
     assert reopened.is_locked is False
 
     with db_manager.session_scope() as session:
-        hist = session.query(WorkingPaperVersionModel).filter_by(working_paper_id=wp.id).order_by(WorkingPaperVersionModel.version).all()
+        hist = (
+            session.query(WorkingPaperVersionModel)
+            .filter_by(working_paper_id=wp.id)
+            .order_by(WorkingPaperVersionModel.version)
+            .all()
+        )
         assert len(hist) == 2
         assert hist[0].version == 1
         assert hist[1].version == 2

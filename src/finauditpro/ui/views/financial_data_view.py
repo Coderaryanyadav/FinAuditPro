@@ -57,7 +57,6 @@ class FinancialDataView(QWidget):
         elif hasattr(financial_service, "db_manager"):
             self.financial_service = FinancialService(financial_service.db_manager)
 
-
         self.current_engagement: Engagement | None = None
         self.current_dataset: FinancialDataset | None = None
 
@@ -85,9 +84,7 @@ class FinancialDataView(QWidget):
         sel_layout.setSpacing(10)
 
         sel_lbl = QLabel("Active Dataset:")
-        sel_lbl.setStyleSheet(
-            "font-size: 11px; font-weight: 700; color: #64748B;"
-        )
+        sel_lbl.setStyleSheet("font-size: 11px; font-weight: 700; color: #64748B;")
 
         self.dataset_combo = CustomComboBox()
         self.dataset_combo.setMinimumWidth(320)
@@ -102,14 +99,22 @@ class FinancialDataView(QWidget):
         self.dataset_combo.currentIndexChanged.connect(self._on_dataset_changed)
         self.dataset_combo.empty_clicked.connect(self._on_import_clicked)
 
-        self.run_analytics_btn = QPushButton("Run Deterministic Analytics")
+        self.run_analytics_btn = QPushButton("Run Analytics")
         self.run_analytics_btn.setObjectName("primaryButton")
         self.run_analytics_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.run_analytics_btn.clicked.connect(self._on_run_analytics_clicked)
         self.run_analytics_btn.setEnabled(False)
 
+        self.map_accounts_btn = QPushButton("Schedule III Mappings")
+        self.map_accounts_btn.clicked.connect(self._on_map_accounts_clicked)
+
+        self.adjustments_btn = QPushButton("Audit Adjustments (AJE)")
+        self.adjustments_btn.clicked.connect(self._on_adjustments_clicked)
+
         sel_layout.addWidget(sel_lbl)
         sel_layout.addWidget(self.dataset_combo, stretch=1)
+        sel_layout.addWidget(self.map_accounts_btn)
+        sel_layout.addWidget(self.adjustments_btn)
         sel_layout.addWidget(self.run_analytics_btn)
         selector_card.content_layout.addLayout(sel_layout)
         layout.addWidget(selector_card)
@@ -217,8 +222,14 @@ class FinancialDataView(QWidget):
             self._show_empty_state()
         else:
             for ds in datasets:
-                cat_val = ds.dataset_type.value if hasattr(ds.dataset_type, "value") else str(ds.dataset_type)
-                self.dataset_combo.addItem(f"{ds.dataset_name} ({ds.valid_rows} rows · {cat_val})", ds.id)
+                cat_val = (
+                    ds.dataset_type.value
+                    if hasattr(ds.dataset_type, "value")
+                    else str(ds.dataset_type)
+                )
+                self.dataset_combo.addItem(
+                    f"{ds.dataset_name} ({ds.valid_rows} rows · {cat_val})", ds.id
+                )
             self.dataset_combo.setCurrentIndex(0)
             self.current_dataset = datasets[0]
             self.run_analytics_btn.setEnabled(True)
@@ -268,7 +279,6 @@ class FinancialDataView(QWidget):
             self.records_table.setItem(row, 6, QTableWidgetItem(str(rec.get("narration", "—"))))
 
         self.records_table.setFixedHeight(min(300, max(1, len(records[:200])) * 36 + 32))
-
 
     def _load_exceptions(self) -> None:
         if not self.current_dataset or not self.financial_service:
@@ -351,3 +361,29 @@ class FinancialDataView(QWidget):
             QMessageBox.critical(
                 self, "Promotion Error", f"Could not promote exception to finding: {ex}"
             )
+
+    def _on_map_accounts_clicked(self) -> None:
+        if not self.current_engagement or not self.financial_service:
+            QMessageBox.warning(self, "No Engagement", "Please select an active engagement first.")
+            return
+
+        from finauditpro.application.services.account_mapping_service import AccountMappingService
+        from finauditpro.ui.dialogs.account_mapping_dialog import AccountMappingDialog
+
+        svc = AccountMappingService(self.financial_service.db_manager)
+        dialog = AccountMappingDialog(svc, self.current_engagement.id, parent=self)
+        dialog.exec()
+        self.data_changed.emit()
+
+    def _on_adjustments_clicked(self) -> None:
+        if not self.current_engagement or not self.financial_service:
+            QMessageBox.warning(self, "No Engagement", "Please select an active engagement first.")
+            return
+
+        from finauditpro.application.services.audit_adjustment_service import AuditAdjustmentService
+        from finauditpro.ui.dialogs.audit_adjustment_dialog import AuditAdjustmentDialog
+
+        svc = AuditAdjustmentService(self.financial_service.db_manager)
+        dialog = AuditAdjustmentDialog(svc, self.current_engagement.id, parent=self)
+        dialog.exec()
+        self.data_changed.emit()

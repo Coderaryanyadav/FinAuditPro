@@ -41,7 +41,6 @@ class LMStudioSupervisor:
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "FinAuditPro-Supervisor/1.0"})  # noqa: S310
             with urllib.request.urlopen(req, timeout=2.0) as resp:  # noqa: S310
-
                 if resp.status == 200:
                     data = json.loads(resp.read().decode("utf-8"))
                     models = data.get("data", [])
@@ -89,7 +88,6 @@ class LMStudioSupervisor:
                 try:
                     subprocess.Popen(
                         ["/usr/bin/open", "-a", "LM Studio"],
-
                         stdout=subprocess.DEVNULL,
                         stderr=subprocess.DEVNULL,
                     )
@@ -126,7 +124,7 @@ class LMStudioSupervisor:
                     [str(cli_bin), "server", "stop"],
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
-                    check=False
+                    check=False,
                 )
                 return True
             except Exception:
@@ -136,7 +134,6 @@ class LMStudioSupervisor:
     start_server_background = start_local_server
 
     @classmethod
-
     def load_model_via_cli(cls, model_query: str = "deepseek", wait_timeout: float = 30.0) -> bool:
         """Automatically load model into LM Studio memory using `lms load <query>`."""
         cli_bin = cls.find_lms_cli()

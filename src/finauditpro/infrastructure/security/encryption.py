@@ -187,7 +187,7 @@ def get_fernet_cipher() -> Fernet:
         except Exception:
             raise ValueError(
                 "Access Denied: The Data Encryption Key is locked and requires user authorization."
-            )
+            ) from None
     else:
         # Legacy/testing auto-initialization
         initialize_wrapped_dek("FinAuditPro-Local-Column-Secret-Key")

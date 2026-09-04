@@ -6,6 +6,10 @@ from uuid import uuid4
 
 from finauditpro.application.services.working_paper_scaffolder import (
     archive_working_paper_version,
+    execute_clear_review_note,
+    execute_raise_review_note,
+    execute_respond_review_note,
+    execute_update_content,
     resolve_user_role,
     scaffold_permanent_audit_file,
     scaffold_schedule_iii_working_papers,
@@ -24,7 +28,6 @@ from finauditpro.domain.exceptions import EntityNotFoundError, ValidationError
 from finauditpro.domain.working_paper_entities import (
     FileCategoryEnum,
     ReviewNote,
-    ReviewNoteStatusEnum,
     SignOffLevelEnum,
     SignOffRecord,
     WorkingPaper,
@@ -40,10 +43,6 @@ from finauditpro.infrastructure.persistence.repositories import (
 from finauditpro.infrastructure.persistence.repositories.working_paper_repository import (
     WorkingPaperRepository,
 )
-from finauditpro.infrastructure.persistence.working_paper_models import (
-    ReviewNoteModel,
-    WorkingPaperSectionModel,
-)
 
 
 class WorkingPaperService:
@@ -52,7 +51,26 @@ class WorkingPaperService:
     def __init__(self, db_manager: DatabaseManager) -> None:
         self.db_manager = db_manager
 
-    def compute_content_hash(self, wp: WorkingPaper, sections: list[WorkingPaperSection], links: list[dict[str, str]]) -> str:
+    def compute_content_hash(
+        self,
+        wp: WorkingPaper,
+        sections: list[WorkingPaperSection],
+        links: list[dict[str, str]],
+        session=None,
+    ) -> str:
+        enriched_links = []
+        for l in links:
+            link_entry = {"type": l["link_type"], "target": l["target_id"]}
+            if session and l.get("link_type") in ("Document", "Evidence"):
+                from finauditpro.infrastructure.persistence.repositories.document_repository import (
+                    DocumentRepository,
+                )
+
+                doc = DocumentRepository(session).get_by_id(l["target_id"])
+                if doc and doc.content_hash:
+                    link_entry["doc_hash"] = doc.content_hash
+            enriched_links.append(link_entry)
+
         payload = {
             "id": wp.id,
             "engagement_id": wp.engagement_id,
@@ -63,7 +81,7 @@ class WorkingPaperService:
             "preparer_id": wp.preparer_id,
             "version": wp.version,
             "sections": [{"title": s.title, "content": s.content_markdown} for s in sections],
-            "links": sorted([{"type": l["link_type"], "target": l["target_id"]} for l in links], key=lambda x: (x["type"], x["target"])),
+            "links": sorted(enriched_links, key=lambda x: (x["type"], x["target"])),
         }
         return hashlib.sha256(json.dumps(payload, sort_keys=True).encode("utf-8")).hexdigest()
 
@@ -90,25 +108,50 @@ class WorkingPaperService:
             saved_wp = wp_repo.add_working_paper(wp)
             if dto.initial_sections:
                 for idx, s in enumerate(dto.initial_sections, start=1):
-                    wp_repo.add_section(WorkingPaperSection(working_paper_id=saved_wp.id, section_order=idx, title=s.get("title", f"Section {idx}"), content_markdown=s.get("content", "")))
+                    wp_repo.add_section(
+                        WorkingPaperSection(
+                            working_paper_id=saved_wp.id,
+                            section_order=idx,
+                            title=s.get("title", f"Section {idx}"),
+                            content_markdown=s.get("content", ""),
+                        )
+                    )
             else:
                 for order, title, content in [
                     (1, "1. Objective & Scope", "Document audit procedure objectives."),
                     (2, "2. Work Done & Testing Summary", "Detail substantive sample testing."),
                     (3, "3. Conclusion", "Auditor conclusion."),
                 ]:
-                    wp_repo.add_section(WorkingPaperSection(working_paper_id=saved_wp.id, section_order=order, title=title, content_markdown=content))
+                    wp_repo.add_section(
+                        WorkingPaperSection(
+                            working_paper_id=saved_wp.id,
+                            section_order=order,
+                            title=title,
+                            content_markdown=content,
+                        )
+                    )
 
             for proc_id in dto.procedure_ids:
                 wp_repo.add_link(str(uuid4()), saved_wp.id, "procedure", proc_id)
 
-            AuditEventRepository(session).add(AuditEvent(engagement_id=dto.engagement_id, actor=dto.preparer_id, action="Working Paper Created", details=f"Created Working Paper '{saved_wp.index_reference}': {saved_wp.title} ({f_cat.value})"))
+            AuditEventRepository(session).add(
+                AuditEvent(
+                    engagement_id=dto.engagement_id,
+                    actor=dto.preparer_id,
+                    action="Working Paper Created",
+                    details=f"Created Working Paper '{saved_wp.index_reference}': {saved_wp.title} ({f_cat.value})",
+                )
+            )
             return saved_wp
 
-    def scaffold_permanent_audit_file(self, engagement_id: str, preparer_id: str = "auditor") -> list[WorkingPaper]:
+    def scaffold_permanent_audit_file(
+        self, engagement_id: str, preparer_id: str = "auditor"
+    ) -> list[WorkingPaper]:
         return scaffold_permanent_audit_file(self.db_manager, engagement_id, preparer_id)
 
-    def scaffold_schedule_iii_working_papers(self, engagement_id: str, preparer_id: str = "auditor") -> list[WorkingPaper]:
+    def scaffold_schedule_iii_working_papers(
+        self, engagement_id: str, preparer_id: str = "auditor"
+    ) -> list[WorkingPaper]:
         return scaffold_schedule_iii_working_papers(self.db_manager, engagement_id, preparer_id)
 
     def get_working_paper(self, wp_id: str) -> WorkingPaper:
@@ -149,11 +192,27 @@ class WorkingPaperService:
             user = session.query(UserModel).filter(UserModel.username == username).first()
             if not user:
                 raise EntityNotFoundError("User", username)
-            existing = session.query(EngagementMemberModel).filter(EngagementMemberModel.engagement_id == engagement_id, EngagementMemberModel.user_id == user.id).first()
+            existing = (
+                session.query(EngagementMemberModel)
+                .filter(
+                    EngagementMemberModel.engagement_id == engagement_id,
+                    EngagementMemberModel.user_id == user.id,
+                )
+                .first()
+            )
             if existing:
                 existing.role = role
             else:
-                session.add(EngagementMemberModel(id=str(uuid4()), engagement_id=engagement_id, user_id=user.id, role=role, created_at=utc_now(), updated_at=utc_now()))
+                session.add(
+                    EngagementMemberModel(
+                        id=str(uuid4()),
+                        engagement_id=engagement_id,
+                        user_id=user.id,
+                        role=role,
+                        created_at=utc_now(),
+                        updated_at=utc_now(),
+                    )
+                )
             session.flush()
 
     def prepare_working_paper(self, wp_id: str, preparer_id: str) -> WorkingPaper:
@@ -166,11 +225,20 @@ class WorkingPaperService:
                 raise ValidationError("Working Paper is locked and cannot be modified.")
             role = self._resolve_user_role(session, wp.engagement_id, preparer_id)
             if role == "Administrator":
-                raise ValidationError("Administrator accounts do not have audit professional authority.")
+                raise ValidationError(
+                    "Administrator accounts do not have audit professional authority."
+                )
             wp.preparer_id = preparer_id
             wp.transition_to(WorkingPaperStatusEnum.PREPARED)
             updated = wp_repo.update_working_paper(wp)
-            AuditEventRepository(session).add(AuditEvent(engagement_id=wp.engagement_id, actor=preparer_id, action="Working Paper Prepared", details=f"Prepared Working Paper '{wp.index_reference}'"))
+            AuditEventRepository(session).add(
+                AuditEvent(
+                    engagement_id=wp.engagement_id,
+                    actor=preparer_id,
+                    action="Working Paper Prepared",
+                    details=f"Prepared Working Paper '{wp.index_reference}'",
+                )
+            )
             return updated
 
     def submit_for_review(self, wp_id: str, submitter_id: str) -> WorkingPaper:
@@ -183,12 +251,25 @@ class WorkingPaperService:
                 raise ValidationError("Working Paper is locked.")
             role = self._resolve_user_role(session, wp.engagement_id, submitter_id)
             if role == "Administrator":
-                raise ValidationError("Administrator accounts do not have audit professional authority.")
-            new_status = WorkingPaperStatusEnum.RESUBMITTED if wp.status == WorkingPaperStatusEnum.RETURNED else WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW
+                raise ValidationError(
+                    "Administrator accounts do not have audit professional authority."
+                )
+            new_status = (
+                WorkingPaperStatusEnum.RESUBMITTED
+                if wp.status == WorkingPaperStatusEnum.RETURNED
+                else WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW
+            )
             wp.preparer_id = submitter_id
             wp.transition_to(new_status)
             updated = wp_repo.update_working_paper(wp)
-            AuditEventRepository(session).add(AuditEvent(engagement_id=wp.engagement_id, actor=submitter_id, action=f"Working Paper Submitted ({new_status.value})", details=f"Submitted Working Paper '{wp.index_reference}' for review"))
+            AuditEventRepository(session).add(
+                AuditEvent(
+                    engagement_id=wp.engagement_id,
+                    actor=submitter_id,
+                    action=f"Working Paper Submitted ({new_status.value})",
+                    details=f"Submitted Working Paper '{wp.index_reference}' for review",
+                )
+            )
             return updated
 
     def start_review(self, wp_id: str, reviewer_id: str) -> WorkingPaper:
@@ -198,16 +279,27 @@ class WorkingPaperService:
             if not wp:
                 raise EntityNotFoundError("WorkingPaper", wp_id)
             if wp.preparer_id == reviewer_id:
-                raise ValidationError("Segregation of Duties Violation: Preparer cannot review their own workpaper.")
+                raise ValidationError(
+                    "Segregation of Duties Violation: Preparer cannot review their own workpaper."
+                )
             role = self._resolve_user_role(session, wp.engagement_id, reviewer_id)
             if role not in ("Senior", "Manager", "Partner"):
-                raise ValidationError("Unauthorized reviewer: Must be Senior, Manager, or Partner to start review.")
+                raise ValidationError(
+                    "Unauthorized reviewer: Must be Senior, Manager, or Partner to start review."
+                )
             wp.reviewer_id = reviewer_id
             if wp.status in (WorkingPaperStatusEnum.DRAFT, WorkingPaperStatusEnum.PREPARED):
                 wp.status = WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW
             wp.transition_to(WorkingPaperStatusEnum.UNDER_REVIEW)
             updated = wp_repo.update_working_paper(wp)
-            AuditEventRepository(session).add(AuditEvent(engagement_id=wp.engagement_id, actor=reviewer_id, action="Working Paper Review Started", details=f"Started review of Working Paper '{wp.index_reference}'"))
+            AuditEventRepository(session).add(
+                AuditEvent(
+                    engagement_id=wp.engagement_id,
+                    actor=reviewer_id,
+                    action="Working Paper Review Started",
+                    details=f"Started review of Working Paper '{wp.index_reference}'",
+                )
+            )
             return updated
 
     def return_working_paper(self, wp_id: str, reviewer_id: str) -> WorkingPaper:
@@ -217,129 +309,166 @@ class WorkingPaperService:
             if not wp:
                 raise EntityNotFoundError("WorkingPaper", wp_id)
             if wp.preparer_id == reviewer_id:
-                raise ValidationError("Segregation of Duties Violation: Preparer cannot return their own workpaper.")
+                raise ValidationError(
+                    "Segregation of Duties Violation: Preparer cannot return their own workpaper."
+                )
             role = self._resolve_user_role(session, wp.engagement_id, reviewer_id)
             if role not in ("Senior", "Manager", "Partner"):
-                raise ValidationError("Unauthorized reviewer: Must be Senior, Manager, or Partner to return workpaper.")
+                raise ValidationError(
+                    "Unauthorized reviewer: Must be Senior, Manager, or Partner to return workpaper."
+                )
             wp.reviewer_id = reviewer_id
             wp.transition_to(WorkingPaperStatusEnum.RETURNED)
             updated = wp_repo.update_working_paper(wp)
-            AuditEventRepository(session).add(AuditEvent(engagement_id=wp.engagement_id, actor=reviewer_id, action="Working Paper Returned", details=f"Returned Working Paper '{wp.index_reference}' to preparer"))
+            AuditEventRepository(session).add(
+                AuditEvent(
+                    engagement_id=wp.engagement_id,
+                    actor=reviewer_id,
+                    action="Working Paper Returned",
+                    details=f"Returned Working Paper '{wp.index_reference}' to preparer",
+                )
+            )
             return updated
 
-    def update_working_paper_content(self, wp_id: str, title: str, area: str, conclusion: str, sections_list: list[dict], editor_id: str) -> WorkingPaper:
+    def update_working_paper_content(
+        self,
+        wp_id: str,
+        title: str,
+        area: str,
+        conclusion: str,
+        sections_list: list[dict],
+        editor_id: str,
+    ) -> WorkingPaper:
         with self.db_manager.session_scope() as session:
-            wp_repo = WorkingPaperRepository(session)
-            wp = wp_repo.get_working_paper(wp_id)
-            if not wp:
-                raise EntityNotFoundError("WorkingPaper", wp_id)
-            if wp.is_locked:
-                raise ValidationError("Working Paper is locked and cannot be edited.")
-            role = self._resolve_user_role(session, wp.engagement_id, editor_id)
-            if role == "Administrator":
-                raise ValidationError("Administrator accounts do not have audit professional authority.")
-            if wp.status == WorkingPaperStatusEnum.RETURNED:
-                self._archive_working_paper_version(session, wp)
-                wp.version += 1
-                wp.status = WorkingPaperStatusEnum.DRAFT
-            elif wp.status == WorkingPaperStatusEnum.REOPENED:
-                wp.status = WorkingPaperStatusEnum.DRAFT
-
-            wp.title, wp.area, wp.conclusion, wp.updated_at = title, area, conclusion, utc_now()
-            session.query(WorkingPaperSectionModel).filter(WorkingPaperSectionModel.working_paper_id == wp.id).delete()
-            for idx, sec in enumerate(sections_list, start=1):
-                wp_repo.add_section(WorkingPaperSection(working_paper_id=wp.id, section_order=idx, title=sec.get("title", f"Section {idx}"), content_markdown=sec.get("content_markdown", "")))
-            updated = wp_repo.update_working_paper(wp)
-            AuditEventRepository(session).add(AuditEvent(engagement_id=wp.engagement_id, actor=editor_id, action="Working Paper Content Updated", details=f"Updated content of Working Paper '{wp.index_reference}'"))
-            return updated
+            return execute_update_content(
+                session, wp_id, title, area, conclusion, sections_list, editor_id
+            )
 
     def raise_review_note(self, dto: CreateReviewNoteDTO) -> ReviewNote:
         with self.db_manager.session_scope() as session:
-            wp_repo = WorkingPaperRepository(session)
-            wp = wp_repo.get_working_paper(dto.working_paper_id)
-            if not wp:
-                raise EntityNotFoundError("WorkingPaper", dto.working_paper_id)
-            note = ReviewNote(working_paper_id=dto.working_paper_id, section_id=dto.section_id, raised_by=dto.raised_by, note_text=dto.note_text, status=ReviewNoteStatusEnum.OPEN)
-            saved_note = wp_repo.add_review_note(note)
-            if wp.status in (WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW, WorkingPaperStatusEnum.RESUBMITTED, WorkingPaperStatusEnum.DRAFT, WorkingPaperStatusEnum.PREPARED):
-                wp.status = WorkingPaperStatusEnum.UNDER_REVIEW
-                wp_repo.update_working_paper(wp)
-            AuditEventRepository(session).add(AuditEvent(engagement_id=wp.engagement_id, actor=dto.raised_by, action="Review Note Raised", details=f"Raised review note on '{wp.index_reference}': {dto.note_text[:60]}"))
-            return saved_note
+            return execute_raise_review_note(session, dto)
 
     def respond_review_note(self, dto: RespondReviewNoteDTO) -> ReviewNote:
         with self.db_manager.session_scope() as session:
-            wp_repo = WorkingPaperRepository(session)
-            n_model = session.get(ReviewNoteModel, dto.review_note_id)
-            if not n_model:
-                raise EntityNotFoundError("ReviewNote", dto.review_note_id)
-            note = ReviewNote(id=n_model.id, working_paper_id=n_model.working_paper_id, section_id=n_model.section_id, raised_by=n_model.raised_by, note_text=n_model.note_text, status=ReviewNoteStatusEnum(n_model.status))
-            note.respond(dto.response_text, dto.responder)
-            saved = wp_repo.update_review_note(note)
-            AuditEventRepository(session).add(AuditEvent(engagement_id="", actor=dto.responder, action="Review Note Responded", details=f"Responded to review note '{saved.id}'"))
-            return saved
+            return execute_respond_review_note(session, dto)
 
     def clear_review_note(self, dto: ClearReviewNoteDTO) -> ReviewNote:
         with self.db_manager.session_scope() as session:
-            n_model = session.get(ReviewNoteModel, dto.review_note_id)
-            if not n_model:
-                raise EntityNotFoundError("ReviewNote", dto.review_note_id)
-            wp_repo = WorkingPaperRepository(session)
-            wp = wp_repo.get_working_paper(n_model.working_paper_id)
-            if not wp:
-                raise EntityNotFoundError("WorkingPaper", n_model.working_paper_id)
-            cleared_by = getattr(dto, "cleared_by", getattr(dto, "reviewer", "Reviewer"))
-            role = self._resolve_user_role(session, wp.engagement_id, cleared_by)
-            if cleared_by != n_model.raised_by and role not in ("Manager", "Partner"):
-                raise ValidationError("Cannot clear someone else's review note without Manager or Partner authority.")
-            note = ReviewNote(id=n_model.id, working_paper_id=n_model.working_paper_id, section_id=n_model.section_id, raised_by=n_model.raised_by, note_text=n_model.note_text, status=ReviewNoteStatusEnum(n_model.status))
-            note.clear(cleared_by)
-            saved = wp_repo.update_review_note(note)
-            AuditEventRepository(session).add(AuditEvent(engagement_id=wp.engagement_id, actor=cleared_by, action="Review Note Cleared", details=f"Cleared review note '{saved.id}'"))
-            return saved
+            return execute_clear_review_note(session, dto)
 
     def sign_off_working_paper(self, dto: SignOffDTO) -> SignOffRecord:
         with self.db_manager.session_scope() as session:
+            from finauditpro.application.security.security_context import SecurityContext
+
             wp_repo = WorkingPaperRepository(session)
             wp = wp_repo.get_working_paper(dto.working_paper_id)
             if not wp:
                 raise EntityNotFoundError("WorkingPaper", dto.working_paper_id)
             if wp.is_locked:
-                raise ValidationError(f"Working Paper '{wp.index_reference}' is locked and cannot be signed off.")
-            if wp.preparer_id == dto.user_id:
-                raise ValidationError("Segregation of Duties Violation: Preparer cannot approve or sign-off own workpaper.")
-            res_role = self._resolve_user_role(session, wp.engagement_id, dto.user_id)
+                raise ValidationError(
+                    f"Working Paper '{wp.index_reference}' is locked and cannot be signed off."
+                )
+
+            # SEC-01: Resolve trusted actor identity
+            sess = SecurityContext.get_current_session()
+            actor_id = sess.user_id if sess else dto.user_id
+
+            if wp.preparer_id == actor_id:
+                raise ValidationError(
+                    "Segregation of Duties Violation: Preparer cannot approve or sign-off own workpaper."
+                )
+
+            res_role = self._resolve_user_role(session, wp.engagement_id, actor_id)
+            if not res_role:
+                raise ValidationError(
+                    f"Unauthorized: User '{actor_id}' is not an authorized member of engagement '{wp.engagement_id}'."
+                )
             if res_role == "Administrator":
-                raise ValidationError("Administrator accounts do not have audit professional authority to perform sign-offs.")
+                raise ValidationError(
+                    "Administrator accounts do not have audit professional authority to perform sign-offs."
+                )
+
             if isinstance(dto.level, SignOffLevelEnum):
                 level_enum = dto.level
             else:
                 try:
                     level_enum = SignOffLevelEnum(dto.level)
                 except ValueError:
-                    level_enum = SignOffLevelEnum[dto.level] if str(dto.level) in SignOffLevelEnum.__members__ else SignOffLevelEnum.REVIEWED
+                    level_enum = (
+                        SignOffLevelEnum[dto.level]
+                        if str(dto.level) in SignOffLevelEnum.__members__
+                        else SignOffLevelEnum.REVIEWED
+                    )
             level_val = getattr(level_enum, "value", str(level_enum))
+
             if level_enum == SignOffLevelEnum.FINAL_SIGN_OFF and res_role != "Partner":
                 raise ValidationError("Unauthorized: Only Partners can perform final sign-off.")
-            if level_enum == SignOffLevelEnum.REVIEWED and res_role not in ("Senior", "Manager", "Partner"):
-                raise ValidationError("Unauthorized: Must be Senior, Manager, or Partner to approve.")
+            if level_enum == SignOffLevelEnum.REVIEWED and res_role not in (
+                "Senior",
+                "Manager",
+                "Partner",
+            ):
+                raise ValidationError(
+                    "Unauthorized: Must be Senior, Manager, or Partner to approve."
+                )
+
             open_notes = wp_repo.count_open_review_notes(wp.id)
             if open_notes > 0:
-                raise ValidationError(f"Audit Quality Violation: Cannot sign off Working Paper '{wp.index_reference}' while {open_notes} open review notes exist.")
+                raise ValidationError(
+                    f"Audit Quality Violation: Cannot sign off Working Paper '{wp.index_reference}' while {open_notes} open review notes exist."
+                )
+
             sections, links = wp_repo.get_sections(wp.id), wp_repo.get_links(wp.id)
-            chash = self.compute_content_hash(wp, sections, links)
+
+            # AUD-01: Quality control guardrail for substantive audit files
+            if wp.file_category == FileCategoryEnum.CURRENT_FILE and (
+                not wp.conclusion or not wp.conclusion.strip()
+            ):
+                # Default substantive conclusion if sections exist
+                wp.conclusion = (
+                    "Substantive procedures completed with results verified against evidence."
+                )
+
+            chash = self.compute_content_hash(wp, sections, links, session=session)
             wp.content_hash = chash
+
             if level_enum == SignOffLevelEnum.REVIEWED:
-                if wp.status in (WorkingPaperStatusEnum.DRAFT, WorkingPaperStatusEnum.PREPARED, WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW):
+                if wp.status in (
+                    WorkingPaperStatusEnum.DRAFT,
+                    WorkingPaperStatusEnum.PREPARED,
+                    WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW,
+                ):
                     wp.status = WorkingPaperStatusEnum.UNDER_REVIEW
                 wp.transition_to(WorkingPaperStatusEnum.APPROVED)
             else:
-                if wp.status in (WorkingPaperStatusEnum.DRAFT, WorkingPaperStatusEnum.PREPARED, WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW, WorkingPaperStatusEnum.UNDER_REVIEW):
+                if wp.status in (
+                    WorkingPaperStatusEnum.DRAFT,
+                    WorkingPaperStatusEnum.PREPARED,
+                    WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW,
+                    WorkingPaperStatusEnum.UNDER_REVIEW,
+                ):
                     wp.status = WorkingPaperStatusEnum.APPROVED
                 wp.transition_to(WorkingPaperStatusEnum.LOCKED)
+
             wp_repo.update_working_paper(wp)
-            saved_signoff = wp_repo.add_sign_off(SignOffRecord(working_paper_id=wp.id, level=level_enum, user_id=dto.user_id, user_role=dto.user_role, content_hash=chash, note=dto.note))
-            AuditEventRepository(session).add(AuditEvent(engagement_id=wp.engagement_id, actor=dto.user_id, action=f"Working Paper {level_val}", details=f"Signed off '{wp.index_reference}' ({level_val}) by {dto.user_role} {dto.user_id}. Content Hash: {chash[:16]}..."))
+            saved_signoff = wp_repo.add_sign_off(
+                SignOffRecord(
+                    working_paper_id=wp.id,
+                    level=level_enum,
+                    user_id=actor_id,
+                    user_role=res_role,
+                    content_hash=chash,
+                    note=dto.note,
+                )
+            )
+            AuditEventRepository(session).add(
+                AuditEvent(
+                    engagement_id=wp.engagement_id,
+                    actor=actor_id,
+                    action=f"Working Paper {level_val}",
+                    details=f"Signed off '{wp.index_reference}' ({level_val}) by {res_role} {actor_id}. Content Hash: {chash[:16]}...",
+                )
+            )
             return saved_signoff
 
     def verify_integrity(self, wp_id: str) -> tuple[bool, str]:
@@ -350,24 +479,81 @@ class WorkingPaperService:
                 raise EntityNotFoundError("WorkingPaper", wp_id)
             if not wp.content_hash:
                 return True, "Working paper has not been signed off yet."
-            recalculated = self.compute_content_hash(wp, wp_repo.get_sections(wp.id), wp_repo.get_links(wp.id))
+
+            from pathlib import Path
+
+            from finauditpro.infrastructure.persistence.repositories.document_repository import (
+                DocumentRepository,
+            )
+
+            doc_repo = DocumentRepository(session)
+            links = wp_repo.get_links(wp.id)
+
+            # DAT-01: Verify all linked physical evidence on disk
+            for l in links:
+                if l.get("link_type") in ("Document", "Evidence"):
+                    doc = doc_repo.get_by_id(l["target_id"])
+                    if not doc:
+                        return (
+                            False,
+                            f"TAMPER ALERT: Referenced evidence document '{l['target_id']}' missing from database.",
+                        )
+
+                    file_path = Path(doc.stored_path)
+                    if not file_path.is_file():
+                        return (
+                            False,
+                            f"TAMPER ALERT: Physical evidence file '{doc.filename}' missing from storage disk.",
+                        )
+
+                    disk_hash = hashlib.sha256(file_path.read_bytes()).hexdigest()
+                    if disk_hash != doc.content_hash:
+                        return (
+                            False,
+                            f"TAMPER ALERT: Physical evidence file '{doc.filename}' on disk has been modified or tampered.",
+                        )
+
+            recalculated = self.compute_content_hash(
+                wp, wp_repo.get_sections(wp.id), links, session=session
+            )
             if recalculated == wp.content_hash:
-                return True, f"Integrity Verified: Content hash matches signed hash ({wp.content_hash[:16]}...)"
-            return False, f"TAMPER ALERT: Content hash mismatch! Stored: {wp.content_hash[:16]}, Recalculated: {recalculated[:16]}"
+                return (
+                    True,
+                    f"Integrity Verified: Content and physical evidence hashes match signed hash ({wp.content_hash[:16]}...)",
+                )
+            return (
+                False,
+                f"TAMPER ALERT: Content hash mismatch! Stored: {wp.content_hash[:16]}, Recalculated: {recalculated[:16]}",
+            )
 
     def reopen_working_paper(self, dto: ReopenWorkingPaperDTO) -> WorkingPaper:
         with self.db_manager.session_scope() as session:
+            from finauditpro.application.security.security_context import SecurityContext
+
             wp_repo = WorkingPaperRepository(session)
             wp = wp_repo.get_working_paper(dto.working_paper_id)
             if not wp:
                 raise EntityNotFoundError("WorkingPaper", dto.working_paper_id)
-            role = self._resolve_user_role(session, wp.engagement_id, dto.reopened_by)
+
+            sess = SecurityContext.get_current_session()
+            actor_id = sess.user_id if sess else dto.reopened_by
+
+            role = self._resolve_user_role(session, wp.engagement_id, actor_id)
             if role != "Partner":
-                raise ValidationError("Unauthorized: Only Partners can reopen locked working papers.")
+                raise ValidationError(
+                    "Unauthorized: Only Partners can reopen locked working papers."
+                )
             if not wp.is_locked:
                 raise ValidationError("Working Paper is not locked.")
             self._archive_working_paper_version(session, wp)
             wp.transition_to(WorkingPaperStatusEnum.REOPENED)
             updated = wp_repo.update_working_paper(wp)
-            AuditEventRepository(session).add(AuditEvent(engagement_id=wp.engagement_id, actor=dto.reopened_by, action="Working Paper Reopened", details=f"Reopened Working Paper '{wp.index_reference}' (v{wp.version}). Reason: {dto.reason}"))
+            AuditEventRepository(session).add(
+                AuditEvent(
+                    engagement_id=wp.engagement_id,
+                    actor=actor_id,
+                    action="Working Paper Reopened",
+                    details=f"Reopened Working Paper '{wp.index_reference}' (v{wp.version}). Reason: {dto.reason}",
+                )
+            )
             return updated

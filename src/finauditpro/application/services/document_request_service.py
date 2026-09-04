@@ -25,7 +25,9 @@ class DocumentRequestService:
     def __init__(self, db_manager: DatabaseManager) -> None:
         self.db_manager = db_manager
 
-    def seed_default_pbc_package(self, engagement_id: str, actor: str = "Auditor") -> list[DocumentRequest]:
+    def seed_default_pbc_package(
+        self, engagement_id: str, actor: str = "Auditor"
+    ) -> list[DocumentRequest]:
         """Seed standard ICAI statutory PBC document requests for an engagement."""
         created_requests: list[DocumentRequest] = []
         with self.db_manager.session_scope() as session:
@@ -119,7 +121,11 @@ class DocumentRequestService:
                 try:
                     status_enum = DocumentRequestStatusEnum(target_status)
                 except ValueError:
-                    status_enum = DocumentRequestStatusEnum[target_status] if str(target_status) in DocumentRequestStatusEnum.__members__ else DocumentRequestStatusEnum.REQUESTED
+                    status_enum = (
+                        DocumentRequestStatusEnum[target_status]
+                        if str(target_status) in DocumentRequestStatusEnum.__members__
+                        else DocumentRequestStatusEnum.REQUESTED
+                    )
 
             req.transition_to(status_enum)
             if reviewer_notes:
@@ -137,7 +143,9 @@ class DocumentRequestService:
             )
             return saved
 
-    def attach_document(self, request_id: str, document_id: str, actor: str = "Auditor") -> DocumentRequest:
+    def attach_document(
+        self, request_id: str, document_id: str, actor: str = "Auditor"
+    ) -> DocumentRequest:
         with self.db_manager.session_scope() as session:
             repo = DocumentRequestRepository(session)
             req = repo.get(request_id)
@@ -205,6 +213,7 @@ class DocumentRequestService:
         from finauditpro.infrastructure.persistence.repositories.document_request_repository import (
             ExternalConfirmationRepository,
         )
+
         with self.db_manager.session_scope() as session:
             repo = ExternalConfirmationRepository(session)
             return repo.list_by_engagement(engagement_id)
@@ -220,6 +229,7 @@ class DocumentRequestService:
         from finauditpro.infrastructure.persistence.repositories.document_request_repository import (
             ExternalConfirmationRepository,
         )
+
         with self.db_manager.session_scope() as session:
             repo = ExternalConfirmationRepository(session)
             conf = repo.get(confirmation_id)
@@ -239,4 +249,3 @@ class DocumentRequestService:
                 )
             )
             return saved
-

@@ -10,4 +10,3 @@ def escape_formula_injection(value: Any) -> Any:
     if isinstance(value, str) and value.startswith(INJECTION_PREFIXES):
         return f"'{value}"
     return value
-

@@ -26,21 +26,28 @@ class CreateRiskDTO(BaseModel):
     risk_code: str = Field(..., min_length=1)
     category: str = Field(..., min_length=1)
     description: str = Field(..., min_length=1)
+    title: str = Field(default="Audit Risk")
+    assertions: list[AssertionEnum] | None = Field(default=None)
     assertion: AssertionEnum = AssertionEnum.COMPLETENESS
     inherent_risk: RiskSeverityEnum = RiskSeverityEnum.MEDIUM
     control_risk: RiskSeverityEnum = RiskSeverityEnum.MEDIUM
     severity: RiskSeverityEnum = RiskSeverityEnum.HIGH
+    is_significant_risk: bool = Field(default=False)
     risk_response: str = Field(default="")
 
 
 class CreateProcedureDTO(BaseModel):
     engagement_id: str = Field(...)
     risk_id: str | None = Field(default=None)
+    linked_risk_ids: list[str] | None = Field(default=None)
     procedure_code: str = Field(..., min_length=1)
     objective: str = Field(..., min_length=1)
+    assertions: list[AssertionEnum] | None = Field(default=None)
     assertion: AssertionEnum = AssertionEnum.COMPLETENESS
     procedure_type: str = Field(default="Substantive Test")
     instructions: str = Field(default="")
+    evidence_requirement: str = Field(default="")
+    requires_evidence: bool = Field(default=True)
 
 
 class UpdateProcedureStatusDTO(BaseModel):

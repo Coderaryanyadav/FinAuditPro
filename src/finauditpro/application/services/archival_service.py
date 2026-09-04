@@ -181,6 +181,7 @@ class ArchivalService:
             from finauditpro.infrastructure.persistence.repositories.audit_matrix_repository import (
                 AuditMatrixRepository,
             )
+
             matrix_repo = AuditMatrixRepository(session)
             risks = matrix_repo.list_risks_for_engagement(engagement_id)
             high_risks = [r for r in risks if hasattr(r, "romm") and r.romm.value == "High"]
@@ -188,7 +189,9 @@ class ArchivalService:
             unresponded_high_risks = []
             for hr in high_risks:
                 linked = [p for p in procs if hr.id in getattr(p, "linked_risk_ids", [])]
-                if not linked or not any(p.status.value in ("Completed", "Reviewed") for p in linked):
+                if not linked or not any(
+                    p.status.value in ("Completed", "Reviewed") for p in linked
+                ):
                     unresponded_high_risks.append(hr.risk_code)
 
             if unresponded_high_risks:
@@ -212,7 +215,6 @@ class ArchivalService:
                         details=f"All {len(high_risks)} high RoMM risk items have substantive procedural responses.",
                     )
                 )
-
 
         is_ready = not has_hard
         return ReadinessCheckResultDTO(

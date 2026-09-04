@@ -37,7 +37,6 @@ class ReopenDialog(QDialog):
         self.resize(480, 260)
         self._init_ui()
 
-
     def _init_ui(self) -> None:
         layout = QVBoxLayout(self)
 
@@ -198,7 +197,6 @@ class ArchivalView(QWidget):
         self.current_engagement_id = engagement_id
         self._refresh_view()
 
-
     def _refresh_view(self) -> None:
         if not self.current_engagement_id:
             self.archives_table.setVisible(False)
@@ -254,6 +252,25 @@ class ArchivalView(QWidget):
 
     def _open_reopen_dialog(self) -> None:
         if not self.current_engagement_id:
+            return
+
+        from finauditpro.ui.dialogs.stepup_totp_dialog import StepUpTOTPDialog
+
+        win = self.window()
+        auth_svc = getattr(win, "auth_service", None)
+        user_sess = getattr(win, "current_user_session", None)
+
+        totp_dlg = StepUpTOTPDialog(
+            self,
+            action_title="Authorize Dossier Reopening",
+            action_description=(
+                "Reopening a sealed statutory audit dossier breaks the SQC-1 lock. "
+                "Please enter your 6-digit Authenticator code to authorize."
+            ),
+            auth_service=auth_svc,
+            user_session=user_sess,
+        )
+        if not totp_dlg.exec() or not totp_dlg.is_authorized:
             return
 
         dlg = ReopenDialog(self)

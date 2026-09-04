@@ -32,7 +32,6 @@ class EngagementView(QWidget):
     engagement_changed = Signal(str)
     engagement_selected = Signal(str)
 
-
     def __init__(
         self,
         firm_service: FirmService,
@@ -73,9 +72,7 @@ class EngagementView(QWidget):
         f_layout.setSpacing(10)
 
         s_lbl = QLabel("Search:")
-        s_lbl.setStyleSheet(
-            "font-size: 11px; font-weight: 700; color: #64748B;"
-        )
+        s_lbl.setStyleSheet("font-size: 11px; font-weight: 700; color: #64748B;")
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText(
             "Search engagements by client name, FY, or audit type..."
@@ -87,9 +84,7 @@ class EngagementView(QWidget):
         self.search_input.textChanged.connect(self._apply_filters)
 
         type_lbl = QLabel("Type:")
-        type_lbl.setStyleSheet(
-            "font-size: 12px; font-weight: 700; color: #475569;"
-        )
+        type_lbl.setStyleSheet("font-size: 12px; font-weight: 700; color: #475569;")
         self.type_combo = CustomComboBox()
         self.type_combo.setMinimumWidth(160)
         self.type_combo.addItems(
@@ -98,9 +93,7 @@ class EngagementView(QWidget):
         self.type_combo.currentIndexChanged.connect(self._apply_filters)
 
         status_lbl = QLabel("Status:")
-        status_lbl.setStyleSheet(
-            "font-size: 12px; font-weight: 700; color: #475569;"
-        )
+        status_lbl.setStyleSheet("font-size: 12px; font-weight: 700; color: #475569;")
         self.status_combo = CustomComboBox()
         self.status_combo.setMinimumWidth(150)
         self.status_combo.addItems(
@@ -110,7 +103,9 @@ class EngagementView(QWidget):
 
         clear_btn = QPushButton("Clear")
         clear_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        clear_btn.setStyleSheet("QPushButton { background-color: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 14px; font-weight: 500; } QPushButton:hover { background-color: #F1F5F9; color: #1E293B; border-color: #94A3B8; }")
+        clear_btn.setStyleSheet(
+            "QPushButton { background-color: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 14px; font-weight: 500; } QPushButton:hover { background-color: #F1F5F9; color: #1E293B; border-color: #94A3B8; }"
+        )
         clear_btn.clicked.connect(self.search_input.clear)
 
         f_layout.addWidget(s_lbl)
@@ -174,7 +169,6 @@ class EngagementView(QWidget):
             if eng_id:
                 self.engagement_changed.emit(eng_id)
                 self.engagement_selected.emit(eng_id)
-
 
     def refresh(self) -> None:
         self._all_engagements = self.engagement_service.list_all_engagements()

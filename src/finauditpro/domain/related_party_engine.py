@@ -93,12 +93,14 @@ class RelatedPartyEngine:
 
             # Match against undeclared KMP PANs
             if pan and pan in kmp_pans and acc_name not in known_names:
-                undeclared.append({
-                    "account_name": acc_name,
-                    "pan": pan,
-                    "amount_paise": amt,
-                    "reason": f"Account PAN '{pan}' matches Director/KMP Master but is NOT declared in Related Party Register.",
-                })
+                undeclared.append(
+                    {
+                        "account_name": acc_name,
+                        "pan": pan,
+                        "amount_paise": amt,
+                        "reason": f"Account PAN '{pan}' matches Director/KMP Master but is NOT declared in Related Party Register.",
+                    }
+                )
 
         summary = (
             f"SA 550 Scan: Evaluated {len(transactions)} transactions. "

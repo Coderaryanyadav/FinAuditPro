@@ -1,6 +1,8 @@
-"""Lockout protection manager for failed authentication attempts."""
+"""Failed authentication attempt tracker and automatic 15-minute brute-force lockout manager."""
 
+import contextlib
 import json
+import os
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -9,7 +11,7 @@ from finauditpro.infrastructure.first_run import get_app_data_dir
 
 
 def _get_lockout_file_path() -> Path:
-    return get_app_data_dir() / ".lockout.json"
+    return get_app_data_dir() / "lockout.json"
 
 
 def check_lockout() -> None:
@@ -20,7 +22,6 @@ def check_lockout() -> None:
 
     try:
         data = json.loads(lockout_file.read_text(encoding="utf-8"))
-        attempts = data.get("attempts", 0)
         lockout_until_str = data.get("lockout_until")
 
         if lockout_until_str:
@@ -34,7 +35,6 @@ def check_lockout() -> None:
     except (json.JSONDecodeError, ValueError) as ex:
         if isinstance(ex, ValidationError):
             raise
-        # Ignore corrupt JSON issues and proceed
         pass
 
 
@@ -45,24 +45,19 @@ def record_failed_attempt() -> None:
     lockout_until = None
 
     if lockout_file.exists():
-        try:
+        with contextlib.suppress(Exception):
             data = json.loads(lockout_file.read_text(encoding="utf-8"))
             attempts = data.get("attempts", 0)
-        except Exception:
-            pass
 
     attempts += 1
     if attempts >= 5:
-        # Lockout for 15 minutes
         lockout_until = (datetime.now(UTC) + timedelta(minutes=15)).isoformat()
 
     data = {
         "attempts": attempts,
-        "lockout_until": lockout_until
+        "lockout_until": lockout_until,
     }
 
-    # Write with strict owner-only file permissions using descriptor open
-    import os
     flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
     fd = os.open(lockout_file, flags, 0o600)
     with os.fdopen(fd, "w", encoding="utf-8") as f:
@@ -73,7 +68,5 @@ def clear_failed_attempts() -> None:
     """Reset failed login attempts to zero."""
     lockout_file = _get_lockout_file_path()
     if lockout_file.exists():
-        try:
+        with contextlib.suppress(Exception):
             lockout_file.unlink()
-        except Exception:
-            pass

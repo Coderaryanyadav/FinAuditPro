@@ -238,7 +238,6 @@ class LMStudioProvider(LLMProvider):
             else:
                 raise
 
-
         if schema_class is not None and issubclass(schema_class, BaseModel):
             try:
                 # Attempt to extract JSON from response content

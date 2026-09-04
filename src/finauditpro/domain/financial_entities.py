@@ -172,6 +172,43 @@ class LedgerEntry(DomainBaseModel):
         return Money(paise=self.credit_paise)
 
 
+class TrialBalanceSummary(DomainBaseModel):
+    total_opening_dr_paise: int = Field(default=0)
+    total_opening_cr_paise: int = Field(default=0)
+    total_debit_paise: int = Field(default=0)
+    total_credit_paise: int = Field(default=0)
+    total_closing_dr_paise: int = Field(default=0)
+    total_closing_cr_paise: int = Field(default=0)
+
+    @property
+    def is_opening_balanced(self) -> bool:
+        return self.total_opening_dr_paise == self.total_opening_cr_paise
+
+    @property
+    def is_period_balanced(self) -> bool:
+        return self.total_debit_paise == self.total_credit_paise
+
+    @property
+    def is_closing_balanced(self) -> bool:
+        return self.total_closing_dr_paise == self.total_closing_cr_paise
+
+    @property
+    def is_balanced(self) -> bool:
+        return self.is_opening_balanced and self.is_period_balanced and self.is_closing_balanced
+
+    @property
+    def opening_discrepancy_paise(self) -> int:
+        return self.total_opening_dr_paise - self.total_opening_cr_paise
+
+    @property
+    def period_discrepancy_paise(self) -> int:
+        return self.total_debit_paise - self.total_credit_paise
+
+    @property
+    def closing_discrepancy_paise(self) -> int:
+        return self.total_closing_dr_paise - self.total_closing_cr_paise
+
+
 class TrialBalanceLine(DomainBaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     dataset_id: str = Field(...)

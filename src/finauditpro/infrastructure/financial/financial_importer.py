@@ -1,9 +1,7 @@
 """Financial data importer for Excel/CSV files with Decimal currency parsing, day-first date parsing, and CSV formula injection protection."""
 
 import csv
-import re
 from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -12,8 +10,23 @@ from finauditpro.domain.financial_entities import (
     LedgerEntry,
     RowError,
     TrialBalanceLine,
+    TrialBalanceSummary,
 )
 from finauditpro.domain.value_objects import Money
+from finauditpro.infrastructure.financial.currency_parser import (
+    parse_indian_currency,
+    parse_indian_date,
+    sanitize_export_cell,
+)
+
+__all__ = [
+    "FinancialImportError",
+    "FinancialImporter",
+    "ImportResult",
+    "parse_indian_currency",
+    "parse_indian_date",
+    "sanitize_export_cell",
+]
 
 
 class FinancialImportError(Exception):
@@ -22,75 +35,12 @@ class FinancialImportError(Exception):
     pass
 
 
-def parse_indian_currency(val: Any) -> Money:
-    """Parse raw cell string into stdlib Decimal and convert to Money value object (integer paise).
-
-    Strips Indian digit separators (e.g. '1,23,456.78' -> Decimal('123456.78') -> 12345678 paise).
-    Raises ValueError on unparseable non-empty amounts.
-    """
-    if val is None:
-        return Money(paise=0)
-
-    s_val = str(val).strip()
-    if not s_val or s_val.lower() in ("nan", "none", "null", "-"):
-        return Money(paise=0)
-
-    # Strip currency symbols and digit separators
-    clean_str = re.sub(r"[₹\$\,\s]", "", s_val)
-    if clean_str.startswith("(") and clean_str.endswith(")"):
-        clean_str = f"-{clean_str[1:-1]}"
-
-    try:
-        dec = Decimal(clean_str)
-        paise = int((dec * Decimal("100")).quantize(Decimal("1")))
-        return Money(paise=paise)
-    except (InvalidOperation, ValueError) as ex:
-        raise ValueError(f"Invalid monetary amount cell value: '{val}'") from ex
-
-
-def parse_indian_date(val: Any) -> str | None:
-    """Parse raw date string or Excel date value into YYYY-MM-DD format using day-first convention."""
-    if val is None:
-        return None
-
-    s_val = str(val).strip()
-    if not s_val or s_val.lower() in ("nan", "none", "null", "-"):
-        return None
-
-    # Common Indian date formats
-    for fmt in ("%d-%m-%Y", "%d/%m/%Y", "%Y-%m-%d", "%Y/%m/%d", "%d.%m.%Y", "%d-%b-%Y", "%d %b %Y"):
-        try:
-            from datetime import datetime
-
-            dt = datetime.strptime(s_val, fmt)
-            return dt.strftime("%Y-%m-%d")
-        except ValueError:
-            pass
-
-    try:
-        from dateutil import parser
-
-        dt = parser.parse(s_val, dayfirst=True)
-        return str(dt.strftime("%Y-%m-%d"))
-    except Exception:
-        raise ValueError(f"Unparseable date value: '{val}'") from None
-
-
-def sanitize_export_cell(val: str) -> str:
-    """Protect against CSV formula injection attacks by prefixing dangerous formula triggers with a single quote."""
-    if not val:
-        return val
-    s = str(val)
-    if s.startswith(("=", "+", "-", "@", "\t", "\r")):
-        return f"'{s}"
-    return s
-
-
 @dataclass
 class ImportResult:
     total_rows: int
     valid_rows: list[Any]
     errors: list[RowError]
+    summary: TrialBalanceSummary | None = None
 
 
 class FinancialImporter:
@@ -214,7 +164,56 @@ class FinancialImporter:
                     )
                 )
 
-        return ImportResult(total_rows=len(rows), valid_rows=valid_lines, errors=errors)
+        total_op_dr = sum(line.opening_dr_paise for line in valid_lines)
+        total_op_cr = sum(line.opening_cr_paise for line in valid_lines)
+        total_dr = sum(line.debit_paise for line in valid_lines)
+        total_cr = sum(line.credit_paise for line in valid_lines)
+        total_cl_dr = sum(line.closing_dr_paise for line in valid_lines)
+        total_cl_cr = sum(line.closing_cr_paise for line in valid_lines)
+
+        summary = TrialBalanceSummary(
+            total_opening_dr_paise=total_op_dr,
+            total_opening_cr_paise=total_op_cr,
+            total_debit_paise=total_dr,
+            total_credit_paise=total_cr,
+            total_closing_dr_paise=total_cl_dr,
+            total_closing_cr_paise=total_cl_cr,
+        )
+
+        if not summary.is_period_balanced and (total_dr > 0 or total_cr > 0):
+            diff_paise = summary.period_discrepancy_paise
+            diff_money = Money(paise=abs(diff_paise)).format_indian()
+            errors.append(
+                RowError(
+                    row_no=1,
+                    column_name="debit/credit",
+                    raw_value=f"Debits: {Money(paise=total_dr).format_indian()}, Credits: {Money(paise=total_cr).format_indian()}",
+                    error_reason=(
+                        f"Trial Balance period movement out of balance by {diff_money} ({diff_paise} paise)."
+                    ),
+                )
+            )
+
+        if not summary.is_closing_balanced and (total_cl_dr > 0 or total_cl_cr > 0):
+            diff_paise = summary.closing_discrepancy_paise
+            diff_money = Money(paise=abs(diff_paise)).format_indian()
+            errors.append(
+                RowError(
+                    row_no=1,
+                    column_name="closing_dr/closing_cr",
+                    raw_value=f"Closing Dr: {Money(paise=total_cl_dr).format_indian()}, Closing Cr: {Money(paise=total_cl_cr).format_indian()}",
+                    error_reason=(
+                        f"Trial Balance closing balances out of balance by {diff_money} ({diff_paise} paise)."
+                    ),
+                )
+            )
+
+        return ImportResult(
+            total_rows=len(rows),
+            valid_rows=valid_lines,
+            errors=errors,
+            summary=summary,
+        )
 
     @classmethod
     def import_general_ledger(

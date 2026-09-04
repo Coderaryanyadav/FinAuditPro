@@ -46,7 +46,9 @@ class TraceabilityDialog(QDialog):
         layout.setSpacing(14)
         layout.setContentsMargins(20, 20, 20, 20)
 
-        header = QLabel("Audit Evidence Lineage Graph: Finding ↔ Procedure ↔ Risk ↔ Assertion ↔ Evidence")
+        header = QLabel(
+            "Audit Evidence Lineage Graph: Finding ↔ Procedure ↔ Risk ↔ Assertion ↔ Evidence"
+        )
         header.setStyleSheet("font-size: 15px; font-weight: 700; color: #2563EB;")
         layout.addWidget(header)
 

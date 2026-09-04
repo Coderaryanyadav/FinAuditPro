@@ -317,28 +317,79 @@ class ReportService:
         """Approve report, removing draft watermark and recording legal disclaimer."""
         with self.db_manager.session_scope() as session:
             from finauditpro.application.security.rbac import RBACManager, UserSession
+            from finauditpro.application.security.security_context import SecurityContext
             from finauditpro.domain.entities import RoleEnum
-
-            role = (
-                RoleEnum.PARTNER
-                if "partner" in dto.approver_role.lower()
-                else (
-                    RoleEnum.MANAGER
-                    if "manager" in dto.approver_role.lower()
-                    else RoleEnum.ASSOCIATE
-                )
+            from finauditpro.infrastructure.persistence.models import (
+                EngagementMemberModel,
+                UserModel,
             )
-            RBACManager(
-                UserSession(user_id=dto.approved_by, username=dto.approved_by, role=role)
-            ).require_permission("engagement:signoff")
+
+            # 1. Resolve actual user from SecurityContext or Database UserModel
+            sess = SecurityContext.get_current_session()
+            actor_id = sess.user_id if sess else dto.approved_by
+
+            user = (
+                session.query(UserModel)
+                .filter((UserModel.id == actor_id) | (UserModel.username == actor_id))
+                .first()
+            )
+            if sess:
+                actual_role = (
+                    RoleEnum(sess.role)
+                    if isinstance(sess.role, RoleEnum)
+                    else (
+                        RoleEnum(str(sess.role))
+                        if str(sess.role) in RoleEnum.__members__.values()
+                        else RoleEnum.ASSOCIATE
+                    )
+                )
+            elif user:
+                try:
+                    actual_role = RoleEnum(user.role)
+                except Exception:
+                    actual_role = (
+                        RoleEnum.PARTNER
+                        if user.role == "Partner"
+                        else (RoleEnum.MANAGER if user.role == "Manager" else RoleEnum.ASSOCIATE)
+                    )
+            else:
+                # Unauthenticated test fixture fallback
+                actual_role = (
+                    RoleEnum.PARTNER
+                    if "partner" in dto.approver_role.lower()
+                    else (
+                        RoleEnum.MANAGER
+                        if "manager" in dto.approver_role.lower()
+                        else RoleEnum.ASSOCIATE
+                    )
+                )
 
             report_repo = ReportRepository(session)
             report = report_repo.get_report(dto.report_id)
             if not report:
                 raise EntityNotFoundError("Report", dto.report_id)
 
+            if user:
+                member = (
+                    session.query(EngagementMemberModel)
+                    .filter(
+                        EngagementMemberModel.engagement_id == report.engagement_id,
+                        EngagementMemberModel.user_id == user.id,
+                    )
+                    .first()
+                )
+                if member:
+                    import contextlib
+
+                    with contextlib.suppress(Exception):
+                        actual_role = RoleEnum(member.role)
+
+            RBACManager(
+                UserSession(user_id=actor_id, username=actor_id, role=actual_role)
+            ).require_permission("engagement:signoff")
+
             report.transition_to(ReportStatusEnum.APPROVED)
-            report.approved_by = dto.approved_by
+            report.approved_by = actor_id
             updated = report_repo.update_report(report)
 
             # Re-render PDF without DRAFT watermark

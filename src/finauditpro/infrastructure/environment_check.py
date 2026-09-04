@@ -74,7 +74,6 @@ class EnvironmentChecker:
         if not tess_path and Path("/opt/homebrew/bin/tesseract").exists():
             tess_path = "/opt/homebrew/bin/tesseract"
 
-
         if tess_path:
             return CheckItem(
                 name="Tesseract OCR Engine",

@@ -144,4 +144,3 @@ DEFAULT_REPORT_TEMPLATES = [
         verified_statutory=False,
     ),
 ]
-

@@ -149,4 +149,3 @@ class ReviewNotesDialog(QDialog):
             )
         )
         self._load_notes()
-

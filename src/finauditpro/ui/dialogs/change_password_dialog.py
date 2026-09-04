@@ -196,11 +196,15 @@ class ChangePasswordDialog(QDialog):
             return
 
         if not p1 or not p2:
-            QMessageBox.warning(self, "Validation Error", "Please enter and confirm your new password.")
+            QMessageBox.warning(
+                self, "Validation Error", "Please enter and confirm your new password."
+            )
             return
 
         if p1 != p2:
-            QMessageBox.warning(self, "Validation Error", "New passwords do not match. Please re-enter.")
+            QMessageBox.warning(
+                self, "Validation Error", "New passwords do not match. Please re-enter."
+            )
             return
 
         if not self.auth_service or not self.user_session:

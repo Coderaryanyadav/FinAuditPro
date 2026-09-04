@@ -54,7 +54,6 @@ class PayrollScanSummary:
 class PayrollForensicEngine:
     """Forensic detection engine for ghost employees and payroll anomalies under SA 240 / SA 330."""
 
-
     @classmethod
     def scan_payroll_master(
         cls,
@@ -97,7 +96,7 @@ class PayrollForensicEngine:
 
             if not is_active:
                 anomaly = PayrollAnomalyTypeEnum.PAYMENT_TO_INACTIVE_EMPLOYEE
-                remark = f"Salary of ₹{sal/100:,.2f} disbursed to inactive/resigned employee (Resigned: {res_d or 'N/A'})."
+                remark = f"Salary of ₹{sal / 100:,.2f} disbursed to inactive/resigned employee (Resigned: {res_d or 'N/A'})."
                 anomaly_cnt += 1
                 at_risk_paise += sal
             elif b_acc and len(bank_map[b_acc]) > 1:

@@ -173,7 +173,6 @@ class DocumentRepository:
 
     list_for_engagement = list_by_engagement
 
-
     def get_document_pages(self, document_id: str) -> list[DocumentPage]:
         stmt = (
             select(DocumentPageModel)
@@ -249,12 +248,13 @@ class DocumentRepository:
                 )
             )
             page_models = self.session.scalars(stmt).all()
-            row_tuples = [(p.document_id, p.id, p.page_number, p.extracted_text or "") for p in page_models]
+            row_tuples = [
+                (p.document_id, p.id, p.page_number, p.extracted_text or "") for p in page_models
+            ]
 
         results: list[tuple[Document, DocumentPage]] = []
 
         for doc_id, page_id, page_num, text_content in row_tuples:
-
             doc_model = self.session.get(DocumentModel, doc_id)
             if doc_model and doc_model.status != DocumentStatusEnum.DELETED.value:
                 doc = self._to_entity(doc_model)

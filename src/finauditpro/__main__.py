@@ -8,9 +8,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication
 
 # Set High DPI scaling policy before importing ANY Qt modules that might trigger QGuiApplication creation
-QApplication.setHighDpiScaleFactorRoundingPolicy(
-    Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
-)
+QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
 
 from finauditpro.infrastructure.ai.lmstudio_supervisor import LMStudioSupervisor
 from finauditpro.infrastructure.first_run import initialize_database

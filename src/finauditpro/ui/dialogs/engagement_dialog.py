@@ -65,7 +65,9 @@ class EngagementDialog(QDialog):
         header.setSpacing(4)
         title = QLabel(f"New Audit Engagement — {self.client.name}")
         title.setStyleSheet("font-size: 18px; font-weight: 700; color: #0F172A;")
-        subtitle = QLabel("Configure financial year, statutory audit scope, and assigned team members.")
+        subtitle = QLabel(
+            "Configure financial year, statutory audit scope, and assigned team members."
+        )
         subtitle.setStyleSheet("font-size: 12px; color: #64748B;")
         header.addWidget(title)
         header.addWidget(subtitle)

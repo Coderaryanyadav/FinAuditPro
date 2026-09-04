@@ -49,7 +49,9 @@ class FirmDialog(QDialog):
         header.setSpacing(4)
         title = QLabel("Audit Firm Details")
         title.setStyleSheet("font-size: 18px; font-weight: 700; color: #0F172A;")
-        subtitle = QLabel("Enter ICAI Firm Registration Number (FRN), tax identifiers, and contact coordinates.")
+        subtitle = QLabel(
+            "Enter ICAI Firm Registration Number (FRN), tax identifiers, and contact coordinates."
+        )
         subtitle.setStyleSheet("font-size: 12px; color: #64748B;")
         header.addWidget(title)
         header.addWidget(subtitle)

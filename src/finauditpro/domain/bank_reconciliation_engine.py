@@ -41,7 +41,9 @@ class BRSReconciledItem(DomainBaseModel):
     clearance_date: str | None = Field(default=None)  # Bank clearance date (if cleared post-period)
     amount_paise: int = Field(default=0, ge=0)
     days_outstanding: int = Field(default=0, ge=0)
-    exception_severity: BRSExceptionSeverityEnum = Field(default=BRSExceptionSeverityEnum.NORMAL_TIMING_DIFFERENCE)
+    exception_severity: BRSExceptionSeverityEnum = Field(
+        default=BRSExceptionSeverityEnum.NORMAL_TIMING_DIFFERENCE
+    )
     audit_recommendation: str = Field(default="")
     created_at: str = Field(default_factory=lambda: utc_now().isoformat())
 
@@ -91,7 +93,7 @@ class BankReconciliationEngine:
 
             if i_type == BRSItemTypeEnum.UNPRESENTED_CHEQUE and days_out > 90:
                 severity = BRSExceptionSeverityEnum.STALE_CHEQUE_REVERSAL
-                rec = f"Cheque stale after 90 days under RBI guidelines. Reverse liability to creditor: ₹{amt/100:,.2f}."
+                rec = f"Cheque stale after 90 days under RBI guidelines. Reverse liability to creditor: ₹{amt / 100:,.2f}."
                 stale_cnt += 1
                 at_risk_paise += amt
             elif i_type == BRSItemTypeEnum.UNCREDITED_DEPOSIT and days_out > 15:

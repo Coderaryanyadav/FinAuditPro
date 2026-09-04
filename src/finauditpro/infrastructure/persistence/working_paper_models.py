@@ -19,7 +19,9 @@ class WorkingPaperModel(Base):
     index_reference: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     area: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
-    file_category: Mapped[str] = mapped_column(String(50), nullable=False, default="Current File", index=True)
+    file_category: Mapped[str] = mapped_column(
+        String(50), nullable=False, default="Current File", index=True
+    )
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="Draft", index=True)
     conclusion: Mapped[str] = mapped_column(Text, nullable=False, default="")
     preparer_id: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -129,4 +131,3 @@ class WorkingPaperVersionModel(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, nullable=False
     )
-

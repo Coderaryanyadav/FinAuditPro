@@ -38,7 +38,13 @@ class AuditMatrixView(QWidget):
 
     matrix_changed = Signal()
 
-    def __init__(self, engagement_service: Any = None, planning_service: Any = None, traceability_service: Any = None, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        engagement_service: Any = None,
+        planning_service: Any = None,
+        traceability_service: Any = None,
+        parent: QWidget | None = None,
+    ) -> None:
 
         super().__init__(parent)
         self.engagement_service = engagement_service
@@ -54,7 +60,12 @@ class AuditMatrixView(QWidget):
         layout.setContentsMargins(24, 20, 24, 24)
         layout.setSpacing(14)
 
-        self.header = PageHeader("Audit Matrix", "Core planning & execution hub: SA 320 Materiality, SA 315 Risks, Procedures, and Findings.")
+        self.header = PageHeader(
+            "Audit Matrix",
+            "Core planning & execution hub: SA 320 Materiality, SA 315 Risks, Procedures, and Findings.",
+            action_text="Coverage & Traceability Matrix",
+            action_callback=self._open_audit_matrix_dialog,
+        )
         layout.addWidget(self.header)
 
         self.tabs = QTabWidget()
@@ -63,7 +74,12 @@ class AuditMatrixView(QWidget):
         self.tabs.tabBar().setElideMode(Qt.TextElideMode.ElideNone)
         self.tabs.tabBar().setExpanding(False)
 
-        self.tab_mat, self.tab_risks, self.tab_procs, self.tab_findings = QWidget(), QWidget(), QWidget(), QWidget()
+        self.tab_mat, self.tab_risks, self.tab_procs, self.tab_findings = (
+            QWidget(),
+            QWidget(),
+            QWidget(),
+            QWidget(),
+        )
         self._init_materiality_tab()
         self._init_risks_tab()
         self._init_procedures_tab()
@@ -96,7 +112,9 @@ class AuditMatrixView(QWidget):
         self.bm_combo = CustomComboBox()
         self.bm_combo.setStyleSheet(field_style)
         for opt in BENCHMARK_GUIDANCE_OPTIONS:
-            self.bm_combo.addItem(f"{opt.benchmark_type.value} ({opt.default_overall_pct}%)", opt.benchmark_type)
+            self.bm_combo.addItem(
+                f"{opt.benchmark_type.value} ({opt.default_overall_pct}%)", opt.benchmark_type
+            )
 
         self.bm_amount_input = QLineEdit()
         self.bm_amount_input.setPlaceholderText("Enter benchmark amount in INR...")
@@ -128,9 +146,15 @@ class AuditMatrixView(QWidget):
 
         metrics = QHBoxLayout()
         metrics.setSpacing(10)
-        self.card_overall = MetricCard("OVERALL MATERIALITY", "Not Set", "Benchmark × 1%", accent_color="#2563EB")
-        self.card_performance = MetricCard("PERFORMANCE MATERIALITY", "Not Set", "75% of OM", accent_color="#16A34A")
-        self.card_trivial = MetricCard("CLEARLY TRIVIAL", "Not Set", "5% of OM", accent_color="#D97706")
+        self.card_overall = MetricCard(
+            "OVERALL MATERIALITY", "Not Set", "Benchmark × 1%", accent_color="#2563EB"
+        )
+        self.card_performance = MetricCard(
+            "PERFORMANCE MATERIALITY", "Not Set", "75% of OM", accent_color="#16A34A"
+        )
+        self.card_trivial = MetricCard(
+            "CLEARLY TRIVIAL", "Not Set", "5% of OM", accent_color="#D97706"
+        )
         for c in (self.card_overall, self.card_performance, self.card_trivial):
             metrics.addWidget(c)
         layout.addLayout(metrics)
@@ -138,7 +162,9 @@ class AuditMatrixView(QWidget):
         hist_card = CardWidget("MATERIALITY REVISION HISTORY")
         self.hist_table = QTableWidget()
         self.hist_table.setColumnCount(6)
-        self.hist_table.setHorizontalHeaderLabels(["VERSION", "BENCHMARK", "AMOUNT (INR)", "OM", "PM", "CTT"])
+        self.hist_table.setHorizontalHeaderLabels(
+            ["VERSION", "BENCHMARK", "AMOUNT (INR)", "OM", "PM", "CTT"]
+        )
         self.hist_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.hist_table.verticalHeader().setVisible(False)
         self.hist_table.setAlternatingRowColors(True)
@@ -158,7 +184,9 @@ class AuditMatrixView(QWidget):
         hdr.addStretch()
         self.btn_new_risk = QPushButton("+ New Audit Risk")
         self.btn_new_risk.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_new_risk.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }")
+        self.btn_new_risk.setStyleSheet(
+            "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }"
+        )
         self.btn_new_risk.clicked.connect(self._on_new_risk_clicked)
         self.btn_new_risk.setVisible(False)
         hdr.addWidget(self.btn_new_risk)
@@ -167,12 +195,28 @@ class AuditMatrixView(QWidget):
         card = CardWidget()
         self.risks_table = QTableWidget()
         self.risks_table.setColumnCount(8)
-        self.risks_table.setHorizontalHeaderLabels(["CODE", "TITLE", "CATEGORY", "ASSERTIONS", "INHERENT", "CONTROL", "DERIVED RoMM", "SIG"])
+        self.risks_table.setHorizontalHeaderLabels(
+            [
+                "CODE",
+                "TITLE",
+                "CATEGORY",
+                "ASSERTIONS",
+                "INHERENT",
+                "CONTROL",
+                "DERIVED RoMM",
+                "SIG",
+            ]
+        )
         self.risks_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         self.risks_table.verticalHeader().setVisible(False)
         self.risks_table.setAlternatingRowColors(True)
 
-        self.risks_empty = EmptyStateWidget("No audit risks recorded", "Log qualitative risks mapped to assertions per SA 315.", "+ New Audit Risk", self._on_new_risk_clicked)
+        self.risks_empty = EmptyStateWidget(
+            "No audit risks recorded",
+            "Log qualitative risks mapped to assertions per SA 315.",
+            "+ New Audit Risk",
+            self._on_new_risk_clicked,
+        )
         self.risks_table.setVisible(False)
         card.content_layout.addWidget(self.risks_table)
         card.content_layout.addWidget(self.risks_empty)
@@ -191,7 +235,9 @@ class AuditMatrixView(QWidget):
         hdr.addStretch()
         self.btn_new_proc = QPushButton("+ New Procedure")
         self.btn_new_proc.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_new_proc.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }")
+        self.btn_new_proc.setStyleSheet(
+            "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }"
+        )
         self.btn_new_proc.clicked.connect(self._on_new_proc_clicked)
         self.btn_new_proc.setVisible(False)
         hdr.addWidget(self.btn_new_proc)
@@ -200,12 +246,19 @@ class AuditMatrixView(QWidget):
         card = CardWidget()
         self.procs_table = QTableWidget()
         self.procs_table.setColumnCount(6)
-        self.procs_table.setHorizontalHeaderLabels(["CODE", "OBJECTIVE", "TYPE", "STATUS", "PREPARER", "REVIEWER"])
+        self.procs_table.setHorizontalHeaderLabels(
+            ["CODE", "OBJECTIVE", "TYPE", "STATUS", "PREPARER", "REVIEWER"]
+        )
         self.procs_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         self.procs_table.verticalHeader().setVisible(False)
         self.procs_table.setAlternatingRowColors(True)
 
-        self.procs_empty = EmptyStateWidget("No audit procedures scheduled", "Create substantive tests or analytical procedures.", "+ New Procedure", self._on_new_proc_clicked)
+        self.procs_empty = EmptyStateWidget(
+            "No audit procedures scheduled",
+            "Create substantive tests or analytical procedures.",
+            "+ New Procedure",
+            self._on_new_proc_clicked,
+        )
         self.procs_table.setVisible(False)
         card.content_layout.addWidget(self.procs_table)
         card.content_layout.addWidget(self.procs_empty)
@@ -224,7 +277,9 @@ class AuditMatrixView(QWidget):
         hdr.addStretch()
         self.btn_new_finding = QPushButton("+ Log Finding")
         self.btn_new_finding.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_new_finding.setStyleSheet("QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }")
+        self.btn_new_finding.setStyleSheet(
+            "QPushButton { background-color: #2563EB; color: #FFFFFF; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 16px; border: 1px solid transparent; } QPushButton:hover { background-color: #1D4ED8; }"
+        )
         self.btn_new_finding.clicked.connect(self._on_new_finding_clicked)
         self.btn_new_finding.setVisible(False)
         hdr.addWidget(self.btn_new_finding)
@@ -233,12 +288,21 @@ class AuditMatrixView(QWidget):
         card = CardWidget()
         self.findings_table = QTableWidget()
         self.findings_table.setColumnCount(7)
-        self.findings_table.setHorizontalHeaderLabels(["SOURCE", "TITLE", "SEVERITY", "IMPACT (₹)", "ACCOUNT", "STATUS", "GRAPH"])
-        self.findings_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.findings_table.setHorizontalHeaderLabels(
+            ["SOURCE", "TITLE", "SEVERITY", "IMPACT (₹)", "ACCOUNT", "STATUS", "GRAPH"]
+        )
+        self.findings_table.horizontalHeader().setSectionResizeMode(
+            1, QHeaderView.ResizeMode.Stretch
+        )
         self.findings_table.verticalHeader().setVisible(False)
         self.findings_table.setAlternatingRowColors(True)
 
-        self.findings_empty = EmptyStateWidget("No audit findings logged", "Promote flagged exceptions or log audit findings.", "+ Log Finding", self._on_new_finding_clicked)
+        self.findings_empty = EmptyStateWidget(
+            "No audit findings logged",
+            "Promote flagged exceptions or log audit findings.",
+            "+ Log Finding",
+            self._on_new_finding_clicked,
+        )
         self.findings_table.setVisible(False)
         card.content_layout.addWidget(self.findings_table)
         card.content_layout.addWidget(self.findings_empty)
@@ -259,12 +323,15 @@ class AuditMatrixView(QWidget):
 
     set_active_engagement = set_engagement
 
-
     def refresh(self) -> None:
         if not self.current_engagement or not self.planning_service:
             for c in (self.card_overall, self.card_performance, self.card_trivial):
                 c.set_value("Not Set")
-            for t, e in ((self.risks_table, self.risks_empty), (self.procs_table, self.procs_empty), (self.findings_table, self.findings_empty)):
+            for t, e in (
+                (self.risks_table, self.risks_empty),
+                (self.procs_table, self.procs_empty),
+                (self.findings_table, self.findings_empty),
+            ):
                 t.setVisible(False)
                 e.setVisible(True)
             self.hist_table.setRowCount(0)
@@ -274,9 +341,21 @@ class AuditMatrixView(QWidget):
         mat = mat_fn(self.current_engagement.id) if mat_fn else None
         if mat:
             self.current_materiality = mat
-            self.card_overall.set_value(mat.overall_materiality.formatted if hasattr(mat.overall_materiality, "formatted") else f"₹ {mat.overall_materiality:,.2f}")
-            self.card_performance.set_value(mat.performance_materiality.formatted if hasattr(mat.performance_materiality, "formatted") else f"₹ {mat.performance_materiality:,.2f}")
-            self.card_trivial.set_value(mat.clearly_trivial_threshold.formatted if hasattr(mat.clearly_trivial_threshold, "formatted") else f"₹ {mat.clearly_trivial_threshold:,.2f}")
+            self.card_overall.set_value(
+                mat.overall_materiality.formatted
+                if hasattr(mat.overall_materiality, "formatted")
+                else f"₹ {mat.overall_materiality:,.2f}"
+            )
+            self.card_performance.set_value(
+                mat.performance_materiality.formatted
+                if hasattr(mat.performance_materiality, "formatted")
+                else f"₹ {mat.performance_materiality:,.2f}"
+            )
+            self.card_trivial.set_value(
+                mat.clearly_trivial_threshold.formatted
+                if hasattr(mat.clearly_trivial_threshold, "formatted")
+                else f"₹ {mat.clearly_trivial_threshold:,.2f}"
+            )
 
         hist_fn = getattr(self.planning_service, "list_materiality_history", None)
         history = hist_fn(self.current_engagement.id) if hist_fn else ([mat] if mat else [])
@@ -285,27 +364,69 @@ class AuditMatrixView(QWidget):
             self.hist_table.insertRow(r)
             self.hist_table.setItem(r, 0, QTableWidgetItem(f"v{m.version}"))
             self.hist_table.setItem(r, 1, QTableWidgetItem(m.benchmark_type.value))
-            self.hist_table.setItem(r, 2, QTableWidgetItem(m.benchmark_amount.formatted if hasattr(m.benchmark_amount, "formatted") else f"₹ {m.benchmark_amount:,.2f}"))
-            self.hist_table.setItem(r, 3, QTableWidgetItem(m.overall_materiality.formatted if hasattr(m.overall_materiality, "formatted") else f"₹ {m.overall_materiality:,.2f}"))
-            self.hist_table.setItem(r, 4, QTableWidgetItem(m.performance_materiality.formatted if hasattr(m.performance_materiality, "formatted") else f"₹ {m.performance_materiality:,.2f}"))
-            self.hist_table.setItem(r, 5, QTableWidgetItem(m.clearly_trivial_threshold.formatted if hasattr(m.clearly_trivial_threshold, "formatted") else f"₹ {m.clearly_trivial_threshold:,.2f}"))
+            self.hist_table.setItem(
+                r,
+                2,
+                QTableWidgetItem(
+                    m.benchmark_amount.formatted
+                    if hasattr(m.benchmark_amount, "formatted")
+                    else f"₹ {m.benchmark_amount:,.2f}"
+                ),
+            )
+            self.hist_table.setItem(
+                r,
+                3,
+                QTableWidgetItem(
+                    m.overall_materiality.formatted
+                    if hasattr(m.overall_materiality, "formatted")
+                    else f"₹ {m.overall_materiality:,.2f}"
+                ),
+            )
+            self.hist_table.setItem(
+                r,
+                4,
+                QTableWidgetItem(
+                    m.performance_materiality.formatted
+                    if hasattr(m.performance_materiality, "formatted")
+                    else f"₹ {m.performance_materiality:,.2f}"
+                ),
+            )
+            self.hist_table.setItem(
+                r,
+                5,
+                QTableWidgetItem(
+                    m.clearly_trivial_threshold.formatted
+                    if hasattr(m.clearly_trivial_threshold, "formatted")
+                    else f"₹ {m.clearly_trivial_threshold:,.2f}"
+                ),
+            )
 
-        r_fn = getattr(self.planning_service, "list_risks", None) or getattr(self.planning_service, "list_risks_for_engagement", None)
+        r_fn = getattr(self.planning_service, "list_risks", None) or getattr(
+            self.planning_service, "list_risks_for_engagement", None
+        )
         risks = r_fn(self.current_engagement.id) if r_fn else []
         self._populate_table(self.risks_table, self.risks_empty, len(risks), self.btn_new_risk)
         for r, rk in enumerate(risks):
             self.risks_table.setItem(r, 0, QTableWidgetItem(rk.risk_code))
             self.risks_table.setItem(r, 1, QTableWidgetItem(getattr(rk, "title", rk.risk_code)))
             self.risks_table.setItem(r, 2, QTableWidgetItem(rk.category))
-            as_str = ", ".join(a.value for a in rk.assertions) if hasattr(rk, "assertions") else rk.assertion.value
+            as_str = (
+                ", ".join(a.value for a in rk.assertions)
+                if hasattr(rk, "assertions")
+                else rk.assertion.value
+            )
             self.risks_table.setItem(r, 3, QTableWidgetItem(as_str))
             self.risks_table.setItem(r, 4, QTableWidgetItem(f"● {rk.inherent_risk.value}"))
             self.risks_table.setItem(r, 5, QTableWidgetItem(f"● {rk.control_risk.value}"))
             romm = rk.derived_romm.value if hasattr(rk, "derived_romm") else rk.severity.value
             self.risks_table.setItem(r, 6, QTableWidgetItem(f"● {romm}"))
-            self.risks_table.setItem(r, 7, QTableWidgetItem("YES" if getattr(rk, "is_significant_risk", False) else "NO"))
+            self.risks_table.setItem(
+                r, 7, QTableWidgetItem("YES" if getattr(rk, "is_significant_risk", False) else "NO")
+            )
 
-        p_fn = getattr(self.planning_service, "list_procedures", None) or getattr(self.planning_service, "list_procedures_for_engagement", None)
+        p_fn = getattr(self.planning_service, "list_procedures", None) or getattr(
+            self.planning_service, "list_procedures_for_engagement", None
+        )
         procs = p_fn(self.current_engagement.id) if p_fn else []
         self._populate_table(self.procs_table, self.procs_empty, len(procs), self.btn_new_proc)
         for r, p in enumerate(procs):
@@ -316,15 +437,23 @@ class AuditMatrixView(QWidget):
             self.procs_table.setItem(r, 4, QTableWidgetItem(p.preparer or "—"))
             self.procs_table.setItem(r, 5, QTableWidgetItem(p.reviewer or "—"))
 
-        f_fn = getattr(self.planning_service, "list_findings", None) or getattr(self.planning_service, "list_findings_for_engagement", None)
+        f_fn = getattr(self.planning_service, "list_findings", None) or getattr(
+            self.planning_service, "list_findings_for_engagement", None
+        )
         findings = f_fn(self.current_engagement.id) if f_fn else []
-        self._populate_table(self.findings_table, self.findings_empty, len(findings), self.btn_new_finding)
+        self._populate_table(
+            self.findings_table, self.findings_empty, len(findings), self.btn_new_finding
+        )
         for r, f in enumerate(findings):
             src_val = f.source.value if hasattr(f.source, "value") else str(f.source)
             self.findings_table.setItem(r, 0, QTableWidgetItem(src_val.upper()))
             self.findings_table.setItem(r, 1, QTableWidgetItem(f.title))
             self.findings_table.setItem(r, 2, QTableWidgetItem(f"● {f.severity.value}"))
-            amt = f.monetary_amount.formatted if hasattr(f, "monetary_amount") and hasattr(f.monetary_amount, "formatted") else f"₹ {getattr(f, 'monetary_amount', 0):,.2f}"
+            amt = (
+                f.monetary_amount.formatted
+                if hasattr(f, "monetary_amount") and hasattr(f.monetary_amount, "formatted")
+                else f"₹ {getattr(f, 'monetary_amount', 0):,.2f}"
+            )
             self.findings_table.setItem(r, 3, QTableWidgetItem(amt))
             self.findings_table.setItem(r, 4, QTableWidgetItem(f.affected_account or "—"))
             self.findings_table.setItem(r, 5, QTableWidgetItem(f"● {f.status.value}"))
@@ -332,7 +461,9 @@ class AuditMatrixView(QWidget):
             bg.clicked.connect(lambda _, fid=f.id: self._open_traceability(fid))
             self.findings_table.setCellWidget(r, 6, bg)
 
-    def _populate_table(self, table: QTableWidget, empty: QWidget, count: int, btn: QPushButton | None = None) -> None:
+    def _populate_table(
+        self, table: QTableWidget, empty: QWidget, count: int, btn: QPushButton | None = None
+    ) -> None:
         table.setVisible(count > 0)
         empty.setVisible(count == 0)
         table.setRowCount(count)
@@ -341,11 +472,15 @@ class AuditMatrixView(QWidget):
 
     def _open_traceability(self, finding_id: str) -> None:
         if self.current_engagement and self.traceability_service:
-            TraceabilityDialog(self.traceability_service, self.current_engagement.id, finding_id, parent=self).exec()
+            TraceabilityDialog(
+                self.traceability_service, self.current_engagement.id, finding_id, parent=self
+            ).exec()
 
     def _on_calculate_materiality(self) -> None:
         if not self.current_engagement or not self.planning_service:
-            QMessageBox.warning(self, "No Engagement", "Please select an active audit engagement first.")
+            QMessageBox.warning(
+                self, "No Engagement", "Please select an active audit engagement first."
+            )
             return
         amt_str = self.bm_amount_input.text().replace(",", "").strip()
         if not amt_str:
@@ -357,24 +492,47 @@ class AuditMatrixView(QWidget):
         except ValueError:
             QMessageBox.warning(self, "Validation Error", "Invalid numeric benchmark amount.")
             return
-        dto = SetMaterialityDTO(engagement_id=self.current_engagement.id, benchmark_type=self.bm_combo.currentData(), benchmark_amount_paise=paise)
+        dto = SetMaterialityDTO(
+            engagement_id=self.current_engagement.id,
+            benchmark_type=self.bm_combo.currentData(),
+            benchmark_amount_paise=paise,
+        )
         try:
             mat = self.planning_service.set_materiality(dto)
-            QMessageBox.information(self, "SA 320 Calculated", f"Materiality v{mat.version}:\nOM: {mat.overall_materiality.formatted}\nPM: {mat.performance_materiality.formatted}\nCTT: {mat.clearly_trivial_threshold.formatted}")
+            QMessageBox.information(
+                self,
+                "SA 320 Calculated",
+                f"Materiality v{mat.version}:\nOM: {mat.overall_materiality.formatted}\nPM: {mat.performance_materiality.formatted}\nCTT: {mat.clearly_trivial_threshold.formatted}",
+            )
             self.refresh()
             self.matrix_changed.emit()
         except Exception as ex:
             QMessageBox.critical(self, "Error", f"Failed: {ex}")
 
     def _on_new_risk_clicked(self) -> None:
-        if self.current_engagement and self.planning_service and RiskDialog(self.planning_service, engagement=self.current_engagement, parent=self).exec() == RiskDialog.DialogCode.Accepted:
+        if (
+            self.current_engagement
+            and self.planning_service
+            and RiskDialog(
+                self.planning_service, engagement=self.current_engagement, parent=self
+            ).exec()
+            == RiskDialog.DialogCode.Accepted
+        ):
             self.refresh()
             self.matrix_changed.emit()
 
     def _on_new_proc_clicked(self) -> None:
         if self.current_engagement and self.planning_service:
             risks = self.planning_service.list_risks(self.current_engagement.id)
-            if ProcedureDialog(self.planning_service, engagement=self.current_engagement, risks=risks, parent=self).exec() == ProcedureDialog.DialogCode.Accepted:
+            if (
+                ProcedureDialog(
+                    self.planning_service,
+                    engagement=self.current_engagement,
+                    risks=risks,
+                    parent=self,
+                ).exec()
+                == ProcedureDialog.DialogCode.Accepted
+            ):
                 self.refresh()
                 self.matrix_changed.emit()
 
@@ -382,6 +540,41 @@ class AuditMatrixView(QWidget):
         if self.current_engagement and self.planning_service:
             procs = self.planning_service.list_procedures(self.current_engagement.id)
             risks = self.planning_service.list_risks(self.current_engagement.id)
-            if FindingDialog(self.planning_service, engagement=self.current_engagement, procedures=procs, risks=risks, parent=self).exec() == FindingDialog.DialogCode.Accepted:
+            if (
+                FindingDialog(
+                    self.planning_service,
+                    engagement=self.current_engagement,
+                    procedures=procs,
+                    risks=risks,
+                    parent=self,
+                ).exec()
+                == FindingDialog.DialogCode.Accepted
+            ):
                 self.refresh()
                 self.matrix_changed.emit()
+
+    def _open_audit_matrix_dialog(self) -> None:
+        if not self.current_engagement:
+            QMessageBox.information(
+                self, "Engagement Required", "Please open an active audit engagement first."
+            )
+            return
+        from finauditpro.application.services.core_audit_service import CoreAuditService
+        from finauditpro.ui.dialogs.audit_matrix_view_dialog import AuditMatrixViewDialog
+
+        db_mgr = getattr(self.planning_service, "db_manager", None) or getattr(
+            self.engagement_service, "db_manager", None
+        )
+        if not db_mgr:
+            QMessageBox.warning(
+                self, "Database Error", "Unable to resolve database manager for Audit Matrix dialog."
+            )
+            return
+        core_svc = CoreAuditService(db_mgr)
+        dlg = AuditMatrixViewDialog(
+            matrix_service=self.planning_service,
+            core_service=core_svc,
+            engagement_id=self.current_engagement.id,
+            parent=self,
+        )
+        dlg.exec()

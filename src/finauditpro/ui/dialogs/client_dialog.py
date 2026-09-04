@@ -55,7 +55,9 @@ class ClientDialog(QDialog):
         header.setSpacing(4)
         title = QLabel(f"Client Profile — {self.firm.name}")
         title.setStyleSheet("font-size: 18px; font-weight: 700; color: #0F172A;")
-        subtitle = QLabel("Enter audited entity legal details, corporate identification, and finance contacts.")
+        subtitle = QLabel(
+            "Enter audited entity legal details, corporate identification, and finance contacts."
+        )
         subtitle.setStyleSheet("font-size: 12px; color: #64748B;")
         header.addWidget(title)
         header.addWidget(subtitle)

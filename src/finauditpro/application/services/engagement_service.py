@@ -67,7 +67,6 @@ class EngagementService:
 
     get_engagement_by_id = get_engagement
 
-
     def list_engagements_for_client(self, client_id: str) -> list[Engagement]:
         with self.db_manager.session_scope() as session:
             repo = EngagementRepository(session)

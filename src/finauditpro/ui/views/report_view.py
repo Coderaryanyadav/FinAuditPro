@@ -2,6 +2,7 @@
 Primary Reporting & Export Workspace View for FinAuditPro.
 Assembly wizard, draft watermarking, and formula-injection-safe XLSX/CSV export.
 """
+
 from typing import Any
 
 from PySide6.QtCore import Signal
@@ -131,7 +132,6 @@ class ReportView(QWidget):
 
     set_active_engagement = set_engagement
 
-
     def refresh(self) -> None:
         if not self.current_engagement:
             self.table.setVisible(False)
@@ -209,23 +209,42 @@ class ReportView(QWidget):
             self.report_changed.emit()
 
     def _approve_report(self, report_id: str) -> None:
-        res = QMessageBox.question(
+        from finauditpro.ui.dialogs.stepup_totp_dialog import StepUpTOTPDialog
+
+        win = self.window()
+        auth_svc = getattr(win, "auth_service", None)
+        user_sess = getattr(win, "current_user_session", None)
+
+        totp_dlg = StepUpTOTPDialog(
             self,
-            "Confirm Report Approval",
-            "Approve report and remove 'DRAFT' watermark?\n\nNotice: Approval is an internal workflow attestation.",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            action_title="Authorize Statutory Report Sign-Off",
+            action_description=(
+                "Signing and de-watermarking an Independent Auditor's Report is a formal "
+                "legal attestation under SA 700. Please enter your 6-digit code to seal."
+            ),
+            auth_service=auth_svc,
+            user_session=user_sess,
         )
-        if res == QMessageBox.StandardButton.Yes:
-            self.report_service.approve_report(
-                ApproveReportDTO(
-                    report_id=report_id, approved_by="Audit Partner", approver_role="Partner"
-                )
+        if not totp_dlg.exec() or not totp_dlg.is_authorized:
+            return
+
+        approver_name = (
+            user_sess.username.split("@")[0].title()
+            if user_sess and hasattr(user_sess, "username")
+            else "Audit Partner"
+        )
+        self.report_service.approve_report(
+            ApproveReportDTO(
+                report_id=report_id, approved_by=approver_name, approver_role="Partner"
             )
-            QMessageBox.information(
-                self, "Report Approved", "Report approved! Watermark removed from PDF."
-            )
-            self.refresh()
-            self.report_changed.emit()
+        )
+        QMessageBox.information(
+            self,
+            "Report Approved",
+            "Statutory report signed with 2FA attestation. Watermark removed.",
+        )
+        self.refresh()
+        self.report_changed.emit()
 
     def _export_xlsx(self, report_id: str) -> None:
         path = self.report_service.export_to_xlsx(

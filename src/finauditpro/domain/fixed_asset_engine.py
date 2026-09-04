@@ -71,7 +71,9 @@ class FixedAssetEngine:
             tag = a.get("asset_tag", "")
             name = a.get("asset_name", "General Fixed Asset")
             gross = int(a.get("gross_block_paise", a.get("gross_block", 0) * 100))
-            dep = int(a.get("accumulated_depreciation_paise", a.get("accumulated_depreciation", 0) * 100))
+            dep = int(
+                a.get("accumulated_depreciation_paise", a.get("accumulated_depreciation", 0) * 100)
+            )
             nbv = gross - dep
             loc = a.get("location", "Factory Floor")
             phys_ver = a.get("is_physically_verified", True)
@@ -84,12 +86,12 @@ class FixedAssetEngine:
 
             if nbv < 0:
                 anomaly = AssetAnomalyTypeEnum.NEGATIVE_NET_BOOK_VALUE
-                remark = f"Negative Net Book Value: Gross ₹{gross/100:,.2f} vs Accumulated Dep ₹{dep/100:,.2f}. Depreciation calculation error."
+                remark = f"Negative Net Book Value: Gross ₹{gross / 100:,.2f} vs Accumulated Dep ₹{dep / 100:,.2f}. Depreciation calculation error."
                 anomaly_cnt += 1
                 at_risk_paise += abs(nbv)
             elif not phys_ver:
                 anomaly = AssetAnomalyTypeEnum.GHOST_ASSET_UNLOCATED
-                remark = f"Asset '{name}' (Carrying Value ₹{nbv/100:,.2f}) not located during physical verification. Possible ghost asset."
+                remark = f"Asset '{name}' (Carrying Value ₹{nbv / 100:,.2f}) not located during physical verification. Possible ghost asset."
                 anomaly_cnt += 1
                 at_risk_paise += max(0, nbv)
             elif not title_ok:

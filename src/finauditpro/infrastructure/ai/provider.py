@@ -149,9 +149,7 @@ class MockLocalAIProvider(BaseAIProvider):
         return True
 
     def generate_text(self, prompt: str, system_prompt: str = "") -> str:
-        return (
-            "AI Copilot isn't configured yet. Connect a local LM Studio server to enable this feature."
-        )
+        return "AI Copilot isn't configured yet. Connect a local LM Studio server to enable this feature."
 
     def generate_structured_observation(
         self, prompt: str, citations: list[AICitation]

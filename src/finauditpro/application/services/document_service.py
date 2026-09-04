@@ -280,7 +280,7 @@ class DocumentService:
             return results
 
     def create_evidence_link(self, dto: CreateEvidenceLinkDTO) -> EvidenceLink:
-        """Link a specific document page / snippet as evidence to downstream audit objects."""
+        """Link a specific document page / snippet as evidence to downstream audit objects with cross-tenant isolation."""
         if not dto.title or not dto.title.strip():
             raise ValidationError("Evidence link title cannot be empty.")
 
@@ -289,6 +289,27 @@ class DocumentService:
             doc = doc_repo.get_by_id(dto.document_id)
             if not doc:
                 raise EntityNotFoundError("Document", dto.document_id)
+
+            # SEC-02 Cross-tenant isolation verification
+            if doc.engagement_id != dto.engagement_id:
+                raise ValidationError(
+                    f"Cross-Engagement Violation: Document '{doc.filename}' belongs to engagement '{doc.engagement_id}', cannot link to engagement '{dto.engagement_id}'."
+                )
+
+            # Target entity engagement verification if target is a working paper
+            if dto.target_type == "Working Paper" and dto.target_id:
+                from finauditpro.infrastructure.persistence.repositories.working_paper_repository import (
+                    WorkingPaperRepository,
+                )
+
+                wp_repo = WorkingPaperRepository(session)
+                wp = wp_repo.get_working_paper(dto.target_id)
+                if not wp:
+                    raise EntityNotFoundError("WorkingPaper", dto.target_id)
+                if wp.engagement_id != dto.engagement_id:
+                    raise ValidationError(
+                        f"Cross-Engagement Violation: Target working paper '{wp.index_reference}' belongs to engagement '{wp.engagement_id}', not '{dto.engagement_id}'."
+                    )
 
             link = EvidenceLink(
                 engagement_id=dto.engagement_id,

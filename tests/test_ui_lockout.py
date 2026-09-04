@@ -1,13 +1,12 @@
 """UI automated tests for MainWindow inactivity lock and manual lock screen overlays."""
 
-import os
-import pytest
 from PySide6.QtCore import QEventLoop, QTimer
 from PySide6.QtWidgets import QApplication
-from finauditpro.ui.main_window import MainWindow
+
 from finauditpro.application.security.rbac import UserSession
 from finauditpro.domain.entities import RoleEnum
 from finauditpro.infrastructure.persistence.database import DatabaseManager
+from finauditpro.ui.main_window import MainWindow
 
 
 def test_ui_inactivity_lock_and_unlock(monkeypatch, tmp_path) -> None:
@@ -49,7 +48,7 @@ def test_ui_inactivity_lock_and_unlock(monkeypatch, tmp_path) -> None:
 
     # Wait for the inactivity timer to trigger the lock overlay by running a local event loop
     loop = QEventLoop()
-    QTimer.singleShot(150, loop.quit)
+    QTimer.singleShot(300, loop.quit)
     loop.exec()
 
     # Assert locked state

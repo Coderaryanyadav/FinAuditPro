@@ -52,6 +52,7 @@ class AuditMatrixService:
             inherent_risk=dto.inherent_risk,
             control_risk=dto.control_risk,
             severity=getattr(dto, "severity", RiskSeverityEnum.HIGH),
+            is_significant_risk=getattr(dto, "is_significant_risk", False),
             risk_response=dto.risk_response,
         )
         risk.calculate_romm()
@@ -98,6 +99,7 @@ class AuditMatrixService:
             assertions=assertions_list,
             procedure_type=dto.procedure_type,
             instructions=dto.instructions,
+            requires_evidence=getattr(dto, "requires_evidence", True),
             status=ProcedureStatusEnum.NOT_STARTED,
         )
 
@@ -168,11 +170,14 @@ class AuditMatrixService:
 
             audit_repo = AuditEventRepository(session)
             if saved_finding.monetary_amount is not None:
-                amt_display = getattr(saved_finding.monetary_amount, "formatted", f"INR {saved_finding.monetary_amount}")
+                amt_display = getattr(
+                    saved_finding.monetary_amount,
+                    "formatted",
+                    f"INR {saved_finding.monetary_amount}",
+                )
             else:
                 amt_display = "INR 0.00"
             audit_repo.add(
-
                 AuditEvent(
                     engagement_id=dto.engagement_id,
                     actor=dto.preparer,

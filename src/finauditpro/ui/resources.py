@@ -17,7 +17,14 @@ def get_asset_path(subpath: str) -> Path:
 
 def get_app_icon() -> QIcon:
     """Return QIcon for application window and dock."""
-    for filename in ("FinAuditPro.icns", "FinAuditPro.ico", "finauditpro_icon.png", "icons/FinAuditPro.icns", "icons/FinAuditPro.ico", "icons/finauditpro_icon.png"):
+    for filename in (
+        "FinAuditPro.icns",
+        "FinAuditPro.ico",
+        "finauditpro_icon.png",
+        "icons/FinAuditPro.icns",
+        "icons/FinAuditPro.ico",
+        "icons/finauditpro_icon.png",
+    ):
         p = get_asset_path(filename)
         if p.exists():
             return QIcon(str(p))

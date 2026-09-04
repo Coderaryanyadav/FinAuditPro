@@ -43,11 +43,36 @@ class SignOffLevelEnum(StrEnum):
 
 # Permanent Audit File (PAF) Standard ICAI Structure
 DEFAULT_PERMANENT_FILE_HEADS = [
-    ("PAF-01", "Memorandum & Articles of Association (MOA & AOA)", "Legal Structure", "Permanent constitutional documents of the company."),
-    ("PAF-02", "Tax Registrations (PAN, GSTIN, TAN, IEC Certificates)", "Statutory Registrations", "Permanent statutory registrations and tax identification numbers."),
-    ("PAF-03", "Organization Structure & Key Management Personnel (KMP)", "Governance", "List of directors, board committees, and organizational chart."),
-    ("PAF-04", "Long-Term Leases, Debt Instruments & Significant Contracts", "Agreements", "Major long-term agreements, title deeds, and loan agreements."),
-    ("PAF-05", "Bank Account Details & Authorized Signatories", "Banking", "Permanent bank accounts, credit facilities, and authorized signatories."),
+    (
+        "PAF-01",
+        "Memorandum & Articles of Association (MOA & AOA)",
+        "Legal Structure",
+        "Permanent constitutional documents of the company.",
+    ),
+    (
+        "PAF-02",
+        "Tax Registrations (PAN, GSTIN, TAN, IEC Certificates)",
+        "Statutory Registrations",
+        "Permanent statutory registrations and tax identification numbers.",
+    ),
+    (
+        "PAF-03",
+        "Organization Structure & Key Management Personnel (KMP)",
+        "Governance",
+        "List of directors, board committees, and organizational chart.",
+    ),
+    (
+        "PAF-04",
+        "Long-Term Leases, Debt Instruments & Significant Contracts",
+        "Agreements",
+        "Major long-term agreements, title deeds, and loan agreements.",
+    ),
+    (
+        "PAF-05",
+        "Bank Account Details & Authorized Signatories",
+        "Banking",
+        "Permanent bank accounts, credit facilities, and authorized signatories.",
+    ),
 ]
 
 # Non-statutory guidance disclaimer for working paper index structures and retention rules

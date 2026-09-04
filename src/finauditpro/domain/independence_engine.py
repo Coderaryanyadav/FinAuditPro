@@ -12,7 +12,9 @@ from finauditpro.domain.clock import utc_now
 
 class IndependenceThreatTypeEnum(StrEnum):
     NONE = "Clean - No Independence Impairment"
-    FINANCIAL_INTEREST_EXCEEDS_LIMIT = "Direct Holding Exceeds Statutory Limit (>₹2,00,000 Face Value)"
+    FINANCIAL_INTEREST_EXCEEDS_LIMIT = (
+        "Direct Holding Exceeds Statutory Limit (>₹2,00,000 Face Value)"
+    )
     SECTION_144_PROHIBITED_SERVICE = "Prohibited Non-Audit Service under Section 144 of CA 2013"
     RELATIONSHIP_WITH_DIRECTOR_KMP = "Close Relative Holds Directorship / Key Position"
     INDEBTEDNESS_OR_GUARANTEE = "Indebtedness / Loan Guarantee Given to Audit Client"
@@ -54,7 +56,9 @@ class IndependenceEvaluationSummary:
 class IndependenceConflictEngine:
     """Evaluation engine for firm-wide independence and Section 144 non-audit service prohibitions."""
 
-    STATUTORY_HOLDING_LIMIT_PAISE = 20000000  # ₹2,00,000.00 face value threshold under Section 141(3)(d)
+    STATUTORY_HOLDING_LIMIT_PAISE = (
+        20000000  # ₹2,00,000.00 face value threshold under Section 141(3)(d)
+    )
 
     @classmethod
     def evaluate_team_independence(
@@ -89,7 +93,7 @@ class IndependenceConflictEngine:
                 impaired += 1
             elif holding > cls.STATUTORY_HOLDING_LIMIT_PAISE:
                 threat = IndependenceThreatTypeEnum.FINANCIAL_INTEREST_EXCEEDS_LIMIT
-                remark = f"Holding of ₹{holding/100:,.2f} exceeds statutory ₹2,00,000 threshold under Section 141(3)(d)."
+                remark = f"Holding of ₹{holding / 100:,.2f} exceeds statutory ₹2,00,000 threshold under Section 141(3)(d)."
                 is_ind = False
                 impaired += 1
             elif rel_kmp:
@@ -123,7 +127,9 @@ class IndependenceConflictEngine:
                 )
             )
 
-        status_msg = "COMPLIANT" if impaired == 0 else f"IMPAIRED ({impaired} team members disqualified)"
+        status_msg = (
+            "COMPLIANT" if impaired == 0 else f"IMPAIRED ({impaired} team members disqualified)"
+        )
 
         return IndependenceEvaluationSummary(
             total_declarations=len(declarations),

@@ -92,17 +92,17 @@ class ReceivablesRecoveryEngine:
             if unrec == 0:
                 status = RecoveryStatusEnum.FULLY_RECOVERED
                 prov = 0
-                rem = f"100% subsequent recovery confirmed in bank records (₹{rec_amt/100:,.2f})."
+                rem = f"100% subsequent recovery confirmed in bank records (₹{rec_amt / 100:,.2f})."
                 fully_cnt += 1
             elif rec_amt > 0:
                 status = RecoveryStatusEnum.PARTIALLY_RECOVERED
                 prov = int(unrec * 0.5)  # 50% prudent provision on overdue balance
-                rem = f"Partially recovered {pct}%. Uncollected balance ₹{unrec/100:,.2f} requires provisioning."
+                rem = f"Partially recovered {pct}%. Uncollected balance ₹{unrec / 100:,.2f} requires provisioning."
                 part_cnt += 1
             else:
                 status = RecoveryStatusEnum.UNRECOVERED_OVERDUE
                 prov = unrec  # 100% recommended provision
-                rem = f"Zero post-year-end recovery. High credit default risk; evaluate full provision of ₹{unrec/100:,.2f}."
+                rem = f"Zero post-year-end recovery. High credit default risk; evaluate full provision of ₹{unrec / 100:,.2f}."
                 unrec_cnt += 1
 
             records.append(

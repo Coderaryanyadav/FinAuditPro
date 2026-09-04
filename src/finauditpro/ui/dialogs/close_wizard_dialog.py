@@ -42,7 +42,9 @@ class SealWorkerThread(QThread):
 class CloseWizardDialog(QDialog):
     """Wizard Dialog guiding auditors through pre-archive readiness checks and engagement sealing."""
 
-    def __init__(self, archival_service: ArchivalService, engagement_id: str, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, archival_service: ArchivalService, engagement_id: str, parent: QWidget | None = None
+    ) -> None:
         super().__init__(parent)
 
         self.archival_service = archival_service
@@ -120,7 +122,9 @@ class CloseWizardDialog(QDialog):
         self.readiness_result = self.archival_service.run_readiness_check(self.engagement_id)
 
         for item in self.readiness_result.items:
-            status_tag = "[PASS]" if item.is_passed else ("[FAIL]" if item.is_hard_blocker else "[WARN]")
+            status_tag = (
+                "[PASS]" if item.is_passed else ("[FAIL]" if item.is_hard_blocker else "[WARN]")
+            )
             item_text = f"{status_tag} [{item.category}] {item.item_name}: {item.details}"
             list_item = QListWidgetItem(item_text)
             self.checklist_widget.addItem(list_item)

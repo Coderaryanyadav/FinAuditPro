@@ -163,7 +163,6 @@ class RollForwardView(QWidget):
 
         self.tieout_table.setFixedHeight(max(1, len(links)) * 36 + 32)
 
-
     def _confirm_tie_out(self) -> None:
         if not self.current_engagement_id:
             return

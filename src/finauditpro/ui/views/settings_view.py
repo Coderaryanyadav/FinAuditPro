@@ -211,10 +211,30 @@ class SettingsView(QWidget):
 
     def _on_manage_2fa_clicked(self) -> None:
         win = self.window()
-        if not hasattr(win, "current_user_session") or not win.current_user_session:
+        user_sess = getattr(win, "current_user_session", None)
+
+        if not user_sess or not hasattr(user_sess, "user_id") or user_sess.user_id == "default":
+            users = self.auth_service.list_users() if self.auth_service else []
+            if users:
+                primary = users[0]
+                user_sess = UserSession(
+                    user_id=primary.id,
+                    username=primary.username,
+                    role=primary.role,
+                    must_change_password=False,
+                )
+                if hasattr(win, "current_user_session"):
+                    win.current_user_session = user_sess
+
+        if not user_sess or not self.auth_service:
+            QMessageBox.warning(
+                self, "Session Error", "Unable to determine current active user session."
+            )
             return
+
         from finauditpro.ui.dialogs.totp_dialog import TOTPDialog
-        dlg = TOTPDialog(self.window(), auth_service=self.auth_service, user_session=win.current_user_session)
+
+        dlg = TOTPDialog(self.window(), auth_service=self.auth_service, user_session=user_sess)
         dlg.exec()
 
     def _open_self_check(self) -> None:

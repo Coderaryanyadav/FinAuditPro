@@ -357,4 +357,3 @@ def apply_card_shadow(widget: QWidget) -> None:
     shadow.setColor(QColor(0, 0, 0, 8))
     shadow.setOffset(0, 2)
     widget.setGraphicsEffect(shadow)
-

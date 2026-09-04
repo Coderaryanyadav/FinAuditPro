@@ -53,7 +53,6 @@ def _ensure_all_schema_columns(conn: sqlite3.Connection) -> None:
     """Safely add any missing columns to existing SQLite tables."""
     cursor = conn.cursor()
 
-
     # 0. users table
     cursor.execute("PRAGMA table_info(users);")
     user_cols = {row[1] for row in cursor.fetchall()}
@@ -89,7 +88,6 @@ def _ensure_all_schema_columns(conn: sqlite3.Connection) -> None:
             conn.execute("ALTER TABLE evidence_links ADD COLUMN target_id TEXT;")
         if "page_number" not in ev_cols:
             conn.execute("ALTER TABLE evidence_links ADD COLUMN page_number INTEGER DEFAULT 1;")
-
 
     # 3. audit_findings table
     cursor.execute("PRAGMA table_info(audit_findings);")

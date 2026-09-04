@@ -69,7 +69,6 @@ def calculate_opening_tie_out(links: list[OpeningBalanceLink]) -> TieOutSummary:
     tot_cl_cr = 0
     all_confirmed = bool(links)
 
-
     for link in links:
         tot_op_dr += link.opening_dr_paise
         tot_op_cr += link.opening_cr_paise

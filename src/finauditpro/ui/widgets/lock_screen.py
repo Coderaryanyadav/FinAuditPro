@@ -1,4 +1,6 @@
-"""Secure, production-grade lock screen overlay widget that grabs focus and locks PySide6 main window."""
+"""Secure, production-grade lock screen overlay widget that grabs focus, supports Touch ID biometrics, and locks PySide6 main window."""
+
+from typing import Any
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
@@ -15,7 +17,7 @@ from finauditpro.application.security.rbac import RBACManager
 
 
 class LockScreenOverlay(QWidget):
-    """Apple slate-styled lock screen overlay capturing all mouse/keyboard inputs."""
+    """Apple slate-styled lock screen overlay capturing all mouse/keyboard inputs and offering Touch ID."""
 
     unlocked = Signal()
 
@@ -72,6 +74,20 @@ class LockScreenOverlay(QWidget):
             QPushButton#btnUnlockAction:pressed {
                 background-color: #1E40AF;
             }
+            QPushButton#btnTouchIDAction {
+                background-color: #334155;
+                color: #F8FAFC;
+                font-size: 13px;
+                font-weight: 600;
+                border-radius: 8px;
+                padding: 8px 14px;
+                border: 1px solid #475569;
+                min-height: 20px;
+            }
+            QPushButton#btnTouchIDAction:hover {
+                background-color: #475569;
+                border-color: #38BDF8;
+            }
         """)
 
         layout = QVBoxLayout(self)
@@ -101,7 +117,7 @@ class LockScreenOverlay(QWidget):
         title.setStyleSheet("font-size: 20px; font-weight: 700; color: #F8FAFC;")
         card_l.addWidget(title)
 
-        subtitle = QLabel("Session secured under SQC-1. Enter passcode to resume.")
+        subtitle = QLabel("Session secured under SQC-1. Use Touch ID or passcode.")
         subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
         subtitle.setStyleSheet("font-size: 12px; color: #94A3B8;")
         subtitle.setWordWrap(True)
@@ -125,10 +141,17 @@ class LockScreenOverlay(QWidget):
         btn_unlock.clicked.connect(self._handle_unlock)
         card_l.addWidget(btn_unlock)
 
+        if self.rbac_manager.is_biometrics_supported():
+            btn_touch_id = QPushButton("🔐 Touch ID Fingerprint")
+            btn_touch_id.setObjectName("btnTouchIDAction")
+            btn_touch_id.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn_touch_id.clicked.connect(self._handle_touch_id_unlock)
+            card_l.addWidget(btn_touch_id)
+
         layout.addWidget(card, alignment=Qt.AlignmentFlag.AlignCenter)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
-    def showEvent(self, event) -> None:
+    def showEvent(self, event: Any) -> None:
         super().showEvent(event)
         if self.parentWidget():
             self.setGeometry(self.parentWidget().rect())
@@ -137,14 +160,28 @@ class LockScreenOverlay(QWidget):
         self.input_passcode.setFocus()
         self.grabKeyboard()
 
-    def hideEvent(self, event) -> None:
+    def hideEvent(self, event: Any) -> None:
         self.releaseKeyboard()
         super().hideEvent(event)
 
-    def resizeEvent(self, event) -> None:
+    def resizeEvent(self, event: Any) -> None:
         if self.parentWidget():
             self.setGeometry(self.parentWidget().rect())
         super().resizeEvent(event)
+
+    def _handle_touch_id_unlock(self) -> None:
+        self.releaseKeyboard()
+        if self.rbac_manager.unlock_with_biometrics("Touch ID to unlock FinAuditPro Workstation"):
+            self.input_passcode.clear()
+            self.lbl_error.setVisible(False)
+            self.unlocked.emit()
+            self.close()
+            self.deleteLater()
+        else:
+            self.grabKeyboard()
+            self.lbl_error.setText("Touch ID verification failed or cancelled.")
+            self.lbl_error.setVisible(True)
+            self.input_passcode.setFocus()
 
     def _handle_unlock(self) -> None:
         passcode = self.input_passcode.text().strip()

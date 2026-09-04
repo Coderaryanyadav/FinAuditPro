@@ -60,11 +60,14 @@ class AICopilotDrawer(QFrame):
     def set_engagement(self, engagement: Engagement | None) -> None:
         self.current_engagement = engagement
         if engagement:
-            audit_t = engagement.audit_type.value if hasattr(engagement.audit_type, "value") else str(engagement.audit_type)
+            audit_t = (
+                engagement.audit_type.value
+                if hasattr(engagement.audit_type, "value")
+                else str(engagement.audit_type)
+            )
             self.lbl_context.setText(f"Active: {audit_t} ({engagement.financial_year})")
         else:
             self.lbl_context.setText("Active: Global Workspace (No Engagement)")
-
 
     def _init_ui(self) -> None:
         layout = QVBoxLayout(self)
@@ -85,7 +88,9 @@ class AICopilotDrawer(QFrame):
 
         btn_close = QPushButton("✕")
         btn_close.setFixedSize(28, 28)
-        btn_close.setStyleSheet("background: transparent; color: #94a3b8; font-size: 14px; border: none;")
+        btn_close.setStyleSheet(
+            "background: transparent; color: #94a3b8; font-size: 14px; border: none;"
+        )
         btn_close.clicked.connect(self.closed.emit)
         hdr.addWidget(btn_close)
         layout.addLayout(hdr)
@@ -98,10 +103,22 @@ class AICopilotDrawer(QFrame):
         quick_box = QVBoxLayout()
         quick_box.setSpacing(6)
         prompts = [
-            ("CARO 2020 Inventory Review", "Analyze uploaded inventory sheets under CARO 2020 Clause (ii)."),
-            ("Sec 188 Related Party Scan", "Check for related party transactions under Section 188 of Companies Act 2013."),
-            ("SA 240 Revenue Cut-Off Test", "Scan sales registers for SA 240 revenue cut-off anomalies."),
-            ("SA 505 Confirmation Summary", "Summarize third-party debtor and creditor balance confirmation responses."),
+            (
+                "CARO 2020 Inventory Review",
+                "Analyze uploaded inventory sheets under CARO 2020 Clause (ii).",
+            ),
+            (
+                "Sec 188 Related Party Scan",
+                "Check for related party transactions under Section 188 of Companies Act 2013.",
+            ),
+            (
+                "SA 240 Revenue Cut-Off Test",
+                "Scan sales registers for SA 240 revenue cut-off anomalies.",
+            ),
+            (
+                "SA 505 Confirmation Summary",
+                "Summarize third-party debtor and creditor balance confirmation responses.",
+            ),
         ]
         for label, text in prompts:
             btn = QPushButton(label)
@@ -128,7 +145,9 @@ class AICopilotDrawer(QFrame):
         # Chat scroll area
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
-        self.scroll.setStyleSheet("background: transparent; border: 1px solid #2d3540; border-radius: 8px;")
+        self.scroll.setStyleSheet(
+            "background: transparent; border: 1px solid #2d3540; border-radius: 8px;"
+        )
 
         self.chat_container = QWidget()
         self.chat_layout = QVBoxLayout(self.chat_container)
@@ -238,11 +257,15 @@ class AICopilotDrawer(QFrame):
         b_layout.setSpacing(4)
 
         if is_user:
-            bubble.setStyleSheet("background: #1e293b; border-radius: 8px; border: 1px solid #334155;")
+            bubble.setStyleSheet(
+                "background: #1e293b; border-radius: 8px; border: 1px solid #334155;"
+            )
             sender = QLabel("You")
             sender.setStyleSheet("font-size: 10px; font-weight: 700; color: #93c5fd;")
         else:
-            bubble.setStyleSheet("background: #0f172a; border-radius: 8px; border: 1px solid #1e293b;")
+            bubble.setStyleSheet(
+                "background: #0f172a; border-radius: 8px; border: 1px solid #1e293b;"
+            )
             sender = QLabel("FinAudit AI Copilot")
             sender.setStyleSheet("font-size: 10px; font-weight: 700; color: #38bdf8;")
 
@@ -262,7 +285,9 @@ class AICopilotDrawer(QFrame):
             for c in citations[:3]:
                 doc_name = c.get("document_name", "Evidence") if isinstance(c, dict) else str(c)
                 tag = QLabel(doc_name[:20])
-                tag.setStyleSheet("background: #334155; color: #cbd5e1; border-radius: 4px; font-size: 9px; padding: 2px 4px;")
+                tag.setStyleSheet(
+                    "background: #334155; color: #cbd5e1; border-radius: 4px; font-size: 9px; padding: 2px 4px;"
+                )
                 c_box.addWidget(tag)
             c_box.addStretch()
             b_layout.addLayout(c_box)

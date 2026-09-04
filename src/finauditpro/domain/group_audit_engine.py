@@ -63,8 +63,12 @@ class GroupAuditEngine:
         components_data: list[dict[str, Any]],
     ) -> GroupAuditSummary:
         """Calculate component significance (>15% benchmark) and assign component materiality."""
-        tot_rev = sum(int(c.get("revenue_paise", c.get("revenue", 0) * 100)) for c in components_data)
-        tot_assets = sum(int(c.get("assets_paise", c.get("assets", 0) * 100)) for c in components_data)
+        tot_rev = sum(
+            int(c.get("revenue_paise", c.get("revenue", 0) * 100)) for c in components_data
+        )
+        tot_assets = sum(
+            int(c.get("assets_paise", c.get("assets", 0) * 100)) for c in components_data
+        )
 
         records = []
         sig_cnt = 0
@@ -82,7 +86,11 @@ class GroupAuditEngine:
 
             # Significant if > 15% of Group Revenue or Total Assets
             is_significant = rev_pct >= 15.0 or asset_pct >= 15.0
-            c_type = ComponentTypeEnum.SUBSIDIARY_SIGNIFICANT if is_significant else ComponentTypeEnum.SUBSIDIARY_NON_SIGNIFICANT
+            c_type = (
+                ComponentTypeEnum.SUBSIDIARY_SIGNIFICANT
+                if is_significant
+                else ComponentTypeEnum.SUBSIDIARY_NON_SIGNIFICANT
+            )
             if is_significant:
                 sig_cnt += 1
 

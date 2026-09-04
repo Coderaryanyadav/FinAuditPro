@@ -135,7 +135,9 @@ class AIService:
                 dim = len(embeddings[0])
                 for c_model, _vec in zip(chunks_to_insert, embeddings, strict=False):
                     c_model.dimension = dim
-                chunk_pairs = [(c.id, vec) for c, vec in zip(chunks_to_insert, embeddings, strict=False)]
+                chunk_pairs = [
+                    (c.id, vec) for c, vec in zip(chunks_to_insert, embeddings, strict=False)
+                ]
                 self.vector_store.build_index(engagement_id, chunk_pairs)
             else:
                 self.vector_store.delete_index(engagement_id)

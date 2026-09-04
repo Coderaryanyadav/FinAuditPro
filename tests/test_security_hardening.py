@@ -55,8 +55,9 @@ def test_path_traversal_detection(tmp_path) -> None:
 
 def test_key_wrapping_and_decryption_flow(tmp_path, monkeypatch) -> None:
     """Verify wrapped DEK key derivation, session decryption, and invalid passcode recovery rejection."""
-    import finauditpro.infrastructure.security.encryption as enc
     import pytest
+
+    import finauditpro.infrastructure.security.encryption as enc
 
     # Redirect paths to tmp_path to isolate test
     monkeypatch.setattr(enc, "_get_key_file_path", lambda: tmp_path / "test_key.key")
@@ -75,6 +76,7 @@ def test_key_wrapping_and_decryption_flow(tmp_path, monkeypatch) -> None:
 
     # Verify strict file permissions (0600) on non-Windows platforms
     import sys
+
     if sys.platform != "win32":
         assert (key_file.stat().st_mode & 0o777) == 0o600
         assert (salt_file.stat().st_mode & 0o777) == 0o600
@@ -112,9 +114,10 @@ def test_key_wrapping_and_decryption_flow(tmp_path, monkeypatch) -> None:
 
 def test_brute_force_lockout_protection(tmp_path, monkeypatch) -> None:
     """Verify that failed attempts increment and trigger local lockout after 5 tries."""
+    import pytest
+
     import finauditpro.infrastructure.security.lockout as lock
     from finauditpro.domain.exceptions import ValidationError
-    import pytest
 
     # Redirect lockout path to tmp_path to isolate test
     monkeypatch.setattr(lock, "_get_lockout_file_path", lambda: tmp_path / "test_lockout.json")
@@ -140,11 +143,12 @@ def test_brute_force_lockout_protection(tmp_path, monkeypatch) -> None:
 
 def test_session_locking_mechanism(tmp_path, monkeypatch) -> None:
     """Verify session locking rejects permissions, and re-authentication unlocks correctly."""
-    from finauditpro.application.security.rbac import UserSession, RBACManager
+    import pytest
+
+    import finauditpro.infrastructure.security.encryption as enc
+    from finauditpro.application.security.rbac import RBACManager, UserSession
     from finauditpro.domain.entities import RoleEnum
     from finauditpro.domain.exceptions import PermissionDeniedError
-    import finauditpro.infrastructure.security.encryption as enc
-    import pytest
 
     # Isolate key paths
     monkeypatch.setattr(enc, "_get_key_file_path", lambda: tmp_path / "test_key.key")
@@ -179,9 +183,10 @@ def test_session_locking_mechanism(tmp_path, monkeypatch) -> None:
 
 def test_legacy_key_migration_flow(tmp_path, monkeypatch) -> None:
     """Verify that a legacy 44-byte plain Fernet key is detected and successfully migrated to a wrapped DEK."""
-    import finauditpro.infrastructure.security.encryption as enc
     import pytest
     from cryptography.fernet import Fernet
+
+    import finauditpro.infrastructure.security.encryption as enc
 
     # Redirect paths
     key_file = tmp_path / "test_key.key"

@@ -31,7 +31,6 @@ class LLMProvider(Protocol):
     embedding_model_id: str
 
     def available(self) -> ProviderStatus:
-
         """Check provider server health and loaded model status."""
         ...
 

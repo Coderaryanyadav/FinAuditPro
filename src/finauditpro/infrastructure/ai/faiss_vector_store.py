@@ -70,7 +70,6 @@ class FAISSVectorStore:
 
         return results
 
-
     def delete_index(self, engagement_id: str) -> None:
         """Delete an engagement's FAISS index file."""
         index_path = self._get_index_path(engagement_id)

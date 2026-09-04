@@ -32,7 +32,9 @@ class InventoryCountItem(DomainBaseModel):
     book_quantity: float = Field(default=0.0, ge=0.0)
     physical_count_quantity: float = Field(default=0.0, ge=0.0)
     unit_cost_paise: int = Field(default=0, ge=0)
-    discrepancy_type: InventoryDiscrepancyTypeEnum = Field(default=InventoryDiscrepancyTypeEnum.MATCHED)
+    discrepancy_type: InventoryDiscrepancyTypeEnum = Field(
+        default=InventoryDiscrepancyTypeEnum.MATCHED
+    )
     discrepancy_value_paise: int = Field(default=0)
     is_nrv_lower_than_cost: bool = Field(default=False)
     audit_remark: str = Field(default="")

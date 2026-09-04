@@ -1,5 +1,4 @@
-"""Pure domain entities and algorithms for SA 530 Audit Sampling and Monetary Unit Sampling (MUS)."""
-
+import random
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any, ClassVar
@@ -15,6 +14,8 @@ class SamplingMethodEnum(StrEnum):
     SYSTEMATIC_SAMPLING = "Systematic Sampling"
     RANDOM_SAMPLING = "Random Selection"
     HIGH_VALUE_STRATIFICATION = "High-Value Stratification"
+    JUDGMENTAL = "Judgmental Selection"
+    HUNDRED_PERCENT = "100% Testing"
 
 
 class DomainBaseModel(BaseModel):
@@ -36,6 +37,7 @@ class SamplingPlan(DomainBaseModel):
     confidence_level_pct: float = Field(default=95.0)
     sampling_interval_paise: int = Field(default=0)
     calculated_sample_size: int = Field(default=0)
+    random_seed: int | None = Field(default=None)
     selected_sample_indices: list[int] = Field(default_factory=list)
     created_at: str = Field(default_factory=lambda: utc_now().isoformat())
 
@@ -59,7 +61,6 @@ class AuditSamplingEngine:
         99.0: 4.61,
     }
 
-
     @classmethod
     def calculate_mus_sample(
         cls,
@@ -72,7 +73,9 @@ class AuditSamplingEngine:
         if not population_records:
             return SamplingResult(0, 0, [], [], 0, "Empty population.")
 
-        pop_val_paise = sum(int(r.get("amount_paise", r.get("amount", 0) * 100)) for r in population_records)
+        pop_val_paise = sum(
+            int(r.get("amount_paise", r.get("amount", 0) * 100)) for r in population_records
+        )
         factor = cls.RELIABILITY_FACTORS.get(confidence_level_pct, 3.0)
 
         # Tolerable minus expected misstatement expansion
@@ -117,5 +120,155 @@ class AuditSamplingEngine:
             selected_items=selected_sample,
             high_value_items=high_value,
             total_sampled_value_paise=total_sampled_val,
+            rationale=rationale,
+        )
+
+    @classmethod
+    def calculate_random_sample(
+        cls,
+        population_records: list[dict[str, Any]],
+        sample_size: int,
+        random_seed: int | None = None,
+    ) -> SamplingResult:
+        """Reproducible random sampling under SA 530 using pseudo-random seed."""
+        if not population_records or sample_size <= 0:
+            return SamplingResult(0, 0, [], [], 0, "Empty population or non-positive sample size.")
+
+        n = min(sample_size, len(population_records))
+        rng = random.Random(random_seed) if random_seed is not None else random.Random(42)
+        indexed = []
+        for idx, r in enumerate(population_records):
+            item = dict(r)
+            item["original_index"] = idx + 1
+            item["amount_paise"] = int(r.get("amount_paise", r.get("amount", 0) * 100))
+            indexed.append(item)
+
+        selected = rng.sample(indexed, n)
+        tot_val = sum(i["amount_paise"] for i in selected)
+        rationale = (
+            f"SA 530 Random Selection: Sampled {n} items from population of {len(population_records)} "
+            f"(Seed: {random_seed if random_seed is not None else 'Default(42)'})."
+        )
+        return SamplingResult(
+            sample_size=n,
+            sampling_interval_paise=0,
+            selected_items=selected,
+            high_value_items=[],
+            total_sampled_value_paise=tot_val,
+            rationale=rationale,
+        )
+
+    @classmethod
+    def calculate_systematic_sample(
+        cls,
+        population_records: list[dict[str, Any]],
+        sample_size: int,
+        start_index: int = 0,
+    ) -> SamplingResult:
+        """Systematic sampling selecting items at fixed intervals (k = N / n)."""
+        if not population_records or sample_size <= 0:
+            return SamplingResult(0, 0, [], [], 0, "Empty population or non-positive sample size.")
+
+        N = len(population_records)
+        n = min(sample_size, N)
+        k = max(1, N // n)
+
+        indexed = []
+        for idx, r in enumerate(population_records):
+            item = dict(r)
+            item["original_index"] = idx + 1
+            item["amount_paise"] = int(r.get("amount_paise", r.get("amount", 0) * 100))
+            indexed.append(item)
+
+        selected = []
+        curr = start_index % k
+        while curr < N and len(selected) < n:
+            selected.append(indexed[curr])
+            curr += k
+
+        tot_val = sum(i["amount_paise"] for i in selected)
+        rationale = (
+            f"SA 530 Systematic Selection: Selected {len(selected)} items with interval k={k} "
+            f"from population of {N}."
+        )
+        return SamplingResult(
+            sample_size=len(selected),
+            sampling_interval_paise=k,
+            selected_items=selected,
+            high_value_items=[],
+            total_sampled_value_paise=tot_val,
+            rationale=rationale,
+        )
+
+    @classmethod
+    def calculate_judgmental_sample(
+        cls,
+        population_records: list[dict[str, Any]],
+        threshold_paise: int | None = None,
+        filter_key: str | None = None,
+    ) -> SamplingResult:
+        """Judgmental / targeted sampling based on auditor assessment and risk thresholds."""
+        if not population_records:
+            return SamplingResult(0, 0, [], [], 0, "Empty population.")
+
+        selected = []
+        for idx, r in enumerate(population_records):
+            item = dict(r)
+            item["original_index"] = idx + 1
+            amt = int(r.get("amount_paise", r.get("amount", 0) * 100))
+            item["amount_paise"] = amt
+            if threshold_paise is not None and amt >= threshold_paise:
+                selected.append(item)
+            elif filter_key and r.get(filter_key):
+                selected.append(item)
+
+        if not selected and threshold_paise is None and not filter_key:
+            selected = [
+                dict(
+                    r,
+                    original_index=idx + 1,
+                    amount_paise=int(r.get("amount_paise", r.get("amount", 0) * 100)),
+                )
+                for idx, r in enumerate(population_records[:10])
+            ]
+
+        tot_val = sum(i["amount_paise"] for i in selected)
+        rationale = (
+            f"SA 530 Judgmental Selection: Selected {len(selected)} targeted items "
+            f"(Threshold: ₹{(threshold_paise or 0) / 100:,.2f})."
+        )
+        return SamplingResult(
+            sample_size=len(selected),
+            sampling_interval_paise=0,
+            selected_items=selected,
+            high_value_items=selected,
+            total_sampled_value_paise=tot_val,
+            rationale=rationale,
+        )
+
+    @classmethod
+    def calculate_100_pct_sample(
+        cls,
+        population_records: list[dict[str, Any]],
+    ) -> SamplingResult:
+        """100% examination of all items in the population under SA 530."""
+        if not population_records:
+            return SamplingResult(0, 0, [], [], 0, "Empty population.")
+
+        selected = []
+        for idx, r in enumerate(population_records):
+            item = dict(r)
+            item["original_index"] = idx + 1
+            item["amount_paise"] = int(r.get("amount_paise", r.get("amount", 0) * 100))
+            selected.append(item)
+
+        tot_val = sum(i["amount_paise"] for i in selected)
+        rationale = f"SA 530 100% Testing: Complete examination of all {len(selected)} items."
+        return SamplingResult(
+            sample_size=len(selected),
+            sampling_interval_paise=1,
+            selected_items=selected,
+            high_value_items=selected,
+            total_sampled_value_paise=tot_val,
             rationale=rationale,
         )

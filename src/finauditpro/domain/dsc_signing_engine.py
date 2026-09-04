@@ -16,7 +16,6 @@ class CertificateTypeEnum(StrEnum):
     SOFTWARE_EMULATED_CERTIFICATE = "Hardware Emulation Token (Test Environment)"
 
 
-
 class DomainBaseModel(BaseModel):
     model_config = ConfigDict(frozen=False, arbitrary_types_allowed=True)
 
@@ -41,7 +40,9 @@ class StatutoryDigitalSignature(DomainBaseModel):
 
     id: str = Field(default_factory=lambda: str(uuid4()))
     engagement_id: str = Field(...)
-    document_target: str = Field(...)  # e.g. "Report: Independent Statutory Audit Report FY 2024-25"
+    document_target: str = Field(
+        ...
+    )  # e.g. "Report: Independent Statutory Audit Report FY 2024-25"
     payload_sha256_hash: str = Field(...)
     signatory_name: str = Field(...)
     signatory_icai_membership: str = Field(...)

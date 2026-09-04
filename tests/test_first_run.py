@@ -29,14 +29,14 @@ def test_first_run_bootstrap_directories(tmp_path, monkeypatch) -> None:
 
 
 def test_initialize_database_runs_all_migrations(tmp_path) -> None:
-    """Verify initialize_database creates database and executes migrations 1 to 9 cleanly."""
+    """Verify initialize_database creates database and executes migrations 1 to 12 cleanly."""
     db_file = tmp_path / "bootstrap_test.db"
     db_manager = initialize_database(db_file)
     assert db_manager is not None
 
     with db_manager.session_scope() as session:
-        # Check that migration history table exists and has 9 entries
+        # Check that migration history table exists and has 14 entries
         res = session.execute(
             __import__("sqlalchemy").text("SELECT COUNT(*) FROM schema_migrations")
         ).scalar()
-        assert res == 10
+        assert res == 14

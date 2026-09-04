@@ -164,11 +164,11 @@ def test_schedule_iii_ratios_computation() -> None:
     # Current Assets < Current Liabilities (CR < 1.0) & Debt > 2.5x Equity
     res = DeterministicAnalyticsEngine.compute_schedule_iii_ratios(
         dataset_id="ds-stat-01",
-        current_assets_paise=80000000,       # ₹8,00,000.00
-        current_liabilities_paise=100000000, # ₹10,00,000.00 -> CR = 0.8
-        net_profit_paise=15000000,           # ₹1,50,000.00
-        revenue_paise=100000000,             # ₹10,00,000.00 -> NPM = 15.0%
-        total_debt_paise=300000000,          # ₹30,00,000.00
+        current_assets_paise=80000000,  # ₹8,00,000.00
+        current_liabilities_paise=100000000,  # ₹10,00,000.00 -> CR = 0.8
+        net_profit_paise=15000000,  # ₹1,50,000.00
+        revenue_paise=100000000,  # ₹10,00,000.00 -> NPM = 15.0%
+        total_debt_paise=300000000,  # ₹30,00,000.00
         shareholder_equity_paise=100000000,  # ₹10,00,000.00 -> DER = 3.0
     )
 
@@ -183,9 +183,24 @@ def test_schedule_iii_ratios_computation() -> None:
 def test_trade_payables_msme_ageing() -> None:
     """Verify Schedule III trade payables MSMED Act Section 15 45-day overdue exception detection."""
     records = [
-        {"vendor_name": "ABC Tech MSME", "is_msme": True, "days_overdue": 62, "amount_paise": 45000000},  # ₹4.5L Overdue >45d
-        {"vendor_name": "Standard Corp Non-MSME", "is_msme": False, "days_overdue": 90, "amount_paise": 100000000},
-        {"vendor_name": "XYZ Spares MSME", "is_msme": True, "days_overdue": 20, "amount_paise": 15000000},  # Within 45d
+        {
+            "vendor_name": "ABC Tech MSME",
+            "is_msme": True,
+            "days_overdue": 62,
+            "amount_paise": 45000000,
+        },  # ₹4.5L Overdue >45d
+        {
+            "vendor_name": "Standard Corp Non-MSME",
+            "is_msme": False,
+            "days_overdue": 90,
+            "amount_paise": 100000000,
+        },
+        {
+            "vendor_name": "XYZ Spares MSME",
+            "is_msme": True,
+            "days_overdue": 20,
+            "amount_paise": 15000000,
+        },  # Within 45d
     ]
 
     res = DeterministicAnalyticsEngine.analyze_trade_payables_ageing("ds-ap-01", records)
@@ -201,11 +216,11 @@ def test_monetary_unit_sampling_engine() -> None:
     from finauditpro.domain.sampling_engine import AuditSamplingEngine
 
     pop = [
-        {"voucher": "V-01", "amount_paise": 20000000},   # ₹2L
+        {"voucher": "V-01", "amount_paise": 20000000},  # ₹2L
         {"voucher": "V-02", "amount_paise": 150000000},  # ₹15L (High Value >= Interval)
-        {"voucher": "V-03", "amount_paise": 30000000},   # ₹3L
-        {"voucher": "V-04", "amount_paise": 50000000},   # ₹5L
-        {"voucher": "V-05", "amount_paise": 10000000},   # ₹1L
+        {"voucher": "V-03", "amount_paise": 30000000},  # ₹3L
+        {"voucher": "V-04", "amount_paise": 50000000},  # ₹5L
+        {"voucher": "V-05", "amount_paise": 10000000},  # ₹1L
     ]
     # Tolerable misstatement: ₹30L -> Interval = 30L / 3.0 = ₹10L (10,00,000 paise * 100 = 100,000,000 paise)
     res = AuditSamplingEngine.calculate_mus_sample(
@@ -246,9 +261,24 @@ def test_gst_reconciliation_engine() -> None:
     )
 
     books = [
-        {"invoice_number": "INV-001", "vendor_gstin": "27AAACB1234F1Z5", "tax_paise": 1800000, "is_sec_17_5_blocked": False},  # Matched
-        {"invoice_number": "INV-002", "vendor_gstin": "27AAACB1234F1Z5", "tax_paise": 500000, "is_sec_17_5_blocked": True},   # Ineligible Sec 17(5)
-        {"invoice_number": "INV-003", "vendor_gstin": "27XYZAB9999F1Z1", "tax_paise": 2400000, "is_sec_17_5_blocked": False},  # Missing in 2B
+        {
+            "invoice_number": "INV-001",
+            "vendor_gstin": "27AAACB1234F1Z5",
+            "tax_paise": 1800000,
+            "is_sec_17_5_blocked": False,
+        },  # Matched
+        {
+            "invoice_number": "INV-002",
+            "vendor_gstin": "27AAACB1234F1Z5",
+            "tax_paise": 500000,
+            "is_sec_17_5_blocked": True,
+        },  # Ineligible Sec 17(5)
+        {
+            "invoice_number": "INV-003",
+            "vendor_gstin": "27XYZAB9999F1Z1",
+            "tax_paise": 2400000,
+            "is_sec_17_5_blocked": False,
+        },  # Missing in 2B
     ]
     gstr2b = [
         {"invoice_number": "INV-001", "vendor_gstin": "27AAACB1234F1Z5", "tax_paise": 1800000},
@@ -280,8 +310,18 @@ def test_related_party_scan_engine() -> None:
         )
     ]
     txns = [
-        {"account_name": "Apex Holdings Pvt Ltd", "amount_paise": 50000000, "pan": "AAACA1111A", "has_audit_committee_approval": True},
-        {"account_name": "Secret Vendor Logistics", "amount_paise": 25000000, "pan": "ABCDE1234F", "has_audit_committee_approval": False},
+        {
+            "account_name": "Apex Holdings Pvt Ltd",
+            "amount_paise": 50000000,
+            "pan": "AAACA1111A",
+            "has_audit_committee_approval": True,
+        },
+        {
+            "account_name": "Secret Vendor Logistics",
+            "amount_paise": 25000000,
+            "pan": "ABCDE1234F",
+            "has_audit_committee_approval": False,
+        },
     ]
     directors_pans = ["ABCDE1234F"]  # Matching the undeclared vendor
 
@@ -290,7 +330,3 @@ def test_related_party_scan_engine() -> None:
     assert res.unapproved_count == 1
     assert len(res.undeclared_vendor_matches) == 1
     assert res.undeclared_vendor_matches[0]["account_name"] == "SECRET VENDOR LOGISTICS"
-
-
-
-

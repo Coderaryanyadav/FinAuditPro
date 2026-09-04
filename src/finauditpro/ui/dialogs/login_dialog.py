@@ -231,9 +231,7 @@ class LoginDialog(QDialog):
         fl.addWidget(btn_reset_pwd, alignment=Qt.AlignmentFlag.AlignCenter)
         fl.addSpacing(8)
 
-        hint = QLabel(
-            "Fully offline · No data leaves your machine"
-        )
+        hint = QLabel("Fully offline · No data leaves your machine")
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
         hint.setStyleSheet(
             "font-size: 11px; color: #64748b; line-height: 1.4; border: none; background: transparent;"
@@ -310,4 +308,6 @@ class LoginDialog(QDialog):
             self.auth_service.reset_to_default_admin()
             self.input_user.setText("admin@finauditpro.com")
             self.input_pass.setText("Admin@123")
-            QMessageBox.information(self, "Reset Complete", "Credentials reset to default.\nClick 'Sign In' to proceed.")
+            QMessageBox.information(
+                self, "Reset Complete", "Credentials reset to default.\nClick 'Sign In' to proceed."
+            )

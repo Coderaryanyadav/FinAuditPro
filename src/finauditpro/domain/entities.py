@@ -15,6 +15,7 @@ class RoleEnum(StrEnum):
     PARTNER = "Partner"
     MANAGER = "Manager"
     SENIOR = "Senior"
+    SENIOR_AUDITOR = "Senior"
     ASSOCIATE = "Associate"
     ADMINISTRATOR = "Administrator"
 

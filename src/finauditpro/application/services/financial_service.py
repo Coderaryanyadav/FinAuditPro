@@ -205,9 +205,28 @@ class FinancialService:
                 # Execute Schedule III statutory ratio analytics
                 tot_dr = sum(l.debit_paise for l in lines)
                 tot_cr = sum(l.credit_paise for l in lines)
-                cur_assets = sum(l.closing_dr_paise for l in lines if "asset" in l.account_name.lower() or "bank" in l.account_name.lower() or "cash" in l.account_name.lower() or "debtor" in l.account_name.lower())
-                cur_liab = sum(l.closing_cr_paise for l in lines if "payable" in l.account_name.lower() or "creditor" in l.account_name.lower() or "liability" in l.account_name.lower())
-                rev = sum(l.credit_paise for l in lines if "revenue" in l.account_name.lower() or "sales" in l.account_name.lower() or "income" in l.account_name.lower())
+                cur_assets = sum(
+                    l.closing_dr_paise
+                    for l in lines
+                    if "asset" in l.account_name.lower()
+                    or "bank" in l.account_name.lower()
+                    or "cash" in l.account_name.lower()
+                    or "debtor" in l.account_name.lower()
+                )
+                cur_liab = sum(
+                    l.closing_cr_paise
+                    for l in lines
+                    if "payable" in l.account_name.lower()
+                    or "creditor" in l.account_name.lower()
+                    or "liability" in l.account_name.lower()
+                )
+                rev = sum(
+                    l.credit_paise
+                    for l in lines
+                    if "revenue" in l.account_name.lower()
+                    or "sales" in l.account_name.lower()
+                    or "income" in l.account_name.lower()
+                )
                 res_ratio = DeterministicAnalyticsEngine.compute_schedule_iii_ratios(
                     dataset_id=dataset_id,
                     current_assets_paise=cur_assets or (tot_dr // 3),
@@ -244,19 +263,25 @@ class FinancialService:
                 txns = repo.get_bank_transactions(dataset_id)
                 res1 = DeterministicAnalyticsEngine.check_bank_balance_continuity(dataset_id, txns)
                 all_exceptions.extend(res1.exceptions)
-            elif ds.dataset_type in (DatasetTypeEnum.PURCHASE_REGISTER, DatasetTypeEnum.VENDOR_MASTER):
+            elif ds.dataset_type in (
+                DatasetTypeEnum.PURCHASE_REGISTER,
+                DatasetTypeEnum.VENDOR_MASTER,
+            ):
                 entries = repo.get_ledger_entries(dataset_id)
                 vendor_recs = [
                     {
                         "vendor_name": e.account_name,
-                        "is_msme": "msme" in (e.narration or "").lower() or "enterprises" in (e.account_name or "").lower(),
+                        "is_msme": "msme" in (e.narration or "").lower()
+                        or "enterprises" in (e.account_name or "").lower(),
                         "days_overdue": 50 if ("overdue" in (e.narration or "").lower()) else 20,
                         "amount_paise": e.credit_paise or e.debit_paise,
                     }
                     for e in entries
                 ]
                 if vendor_recs:
-                    res_ap = DeterministicAnalyticsEngine.analyze_trade_payables_ageing(dataset_id, vendor_recs)
+                    res_ap = DeterministicAnalyticsEngine.analyze_trade_payables_ageing(
+                        dataset_id, vendor_recs
+                    )
                     all_exceptions.extend(res_ap.exceptions)
 
             for exc in all_exceptions:

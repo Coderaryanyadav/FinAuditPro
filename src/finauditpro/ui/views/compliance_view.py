@@ -20,39 +20,155 @@ from finauditpro.domain.entities import Engagement
 from finauditpro.ui.theme import MetricCard, PageHeader
 
 CARO_2020_CLAUSES = [
-    ("Clause (i)", "Fixed Assets & PPE", "Maintenance of proper records of PPE and physical verification"),
-    ("Clause (ii)", "Inventory Physical Verification", "Physical verification of inventory coverage, procedure & discrepancies > 10%"),
-    ("Clause (iii)", "Loans & Investments Granted", "Investments made, guarantees provided, loans granted to related entities"),
-    ("Clause (iv)", "Sec 185/186 Compliance", "Compliance with provisions of Section 185 and 186 for loans & guarantees"),
-    ("Clause (v)", "Public Deposits Acceptance", "Compliance with RBI directives and Sections 73 to 76 for public deposits"),
-    ("Clause (vi)", "Cost Records Maintenance", "Maintenance of cost records prescribed u/s 148(1) of Companies Act 2013"),
-    ("Clause (vii)", "Statutory Dues Regularity", "Regularity in deposit of undisputed statutory dues (GST, PF, ESI, Income Tax)"),
-    ("Clause (viii)", "Unrecorded Surrendered Income", "Surrendered or disclosed income in tax assessments not recorded in books"),
-    ("Clause (ix)", "Default in Borrowings Repayment", "Default in repayment of loans/borrowings to banks or financial institutions"),
-    ("Clause (x)", "IPO / FPO Funds Application", "Application of funds raised through IPO/FPO or preferential allotment"),
+    (
+        "Clause (i)",
+        "Fixed Assets & PPE",
+        "Maintenance of proper records of PPE and physical verification",
+    ),
+    (
+        "Clause (ii)",
+        "Inventory Physical Verification",
+        "Physical verification of inventory coverage, procedure & discrepancies > 10%",
+    ),
+    (
+        "Clause (iii)",
+        "Loans & Investments Granted",
+        "Investments made, guarantees provided, loans granted to related entities",
+    ),
+    (
+        "Clause (iv)",
+        "Sec 185/186 Compliance",
+        "Compliance with provisions of Section 185 and 186 for loans & guarantees",
+    ),
+    (
+        "Clause (v)",
+        "Public Deposits Acceptance",
+        "Compliance with RBI directives and Sections 73 to 76 for public deposits",
+    ),
+    (
+        "Clause (vi)",
+        "Cost Records Maintenance",
+        "Maintenance of cost records prescribed u/s 148(1) of Companies Act 2013",
+    ),
+    (
+        "Clause (vii)",
+        "Statutory Dues Regularity",
+        "Regularity in deposit of undisputed statutory dues (GST, PF, ESI, Income Tax)",
+    ),
+    (
+        "Clause (viii)",
+        "Unrecorded Surrendered Income",
+        "Surrendered or disclosed income in tax assessments not recorded in books",
+    ),
+    (
+        "Clause (ix)",
+        "Default in Borrowings Repayment",
+        "Default in repayment of loans/borrowings to banks or financial institutions",
+    ),
+    (
+        "Clause (x)",
+        "IPO / FPO Funds Application",
+        "Application of funds raised through IPO/FPO or preferential allotment",
+    ),
     ("Clause (xi)", "Statutory Notice u/s 143(12)", "Notice or reporting u/s 143(12)"),
-    ("Clause (xii)", "Nidhi Company Ratio", "Compliance with Net Owned Funds to Deposit ratio 1:20"),
-    ("Clause (xiii)", "Related Party Sec 177/188", "Compliance with Sec 177 & 188 for related party transactions"),
-    ("Clause (xiv)", "Internal Audit Scope", "Commensurate internal audit system & consideration of internal audit reports"),
-    ("Clause (xv)", "Non-Cash Director Deals", "Non-cash transactions with directors or connected persons u/s 192"),
-    ("Clause (xvi)", "RBI Registration u/s 45-IA", "Registration requirement under Section 45-IA of RBI Act 1934"),
-    ("Clause (xvii)", "Cash Loss Incurrence", "Incurrence of cash losses in current and immediately preceding financial year"),
-    ("Clause (xviii)", "Outgoing Auditor Objections", "Issues or objections raised by outgoing statutory auditor"),
-    ("Clause (xix)", "Financial Ratio Viability", "Capability of meeting liabilities falling due within 1 year based on ratios"),
-    ("Clause (xx)", "CSR Unspent Transfer", "Transfer of unspent CSR funds to specified Fund under Schedule VII"),
-    ("Clause (xxi)", "Consolidated Qualifications", "Adverse remarks or qualifications in CARO reports of group companies"),
+    (
+        "Clause (xii)",
+        "Nidhi Company Ratio",
+        "Compliance with Net Owned Funds to Deposit ratio 1:20",
+    ),
+    (
+        "Clause (xiii)",
+        "Related Party Sec 177/188",
+        "Compliance with Sec 177 & 188 for related party transactions",
+    ),
+    (
+        "Clause (xiv)",
+        "Internal Audit Scope",
+        "Commensurate internal audit system & consideration of internal audit reports",
+    ),
+    (
+        "Clause (xv)",
+        "Non-Cash Director Deals",
+        "Non-cash transactions with directors or connected persons u/s 192",
+    ),
+    (
+        "Clause (xvi)",
+        "RBI Registration u/s 45-IA",
+        "Registration requirement under Section 45-IA of RBI Act 1934",
+    ),
+    (
+        "Clause (xvii)",
+        "Cash Loss Incurrence",
+        "Incurrence of cash losses in current and immediately preceding financial year",
+    ),
+    (
+        "Clause (xviii)",
+        "Outgoing Auditor Objections",
+        "Issues or objections raised by outgoing statutory auditor",
+    ),
+    (
+        "Clause (xix)",
+        "Financial Ratio Viability",
+        "Capability of meeting liabilities falling due within 1 year based on ratios",
+    ),
+    (
+        "Clause (xx)",
+        "CSR Unspent Transfer",
+        "Transfer of unspent CSR funds to specified Fund under Schedule VII",
+    ),
+    (
+        "Clause (xxi)",
+        "Consolidated Qualifications",
+        "Adverse remarks or qualifications in CARO reports of group companies",
+    ),
 ]
 
 FORM_3CD_CLAUSES = [
-    ("Clause 1-4", "Assessee Registration & PAN/GSTIN", "Name, address, PAN, and GSTIN registration numbers of assessee"),
-    ("Clause 8", "Relevant Section under which Audited", "Indicate relevant clause of section 44AB applicable"),
-    ("Clause 13", "Method of Accounting Employed", "Method of accounting employed in the previous year (Mercantile/Cash)"),
-    ("Clause 17", "Sec 50C / 43CA Property Transfer", "Land or building transferred below stamp duty value"),
-    ("Clause 21", "Inadmissible Expenses Sec 40A", "Disallowances u/s 36, 37, 40(a), 40A(2)(b), 40A(3) cash payments > 10k"),
-    ("Clause 26", "Liability u/s 43B Paid Before Due Date", "Sum referred to in clauses (a) to (g) of section 43B"),
-    ("Clause 31", "Acceptance/Repayment of Loans Sec 269SS/T", "Loans, deposits, or specified advances accepted/repaid in excess of 20,000"),
-    ("Clause 34", "TDS / TCS Compliance & Chapter XVII-B", "Compliance with Chapter XVII-B TDS deduction, deposit & quarterly returns"),
-    ("Clause 44", "GST Expenditure Split Matrix", "Break-down of total expenditure into GST registered vs exempt vs non-registered"),
+    (
+        "Clause 1-4",
+        "Assessee Registration & PAN/GSTIN",
+        "Name, address, PAN, and GSTIN registration numbers of assessee",
+    ),
+    (
+        "Clause 8",
+        "Relevant Section under which Audited",
+        "Indicate relevant clause of section 44AB applicable",
+    ),
+    (
+        "Clause 13",
+        "Method of Accounting Employed",
+        "Method of accounting employed in the previous year (Mercantile/Cash)",
+    ),
+    (
+        "Clause 17",
+        "Sec 50C / 43CA Property Transfer",
+        "Land or building transferred below stamp duty value",
+    ),
+    (
+        "Clause 21",
+        "Inadmissible Expenses Sec 40A",
+        "Disallowances u/s 36, 37, 40(a), 40A(2)(b), 40A(3) cash payments > 10k",
+    ),
+    (
+        "Clause 26",
+        "Liability u/s 43B Paid Before Due Date",
+        "Sum referred to in clauses (a) to (g) of section 43B",
+    ),
+    (
+        "Clause 31",
+        "Acceptance/Repayment of Loans Sec 269SS/T",
+        "Loans, deposits, or specified advances accepted/repaid in excess of 20,000",
+    ),
+    (
+        "Clause 34",
+        "TDS / TCS Compliance & Chapter XVII-B",
+        "Compliance with Chapter XVII-B TDS deduction, deposit & quarterly returns",
+    ),
+    (
+        "Clause 44",
+        "GST Expenditure Split Matrix",
+        "Break-down of total expenditure into GST registered vs exempt vs non-registered",
+    ),
 ]
 
 
@@ -90,15 +206,24 @@ class ComplianceView(QWidget):
         # 2. Metric Summary Cards
         stats_layout = QHBoxLayout()
         stats_layout.setSpacing(10)
-        self.card_total = MetricCard("CARO 2020 CLAUSES", "21", "Statutory audit scope", accent_color="#2563EB")
-        self.card_evaluated = MetricCard("EVALUATED & REVIEWED", "0", "Documented verification", accent_color="#16A34A")
-        self.card_anomalies = MetricCard("REPORTABLE FINDINGS", "0", "Adverse remarks", accent_color="#DC2626")
-        self.card_f3cd = MetricCard("FORM 3CD CLAUSES", "9 Core", "Tax audit reporting", accent_color="#D97706")
+        self.card_total = MetricCard(
+            "CARO 2020 CLAUSES", "21", "Statutory audit scope", accent_color="#2563EB"
+        )
+        self.card_evaluated = MetricCard(
+            "EVALUATED & REVIEWED", "0", "Documented verification", accent_color="#16A34A"
+        )
+        self.card_anomalies = MetricCard(
+            "REPORTABLE FINDINGS", "0", "Adverse remarks", accent_color="#DC2626"
+        )
+        self.card_f3cd = MetricCard(
+            "FORM 3CD CLAUSES", "9 Core", "Tax audit reporting", accent_color="#D97706"
+        )
         for c in (self.card_total, self.card_evaluated, self.card_anomalies, self.card_f3cd):
             stats_layout.addWidget(c)
         main_layout.addLayout(stats_layout)
 
         from PySide6.QtCore import Qt
+
         tabs = QTabWidget()
         tabs.setUsesScrollButtons(True)
         tabs.setElideMode(Qt.TextElideMode.ElideNone)
@@ -111,10 +236,14 @@ class ComplianceView(QWidget):
         caro_l.setContentsMargins(14, 14, 14, 14)
         self.caro_table = QTableWidget()
         self.caro_table.setColumnCount(4)
-        self.caro_table.setHorizontalHeaderLabels(["CLAUSE", "TITLE", "STATUTORY SCOPE", "COMPLIANCE STATUS"])
+        self.caro_table.setHorizontalHeaderLabels(
+            ["CLAUSE", "TITLE", "STATUTORY SCOPE", "COMPLIANCE STATUS"]
+        )
         self.caro_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         for col_idx in [0, 1, 3]:
-            self.caro_table.horizontalHeader().setSectionResizeMode(col_idx, QHeaderView.ResizeMode.ResizeToContents)
+            self.caro_table.horizontalHeader().setSectionResizeMode(
+                col_idx, QHeaderView.ResizeMode.ResizeToContents
+            )
         self.caro_table.verticalHeader().setVisible(False)
         self.caro_table.setAlternatingRowColors(True)
 
@@ -136,7 +265,9 @@ class ComplianceView(QWidget):
         self.f3cd_table.setHorizontalHeaderLabels(["CLAUSE", "TITLE", "SCOPE", "COMPLIANCE STATUS"])
         self.f3cd_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         for col_idx in [0, 1, 3]:
-            self.f3cd_table.horizontalHeader().setSectionResizeMode(col_idx, QHeaderView.ResizeMode.ResizeToContents)
+            self.f3cd_table.horizontalHeader().setSectionResizeMode(
+                col_idx, QHeaderView.ResizeMode.ResizeToContents
+            )
 
         self.f3cd_table.verticalHeader().setVisible(False)
         self.f3cd_table.setAlternatingRowColors(True)
@@ -165,7 +296,9 @@ class ComplianceView(QWidget):
 
     def _on_evaluate_clicked(self) -> None:
         if not self.current_engagement:
-            QMessageBox.warning(self, "No Engagement", "Please select an active audit engagement first.")
+            QMessageBox.warning(
+                self, "No Engagement", "Please select an active audit engagement first."
+            )
             return
 
         eval_map = {
@@ -217,5 +350,3 @@ class ComplianceView(QWidget):
             "Statutory & Tax Compliance Reconciled",
             "CARO 2020 (21 Clauses) and Form 3CD (9 Core Tax Audit Clauses) verified and reconciled against Working Papers & Substantive Ledger Tests.",
         )
-
-

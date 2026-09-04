@@ -26,21 +26,39 @@ def test_three_way_match_engine() -> None:
     orders = [
         # Matched
         {
-            "po_number": "PO-01", "grn_number": "GRN-01", "invoice_number": "INV-01",
-            "po_quantity": 100, "grn_quantity": 100, "invoice_quantity": 100,
-            "po_rate_paise": 50000, "invoice_rate_paise": 50000, "invoice_total_paise": 5000000,
+            "po_number": "PO-01",
+            "grn_number": "GRN-01",
+            "invoice_number": "INV-01",
+            "po_quantity": 100,
+            "grn_quantity": 100,
+            "invoice_quantity": 100,
+            "po_rate_paise": 50000,
+            "invoice_rate_paise": 50000,
+            "invoice_total_paise": 5000000,
         },
         # Quantity Discrepancy (Billed 100, received 80)
         {
-            "po_number": "PO-02", "grn_number": "GRN-02", "invoice_number": "INV-02",
-            "po_quantity": 100, "grn_quantity": 80, "invoice_quantity": 100,
-            "po_rate_paise": 50000, "invoice_rate_paise": 50000, "invoice_total_paise": 5000000,
+            "po_number": "PO-02",
+            "grn_number": "GRN-02",
+            "invoice_number": "INV-02",
+            "po_quantity": 100,
+            "grn_quantity": 80,
+            "invoice_quantity": 100,
+            "po_rate_paise": 50000,
+            "invoice_rate_paise": 50000,
+            "invoice_total_paise": 5000000,
         },
         # Invoice Without GRN
         {
-            "po_number": "PO-03", "grn_number": "", "invoice_number": "INV-03",
-            "po_quantity": 50, "grn_quantity": 0, "invoice_quantity": 50,
-            "po_rate_paise": 20000, "invoice_rate_paise": 20000, "invoice_total_paise": 1000000,
+            "po_number": "PO-03",
+            "grn_number": "",
+            "invoice_number": "INV-03",
+            "po_quantity": 50,
+            "grn_quantity": 0,
+            "invoice_quantity": 50,
+            "po_rate_paise": 20000,
+            "invoice_rate_paise": 20000,
+            "invoice_total_paise": 1000000,
         },
     ]
 
@@ -58,13 +76,19 @@ def test_cutoff_testing_engine() -> None:
     txns = [
         # Normal sales pre-year end
         {
-            "document_number": "S-101", "document_date": "2026-03-28", "dispatch_or_receipt_date": "2026-03-28",
-            "amount_paise": 10000000, "transaction_type": "Sales",
+            "document_number": "S-101",
+            "document_date": "2026-03-28",
+            "dispatch_or_receipt_date": "2026-03-28",
+            "amount_paise": 10000000,
+            "transaction_type": "Sales",
         },
         # Post year-end sales return within 15 days
         {
-            "document_number": "SR-01", "document_date": "2026-04-05", "dispatch_or_receipt_date": "2026-04-05",
-            "amount_paise": 50000000, "transaction_type": "Returns",
+            "document_number": "SR-01",
+            "document_date": "2026-04-05",
+            "dispatch_or_receipt_date": "2026-04-05",
+            "amount_paise": 50000000,
+            "transaction_type": "Returns",
         },
     ]
 
@@ -81,18 +105,24 @@ def test_bank_reconciliation_engine() -> None:
     items = [
         # Normal timing difference (20 days)
         {
-            "bank_account_number": "HDFC-01", "item_type": BRSItemTypeEnum.UNPRESENTED_CHEQUE,
-            "entry_date": "2026-03-15", "amount_paise": 2500000,
+            "bank_account_number": "HDFC-01",
+            "item_type": BRSItemTypeEnum.UNPRESENTED_CHEQUE,
+            "entry_date": "2026-03-15",
+            "amount_paise": 2500000,
         },
         # Stale Cheque (120 days old)
         {
-            "bank_account_number": "HDFC-01", "item_type": BRSItemTypeEnum.UNPRESENTED_CHEQUE,
-            "entry_date": "2025-12-01", "amount_paise": 8000000,
+            "bank_account_number": "HDFC-01",
+            "item_type": BRSItemTypeEnum.UNPRESENTED_CHEQUE,
+            "entry_date": "2025-12-01",
+            "amount_paise": 8000000,
         },
         # Delayed deposit (30 days)
         {
-            "bank_account_number": "HDFC-01", "item_type": BRSItemTypeEnum.UNCREDITED_DEPOSIT,
-            "entry_date": "2026-03-01", "amount_paise": 15000000,
+            "bank_account_number": "HDFC-01",
+            "item_type": BRSItemTypeEnum.UNCREDITED_DEPOSIT,
+            "entry_date": "2026-03-01",
+            "amount_paise": 15000000,
         },
     ]
 
@@ -140,11 +170,30 @@ def test_payroll_forensic_engine() -> None:
 
     entries = [
         # Normal staff
-        {"employee_code": "EMP-01", "employee_name": "Ramesh Kumar", "bank_account_number": "SBIN001122", "salary_paise": 5000000, "is_active": True},
+        {
+            "employee_code": "EMP-01",
+            "employee_name": "Ramesh Kumar",
+            "bank_account_number": "SBIN001122",
+            "salary_paise": 5000000,
+            "is_active": True,
+        },
         # Duplicate bank account (Ghost employee)
-        {"employee_code": "EMP-02", "employee_name": "Ghost Staff 1", "bank_account_number": "SBIN001122", "salary_paise": 5000000, "is_active": True},
+        {
+            "employee_code": "EMP-02",
+            "employee_name": "Ghost Staff 1",
+            "bank_account_number": "SBIN001122",
+            "salary_paise": 5000000,
+            "is_active": True,
+        },
         # Inactive employee paid post-resignation
-        {"employee_code": "EMP-03", "employee_name": "Suresh Ex-Employee", "bank_account_number": "HDFC998877", "salary_paise": 4000000, "is_active": False, "resignation_date": "2025-11-30"},
+        {
+            "employee_code": "EMP-03",
+            "employee_name": "Suresh Ex-Employee",
+            "bank_account_number": "HDFC998877",
+            "salary_paise": 4000000,
+            "is_active": False,
+            "resignation_date": "2025-11-30",
+        },
     ]
 
     res = PayrollForensicEngine.scan_payroll_master("eng-01", entries)
@@ -153,7 +202,6 @@ def test_payroll_forensic_engine() -> None:
     assert res.records[0].anomaly_type == PayrollAnomalyTypeEnum.DUPLICATE_BANK_ACCOUNT
     assert res.records[1].anomaly_type == PayrollAnomalyTypeEnum.DUPLICATE_BANK_ACCOUNT
     assert res.records[2].anomaly_type == PayrollAnomalyTypeEnum.PAYMENT_TO_INACTIVE_EMPLOYEE
-
 
 
 def test_inventory_count_engine() -> None:
@@ -165,11 +213,27 @@ def test_inventory_count_engine() -> None:
 
     sheets = [
         # Matched count
-        {"item_code": "ITM-01", "book_quantity": 100, "physical_count_quantity": 100, "unit_cost_paise": 5000},
+        {
+            "item_code": "ITM-01",
+            "book_quantity": 100,
+            "physical_count_quantity": 100,
+            "unit_cost_paise": 5000,
+        },
         # Physical Shortage (pilferage / unrecorded issue)
-        {"item_code": "ITM-02", "book_quantity": 50, "physical_count_quantity": 40, "unit_cost_paise": 10000},
+        {
+            "item_code": "ITM-02",
+            "book_quantity": 50,
+            "physical_count_quantity": 40,
+            "unit_cost_paise": 10000,
+        },
         # Damaged stock (NRV test required)
-        {"item_code": "ITM-03", "book_quantity": 20, "physical_count_quantity": 20, "unit_cost_paise": 8000, "is_damaged_or_obsolete": True},
+        {
+            "item_code": "ITM-03",
+            "book_quantity": 20,
+            "physical_count_quantity": 20,
+            "unit_cost_paise": 8000,
+            "is_damaged_or_obsolete": True,
+        },
     ]
 
     res = InventoryCountEngine.reconcile_physical_counts("eng-01", sheets)
@@ -187,11 +251,29 @@ def test_fixed_asset_engine() -> None:
 
     assets = [
         # Valid asset
-        {"asset_tag": "FA-01", "asset_name": "CNC Lathe Machine", "gross_block_paise": 100000000, "accumulated_depreciation_paise": 20000000, "is_physically_verified": True},
+        {
+            "asset_tag": "FA-01",
+            "asset_name": "CNC Lathe Machine",
+            "gross_block_paise": 100000000,
+            "accumulated_depreciation_paise": 20000000,
+            "is_physically_verified": True,
+        },
         # Negative NBV (Depreciation calculation error)
-        {"asset_tag": "FA-02", "asset_name": "Old Generator", "gross_block_paise": 50000000, "accumulated_depreciation_paise": 60000000, "is_physically_verified": True},
+        {
+            "asset_tag": "FA-02",
+            "asset_name": "Old Generator",
+            "gross_block_paise": 50000000,
+            "accumulated_depreciation_paise": 60000000,
+            "is_physically_verified": True,
+        },
         # Ghost Asset (Not located during physical verification)
-        {"asset_tag": "FA-03", "asset_name": "Executive Laptop #4", "gross_block_paise": 8000000, "accumulated_depreciation_paise": 2000000, "is_physically_verified": False},
+        {
+            "asset_tag": "FA-03",
+            "asset_name": "Executive Laptop #4",
+            "gross_block_paise": 8000000,
+            "accumulated_depreciation_paise": 2000000,
+            "is_physically_verified": False,
+        },
     ]
 
     res = FixedAssetEngine.audit_fixed_asset_register("eng-01", assets)
@@ -200,7 +282,6 @@ def test_fixed_asset_engine() -> None:
     assert res.anomalous_assets_count == 2
     assert res.records[1].anomaly_type == AssetAnomalyTypeEnum.NEGATIVE_NET_BOOK_VALUE
     assert res.records[2].anomaly_type == AssetAnomalyTypeEnum.GHOST_ASSET_UNLOCATED
-
 
 
 def test_independence_conflict_engine() -> None:
@@ -212,19 +293,39 @@ def test_independence_conflict_engine() -> None:
 
     declarations = [
         # Clean Member
-        {"user_id": "u-01", "user_name": "Audit Senior", "role": "Senior", "holding_face_value_paise": 5000000},  # ₹50,000 <= ₹2L
+        {
+            "user_id": "u-01",
+            "user_name": "Audit Senior",
+            "role": "Senior",
+            "holding_face_value_paise": 5000000,
+        },  # ₹50,000 <= ₹2L
         # Holding Limit Exceeded (> ₹2L)
-        {"user_id": "u-02", "user_name": "Audit Partner B", "role": "Partner", "holding_face_value_paise": 35000000},  # ₹3.5L > ₹2L
+        {
+            "user_id": "u-02",
+            "user_name": "Audit Partner B",
+            "role": "Partner",
+            "holding_face_value_paise": 35000000,
+        },  # ₹3.5L > ₹2L
         # Section 144 Prohibited Service
-        {"user_id": "u-03", "user_name": "Manager C", "role": "Manager", "has_prohibited_non_audit_services": True},
+        {
+            "user_id": "u-03",
+            "user_name": "Manager C",
+            "role": "Manager",
+            "has_prohibited_non_audit_services": True,
+        },
     ]
 
     res = IndependenceConflictEngine.evaluate_team_independence("firm-01", "eng-01", declarations)
     assert res.total_declarations == 3
     assert res.clean_count == 1
     assert res.impaired_count == 2
-    assert res.declarations[1].threat_type == IndependenceThreatTypeEnum.FINANCIAL_INTEREST_EXCEEDS_LIMIT
-    assert res.declarations[2].threat_type == IndependenceThreatTypeEnum.SECTION_144_PROHIBITED_SERVICE
+    assert (
+        res.declarations[1].threat_type
+        == IndependenceThreatTypeEnum.FINANCIAL_INTEREST_EXCEEDS_LIMIT
+    )
+    assert (
+        res.declarations[2].threat_type == IndependenceThreatTypeEnum.SECTION_144_PROHIBITED_SERVICE
+    )
     assert "IMPAIRED" in res.firm_compliance_status
 
 
@@ -234,9 +335,19 @@ def test_deferred_tax_engine() -> None:
 
     items = [
         # Higher book depreciation than tax -> Future deductible -> DTA
-        {"item_name": "Plant & Machinery Depreciation", "difference_type": TimingDifferenceTypeEnum.DEPRECIATION_DIFFERENCE, "books_carrying_paise": 80000000, "tax_base_paise": 100000000},
+        {
+            "item_name": "Plant & Machinery Depreciation",
+            "difference_type": TimingDifferenceTypeEnum.DEPRECIATION_DIFFERENCE,
+            "books_carrying_paise": 80000000,
+            "tax_base_paise": 100000000,
+        },
         # Section 43B statutory dues unpaid -> DTA
-        {"item_name": "Bonus Payable under Sec 43B", "difference_type": TimingDifferenceTypeEnum.SECTION_43B_DISALLOWANCE, "books_carrying_paise": 15000000, "tax_base_paise": 0},
+        {
+            "item_name": "Bonus Payable under Sec 43B",
+            "difference_type": TimingDifferenceTypeEnum.SECTION_43B_DISALLOWANCE,
+            "books_carrying_paise": 15000000,
+            "tax_base_paise": 0,
+        },
     ]
 
     res = DeferredTaxEngine.calculate_deferred_tax("eng-01", 25.17, items)
@@ -254,12 +365,20 @@ def test_receivables_recovery_engine() -> None:
 
     balances = [
         {"debtor_code": "D-01", "debtor_name": "Alpha Corp", "balance_at_year_end_paise": 10000000},
-        {"debtor_code": "D-02", "debtor_name": "Beta Enterprises", "balance_at_year_end_paise": 20000000},
-        {"debtor_code": "D-03", "debtor_name": "Gamma Solutions", "balance_at_year_end_paise": 15000000},
+        {
+            "debtor_code": "D-02",
+            "debtor_name": "Beta Enterprises",
+            "balance_at_year_end_paise": 20000000,
+        },
+        {
+            "debtor_code": "D-03",
+            "debtor_name": "Gamma Solutions",
+            "balance_at_year_end_paise": 15000000,
+        },
     ]
     receipts = [
         {"debtor_code": "D-01", "receipt_amount_paise": 10000000},  # 100% recovered
-        {"debtor_code": "D-02", "receipt_amount_paise": 8000000},   # Partially recovered
+        {"debtor_code": "D-02", "receipt_amount_paise": 8000000},  # Partially recovered
     ]
 
     res = ReceivablesRecoveryEngine.tie_out_subsequent_receipts("eng-01", balances, receipts)
@@ -282,8 +401,10 @@ def test_minutes_contradiction_engine() -> None:
 
     resolutions = [
         {
-            "meeting_date": "2025-09-15", "resolution_type": MinutesItemTypeEnum.BORROWING_LIMIT_RESOLUTION,
-            "authorized_limit_paise": 5000000000, "extracted_text": "Resolved that borrowing limit is ₹50 Cr.",
+            "meeting_date": "2025-09-15",
+            "resolution_type": MinutesItemTypeEnum.BORROWING_LIMIT_RESOLUTION,
+            "authorized_limit_paise": 5000000000,
+            "extracted_text": "Resolved that borrowing limit is ₹50 Cr.",
         }
     ]
     # Actual ledger borrowings: ₹60 Cr (> ₹50 Cr limit)
@@ -305,9 +426,17 @@ def test_roc_secretarial_engine() -> None:
 
     filings = [
         # MGT-7 Match
-        {"form_type": ROCFormTypeEnum.FORM_MGT_7, "srn_number": "SRN-12345", "reported_value_paise": 100000000},
+        {
+            "form_type": ROCFormTypeEnum.FORM_MGT_7,
+            "srn_number": "SRN-12345",
+            "reported_value_paise": 100000000,
+        },
         # CHG-1 Deficit (Registered ₹3 Cr vs Borrowings ₹5 Cr)
-        {"form_type": ROCFormTypeEnum.FORM_CHG_1, "srn_number": "SRN-99887", "reported_value_paise": 300000000},
+        {
+            "form_type": ROCFormTypeEnum.FORM_CHG_1,
+            "srn_number": "SRN-99887",
+            "reported_value_paise": 300000000,
+        },
     ]
     books = {
         "paid_up_capital_paise": 100000000,
@@ -330,9 +459,17 @@ def test_group_audit_engine() -> None:
 
     comps = [
         # Significant subsidiary (50% of revenue)
-        {"component_name": "Apex Manufacturing Ltd", "revenue_paise": 5000000000, "assets_paise": 4000000000},
+        {
+            "component_name": "Apex Manufacturing Ltd",
+            "revenue_paise": 5000000000,
+            "assets_paise": 4000000000,
+        },
         # Non-significant subsidiary (5% of revenue)
-        {"component_name": "Apex Small Spares LLP", "revenue_paise": 500000000, "assets_paise": 400000000},
+        {
+            "component_name": "Apex Small Spares LLP",
+            "revenue_paise": 500000000,
+            "assets_paise": 400000000,
+        },
     ]
 
     res = GroupAuditEngine.analyze_group_structure(
@@ -345,8 +482,7 @@ def test_group_audit_engine() -> None:
     assert res.significant_components_count == 1
     assert res.components[0].component_type == ComponentTypeEnum.SUBSIDIARY_SIGNIFICANT
     assert res.components[1].component_type == ComponentTypeEnum.SUBSIDIARY_NON_SIGNIFICANT
-    assert res.components[0].component_materiality_paise > res.components[1].component_materiality_paise
-
-
-
-
+    assert (
+        res.components[0].component_materiality_paise
+        > res.components[1].component_materiality_paise
+    )

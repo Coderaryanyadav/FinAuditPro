@@ -63,7 +63,9 @@ class InspectionView(QWidget):
         # Integrity Banner
         self.banner = CardWidget("INSPECTION INTEGRITY STATUS")
         banner_layout = QHBoxLayout()
-        self.status_lbl = QLabel("READ-ONLY ENFORCED: Database locked against mutations. Full SHA-256 Merkle chain verified.")
+        self.status_lbl = QLabel(
+            "READ-ONLY ENFORCED: Database locked against mutations. Full SHA-256 Merkle chain verified."
+        )
         self.status_lbl.setStyleSheet("color: #16A34A; font-weight: bold; font-size: 13px;")
         banner_layout.addWidget(self.status_lbl)
         self.banner.content_layout.addLayout(banner_layout)
@@ -74,14 +76,19 @@ class InspectionView(QWidget):
         stats_layout.setSpacing(10)
         self.card_wps = MetricCard("WORKING PAPERS", "0", "Signed & Locked", accent_color="#2563EB")
         self.card_risks = MetricCard("ASSESSED RISKS", "0", "SA 315 Matrix", accent_color="#DC2626")
-        self.card_evidence = MetricCard("EVIDENCE VAULT", "0", "SHA-256 Digested", accent_color="#16A34A")
-        self.card_notes = MetricCard("OPEN REVIEW NOTES", "0", "Zero Tolerance", accent_color="#D97706")
+        self.card_evidence = MetricCard(
+            "EVIDENCE VAULT", "0", "SHA-256 Digested", accent_color="#16A34A"
+        )
+        self.card_notes = MetricCard(
+            "OPEN REVIEW NOTES", "0", "Zero Tolerance", accent_color="#D97706"
+        )
         for c in (self.card_wps, self.card_risks, self.card_evidence, self.card_notes):
             stats_layout.addWidget(c)
         layout.addLayout(stats_layout)
 
         # Inspection Tabs
         from PySide6.QtCore import Qt
+
         self.tabs = QTabWidget()
         self.tabs.setUsesScrollButtons(True)
         self.tabs.setElideMode(Qt.TextElideMode.ElideNone)
@@ -93,10 +100,14 @@ class InspectionView(QWidget):
         wp_l = QVBoxLayout(wp_tab)
         self.wp_table = QTableWidget()
         self.wp_table.setColumnCount(6)
-        self.wp_table.setHorizontalHeaderLabels(["INDEX", "TITLE", "FILE CATEGORY", "PREPARER", "REVIEWER", "CONTENT HASH"])
+        self.wp_table.setHorizontalHeaderLabels(
+            ["INDEX", "TITLE", "FILE CATEGORY", "PREPARER", "REVIEWER", "CONTENT HASH"]
+        )
         self.wp_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         for i in [0, 2, 3, 4, 5]:
-            self.wp_table.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeMode.ResizeToContents)
+            self.wp_table.horizontalHeader().setSectionResizeMode(
+                i, QHeaderView.ResizeMode.ResizeToContents
+            )
         self.wp_table.verticalHeader().setVisible(False)
         self.wp_table.setAlternatingRowColors(True)
         wp_l.addWidget(self.wp_table)
@@ -107,10 +118,14 @@ class InspectionView(QWidget):
         risk_l = QVBoxLayout(risk_tab)
         self.risk_table = QTableWidget()
         self.risk_table.setColumnCount(5)
-        self.risk_table.setHorizontalHeaderLabels(["RISK CODE", "CATEGORY", "ASSERTIONS", "RoMM SEVERITY", "AUDIT RESPONSE"])
+        self.risk_table.setHorizontalHeaderLabels(
+            ["RISK CODE", "CATEGORY", "ASSERTIONS", "RoMM SEVERITY", "AUDIT RESPONSE"]
+        )
         self.risk_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
         for i in [0, 1, 2, 3]:
-            self.risk_table.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeMode.ResizeToContents)
+            self.risk_table.horizontalHeader().setSectionResizeMode(
+                i, QHeaderView.ResizeMode.ResizeToContents
+            )
         self.risk_table.verticalHeader().setVisible(False)
         self.risk_table.setAlternatingRowColors(True)
         risk_l.addWidget(self.risk_table)
@@ -121,10 +136,14 @@ class InspectionView(QWidget):
         ev_l = QVBoxLayout(ev_tab)
         self.ev_table = QTableWidget()
         self.ev_table.setColumnCount(5)
-        self.ev_table.setHorizontalHeaderLabels(["EVIDENCE ID", "TITLE", "DOCUMENT / PAGE", "LINEAGE NODE", "ACTIONS"])
+        self.ev_table.setHorizontalHeaderLabels(
+            ["EVIDENCE ID", "TITLE", "DOCUMENT / PAGE", "LINEAGE NODE", "ACTIONS"]
+        )
         self.ev_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         for i in [0, 2, 3, 4]:
-            self.ev_table.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeMode.ResizeToContents)
+            self.ev_table.horizontalHeader().setSectionResizeMode(
+                i, QHeaderView.ResizeMode.ResizeToContents
+            )
         self.ev_table.verticalHeader().setVisible(False)
         self.ev_table.setAlternatingRowColors(True)
         ev_l.addWidget(self.ev_table)
@@ -143,10 +162,16 @@ class InspectionView(QWidget):
 
         # Load Working Papers
         if self.working_paper_service:
-            wps = self.working_paper_service.list_working_papers_for_engagement(self.current_engagement.id)
+            wps = self.working_paper_service.list_working_papers_for_engagement(
+                self.current_engagement.id
+            )
             self.wp_table.setRowCount(len(wps))
             for r, wp in enumerate(wps):
-                cat_val = wp.file_category.value if hasattr(wp.file_category, "value") else str(wp.file_category)
+                cat_val = (
+                    wp.file_category.value
+                    if hasattr(wp.file_category, "value")
+                    else str(wp.file_category)
+                )
                 self.wp_table.setItem(r, 0, QTableWidgetItem(wp.index_code))
                 self.wp_table.setItem(r, 1, QTableWidgetItem(wp.title))
                 self.wp_table.setItem(r, 2, QTableWidgetItem(cat_val))
@@ -162,7 +187,9 @@ class InspectionView(QWidget):
             self.risk_table.setRowCount(len(risks))
             for r, rk in enumerate(risks):
                 romm_val = rk.romm.value if hasattr(rk.romm, "value") else str(rk.romm)
-                ass_str = ", ".join(a.value if hasattr(a, "value") else str(a) for a in rk.assertions)
+                ass_str = ", ".join(
+                    a.value if hasattr(a, "value") else str(a) for a in rk.assertions
+                )
                 self.risk_table.setItem(r, 0, QTableWidgetItem(rk.risk_code))
                 self.risk_table.setItem(r, 1, QTableWidgetItem(rk.category))
                 self.risk_table.setItem(r, 2, QTableWidgetItem(ass_str))
@@ -170,7 +197,9 @@ class InspectionView(QWidget):
                 self.risk_table.setItem(r, 4, QTableWidgetItem(rk.risk_response))
             self.card_risks.set_value(str(len(risks)))
 
-            evidence_items = self.audit_matrix_service.list_evidence_for_engagement(self.current_engagement.id)
+            evidence_items = self.audit_matrix_service.list_evidence_for_engagement(
+                self.current_engagement.id
+            )
             self.ev_table.setRowCount(len(evidence_items))
             for r, ev in enumerate(evidence_items):
                 page_str = f"Page {ev.page_number}" if ev.page_number else "Dataset Row"
@@ -187,8 +216,11 @@ class InspectionView(QWidget):
 
     def _on_view_dag(self, evidence_id: str) -> None:
         from finauditpro.ui.dialogs.traceability_dialog import TraceabilityDialog
+
         if self.audit_matrix_service and self.current_engagement:
-            diag = TraceabilityDialog(self.audit_matrix_service, self.current_engagement.id, parent=self)
+            diag = TraceabilityDialog(
+                self.audit_matrix_service, self.current_engagement.id, parent=self
+            )
             diag.exec()
 
     def _on_verify_integrity(self) -> None:

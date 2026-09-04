@@ -122,6 +122,7 @@ class ExternalConfirmationRepository:
             ConfirmationTypeEnum,
             ExternalConfirmation,
         )
+
         try:
             c_type = ConfirmationTypeEnum(m.confirmation_type)
         except ValueError:
@@ -157,12 +158,15 @@ class ExternalConfirmationRepository:
         from finauditpro.infrastructure.persistence.pbc_and_query_models import (
             ExternalConfirmationModel,
         )
+
         if not entity.id:
             entity.id = str(uuid4())
         model = ExternalConfirmationModel(
             id=entity.id,
             engagement_id=entity.engagement_id,
-            confirmation_type=entity.confirmation_type.value if hasattr(entity.confirmation_type, "value") else str(entity.confirmation_type),
+            confirmation_type=entity.confirmation_type.value
+            if hasattr(entity.confirmation_type, "value")
+            else str(entity.confirmation_type),
             third_party_name=entity.third_party_name,
             account_reference=entity.account_reference,
             book_balance_paise=entity.book_balance_paise,
@@ -188,7 +192,10 @@ class ExternalConfirmationRepository:
         from finauditpro.infrastructure.persistence.pbc_and_query_models import (
             ExternalConfirmationModel,
         )
-        stmt = select(ExternalConfirmationModel).where(ExternalConfirmationModel.id == confirmation_id)
+
+        stmt = select(ExternalConfirmationModel).where(
+            ExternalConfirmationModel.id == confirmation_id
+        )
         model = self.session.execute(stmt).scalar_one_or_none()
         return self._to_entity(model) if model else None
 
@@ -196,6 +203,7 @@ class ExternalConfirmationRepository:
         from finauditpro.infrastructure.persistence.pbc_and_query_models import (
             ExternalConfirmationModel,
         )
+
         stmt = (
             select(ExternalConfirmationModel)
             .where(ExternalConfirmationModel.engagement_id == engagement_id)
@@ -208,19 +216,26 @@ class ExternalConfirmationRepository:
         from finauditpro.infrastructure.persistence.pbc_and_query_models import (
             ExternalConfirmationModel,
         )
+
         stmt = select(ExternalConfirmationModel).where(ExternalConfirmationModel.id == entity.id)
         model = self.session.execute(stmt).scalar_one_or_none()
         if not model:
             raise ValueError(f"ExternalConfirmation '{entity.id}' not found.")
 
-        model.confirmation_type = entity.confirmation_type.value if hasattr(entity.confirmation_type, "value") else str(entity.confirmation_type)
+        model.confirmation_type = (
+            entity.confirmation_type.value
+            if hasattr(entity.confirmation_type, "value")
+            else str(entity.confirmation_type)
+        )
         model.third_party_name = entity.third_party_name
         model.account_reference = entity.account_reference
         model.book_balance_paise = entity.book_balance_paise
         model.as_of_date = entity.as_of_date
         model.contact_email = entity.contact_email
         model.contact_address = entity.contact_address
-        model.status = entity.status.value if hasattr(entity.status, "value") else str(entity.status)
+        model.status = (
+            entity.status.value if hasattr(entity.status, "value") else str(entity.status)
+        )
         model.dispatched_date = entity.dispatched_date
         model.response_date = entity.response_date
         model.confirmed_balance_paise = entity.confirmed_balance_paise
@@ -232,4 +247,3 @@ class ExternalConfirmationRepository:
 
         self.session.flush()
         return self._to_entity(model)
-

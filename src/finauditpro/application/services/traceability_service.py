@@ -216,6 +216,52 @@ class TraceabilityService:
                         }
                     )
 
+            # 8. Misstatement & AJE Integration (Phase B)
+            from finauditpro.infrastructure.persistence.repositories.core_audit_engine_repository import (
+                CoreAuditEngineRepository,
+            )
+
+            core_repo = CoreAuditEngineRepository(session)
+            misstatements = core_repo.list_misstatements_for_engagement(engagement_id)
+            for misst in misstatements:
+                if misst.exception_id == finding.id or misst.procedure_id == finding.procedure_id:
+                    m_node_id = f"misstatement_{misst.id}"
+                    if m_node_id not in visited_nodes:
+                        nodes.append(
+                            {
+                                "id": m_node_id,
+                                "type": "Misstatement",
+                                "label": f"[{misst.account_code}] ₹{misst.amount_paise / 100:,.2f} ({misst.status.value})",
+                                "amount_paise": misst.amount_paise,
+                            }
+                        )
+                        visited_nodes.add(m_node_id)
+                    edges.append(
+                        {
+                            "source": finding_node_id,
+                            "target": m_node_id,
+                            "relation": "QUANTIFIED_AS_MISSTATEMENT",
+                        }
+                    )
+                    if misst.linked_aje_number:
+                        aje_node_id = f"aje_{misst.linked_aje_id or misst.linked_aje_number}"
+                        if aje_node_id not in visited_nodes:
+                            nodes.append(
+                                {
+                                    "id": aje_node_id,
+                                    "type": "AJE",
+                                    "label": f"Adjustment [{misst.linked_aje_number}]",
+                                }
+                            )
+                            visited_nodes.add(aje_node_id)
+                        edges.append(
+                            {
+                                "source": m_node_id,
+                                "target": aje_node_id,
+                                "relation": "CORRECTED_BY_AJE",
+                            }
+                        )
+
             return TraceabilityGraphDTO(
                 engagement_id=engagement_id,
                 finding_id=finding_id,

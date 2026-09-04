@@ -35,7 +35,6 @@ class FirmView(QWidget):
         self._all_firms: list[Firm] = []
         self._init_ui()
 
-
     def _init_ui(self) -> None:
         layout = QVBoxLayout(self)
         layout.setContentsMargins(24, 20, 24, 24)
@@ -58,9 +57,7 @@ class FirmView(QWidget):
         f_layout.setSpacing(10)
 
         s_lbl = QLabel("Search:")
-        s_lbl.setStyleSheet(
-            "font-size: 11px; font-weight: 700; color: #64748B;"
-        )
+        s_lbl.setStyleSheet("font-size: 11px; font-weight: 700; color: #64748B;")
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Search firms by name, registration (FRN), or PAN...")
         self.search_input.setStyleSheet(
@@ -71,7 +68,9 @@ class FirmView(QWidget):
 
         clear_btn = QPushButton("Clear")
         clear_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        clear_btn.setStyleSheet("QPushButton { background-color: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 14px; font-weight: 500; } QPushButton:hover { background-color: #F1F5F9; color: #1E293B; border-color: #94A3B8; }")
+        clear_btn.setStyleSheet(
+            "QPushButton { background-color: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 14px; font-weight: 500; } QPushButton:hover { background-color: #F1F5F9; color: #1E293B; border-color: #94A3B8; }"
+        )
         clear_btn.clicked.connect(self.search_input.clear)
 
         f_layout.addWidget(s_lbl)

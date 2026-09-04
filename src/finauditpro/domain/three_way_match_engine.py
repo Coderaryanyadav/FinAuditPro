@@ -87,13 +87,17 @@ class ThreeWayMatchEngine:
             if inv_no and not grn_no:
                 disc_type = MatchDiscrepancyTypeEnum.INVOICE_WITHOUT_GRN
                 var_paise = inv_tot
-                remark = "Invoice billed without Goods Receipt Note (GRN). Potential unverified billing."
+                remark = (
+                    "Invoice billed without Goods Receipt Note (GRN). Potential unverified billing."
+                )
                 disc_cnt += 1
                 tot_var += var_paise
             elif grn_no and not inv_no:
                 disc_type = MatchDiscrepancyTypeEnum.GRN_WITHOUT_INVOICE
                 var_paise = int(grn_qty * po_rate)
-                remark = "Goods received without vendor invoice. Unrecorded liability accrual required."
+                remark = (
+                    "Goods received without vendor invoice. Unrecorded liability accrual required."
+                )
                 disc_cnt += 1
                 tot_var += var_paise
             elif abs(grn_qty - inv_qty) > 0.001:
@@ -107,7 +111,7 @@ class ThreeWayMatchEngine:
                 disc_type = MatchDiscrepancyTypeEnum.PRICE_VARIANCE
                 rate_diff = abs(inv_rate - po_rate)
                 var_paise = int(inv_qty * rate_diff)
-                remark = f"Rate variance: PO rate ₹{po_rate/100:,.2f} vs Billed rate ₹{inv_rate/100:,.2f}."
+                remark = f"Rate variance: PO rate ₹{po_rate / 100:,.2f} vs Billed rate ₹{inv_rate / 100:,.2f}."
                 disc_cnt += 1
                 tot_var += var_paise
             else:

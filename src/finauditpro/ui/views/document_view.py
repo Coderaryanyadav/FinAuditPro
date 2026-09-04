@@ -2,6 +2,7 @@
 Document Intelligence Workspace View for FinAuditPro.
 Enterprise document vault supporting FTS search, category filters, and evidence indexing.
 """
+
 from typing import Any
 
 from PySide6.QtCore import Qt, Signal
@@ -61,9 +62,7 @@ class DocumentView(QWidget):
         s_layout.setSpacing(10)
 
         search_lbl = QLabel("Search:")
-        search_lbl.setStyleSheet(
-            "font-size: 11px; font-weight: 700; color: #64748B;"
-        )
+        search_lbl.setStyleSheet("font-size: 11px; font-weight: 700; color: #64748B;")
 
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText(
@@ -82,7 +81,9 @@ class DocumentView(QWidget):
 
         clear_btn = QPushButton("Clear")
         clear_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        clear_btn.setStyleSheet("QPushButton { background-color: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 14px; font-weight: 500; } QPushButton:hover { background-color: #F1F5F9; color: #1E293B; border-color: #94A3B8; }")
+        clear_btn.setStyleSheet(
+            "QPushButton { background-color: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 14px; font-weight: 500; } QPushButton:hover { background-color: #F1F5F9; color: #1E293B; border-color: #94A3B8; }"
+        )
         clear_btn.clicked.connect(self._on_clear_search)
 
         s_layout.addWidget(search_lbl)
@@ -139,7 +140,6 @@ class DocumentView(QWidget):
             self.header.title_lbl.setText("Documents (Select Engagement)")
             self.header.action_btn.setEnabled(False)
         self.refresh()
-
 
     def refresh(self) -> None:
         if not self.current_engagement_id:

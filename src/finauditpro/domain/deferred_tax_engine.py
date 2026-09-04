@@ -85,10 +85,10 @@ class DeferredTaxEngine:
 
             if is_asset:
                 tot_deductible += abs(diff)
-                rem = f"DTA of ₹{tax_impact/100:,.2f} recognized. Verify virtual/reasonable certainty for realization."
+                rem = f"DTA of ₹{tax_impact / 100:,.2f} recognized. Verify virtual/reasonable certainty for realization."
             else:
                 tot_taxable += abs(diff)
-                rem = f"DTL of ₹{tax_impact/100:,.2f} created due to higher tax depreciation in initial years."
+                rem = f"DTL of ₹{tax_impact / 100:,.2f} created due to higher tax depreciation in initial years."
 
             records.append(
                 DeferredTaxItem(

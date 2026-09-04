@@ -63,7 +63,6 @@ class AIWorkerThread(QThread):
         super().__init__()
         self.func = func
 
-
     def run(self) -> None:
         try:
             res = self.func()
@@ -259,7 +258,11 @@ class AIAssistantView(QWidget):
             pbtn.setStyleSheet(
                 "QPushButton { background-color: #F1F5F9; color: #334155; font-size: 11px; font-weight: 600; border: 1px solid #CBD5E1; border-radius: 4px; padding: 4px 10px; } QPushButton:hover { background-color: #E2E8F0; color: #0F172A; }"
             )
-            pbtn.clicked.connect(lambda checked=False, p=pill: self._on_prompt_pill_clicked(f"Analyze {p} in financial records."))
+            pbtn.clicked.connect(
+                lambda checked=False, p=pill: self._on_prompt_pill_clicked(
+                    f"Analyze {p} in financial records."
+                )
+            )
             pills_row.addWidget(pbtn)
         pills_row.addStretch()
         c2_layout.addLayout(pills_row)
@@ -320,7 +323,6 @@ class AIAssistantView(QWidget):
                 name = getattr(doc, "filename", getattr(doc, "original_filename", "Document"))
                 self.doc_sources_list.addItem(QListWidgetItem(f"{name}"))
 
-
     def _on_prompt_pill_clicked(self, prompt_str: str) -> None:
         self.qa_input.setText(prompt_str)
         self._on_ask_clicked()
@@ -358,7 +360,12 @@ class AIAssistantView(QWidget):
             return
 
         q = self.qa_input.text().strip()
-        if not q or not self.ai_service or not hasattr(self.ai_service, "query_rag") or not self.current_engagement:
+        if (
+            not q
+            or not self.ai_service
+            or not hasattr(self.ai_service, "query_rag")
+            or not self.current_engagement
+        ):
             return
 
         self.chat_display.setText(" Executing RAG Query against Local LM Studio AI Model...")

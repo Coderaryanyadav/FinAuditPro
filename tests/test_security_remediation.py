@@ -342,7 +342,7 @@ def test_dat01_working_paper_integrity_detects_tampered_and_deleted_evidence(
 
     # 2. Tampering evidence on disk fails integrity check
     stored_path = Path(doc.stored_path)
-    stored_path.write_text("TAMPERED BANK BALANCE: ₹100.00")
+    stored_path.write_text("TAMPERED BANK BALANCE: ₹100.00", encoding="utf-8")
     is_valid_tampered, msg_tampered = wp_svc.verify_integrity(wp.id)
     assert is_valid_tampered is False
     assert "modified or tampered" in msg_tampered

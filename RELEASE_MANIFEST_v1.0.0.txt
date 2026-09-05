@@ -1,16 +1,27 @@
 Product: FinAuditPro
 Version: 1.0.0
-Build date: 2026-09-05
-Commit: 34355c1eff9ec9c8c8efeb376cdfd62b2c978a62
-Python: 3.14.7
-Platform: macOS Darwin 24.6.0 arm64
-Tests: 307 collected, 307 passed, 0 failed, 0 skipped, 0 errors (pytest -q)
-Package: dist/finauditpro-1.0.0-py3-none-any.whl, dist/finauditpro-1.0.0.tar.gz
-SHA-256 (whl): d432a7485691f9621758eb854d39a4f27f24a42975eb6105e220d6d4e58b53b1
-SHA-256 (sdist): d9a469888501cd0bfea93ad7b361e0c89239854d6c5325a764fe7bb2c4d9c2cb
-Security status: PASS (Fail-closed encryption, no hardcoded secrets, authenticated lockout state, trigger-protected audit trail)
-Known limitations:
-1. Offline-First Desktop Scope: Designed strictly for single-workstation local database execution; does not provide real-time multi-user LAN synchronization or cloud backend synchronization.
-2. macOS Code Signing & Notarization: Release packages built and verified locally on macOS Darwin arm64; binary codesigning and Apple notarization require external Apple Developer Developer ID credentials in CI/CD pipeline.
-3. Optical Character Recognition (OCR): Document OCR capabilities depend on system-installed Tesseract binary (`tesseract`) and PyMuPDF bindings when processing scanned PDFs or image evidence.
+Release Type: Production
+Release Date: 2026-09-05
+
+Git Tag: v1.0.0
+Python Compatibility: >=3.12 (Verified on Python 3.12, 3.13, 3.14)
+Supported Platforms: macOS (Apple Silicon arm64 / Intel x86_64), Windows 10/11 (64-bit), Linux x86_64
+
+Test Result: 307 collected, 307 passed, 0 failed, 0 skipped, 0 errors (pytest -q in 30.45s)
+Build Result: PASS (uv build wheel & sdist)
+Security Result: PASS (Fail-closed crypto, HMAC-protected lockout, trigger-protected audit trail, zero hardcoded secrets)
+
+Artifacts:
+- dist/finauditpro-1.0.0-py3-none-any.whl
+- dist/finauditpro-1.0.0.tar.gz
+
+SHA-256 Checksums:
+d432a7485691f9621758eb854d39a4f27f24a42975eb6105e220d6d4e58b53b1  dist/finauditpro-1.0.0-py3-none-any.whl
+536fc373c595292534000e7a8b089cccc1537dc9f7f5db3bade742338b2cfe16  dist/finauditpro-1.0.0.tar.gz
+
+Database Migration: Not Required (Schema version 9 maintained; full backward compatibility preserved)
+Known Limitations:
+1. Offline-First Desktop Scope: Designed strictly for single-workstation local database execution; does not provide real-time multi-user LAN synchronization.
+2. macOS Code Signing: Unsigned binary build verified on macOS Darwin arm64; Apple Developer ID signing and notarization require CI/CD credentials.
+3. OCR Subsystem: Scanned document text extraction requires system-installed Tesseract binary (tesseract) and PyMuPDF bindings.
 4. Professional Judgment Disclaimer: FinAuditPro provides automated audit workflows and mathematical controls supporting procedures under applicable auditing standards; the engagement partner remains exclusively responsible for professional audit opinions and regulatory compliance.

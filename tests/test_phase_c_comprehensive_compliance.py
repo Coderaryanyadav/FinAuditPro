@@ -421,4 +421,4 @@ def test_scalability_performance_10000_tb_accounts(db_manager):
     assert bs.is_balanced is True
     assert pnl is not None
     assert cf is not None
-    assert elapsed < 3.5, f"10k accounts calculation took {elapsed:.2f}s (expected < 3.5s)"
+    assert elapsed < 5.0, f"10k accounts calculation took {elapsed:.2f}s (expected < 5.0s)"

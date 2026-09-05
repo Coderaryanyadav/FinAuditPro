@@ -1,5 +1,7 @@
 """Helper to scaffold Permanent Audit Files and Schedule III working papers."""
 
+from typing import Any
+
 from finauditpro.domain.entities import AuditEvent
 from finauditpro.domain.working_paper_entities import (
     ReviewNote,
@@ -14,7 +16,7 @@ from finauditpro.infrastructure.persistence.repositories.working_paper_repositor
 
 
 def scaffold_permanent_audit_file(
-    db_manager, engagement_id: str, preparer_id: str = "auditor"
+    db_manager: Any, engagement_id: str, preparer_id: str = "auditor"
 ) -> list[WorkingPaper]:
     """Automatically scaffold standard ICAI Permanent Audit File (PAF) legal and statutory structures."""
     from finauditpro.domain.working_paper_entities import (
@@ -77,7 +79,7 @@ def scaffold_permanent_audit_file(
 
 
 def scaffold_schedule_iii_working_papers(
-    db_manager, engagement_id: str, preparer_id: str = "auditor"
+    db_manager: Any, engagement_id: str, preparer_id: str = "auditor"
 ) -> list[WorkingPaper]:
     """Automatically scaffold standard ICAI Schedule III statutory audit working papers (CAF)."""
     from finauditpro.domain.working_paper_entities import FileCategoryEnum
@@ -175,7 +177,7 @@ def scaffold_schedule_iii_working_papers(
     return created
 
 
-def resolve_user_role(session, engagement_id: str, identifier: str) -> str | None:
+def resolve_user_role(session: Any, engagement_id: str, identifier: str) -> str | None:
     """Resolve active role for a user (by ID or username) within engagement scope.
 
     Derives role strictly from ambient SecurityContext or persisted database user records.
@@ -198,7 +200,7 @@ def resolve_user_role(session, engagement_id: str, identifier: str) -> str | Non
             .first()
         )
         if member:
-            return member.role
+            return str(member.role)
         role_val = sess.role.value if hasattr(sess.role, "value") else str(sess.role)
         return role_val if role_val else None
 
@@ -218,8 +220,8 @@ def resolve_user_role(session, engagement_id: str, identifier: str) -> str | Non
             .first()
         )
         if member:
-            return member.role
-        return user.role
+            return str(member.role)
+        return str(user.role)
 
     # 3. Unauthenticated test fixture fallback (when caller is not registered in UserModel)
     u_lower = identifier.lower()
@@ -237,7 +239,7 @@ def resolve_user_role(session, engagement_id: str, identifier: str) -> str | Non
     return "Associate"
 
 
-def archive_working_paper_version(session, wp: WorkingPaper) -> None:
+def archive_working_paper_version(session: Any, wp: WorkingPaper) -> None:
     """Snapshot and persist historical version of a working paper before modification."""
     import json
     from uuid import uuid4
@@ -271,12 +273,12 @@ def archive_working_paper_version(session, wp: WorkingPaper) -> None:
 
 
 def execute_update_content(
-    session,
+    session: Any,
     wp_id: str,
     title: str,
     area: str,
     conclusion: str,
-    sections_list: list[dict],
+    sections_list: list[dict[str, Any]],
     editor_id: str,
 ) -> WorkingPaper:
     from finauditpro.domain.clock import utc_now
@@ -328,7 +330,7 @@ def execute_update_content(
     return updated
 
 
-def execute_raise_review_note(session, dto) -> ReviewNote:
+def execute_raise_review_note(session: Any, dto: Any) -> ReviewNote:
     from finauditpro.domain.exceptions import EntityNotFoundError
     from finauditpro.domain.working_paper_entities import ReviewNote, ReviewNoteStatusEnum
 
@@ -367,7 +369,7 @@ def execute_raise_review_note(session, dto) -> ReviewNote:
     return saved_note
 
 
-def execute_respond_review_note(session, dto) -> ReviewNote:
+def execute_respond_review_note(session: Any, dto: Any) -> ReviewNote:
     from finauditpro.domain.exceptions import EntityNotFoundError
     from finauditpro.domain.working_paper_entities import ReviewNote, ReviewNoteStatusEnum
     from finauditpro.infrastructure.persistence.working_paper_models import ReviewNoteModel
@@ -397,7 +399,7 @@ def execute_respond_review_note(session, dto) -> ReviewNote:
     return saved
 
 
-def execute_clear_review_note(session, dto) -> ReviewNote:
+def execute_clear_review_note(session: Any, dto: Any) -> ReviewNote:
     from finauditpro.domain.exceptions import EntityNotFoundError, ValidationError
     from finauditpro.domain.working_paper_entities import ReviewNote, ReviewNoteStatusEnum
     from finauditpro.infrastructure.persistence.working_paper_models import ReviewNoteModel

@@ -4,8 +4,10 @@ from typing import Any
 
 from finauditpro.domain.financial_statement_entities import (
     BalanceSheet,
+    BalanceSheetLineItem,
     DataLineageNode,
     FinancialStatementNote,
+    ProfitAndLossLineItem,
     ProfitAndLossStatement,
 )
 
@@ -18,28 +20,30 @@ def extract_data_lineage_trace(
     adjusted_tb_lines: list[Any],
 ) -> DataLineageNode:
     """Extract complete deterministic lineage: FS Line -> Note -> Mapped Accounts -> Adjusted TB -> AJE -> Original TB."""
-    line_item: Any = None
-    for l in bs.equity_and_liabilities_lines + bs.assets_lines:
-        if l.line_code == fs_line_code:
-            line_item = l
+    target_line: BalanceSheetLineItem | ProfitAndLossLineItem | None = None
+
+    for bsl in bs.equity_and_liabilities_lines + bs.assets_lines:
+        if bsl.line_code == fs_line_code:
+            target_line = bsl
             break
-    if not line_item:
-        for l in pnl.revenue_lines + pnl.expense_lines:
-            if l.line_code == fs_line_code:
-                line_item = l
+
+    if target_line is None:
+        for pnll in pnl.revenue_lines + pnl.expense_lines:
+            if pnll.line_code == fs_line_code:
+                target_line = pnll
                 break
 
-    if not line_item:
+    if target_line is None:
         return DataLineageNode(
             fs_line_code=fs_line_code,
             fs_line_name="Unknown Line Item",
             total_amount_paise=0,
         )
 
-    matched_note = next((n for n in notes if n.note_number == line_item.note_ref), None)
+    matched_note = next((n for n in notes if n.note_number == target_line.note_ref), None)
 
     traces = []
-    for code in line_item.mapped_account_codes:
+    for code in target_line.mapped_account_codes:
         tb_line = next((t for t in adjusted_tb_lines if t.account_code == code), None)
         if tb_line:
             traces.append(
@@ -54,10 +58,11 @@ def extract_data_lineage_trace(
             )
 
     return DataLineageNode(
-        fs_line_code=line_item.line_code,
-        fs_line_name=line_item.category,
-        note_ref=line_item.note_ref,
+        fs_line_code=target_line.line_code,
+        fs_line_name=target_line.category,
+        note_ref=target_line.note_ref,
         note_title=matched_note.title if matched_note else None,
-        total_amount_paise=line_item.current_period_paise,
+        total_amount_paise=target_line.current_period_paise,
         account_traces=traces,
     )
+

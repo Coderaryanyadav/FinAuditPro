@@ -103,17 +103,17 @@ class AuditReportGenerationService:
 
             # 6. Audit Report Workpaper Partner Approval
             rep_repo = AuditReportRepository(session)
-            wp = rep_repo.get_report_workpaper_for_engagement(engagement_id)
-            if not wp:
+            report_wp = rep_repo.get_report_workpaper_for_engagement(engagement_id)
+            if not report_wp:
                 blockers.append("Audit Report workpaper has not been prepared.")
-            elif wp.status == ReportWorkpaperStatusEnum.INVALIDATED_STALE:
+            elif report_wp.status == ReportWorkpaperStatusEnum.INVALIDATED_STALE:
                 blockers.append("Audit report is INVALIDATED due to modified financial dependencies. Partner re-review required.")
-            elif wp.status not in (
+            elif report_wp.status not in (
                 ReportWorkpaperStatusEnum.PARTNER_APPROVED,
                 ReportWorkpaperStatusEnum.FINAL,
                 ReportWorkpaperStatusEnum.LOCKED,
             ):
-                blockers.append(f"Audit report partner approval missing. Current status: '{wp.status.value}'.")
+                blockers.append(f"Audit report partner approval missing. Current status: '{report_wp.status.value}'.")
 
         return {
             "can_generate": len(blockers) == 0,
@@ -140,7 +140,7 @@ class AuditReportGenerationService:
                     tb_lines.extend(fin_repo.get_trial_balance_lines(ds.id))
 
             # Revenue from Operations
-            tb_rev = sum(l.closing_cr_paise - l.closing_dr_paise for l in tb_lines if l.account_code.startswith("4"))
+            tb_rev = sum((l.closing_cr_paise - l.closing_dr_paise) for l in tb_lines if l.account_code and l.account_code.startswith("4"))
             pnl_obj = getattr(pkg, "profit_and_loss", getattr(pkg, "profit_loss", None)) if pkg else None
             fs_rev = getattr(pnl_obj, "total_revenue_paise", getattr(pnl_obj, "revenue_from_operations_paise", 0)) if pnl_obj else 0
             is_rev_reconciled = tb_rev == fs_rev
@@ -203,7 +203,7 @@ class AuditReportGenerationService:
             )
 
             # Cash and Cash Equivalents
-            cash_paise = sum(l.closing_dr_paise - l.closing_cr_paise for l in tb_lines if l.account_code.startswith("33"))
+            cash_paise = sum((l.closing_dr_paise - l.closing_cr_paise) for l in tb_lines if l.account_code and l.account_code.startswith("33"))
             lineage_items.append(
                 ReportDataLineage(
                     field_name="Cash & Bank Balances",
@@ -216,7 +216,7 @@ class AuditReportGenerationService:
             )
 
             # Borrowings
-            debt_paise = sum(l.closing_cr_paise - l.closing_dr_paise for l in tb_lines if l.account_code.startswith("20"))
+            debt_paise = sum((l.closing_cr_paise - l.closing_dr_paise) for l in tb_lines if l.account_code and l.account_code.startswith("20"))
             lineage_items.append(
                 ReportDataLineage(
                     field_name="Borrowings",

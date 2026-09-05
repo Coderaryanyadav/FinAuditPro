@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import UTC, datetime
+from typing import Any
 
 from finauditpro.application.continuous_audit_dtos import (
     AlertInvestigationDto,
@@ -128,7 +129,7 @@ class AlertInvestigationService:
         self.audit_repo.save_feedback(feedback)
         return True
 
-    def get_alert_explainability(self, alert_id: str) -> dict:
+    def get_alert_explainability(self, alert_id: str) -> dict[str, Any]:
         alert = self.audit_repo.get_alert_by_id(alert_id)
         if not alert:
             return {}

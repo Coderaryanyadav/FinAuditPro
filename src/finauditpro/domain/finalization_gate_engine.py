@@ -77,29 +77,30 @@ class FinalizationGateEngine:
                     )
                 )
 
-        # 2. Audit Exceptions Check
         for exc in exceptions:
             status_val = getattr(exc.status, "value", str(exc.status)).lower()
             if status_val not in ("resolved", "cleared", "waived"):
-                sev = ItemSeverityEnum.CRITICAL if exc.is_material else ItemSeverityEnum.HIGH
+                is_mat = bool(getattr(exc, "is_material", False))
+                exc_num = getattr(exc, "exception_number", None) or exc.id[:8]
+                sev = ItemSeverityEnum.CRITICAL if is_mat else ItemSeverityEnum.HIGH
                 open_items.append(
                     OpenItem(
                         engagement_id=engagement_id,
                         source_type="Audit Exception",
-                        source_ref=exc.exception_number or exc.id[:8],
+                        source_ref=exc_num,
                         title=f"Unresolved Exception: {exc.title}",
                         description=exc.description or exc.title,
                         severity=sev,
                         action_required="Propose audit adjustment or document resolution justification.",
-                        is_blocking=exc.is_material,
+                        is_blocking=is_mat,
                     )
                 )
-                if exc.is_material:
+                if is_mat:
                     blockers.append(
                         FinalizationBlocker(
                             category="Audit Exceptions",
                             reason=f"Unresolved material audit exception: {exc.title}",
-                            source_ref=exc.exception_number or exc.id[:8],
+                            source_ref=exc_num,
                             action_required="Post adjusting entry or obtain partner waiver.",
                             severity=ItemSeverityEnum.CRITICAL,
                         )

@@ -1,6 +1,7 @@
 """Service for running data quality validations and managing detected data issues."""
 
 from datetime import UTC, datetime
+from typing import Any
 
 from finauditpro.application.continuous_audit_dtos import (
     DataQualityIssueDto,

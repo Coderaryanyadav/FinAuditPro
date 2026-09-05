@@ -235,20 +235,16 @@ class AuditCompletionService:
             if not pkg:
                 raise ValueError(f"No financial statement package found for engagement {engagement_id}")
 
-            if hasattr(pkg, "balance_sheet") and pkg.balance_sheet:
+            if getattr(pkg, "balance_sheet", None):
                 bs = pkg.balance_sheet
-            elif getattr(pkg, "balance_sheet_json", None) and pkg.balance_sheet_json != "{}":
-                bs = BalanceSheet.model_validate_json(pkg.balance_sheet_json)
             else:
                 bs = BalanceSheet(
                     engagement_id=engagement_id,
                     as_at_date="2024-03-31",
                 )
 
-            if hasattr(pkg, "profit_loss") and pkg.profit_loss:
-                pnl = pkg.profit_loss
-            elif getattr(pkg, "profit_loss_json", None) and pkg.profit_loss_json != "{}":
-                pnl = ProfitAndLossStatement.model_validate_json(pkg.profit_loss_json)
+            if getattr(pkg, "profit_and_loss", None):
+                pnl = pkg.profit_and_loss
             else:
                 pnl = ProfitAndLossStatement(
                     engagement_id=engagement_id,

@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+from typing import Any
 from uuid import uuid4
 
 from finauditpro.application.security.engagement_lock_guard import assert_engagement_not_locked
@@ -57,7 +58,7 @@ class WorkingPaperService:
         wp: WorkingPaper,
         sections: list[WorkingPaperSection],
         links: list[dict[str, str]],
-        session=None,
+        session: Any = None,
     ) -> str:
         enriched_links = []
         for l in links:
@@ -184,10 +185,10 @@ class WorkingPaperService:
         with self.db_manager.session_scope() as session:
             return WorkingPaperRepository(session).list_review_notes(wp_id)
 
-    def _resolve_user_role(self, session, engagement_id: str, username: str) -> str:
+    def _resolve_user_role(self, session: Any, engagement_id: str, username: str) -> str | None:
         return resolve_user_role(session, engagement_id, username)
 
-    def _archive_working_paper_version(self, session, wp: WorkingPaper) -> None:
+    def _archive_working_paper_version(self, session: Any, wp: WorkingPaper) -> None:
         archive_working_paper_version(session, wp)
 
     def assign_user_to_engagement(self, engagement_id: str, username: str, role: str) -> None:
@@ -339,7 +340,7 @@ class WorkingPaperService:
         title: str,
         area: str,
         conclusion: str,
-        sections_list: list[dict],
+        sections_list: list[dict[str, Any]],
         editor_id: str,
     ) -> WorkingPaper:
         with self.db_manager.session_scope() as session:

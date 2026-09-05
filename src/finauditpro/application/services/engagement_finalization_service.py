@@ -1,5 +1,4 @@
-"""Application Service for Engagement Completion Checklist, Finalization Gate, and Partner Sign-Off."""
-
+from typing import Any
 
 from finauditpro.application.completion_dtos import (
     ChecklistItemDTO,
@@ -14,6 +13,12 @@ from finauditpro.application.completion_dtos import (
 )
 from finauditpro.application.security.rbac import RoleEnum
 from finauditpro.application.security.security_context import SecurityContext
+from finauditpro.domain.audit_completion_engine import AuditCompletionEngine
+from finauditpro.domain.audit_completion_entities import (
+    FinancialMisstatement,
+    MisstatementStatusEnum,
+    MisstatementTypeEnum,
+)
 from finauditpro.domain.completion_checklist_entities import (
     ChecklistCategoryEnum,
     CompletionChecklistItem,
@@ -28,6 +33,7 @@ from finauditpro.domain.exceptions import (
     ValidationError,
 )
 from finauditpro.domain.finalization_gate_engine import FinalizationGateEngine
+from finauditpro.domain.financial_statement_entities import PackageStatusEnum
 from finauditpro.infrastructure.persistence.database import DatabaseManager
 from finauditpro.infrastructure.persistence.repositories import (
     EngagementRepository,
@@ -74,12 +80,10 @@ class EngagementFinalizationService:
             if not item or item.engagement_id != dto.engagement_id:
                 raise EntityNotFoundError("CompletionChecklistItem", dto.item_id)
 
-            status_enum = CompletionStatusEnum.NOT_STARTED
-            for s in CompletionStatusEnum:
-                if s.value.lower() == dto.status.lower() or s.name.lower() == dto.status.lower():
-                    status_enum = s
-                    break
-
+            status_enum = next(
+                (s for s in CompletionStatusEnum if s.value.lower() == dto.status.lower() or s.name.lower() == dto.status.lower()),
+                CompletionStatusEnum.NOT_STARTED,
+            )
             updated = CompletionChecklistItem(
                 id=item.id,
                 engagement_id=item.engagement_id,
@@ -107,7 +111,7 @@ class EngagementFinalizationService:
                         reason=b.reason,
                         source_ref=b.source_ref,
                         action_required=b.action_required,
-                        severity=b.severity.value,
+                        severity=getattr(b.severity, "value", str(b.severity)),
                     )
                     for b in gate_res.blockers
                 ],
@@ -121,7 +125,7 @@ class EngagementFinalizationService:
             _, open_reg = self._evaluate_gate_internal(session, engagement_id)
             return open_reg
 
-    def partner_signoff_and_finalize(self, dto: PartnerSignoffDTO) -> dict:
+    def partner_signoff_and_finalize(self, dto: PartnerSignoffDTO) -> dict[str, Any]:
         session_user = SecurityContext.get_current_session()
         if not session_user:
             raise PermissionDeniedError("Authentication required for partner sign-off.")
@@ -149,9 +153,7 @@ class EngagementFinalizationService:
             fs_repo = FinancialStatementRepository(session)
             pkg = fs_repo.get_latest_package(dto.engagement_id)
             if pkg:
-                pkg.is_locked = True
-                pkg.status = "Final Locked V4"
-                pkg.approved_by = session_user.username
+                pkg.is_locked, pkg.status, pkg.approved_by = True, PackageStatusEnum.LOCKED, session_user.username
                 fs_repo.update_package(pkg)
 
             wp_repo = WorkingPaperRepository(session)
@@ -160,63 +162,43 @@ class EngagementFinalizationService:
                 wp_repo.update_working_paper(wp)
 
             return {
-                "engagement_id": eng.id,
-                "status": eng.status.value,
-                "finalized_by": session_user.username,
-                "partner_role": user_role_str,
-                "audit_opinion_type": dto.audit_opinion_type,
-                "is_locked": True,
-                "signoff_notes": dto.signoff_notes,
+                "engagement_id": eng.id, "status": eng.status.value, "finalized_by": session_user.username,
+                "partner_role": user_role_str, "audit_opinion_type": dto.audit_opinion_type, "is_locked": True, "signoff_notes": dto.signoff_notes,
             }
 
-    def record_related_party_completion(
-        self, dto: RelatedPartyCompletionDTO
-    ) -> RelatedPartyCompletionDTO:
+    def record_related_party_completion(self, dto: RelatedPartyCompletionDTO) -> RelatedPartyCompletionDTO:
         with self.db_manager.session_scope() as session:
             repo = CompletionChecklistRepository(session)
             record = RelatedPartyCompletionRecord(
-                engagement_id=dto.engagement_id,
-                register_reviewed=dto.register_reviewed,
+                engagement_id=dto.engagement_id, register_reviewed=dto.register_reviewed,
                 undisclosed_transactions_identified=dto.undisclosed_transactions_identified,
-                arms_length_verified=dto.arms_length_verified,
-                schedule_iii_disclosed=dto.schedule_iii_disclosed,
-                auditor_conclusion=dto.auditor_conclusion,
-                reviewer=dto.reviewer or SecurityContext.get_current_username(),
-                is_completed=True,
+                arms_length_verified=dto.arms_length_verified, schedule_iii_disclosed=dto.schedule_iii_disclosed,
+                auditor_conclusion=dto.auditor_conclusion, reviewer=dto.reviewer or SecurityContext.get_current_username(), is_completed=True,
             )
             repo.save_related_party_completion(record)
             return dto
 
-    def get_related_party_completion(
-        self, engagement_id: str
-    ) -> RelatedPartyCompletionDTO | None:
+    def get_related_party_completion(self, engagement_id: str) -> RelatedPartyCompletionDTO | None:
         with self.db_manager.session_scope() as session:
-            repo = CompletionChecklistRepository(session)
-            r = repo.get_related_party_completion(engagement_id)
+            r = CompletionChecklistRepository(session).get_related_party_completion(engagement_id)
             if not r:
                 return None
             return RelatedPartyCompletionDTO(
-                engagement_id=r.engagement_id,
-                register_reviewed=r.register_reviewed,
+                engagement_id=r.engagement_id, register_reviewed=r.register_reviewed,
                 undisclosed_transactions_identified=r.undisclosed_transactions_identified,
-                arms_length_verified=r.arms_length_verified,
-                schedule_iii_disclosed=r.schedule_iii_disclosed,
-                auditor_conclusion=r.auditor_conclusion,
-                reviewer=r.reviewer,
+                arms_length_verified=r.arms_length_verified, schedule_iii_disclosed=r.schedule_iii_disclosed,
+                auditor_conclusion=r.auditor_conclusion, reviewer=r.reviewer,
             )
 
     def record_sa240_completion(self, dto: SA240CompletionDTO) -> SA240CompletionDTO:
         with self.db_manager.session_scope() as session:
             repo = CompletionChecklistRepository(session)
             record = SA240CompletionRecord(
-                engagement_id=dto.engagement_id,
-                management_override_tested=dto.management_override_tested,
+                engagement_id=dto.engagement_id, management_override_tested=dto.management_override_tested,
                 journal_entry_testing_completed=dto.journal_entry_testing_completed,
                 revenue_recognition_presumption_addressed=dto.revenue_recognition_presumption_addressed,
                 risk_indicators_identified=getattr(dto, "risk_indicators_identified", False),
-                auditor_conclusion=dto.auditor_conclusion,
-                reviewer=dto.reviewer or SecurityContext.get_current_username(),
-                is_completed=True,
+                auditor_conclusion=dto.auditor_conclusion, reviewer=dto.reviewer or SecurityContext.get_current_username(), is_completed=True,
             )
             repo.save_sa240_completion(record)
             return dto
@@ -225,23 +207,22 @@ class EngagementFinalizationService:
 
     def get_sa240_completion(self, engagement_id: str) -> SA240CompletionDTO | None:
         with self.db_manager.session_scope() as session:
-            repo = CompletionChecklistRepository(session)
-            f = repo.get_sa240_completion(engagement_id)
+            f = CompletionChecklistRepository(session).get_sa240_completion(engagement_id)
             if not f:
                 return None
             return SA240CompletionDTO(
-                engagement_id=f.engagement_id,
-                management_override_tested=f.management_override_tested,
+                engagement_id=f.engagement_id, management_override_tested=f.management_override_tested,
                 journal_entry_testing_completed=f.journal_entry_testing_completed,
                 revenue_recognition_presumption_addressed=f.revenue_recognition_presumption_addressed,
                 risk_indicators_identified=f.risk_indicators_identified,
-                auditor_conclusion=f.auditor_conclusion,
-                reviewer=f.reviewer,
+                auditor_conclusion=f.auditor_conclusion, reviewer=f.reviewer,
             )
 
     get_fraud_completion = get_sa240_completion  # ignore
 
-    def _evaluate_gate_internal(self, session, engagement_id: str):
+    def _evaluate_gate_internal(
+        self, session: Any, engagement_id: str
+    ) -> tuple[Any, OpenItemsRegisterDTO]:
         wp_repo = WorkingPaperRepository(session)
         wps = wp_repo.list_for_engagement(engagement_id)
         all_review_notes = []
@@ -251,13 +232,6 @@ class EngagementFinalizationService:
         core_repo = CoreAuditEngineRepository(session)
         exceptions = core_repo.list_exceptions_for_engagement(engagement_id)
         misstatements = core_repo.list_misstatements_for_engagement(engagement_id)
-
-        from finauditpro.domain.audit_completion_engine import AuditCompletionEngine
-        from finauditpro.domain.audit_completion_entities import (
-            FinancialMisstatement,
-            MisstatementStatusEnum,
-            MisstatementTypeEnum,
-        )
 
         mat_repo = AuditMatrixRepository(session)
         mat = mat_repo.get_materiality(engagement_id)
@@ -327,7 +301,7 @@ class EngagementFinalizationService:
                 source_ref=b.source_ref,
                 title=b.reason[:80],
                 description=b.reason,
-                severity=b.severity.value,
+                severity=getattr(b.severity, "value", str(b.severity)),
                 action_required=b.action_required,
                 is_blocking=True,
                 resolved=False,
@@ -348,7 +322,7 @@ class EngagementFinalizationService:
 
         return gate_res, open_reg
 
-    def _initialize_default_checklist(self, session, engagement_id: str) -> list[CompletionChecklistItem]:
+    def _initialize_default_checklist(self, session: Any, engagement_id: str) -> list[CompletionChecklistItem]:
         repo = CompletionChecklistRepository(session)
         default_categories = [
             (ChecklistCategoryEnum.PLANNING, "Engagement Planning & Pre-conditions (SA 210)", "Agree engagement terms, independence verification, and team staffing"),
@@ -373,30 +347,35 @@ class EngagementFinalizationService:
             (ChecklistCategoryEnum.PARTNER_REVIEW, "Partner Sign-off & Final Lock", "Final engagement review and cryptographic locking by engagement partner"),
         ]
 
-        items = []
-        for cat, title, desc in default_categories:
-            item = CompletionChecklistItem(
-                engagement_id=engagement_id,
-                category=cat,
-                title=title,
-                description=desc,
-                is_applicable=True,
-                status=CompletionStatusEnum.NOT_STARTED,
+        return [
+            repo.save_checklist_item(
+                CompletionChecklistItem(
+                    engagement_id=engagement_id,
+                    category=cat,
+                    title=title,
+                    description=desc,
+                    is_applicable=True,
+                    status=CompletionStatusEnum.NOT_STARTED,
+                )
             )
-            items.append(repo.save_checklist_item(item))
-        return items
+            for cat, title, desc in default_categories
+        ]
 
     def _to_checklist_dto(self, item: CompletionChecklistItem) -> ChecklistItemDTO:
+        cat_val = item.category.value if hasattr(item.category, "value") else str(item.category)
+        stat_val = item.status.value if hasattr(item.status, "value") else str(item.status)
+        dt_val = item.updated_at.isoformat() if hasattr(item.updated_at, "isoformat") else str(item.updated_at)
         return ChecklistItemDTO(
             id=item.id,
             engagement_id=item.engagement_id,
-            category=item.category.value if hasattr(item.category, "value") else str(item.category),
+            category=cat_val,
             title=item.title,
             description=item.description,
             is_applicable=item.is_applicable,
-            status=item.status.value if hasattr(item.status, "value") else str(item.status),
+            status=stat_val,
             supporting_ref=item.supporting_ref,
             reviewer=item.reviewer,
             notes=item.notes,
-            updated_at=item.updated_at.isoformat() if hasattr(item.updated_at, "isoformat") else str(item.updated_at),
+            updated_at=dt_val,
         )
+

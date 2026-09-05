@@ -250,7 +250,7 @@ class AuditReportService:
             fin_repo = FinancialDataRepository(session)
             datasets = [d for d in fin_repo.list_datasets_by_engagement(engagement_id) if "trial" in str(getattr(d.dataset_type, "value", d.dataset_type)).lower()]
             tb_lines = [l for d in datasets for l in fin_repo.get_trial_balance_lines(d.id)]
-            tb_rev = sum(l.closing_cr_paise - l.closing_dr_paise for l in tb_lines if l.account_code.startswith("4"))
+            tb_rev = sum((l.closing_cr_paise - l.closing_dr_paise) for l in tb_lines if l.account_code and l.account_code.startswith("4"))
             pnl = getattr(pkg, "profit_and_loss", getattr(pkg, "profit_loss", None)) if pkg else None
             fs_rev = getattr(pnl, "total_revenue_paise", 0) if pnl else 0
             pnl_profit = getattr(pnl, "profit_after_tax_paise", 0) if pnl else 0
@@ -263,7 +263,7 @@ class AuditReportService:
                 caro_report_answers={}, caro_workpaper_answers={}, going_concern_memo_uncertainty=False,
                 fs_has_going_concern_note=True, mrl_signed=mrl_signed,
             )
-            return {"is_consistent": len(issues) == 0, "inconsistencies": [i.description for i in issues]}
+            return {"is_consistent": len(issues) == 0, "inconsistencies": [i.explanation for i in issues]}
 
     def partner_approve_report(self, dto: PartnerApproveReportDTO) -> AuditReportWorkpaper:
         session_user = SecurityContext.get_current_session()

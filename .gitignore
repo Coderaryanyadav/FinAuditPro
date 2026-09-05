@@ -77,7 +77,7 @@ finauditpro.db
 
 # Storage Directories & Vector Store
 vector_store/
-documents/
+/documents/
 matplotlib/
 logs/
 *.log

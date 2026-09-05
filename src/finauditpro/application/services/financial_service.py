@@ -94,6 +94,7 @@ class FinancialService:
             stored_path=str(path.resolve()),
             status=DatasetStatusEnum.IMPORTED if imp_res.valid_rows else DatasetStatusEnum.FAILED,
             total_rows=imp_res.total_rows,
+            row_count=len(imp_res.valid_rows),
             valid_rows=len(imp_res.valid_rows),
             error_rows=len(imp_res.errors),
             column_mappings=final_mappings,

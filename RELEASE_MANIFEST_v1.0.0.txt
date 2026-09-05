@@ -1,7 +1,7 @@
 Product: FinAuditPro
 Version: 1.0.0
 Build date: 2026-09-05
-Commit: fb9874894a7ec7e9cbbb2996a15d3f5d2512710e
+Commit: 34355c1eff9ec9c8c8efeb376cdfd62b2c978a62
 Python: 3.14.7
 Platform: macOS Darwin 24.6.0 arm64
 Tests: 307 collected, 307 passed, 0 failed, 0 skipped, 0 errors (pytest -q)

@@ -1,0 +1,2 @@
+f1f9b6024f052e14643418ee635eb1c75c06ac9bb7c94edbb46b1af1d9694365  finauditpro-1.0.0-py3-none-any.whl
+59c6c60d3e229e324be1bd85cfa94b40045f562984456e2ac909b3dfbe71fa17  finauditpro-1.0.0.tar.gz

@@ -1,0 +1,14 @@
+Product: FinAuditPro
+Version: 1.0.0
+Build date: 2026-09-05
+Commit: 0e4dcb702ee894e60d4fbc5d3331f18cb4e44364
+Python: 3.14.7
+Platform: macOS (Darwin 24.6.0 arm64) / Windows x64 / Linux x86_64
+Tests: 307 passed, 0 failed, 0 skipped, 0 errors (pytest -q)
+Package: dist/finauditpro-1.0.0-py3-none-any.whl, dist/finauditpro-1.0.0.tar.gz
+SHA-256 (whl): f1f9b6024f052e14643418ee635eb1c75c06ac9bb7c94edbb46b1af1d9694365
+SHA-256 (sdist): 59c6c60d3e229e324be1bd85cfa94b40045f562984456e2ac909b3dfbe71fa17
+Security status: PASS (0 hardcoded secrets, fail-closed crypto, persistent lockout, immutable audit triggers)
+Known limitations:
+1. Workstation-level OS root/debugger access can inspect process memory.
+2. Local AI assistant features require a local LM Studio server on http://localhost:1234.

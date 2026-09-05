@@ -130,8 +130,9 @@ if is_darwin:
             "CFBundleDisplayName": "FinAuditPro",
             "CFBundleExecutable": "FinAuditPro",
             "CFBundleIdentifier": "com.finauditpro.desktop",
-            "CFBundleVersion": "1.2.0",
-            "CFBundleShortVersionString": "1.2.0",
+            "CFBundleVersion": "1.0.0",
+            "CFBundleShortVersionString": "1.0.0",
+
             "NSHighResolutionCapable": "True",
             "LSMinimumSystemVersion": "12.0",
             "NSHumanReadableCopyright": "Copyright © 2026 FinAuditPro. All rights reserved.",

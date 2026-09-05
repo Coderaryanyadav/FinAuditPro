@@ -148,9 +148,10 @@ class ChangePasswordDialog(QDialog):
         layout.addWidget(form_frame)
 
         # Requirements Note
-        req = QLabel("Min. 8 characters  •  Letters & numbers/symbols  •  Cannot be Admin@123")
+        req = QLabel("Min. 8 characters  •  Letters & numbers/symbols  •  Cannot be common default")
         req.setStyleSheet("font-size: 11px; font-weight: 500; color: #64748B;")
         layout.addWidget(req)
+
 
         layout.addStretch()
 

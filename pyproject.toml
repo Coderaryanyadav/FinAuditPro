@@ -1,7 +1,8 @@
 [project]
 name = "finauditpro"
-version = "1.2.0"
+version = "1.0.0"
 description = "Offline-first audit intelligence workspace for Indian audit practice"
+
 readme = "README.md"
 requires-python = ">=3.12"
 license = { file = "LICENSE" }

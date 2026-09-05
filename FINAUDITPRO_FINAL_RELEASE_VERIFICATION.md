@@ -1,33 +1,30 @@
 # FINAUDITPRO — FINAL RELEASE VERIFICATION REPORT
 
-**Evaluation Date:** 2026-09-05\
-**Final Release Candidate Version:** 1.2.0\
-**Git Commit / Hash:** `248f18a38f50dbedc557ef31f4efecea17fd797f`
+**Evaluation Date:** 2026-09-05  
+**Final Release Candidate Version:** 1.2.0  
+**Git Commit / Hash:** `0e4dcb702ee894e60d4fbc5d3331f18cb4e44364`  
 
 ---
 
 ## 1. Environment
 
-- **Operating System:** macOS Darwin 24.6.0 (Apple Silicon / arm64)
-- **Python Version:** 3.14.7
-- **Virtual Environment:** Dedicated `.venv` with `pip install -e .[ocr,ai]`
-- **Critical Runtime Dependencies:** PySide6 6.11.2, SQLAlchemy 2.0.46,
-  Cryptography 46.0.5, ReportLab 4.4.11, OpenPyXL 3.1.5, FAISS (CPU)
-- **Tesseract OCR Binary:** Verified (`/opt/homebrew/bin/tesseract`)
-- **LM Studio Endpoint:** `http://localhost:1234` (Local loopback REST API)
+* **Operating System:** macOS Darwin 24.6.0 (Apple Silicon / arm64)
+* **Python Version:** 3.14.7
+* **Virtual Environment:** Dedicated `.venv` with `pip install -e .[ocr,ai]`
+* **Critical Runtime Dependencies:** PySide6 6.11.2, SQLAlchemy 2.0.46, Cryptography 46.0.5, ReportLab 4.4.11, OpenPyXL 3.1.5, FAISS (CPU)
+* **Tesseract OCR Binary:** Verified (`/opt/homebrew/bin/tesseract`)
+* **LM Studio Endpoint:** `http://localhost:1234` (Local loopback REST API)
 
 ---
 
 ## 2. Full Test Suite Execution Results
 
 **Command Executed:**
-
 ```bash
 pytest -q
 ```
 
 **Exact Result:**
-
 ```text
 307 collected
 307 passed
@@ -35,7 +32,7 @@ pytest -q
 0 skipped
 0 xfailed
 0 errors
-Duration: 40.52s
+Duration: 27.67s
 ```
 
 ---

@@ -16,7 +16,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 def run_command(cmd: list[str], cwd: Path | None = None) -> None:
     """Run shell command with error checking."""
-    print(f"  → Running: {' '.join(cmd)}")
+    print(f"  -> Running: {' '.join(cmd)}")
     subprocess.run(cmd, cwd=cwd or PROJECT_ROOT, check=True)
 
 

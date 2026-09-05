@@ -5,7 +5,6 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from typing import Any
 
-
 from finauditpro.application.security.rbac import UserSession
 
 _current_session_var: contextvars.ContextVar[UserSession | None] = contextvars.ContextVar(

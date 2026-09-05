@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from finauditpro.domain.entities import RoleEnum
+from finauditpro.domain.entities import RoleEnum as RoleEnum
 from finauditpro.domain.exceptions import PermissionDeniedError
 
 

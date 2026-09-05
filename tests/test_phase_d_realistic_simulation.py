@@ -10,18 +10,18 @@ Resolution -> Partner Review -> Gate Pass -> Final Lock -> Archive Integrity.
 
 from pathlib import Path
 from uuid import uuid4
+
 import pytest
 
+from finauditpro.application.archival_dtos import FreezeAndSealDTO
 from finauditpro.application.audit_completion_dtos import (
     CreateGoingConcernAssessmentDTO,
     CreateSubsequentEventDTO,
 )
-from finauditpro.application.archival_dtos import FreezeAndSealDTO
 from finauditpro.application.completion_dtos import (
     PartnerSignoffDTO,
     RelatedPartyCompletionDTO,
     SA240CompletionDTO,
-    UpdateChecklistItemDTO,
 )
 from finauditpro.application.financial_statement_dtos import (
     GenerateFinancialStatementsDTO,
@@ -37,21 +37,12 @@ from finauditpro.application.services.engagement_finalization_service import (
 )
 from finauditpro.application.services.financial_statement_service import FinancialStatementService
 from finauditpro.domain.account_mapping_entities import AccountTypeEnum
-from finauditpro.domain.audit_completion_entities import (
-    GoingConcernConclusionEnum,
-    MRLStatusEnum,
-    SolvencyRiskLevelEnum,
-    SubsequentEventProcedureEnum,
-    SubsequentEventTypeEnum,
-)
-from finauditpro.domain.audit_execution_entities import AuditMisstatement
 from finauditpro.domain.audit_matrix_entities import MaterialityAssessment
 from finauditpro.domain.compliance_entities import (
     CAROClauseEnum,
     CAROClauseWorkpaper,
     CAROReportAnswerEnum,
 )
-from finauditpro.domain.completion_checklist_entities import CompletionStatusEnum
 from finauditpro.domain.entities import (
     AuditTypeEnum,
     Client,
@@ -60,7 +51,7 @@ from finauditpro.domain.entities import (
     Firm,
     User,
 )
-from finauditpro.domain.exceptions import PermissionDeniedError, ValidationError
+from finauditpro.domain.exceptions import PermissionDeniedError
 from finauditpro.domain.financial_entities import (
     DatasetTypeEnum,
     FinancialDataset,
@@ -84,9 +75,6 @@ from finauditpro.infrastructure.persistence.repositories import (
 )
 from finauditpro.infrastructure.persistence.repositories.compliance_repository import (
     ComplianceRepository,
-)
-from finauditpro.infrastructure.persistence.repositories.core_audit_engine_repository import (
-    CoreAuditEngineRepository,
 )
 
 

@@ -1,6 +1,5 @@
 """Unit tests for Pattern Detection Engine: Duplicates, Split Transactions, and Control Monitoring."""
 
-import pytest
 
 from finauditpro.domain.continuous_audit_entities import AlertSeverityEnum, AlertTypeEnum
 from finauditpro.domain.pattern_detection_engine import PatternDetectionEngine

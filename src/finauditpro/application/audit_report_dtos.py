@@ -1,6 +1,5 @@
 """Application Data Transfer Objects (DTOs) for Audit Reporting & Deliverables (Phase E)."""
 
-from typing import Any
 from pydantic import Field
 
 from finauditpro.domain.audit_report_entities import (

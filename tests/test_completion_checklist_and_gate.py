@@ -1,7 +1,8 @@
 """Tests for Phase D Completion Checklist, Open Items Register, and Finalization Gate."""
 
-import pytest
 from uuid import uuid4
+
+import pytest
 
 from finauditpro.application.completion_dtos import (
     RelatedPartyCompletionDTO,

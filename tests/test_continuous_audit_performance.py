@@ -1,11 +1,9 @@
 """Performance scalability benchmarks for Phase F continuous audit evaluation engines."""
 
-from datetime import date
 import time
-import pytest
+from datetime import date
 
 from finauditpro.domain.journal_analytics_engine import JournalAnalyticsEngine
-from finauditpro.domain.pattern_detection_engine import PatternDetectionEngine
 
 
 def test_performance_10k_transactions() -> None:

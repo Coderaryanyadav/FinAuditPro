@@ -2,23 +2,21 @@
 Junior Accountant, Fraudster, Malicious User, Senior Reviewer, Database Attacker, and Auditor.
 """
 
-from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
+
 import pytest
 
 from finauditpro.application.audit_adjustment_dtos import CreateAJEDTO, CreateAJELineDTO
 from finauditpro.application.completion_dtos import (
     PartnerSignoffDTO,
-    RelatedPartyCompletionDTO,
-    SA240CompletionDTO,
 )
-from finauditpro.application.financial_dtos import ImportDatasetDTO
 from finauditpro.application.security.rbac import RBACManager, RoleEnum, UserSession
 from finauditpro.application.security.security_context import SecurityContext
 from finauditpro.application.services.audit_adjustment_service import AuditAdjustmentService
-from finauditpro.application.services.engagement_finalization_service import EngagementFinalizationService
-from finauditpro.application.services.financial_data_service import FinancialDataService
+from finauditpro.application.services.engagement_finalization_service import (
+    EngagementFinalizationService,
+)
 from finauditpro.application.services.working_paper_service import WorkingPaperService
 from finauditpro.application.working_paper_dtos import (
     CreateWorkingPaperDTO,
@@ -32,7 +30,7 @@ from finauditpro.domain.entities import (
     Firm,
     User,
 )
-from finauditpro.domain.exceptions import PermissionDeniedError, ValidationError
+from finauditpro.domain.exceptions import ValidationError
 from finauditpro.domain.export_sanitizer import escape_formula_injection
 from finauditpro.domain.working_paper_entities import SignOffLevelEnum
 from finauditpro.infrastructure.first_run import initialize_database

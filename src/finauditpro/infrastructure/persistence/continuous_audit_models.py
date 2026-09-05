@@ -1,6 +1,6 @@
 """SQLAlchemy ORM models for continuous audit, intelligence, and data quality assurance."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
@@ -24,7 +24,7 @@ class DataQualityIssueModel(Base):
     resolution: Mapped[str | None] = mapped_column(Text, nullable=True)
     resolved_by: Mapped[str | None] = mapped_column(String, nullable=True)
     resolved_at: Mapped[str | None] = mapped_column(String, nullable=True)
-    detected_at: Mapped[str] = mapped_column(String, nullable=False, default=lambda: datetime.now(timezone.utc).isoformat())
+    detected_at: Mapped[str] = mapped_column(String, nullable=False, default=lambda: datetime.now(UTC).isoformat())
 
 
 class ContinuousAlertModel(Base):
@@ -49,7 +49,7 @@ class ContinuousAlertModel(Base):
     suppression_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_experimental: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     model_rule_version: Mapped[str] = mapped_column(String, nullable=False, default="v1.0")
-    detected_at: Mapped[str] = mapped_column(String, nullable=False, default=lambda: datetime.now(timezone.utc).isoformat())
+    detected_at: Mapped[str] = mapped_column(String, nullable=False, default=lambda: datetime.now(UTC).isoformat())
 
 
 class AlertInvestigationModel(Base):
@@ -71,8 +71,8 @@ class AlertInvestigationModel(Base):
     management_response: Mapped[str] = mapped_column(Text, nullable=False, default="")
     conclusion: Mapped[str] = mapped_column(Text, nullable=False, default="")
     outcome: Mapped[str] = mapped_column(String, nullable=False, default="Needs Investigation")
-    created_at: Mapped[str] = mapped_column(String, nullable=False, default=lambda: datetime.now(timezone.utc).isoformat())
-    updated_at: Mapped[str] = mapped_column(String, nullable=False, default=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: Mapped[str] = mapped_column(String, nullable=False, default=lambda: datetime.now(UTC).isoformat())
+    updated_at: Mapped[str] = mapped_column(String, nullable=False, default=lambda: datetime.now(UTC).isoformat())
 
 
 class AlertFeedbackModel(Base):
@@ -89,7 +89,7 @@ class AlertFeedbackModel(Base):
     is_misstatement: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     procedure_created: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     comments: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    recorded_at: Mapped[str] = mapped_column(String, nullable=False, default=lambda: datetime.now(timezone.utc).isoformat())
+    recorded_at: Mapped[str] = mapped_column(String, nullable=False, default=lambda: datetime.now(UTC).isoformat())
 
 
 class ContinuousReconciliationRecordModel(Base):
@@ -106,4 +106,4 @@ class ContinuousReconciliationRecordModel(Base):
     threshold_paise: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     status: Mapped[str] = mapped_column(String, nullable=False, default="BALANCED")
     details: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    evaluated_at: Mapped[str] = mapped_column(String, nullable=False, default=lambda: datetime.now(timezone.utc).isoformat())
+    evaluated_at: Mapped[str] = mapped_column(String, nullable=False, default=lambda: datetime.now(UTC).isoformat())

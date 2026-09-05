@@ -8,7 +8,7 @@ from sqlalchemy import DateTime, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from finauditpro.domain.clock import utc_now
-from finauditpro.infrastructure.persistence.database import Base
+from finauditpro.infrastructure.persistence.database import Base as Base
 
 
 class FirmModel(Base):

@@ -6,7 +6,6 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QHeaderView,
     QLabel,
-    QLineEdit,
     QPushButton,
     QSplitter,
     QTableWidget,
@@ -15,7 +14,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from finauditpro.application.audit_adjustment_dtos import AccountTraceDTO, LeadScheduleTraceDTO
+from finauditpro.application.audit_adjustment_dtos import LeadScheduleTraceDTO
 from finauditpro.application.services.audit_adjustment_service import AuditAdjustmentService
 from finauditpro.ui.theme import CardWidget, format_inr
 

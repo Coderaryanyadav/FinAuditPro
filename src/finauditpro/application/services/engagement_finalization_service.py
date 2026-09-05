@@ -1,6 +1,5 @@
 """Application Service for Engagement Completion Checklist, Finalization Gate, and Partner Sign-Off."""
 
-from uuid import uuid4
 
 from finauditpro.application.completion_dtos import (
     ChecklistItemDTO,
@@ -15,30 +14,43 @@ from finauditpro.application.completion_dtos import (
 )
 from finauditpro.application.security.rbac import RoleEnum
 from finauditpro.application.security.security_context import SecurityContext
-from finauditpro.domain.audit_completion_entities import MRLStatusEnum
 from finauditpro.domain.completion_checklist_entities import (
     ChecklistCategoryEnum,
     CompletionChecklistItem,
     CompletionStatusEnum,
-    ItemSeverityEnum,
     RelatedPartyCompletionRecord,
     SA240CompletionRecord,
 )
 from finauditpro.domain.entities import EngagementStatusEnum
-from finauditpro.domain.exceptions import EntityNotFoundError, PermissionDeniedError, ValidationError
+from finauditpro.domain.exceptions import (
+    EntityNotFoundError,
+    PermissionDeniedError,
+    ValidationError,
+)
 from finauditpro.domain.finalization_gate_engine import FinalizationGateEngine
 from finauditpro.infrastructure.persistence.database import DatabaseManager
 from finauditpro.infrastructure.persistence.repositories import (
     EngagementRepository,
-    FinancialDataRepository,
     WorkingPaperRepository,
 )
-from finauditpro.infrastructure.persistence.repositories.financial_statement_repository import FinancialStatementRepository
-from finauditpro.infrastructure.persistence.repositories.audit_completion_repository import AuditCompletionRepository
-from finauditpro.infrastructure.persistence.repositories.audit_matrix_repository import AuditMatrixRepository
-from finauditpro.infrastructure.persistence.repositories.compliance_repository import ComplianceRepository
-from finauditpro.infrastructure.persistence.repositories.completion_checklist_repository import CompletionChecklistRepository
-from finauditpro.infrastructure.persistence.repositories.core_audit_engine_repository import CoreAuditEngineRepository
+from finauditpro.infrastructure.persistence.repositories.audit_completion_repository import (
+    AuditCompletionRepository,
+)
+from finauditpro.infrastructure.persistence.repositories.audit_matrix_repository import (
+    AuditMatrixRepository,
+)
+from finauditpro.infrastructure.persistence.repositories.completion_checklist_repository import (
+    CompletionChecklistRepository,
+)
+from finauditpro.infrastructure.persistence.repositories.compliance_repository import (
+    ComplianceRepository,
+)
+from finauditpro.infrastructure.persistence.repositories.core_audit_engine_repository import (
+    CoreAuditEngineRepository,
+)
+from finauditpro.infrastructure.persistence.repositories.financial_statement_repository import (
+    FinancialStatementRepository,
+)
 
 
 class EngagementFinalizationService:
@@ -85,7 +97,7 @@ class EngagementFinalizationService:
 
     def evaluate_finalization_gate(self, engagement_id: str) -> FinalizationGateResultDTO:
         with self.db_manager.session_scope() as session:
-            gate_res, open_reg = self._evaluate_gate_internal(session, engagement_id)
+            gate_res, _ = self._evaluate_gate_internal(session, engagement_id)
             return FinalizationGateResultDTO(
                 engagement_id=engagement_id,
                 is_finalizable=gate_res.is_finalizable,
@@ -172,7 +184,7 @@ class EngagementFinalizationService:
                 reviewer=dto.reviewer or SecurityContext.get_current_username(),
                 is_completed=True,
             )
-            saved = repo.save_related_party_completion(record)
+            repo.save_related_party_completion(record)
             return dto
 
     def get_related_party_completion(
@@ -240,7 +252,6 @@ class EngagementFinalizationService:
         exceptions = core_repo.list_exceptions_for_engagement(engagement_id)
         misstatements = core_repo.list_misstatements_for_engagement(engagement_id)
 
-        from finauditpro.application.services.audit_completion_service import AuditCompletionService
         from finauditpro.domain.audit_completion_engine import AuditCompletionEngine
         from finauditpro.domain.audit_completion_entities import (
             FinancialMisstatement,

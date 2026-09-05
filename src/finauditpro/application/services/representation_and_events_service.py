@@ -1,7 +1,5 @@
 """Application Service for SA 580 Management Representation Letters & SA 560 Subsequent Events Register."""
 
-import json
-from typing import Any
 
 from finauditpro.application.audit_completion_dtos import (
     CreateSubsequentEventDTO,
@@ -20,7 +18,6 @@ from finauditpro.domain.audit_completion_entities import (
     SubsequentEvent,
     SubsequentEventTypeEnum,
 )
-from finauditpro.domain.exceptions import PermissionDeniedError
 from finauditpro.infrastructure.persistence.database import DatabaseManager
 from finauditpro.infrastructure.persistence.repositories.audit_completion_repository import (
     AuditCompletionRepository,

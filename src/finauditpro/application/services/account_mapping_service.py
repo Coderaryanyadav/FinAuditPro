@@ -2,8 +2,6 @@
 
 from uuid import uuid4
 
-from finauditpro.domain.clock import utc_now
-
 from finauditpro.application.account_mapping_dtos import (
     BulkMapAccountsDTO,
     MapAccountDTO,
@@ -20,6 +18,7 @@ from finauditpro.domain.account_mapping_entities import (
     MappingValidationReport,
     ScheduleIIIHead,
 )
+from finauditpro.domain.clock import utc_now
 from finauditpro.domain.entities import AuditEvent
 from finauditpro.domain.exceptions import EntityNotFoundError, ValidationError
 from finauditpro.infrastructure.persistence.database import DatabaseManager

@@ -9,10 +9,8 @@ from finauditpro.domain.audit_completion_entities import (
     SA450EvaluationSummary,
 )
 from finauditpro.domain.audit_execution_entities import AuditException, AuditMisstatement
-from finauditpro.domain.compliance_entities import CAROClauseWorkpaper, CAROReportAnswerEnum
 from finauditpro.domain.completion_checklist_entities import (
     CompletionChecklistItem,
-    CompletionStatusEnum,
     FinalizationBlocker,
     FinalizationGateResult,
     ItemSeverityEnum,
@@ -20,8 +18,9 @@ from finauditpro.domain.completion_checklist_entities import (
     RelatedPartyCompletionRecord,
     SA240CompletionRecord,
 )
+from finauditpro.domain.compliance_entities import CAROClauseWorkpaper
 from finauditpro.domain.financial_statement_entities import FinancialStatementPackage
-from finauditpro.domain.working_paper_entities import ReviewNote, ReviewNoteStatusEnum
+from finauditpro.domain.working_paper_entities import ReviewNote
 
 
 class FinalizationGateEngine:

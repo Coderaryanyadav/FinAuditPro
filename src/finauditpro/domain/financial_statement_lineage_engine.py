@@ -18,7 +18,7 @@ def extract_data_lineage_trace(
     adjusted_tb_lines: list[Any],
 ) -> DataLineageNode:
     """Extract complete deterministic lineage: FS Line -> Note -> Mapped Accounts -> Adjusted TB -> AJE -> Original TB."""
-    line_item = None
+    line_item: Any = None
     for l in bs.equity_and_liabilities_lines + bs.assets_lines:
         if l.line_code == fs_line_code:
             line_item = l

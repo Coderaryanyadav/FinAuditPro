@@ -72,6 +72,7 @@ def run_system_check() -> int:
     print("\n[4/6] Probing Fernet AES-128-CBC Encryption...")
     try:
         import tempfile as _tempfile
+
         import finauditpro.infrastructure.security.encryption as _enc
         from finauditpro.infrastructure.security.encryption import (
             decrypt_sensitive_string,
@@ -122,8 +123,8 @@ def run_system_check() -> int:
             if ai_res["models_loaded"]:
                 print(f"    - Loaded Models: {', '.join(ai_res['models_loaded'][:3])}")
         else:
-            print(f"  • LM Studio HTTP Endpoint: AIR-GAPPED FALLBACK (Offline on {ai_res['url']})")
-            print("    [Info: FinAuditPro core audit engine operates fully air-gapped without cloud or AI server dependencies]")
+            print(f"  • LM Studio HTTP Endpoint: OFFLINE FALLBACK (Offline on {ai_res['url']})")
+            print("    [Info: FinAuditPro core audit engine operates fully offline without cloud or AI server dependencies]")
     except Exception as e:
         print(f"  • LM Studio Server Supervisor: WARNING ({e})")
 

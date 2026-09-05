@@ -11,7 +11,7 @@ def test_settings_service_defaults(tmp_path) -> None:
 
     assert settings.lm_studio_endpoint == "http://localhost:1234"
     assert settings.llm_model == "deepseek-r1-distill-qwen-14b"
-    assert settings.allow_cloud_ai is False  # Air-gapped default
+    assert settings.allow_cloud_ai is False  # Offline-first default (zero cloud AI)
 
 
 def test_settings_service_update_and_persistence(tmp_path) -> None:

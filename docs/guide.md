@@ -120,7 +120,7 @@ flowchart LR
 
 ---
 
-### Stage 7: Air-Gapped Local AI Assistant & RAG
+### Stage 7: Local AI Assistant & RAG
 
 1. Ensure **LM Studio** is running locally on `http://localhost:1234` with a
    model like `deepseek-r1-distill-qwen-14b`.
@@ -128,11 +128,11 @@ flowchart LR
 3. Query the assistant regarding client records:
    - _"Summarize lease commitment liabilities from the uploaded contracts."_
    - _"Identify statutory compliance clauses in the board meeting minutes."_
-4. **RAG Citations & Zero Data Leakage**:
+4. **RAG Citations & Zero Outbound Egress**:
    - FAISS vector search retrieves relevant chunks from the current engagement
      only.
    - The AI responds with exact document names and page number citations.
-   - **100% Offline**: Zero bytes leave the auditor's workstation.
+   - **Offline-First**: Zero client data bytes leave the auditor's workstation.
 
 ---
 
@@ -160,7 +160,7 @@ flowchart LR
 
 ### Core Strengths (What Makes This Software Exceptional)
 
-1. **True Air-Gapped Privacy & Confidentiality**:
+1. **Offline-First Privacy & Confidentiality**:
    - Under ICAI Code of Ethics and statutory audit regulations, uploading
      unredacted client financial records or trial balances to public cloud AI
      APIs is a critical compliance liability. FinAuditPro's local-only
@@ -198,8 +198,8 @@ flowchart LR
 
 | Anti-Pattern / Unneeded Feature                         | Why It Should NOT Be Added                                                                                                                                                                |
 | :------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Public Cloud AI APIs (OpenAI / Anthropic Cloud API)** | Directly violates auditor confidentiality and air-gap guarantees. Local LM Studio or Ollama endpoints are the correct solution.                                                           |
-| **Cloud SaaS Backend / Multi-Tenant Remote Hosting**    | CA firms in India require client data to remain on air-gapped or firm-controlled hardware. A remote cloud database introduces severe compliance, data sovereignty, and security overhead. |
+| **Public Cloud AI APIs (OpenAI / Anthropic Cloud API)** | Directly violates auditor confidentiality and zero-cloud-egress posture. Local LM Studio or Ollama endpoints are the correct solution.                                                           |
+| **Cloud SaaS Backend / Multi-Tenant Remote Hosting**    | CA firms in India require client data to remain on local, firm-controlled hardware. A remote cloud database introduces severe compliance, data sovereignty, and security overhead. |
 | **Heavyweight Web / Electron Wrapper**                  | Electron/Chromium consumes 1GB+ RAM. PySide6 (native Qt) provides high rendering performance, native OS look-and-feel, and minimal memory footprint.                                      |
 | **Real Client Data in Source Control**                  | Test fixtures must strictly contain synthetic mock data. Real PAN, GSTIN, or banking records must never enter the repository.                                                             |
 | **Unnecessary Complex Microservices**                   | For a desktop audit workstation, a modular monolith using Python DDD + SQLite WAL is 10x faster, simpler to maintain, and has zero network failure modes.                                 |

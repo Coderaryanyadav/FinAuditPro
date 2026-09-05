@@ -10,6 +10,9 @@ from finauditpro.infrastructure.persistence.repositories.audit_matrix_repository
     AuditMatrixRepository,
 )
 from finauditpro.infrastructure.persistence.repositories.client_repository import ClientRepository
+from finauditpro.infrastructure.persistence.repositories.continuous_audit_repository import (
+    ContinuousAuditRepository,
+)
 from finauditpro.infrastructure.persistence.repositories.document_repository import (
     DocumentRepository,
 )
@@ -29,9 +32,6 @@ from finauditpro.infrastructure.persistence.repositories.roll_forward_repository
 )
 from finauditpro.infrastructure.persistence.repositories.user_repository import (
     UserRepository,
-)
-from finauditpro.infrastructure.persistence.repositories.continuous_audit_repository import (
-    ContinuousAuditRepository,
 )
 from finauditpro.infrastructure.persistence.repositories.working_paper_repository import (
     WorkingPaperRepository,

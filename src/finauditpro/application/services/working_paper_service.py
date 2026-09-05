@@ -4,6 +4,7 @@ import hashlib
 import json
 from uuid import uuid4
 
+from finauditpro.application.security.engagement_lock_guard import assert_engagement_not_locked
 from finauditpro.application.services.working_paper_scaffolder import (
     archive_working_paper_version,
     execute_clear_review_note,
@@ -22,7 +23,6 @@ from finauditpro.application.working_paper_dtos import (
     RespondReviewNoteDTO,
     SignOffDTO,
 )
-from finauditpro.application.security.engagement_lock_guard import assert_engagement_not_locked
 from finauditpro.domain.clock import utc_now
 from finauditpro.domain.entities import AuditEvent
 from finauditpro.domain.exceptions import EntityNotFoundError, ValidationError

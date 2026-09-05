@@ -13,7 +13,7 @@ Article Assistants, and Engagement Partners
 | Assessment Dimension                   |   Current Score   | Tier-1 Benchmark | Verdict & Root Problem                                                                                                 |
 | :------------------------------------- | :---------------: | :--------------: | :--------------------------------------------------------------------------------------------------------------------- |
 | **Core Architecture & Engine**         |  **9 / 10 (A)**   |      9 / 10      | Clean 4-layer DDD, integer-paise math, SQLite WAL, and AST layer guards are robust and high quality.                   |
-| **Security & Air-Gap Compliance**      | **9.5 / 10 (A+)** |     9.5 / 10     | Local-only execution, zero cloud egress, Fernet AES-128-CBC encryption, and append-only triggers are industry-leading. |
+| **Security & Privacy Posture**         | **9.5 / 10 (A+)** |     9.5 / 10     | Local-only execution, zero cloud egress, Fernet AES-128-CBC encryption, and append-only triggers are industry-leading. |
 | **User Flow & Navigation (UX)**        | **3.5 / 10 (D-)** |     9.5 / 10     | **Broken Information Architecture.** 15 flat disjoint tabs force the auditor into constant manual context-switching.   |
 | **Practitioner Empathy (CA Workflow)** |  **4 / 10 (D)**   |      9 / 10      | Built like a database management tool (CRUD tables) rather than a guided audit engagement pipeline.                    |
 | **AI Integration Flow**                |  **5 / 10 (C)**   |      9 / 10      | AI is sequestered in an isolated full-page tab instead of living as a persistent, in-context slide-over assistant.     |

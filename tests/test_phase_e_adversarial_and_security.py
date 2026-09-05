@@ -6,6 +6,7 @@ open review notes, and stale dependencies, and verifies immutability of locked f
 
 from pathlib import Path
 from uuid import uuid4
+
 import pytest
 
 from finauditpro.application.audit_report_dtos import (
@@ -31,28 +32,22 @@ from finauditpro.domain.entities import (
     Firm,
     User,
 )
-from finauditpro.domain.financial_entities import (
-    DatasetTypeEnum,
-    FinancialDataset,
-    TrialBalanceLine,
-)
 from finauditpro.domain.exceptions import PermissionDeniedError, ValidationError
+from finauditpro.domain.working_paper_entities import (
+    ReviewNote,
+    ReviewNoteStatusEnum,
+    WorkingPaper,
+)
 from finauditpro.infrastructure.first_run import initialize_database
 from finauditpro.infrastructure.persistence.database import DatabaseManager
 from finauditpro.infrastructure.persistence.repositories import (
     ClientRepository,
     EngagementRepository,
-    FinancialDataRepository,
     FirmRepository,
     UserRepository,
 )
 from finauditpro.infrastructure.persistence.repositories.working_paper_repository import (
     WorkingPaperRepository,
-)
-from finauditpro.domain.working_paper_entities import (
-    ReviewNote,
-    ReviewNoteStatusEnum,
-    WorkingPaper,
 )
 
 

@@ -1,10 +1,9 @@
 """Pattern detection engine for duplicates, transaction splitting, related party, tax, and control exceptions."""
 
+import uuid
 from collections import defaultdict
 from datetime import date, datetime
-import math
-from typing import Any, Optional
-import uuid
+from typing import Any
 
 from finauditpro.domain.continuous_audit_entities import (
     AlertSeverityEnum,
@@ -230,7 +229,7 @@ class PatternDetectionEngine:
         engagement_id: str,
         action_type: str,
         maker_id: str,
-        reviewer_id: Optional[str],
+        reviewer_id: str | None,
         amount_paise: int = 0,
         is_engagement_locked: bool = False,
     ) -> list[ContinuousAlert]:

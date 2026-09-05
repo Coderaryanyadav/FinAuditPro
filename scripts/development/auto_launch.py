@@ -33,8 +33,8 @@ def main() -> None:
         if ai_status["models_loaded"]:
             print(f"    Loaded Local AI Models: {', '.join(ai_status['models_loaded'])}")
     else:
-        print(f"  • Local LM Studio Server: AIR-GAPPED FALLBACK (Offline on {ai_status['url']})")
-        print("    [Auditor Note: FinAuditPro core audit calculations operate fully air-gapped without cloud dependencies]")
+        print(f"  • Local LM Studio Server: OFFLINE FALLBACK (Offline on {ai_status['url']})")
+        print("    [Auditor Note: FinAuditPro core audit calculations operate fully offline without cloud dependencies]")
 
     print("=================================================================")
     print(" STARTING FINAUDITPRO DESKTOP APPLICATION...")

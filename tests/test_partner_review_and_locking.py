@@ -1,6 +1,7 @@
 """Tests for Partner Review, Trusted Sign-Off, Engagement Locking, and Immutability."""
 
 from uuid import uuid4
+
 import pytest
 
 from finauditpro.application.completion_dtos import PartnerSignoffDTO

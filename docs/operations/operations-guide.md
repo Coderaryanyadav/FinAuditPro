@@ -25,7 +25,7 @@ Stored under the user's application data directory:
 }
 ```
 > [!IMPORTANT]
-> `allow_cloud_ai` must remain `false` to guarantee 100% air-gapped statutory privacy compliance.
+> `allow_cloud_ai` must remain `false` to preserve offline-first privacy and prevent outbound cloud transmission.
 
 ---
 

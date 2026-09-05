@@ -1,8 +1,7 @@
 """Service for managing auditor investigations, evidence linking, and feedback loops on continuous alerts."""
 
-from datetime import datetime, timezone
-from typing import Optional
 import uuid
+from datetime import UTC, datetime
 
 from finauditpro.application.continuous_audit_dtos import (
     AlertInvestigationDto,
@@ -14,7 +13,6 @@ from finauditpro.domain.continuous_audit_entities import (
     AlertInvestigation,
     AlertStatusEnum,
     AuditorFeedback,
-    ContinuousAlert,
     InvestigationOutcomeEnum,
 )
 from finauditpro.infrastructure.persistence.continuous_audit_models import (
@@ -80,7 +78,7 @@ class AlertInvestigationService:
         existing_inv.procedure_ids = request.procedure_ids
         existing_inv.exception_ids = request.exception_ids
         existing_inv.misstatement_ids = request.misstatement_ids
-        existing_inv.updated_at = datetime.now(timezone.utc)
+        existing_inv.updated_at = datetime.now(UTC)
 
         # Update alert status based on investigation outcome
         alert = session.get(ContinuousAlertModel, request.alert_id)

@@ -1,9 +1,9 @@
 """Deterministic journal entry risk scoring and Benford's Law analytical anomaly detection."""
 
-from datetime import date, datetime
 import math
-from typing import Any, Optional
 import uuid
+from datetime import date, datetime
+from typing import Any
 
 from finauditpro.domain.continuous_audit_entities import (
     AlertSeverityEnum,
@@ -29,7 +29,7 @@ class JournalAnalyticsEngine:
         9: 0.04576,
     }
 
-    def __init__(self, period_end_date: Optional[date] = None, high_value_threshold_paise: int = 50_00_00_00):
+    def __init__(self, period_end_date: date | None = None, high_value_threshold_paise: int = 50_00_00_00):
         # Default high value threshold: 50 Lakhs INR (5,000,000 INR = 50,00,00,00 paise)
         self.period_end_date = period_end_date
         self.high_value_threshold_paise = high_value_threshold_paise
@@ -38,7 +38,7 @@ class JournalAnalyticsEngine:
         self,
         engagement_id: str,
         journal_data: dict[str, Any],
-    ) -> Optional[ContinuousAlert]:
+    ) -> ContinuousAlert | None:
         """Calculates deterministic risk factors and produces an alert if risk exceeds baseline threshold."""
         factors: list[RiskFactorContribution] = []
         score = 0.0
@@ -52,7 +52,7 @@ class JournalAnalyticsEngine:
         acct_code = str(journal_data.get("account_code") or "")
         acct_name = str(journal_data.get("account_name") or "").upper()
 
-        parsed_date: Optional[date] = None
+        parsed_date: date | None = None
         if entry_date_str:
             try:
                 parsed_date = date.fromisoformat(entry_date_str[:10])

@@ -1,12 +1,17 @@
 """Adversarial and security tests for continuous audit engine: evasion resistance and tenant isolation."""
 
-from datetime import date, datetime, timezone
-import pytest
+from datetime import date
 
 from finauditpro.application.continuous_audit_dtos import ContinuousMonitoringRunRequest
 from finauditpro.application.services.continuous_audit_service import ContinuousAuditService
-from finauditpro.domain.continuous_audit_entities import AlertSeverityEnum, AlertTypeEnum
-from finauditpro.domain.entities import AuditTypeEnum, Client, Engagement, EngagementStatusEnum, Firm
+from finauditpro.domain.continuous_audit_entities import AlertSeverityEnum
+from finauditpro.domain.entities import (
+    AuditTypeEnum,
+    Client,
+    Engagement,
+    EngagementStatusEnum,
+    Firm,
+)
 from finauditpro.domain.pattern_detection_engine import PatternDetectionEngine
 from finauditpro.infrastructure.first_run import initialize_database
 from finauditpro.infrastructure.persistence.repositories import (

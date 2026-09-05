@@ -1,8 +1,6 @@
 """Service for running data quality validations and managing detected data issues."""
 
-from datetime import datetime, timezone
-import json
-from typing import Optional
+from datetime import UTC, datetime
 
 from finauditpro.application.continuous_audit_dtos import (
     DataQualityIssueDto,
@@ -13,7 +11,6 @@ from finauditpro.domain.continuous_audit_entities import (
     AlertSeverityEnum,
     AlertTypeEnum,
     ContinuousAlert,
-    DataQualityIssue,
     DataQualitySeverityEnum,
     RiskFactorContribution,
 )
@@ -33,8 +30,8 @@ class DataQualityService:
     def __init__(
         self,
         audit_repo: ContinuousAuditRepository,
-        financial_repo: Optional[FinancialDataRepository] = None,
-        engine: Optional[DataQualityEngine] = None,
+        financial_repo: FinancialDataRepository | None = None,
+        engine: DataQualityEngine | None = None,
     ):
         self.audit_repo = audit_repo
         self.financial_repo = financial_repo
@@ -43,9 +40,9 @@ class DataQualityService:
     def run_data_quality_checks(
         self,
         request: DataQualityRunRequest,
-        entries_override: Optional[list[dict]] = None,
+        entries_override: list[dict[str, Any]] | None = None,
     ) -> DataQualityRunResultDto:
-        entries: list[dict] = []
+        entries: list[dict[str, Any]] = []
         known_accounts: set[str] = set()
 
         if entries_override is not None:
@@ -155,6 +152,6 @@ class DataQualityService:
             return False
         model.resolution = resolution
         model.resolved_by = resolved_by
-        model.resolved_at = datetime.now(timezone.utc).isoformat()
+        model.resolved_at = datetime.now(UTC).isoformat()
         session.flush()
         return True

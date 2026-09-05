@@ -12,7 +12,6 @@ Validates:
 """
 
 import time
-from uuid import uuid4
 
 import pytest
 
@@ -26,7 +25,6 @@ from finauditpro.application.audit_adjustment_dtos import (
     ApplyAJEDTO,
     CreateAJEDTO,
     CreateAJELineDTO,
-    ReverseAJEDTO,
     ReviewAJEDTO,
     SubmitAJEDTO,
     UpdateAJEDTO,
@@ -36,7 +34,7 @@ from finauditpro.application.security.security_context import SecurityContext
 from finauditpro.application.services.account_mapping_service import AccountMappingService
 from finauditpro.application.services.audit_adjustment_service import AuditAdjustmentService
 from finauditpro.domain.account_mapping_entities import AccountTypeEnum, MappingStatusEnum
-from finauditpro.domain.audit_adjustment_entities import AJEStatusEnum, AJETypeEnum
+from finauditpro.domain.audit_adjustment_entities import AJEStatusEnum
 from finauditpro.domain.entities import (
     AuditTypeEnum,
     Client,

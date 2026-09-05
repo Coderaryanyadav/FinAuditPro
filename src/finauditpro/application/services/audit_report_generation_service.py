@@ -1,7 +1,6 @@
 """Service for Audit Report generation, data lineage tracking, and pre-generation checklist validation (Phase E)."""
 
 import hashlib
-import json
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -13,6 +12,7 @@ from finauditpro.application.audit_report_dtos import (
 )
 from finauditpro.application.security.security_context import SecurityContext
 from finauditpro.domain.audit_report_entities import (
+    AuditReportWorkpaper,
     ReportDataLineage,
     ReportWorkpaperStatusEnum,
     SourceLineageTypeEnum,

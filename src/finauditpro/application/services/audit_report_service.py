@@ -24,7 +24,11 @@ from finauditpro.domain.audit_report_entities import (
 )
 from finauditpro.domain.clock import utc_now
 from finauditpro.domain.entities import AuditEvent
-from finauditpro.domain.exceptions import EntityNotFoundError, PermissionDeniedError, ValidationError
+from finauditpro.domain.exceptions import (
+    EntityNotFoundError,
+    PermissionDeniedError,
+    ValidationError,
+)
 from finauditpro.domain.opinion_consistency_engine import (
     OpinionConsistencyEngine,
     OpinionEvaluationResult,
@@ -41,9 +45,6 @@ from finauditpro.infrastructure.persistence.repositories.audit_adjustment_reposi
 from finauditpro.infrastructure.persistence.repositories.audit_completion_repository import (
     AuditCompletionRepository,
 )
-from finauditpro.infrastructure.persistence.repositories.core_audit_engine_repository import (
-    CoreAuditEngineRepository,
-)
 from finauditpro.infrastructure.persistence.repositories.audit_matrix_repository import (
     AuditMatrixRepository,
 )
@@ -52,6 +53,9 @@ from finauditpro.infrastructure.persistence.repositories.audit_report_repository
 )
 from finauditpro.infrastructure.persistence.repositories.compliance_repository import (
     ComplianceRepository,
+)
+from finauditpro.infrastructure.persistence.repositories.core_audit_engine_repository import (
+    CoreAuditEngineRepository,
 )
 from finauditpro.infrastructure.persistence.repositories.financial_data_repository import (
     FinancialDataRepository,

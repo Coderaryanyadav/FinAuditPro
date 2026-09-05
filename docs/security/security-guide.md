@@ -1,7 +1,7 @@
 # FinAuditPro — Security Architecture & Threat Defense Guide
 
 FinAuditPro enforces a defense-in-depth security model tailored specifically for
-air-gapped statutory financial audit practice.
+offline-first statutory financial audit practice with zero outbound client data transmission.
 
 ---
 

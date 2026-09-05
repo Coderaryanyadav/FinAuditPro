@@ -69,7 +69,6 @@ def test_phase_a_dialogs_rendering(qapp: QApplication, db_manager: DatabaseManag
     from finauditpro.ui.dialogs.account_mapping_dialog import AccountMappingDialog
     from finauditpro.ui.dialogs.audit_adjustment_dialog import AuditAdjustmentDialog
     from finauditpro.ui.dialogs.create_aje_dialog import CreateAJEDialog
-    from finauditpro.ui.dialogs.lead_schedule_trace_dialog import LeadScheduleTraceDialog
 
     eng_svc = EngagementService(db_manager)
     firm_svc = FirmService(db_manager)

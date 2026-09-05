@@ -1,9 +1,10 @@
 """Unit tests for Journal Analytics Engine risk factor decomposition and Benford's Law."""
 
 from datetime import date
+
 import pytest
 
-from finauditpro.domain.continuous_audit_entities import AlertSeverityEnum, AlertTypeEnum
+from finauditpro.domain.continuous_audit_entities import AlertSeverityEnum
 from finauditpro.domain.journal_analytics_engine import JournalAnalyticsEngine
 
 

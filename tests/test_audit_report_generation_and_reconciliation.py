@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from uuid import uuid4
+
 import pytest
 
 from finauditpro.application.audit_completion_dtos import CreateGoingConcernAssessmentDTO
@@ -40,7 +41,6 @@ from finauditpro.domain.financial_entities import (
     FinancialDataset,
     TrialBalanceLine,
 )
-from finauditpro.domain.exceptions import ValidationError
 from finauditpro.infrastructure.first_run import initialize_database
 from finauditpro.infrastructure.persistence.database import DatabaseManager
 from finauditpro.infrastructure.persistence.repositories import (

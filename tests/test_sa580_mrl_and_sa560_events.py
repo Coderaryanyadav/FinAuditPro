@@ -36,8 +36,18 @@ def test_sa580_service_mrl_lifecycle(tmp_path: any) -> None:
     db_manager = initialize_database(db_path)
 
     with db_manager.session_scope() as session:
-        from finauditpro.domain.entities import AuditTypeEnum, Client, Engagement, EngagementStatusEnum, Firm
-        from finauditpro.infrastructure.persistence.repositories import ClientRepository, EngagementRepository, FirmRepository
+        from finauditpro.domain.entities import (
+            AuditTypeEnum,
+            Client,
+            Engagement,
+            EngagementStatusEnum,
+            Firm,
+        )
+        from finauditpro.infrastructure.persistence.repositories import (
+            ClientRepository,
+            EngagementRepository,
+            FirmRepository,
+        )
         firm = Firm(id="firm-mrl", name="Test Firm")
         FirmRepository(session).add(firm)
         client = Client(id="client-mrl", firm_id=firm.id, name="Test Client")
@@ -85,8 +95,18 @@ def test_sa560_subsequent_events_log(tmp_path: any) -> None:
     db_manager = initialize_database(db_path)
 
     with db_manager.session_scope() as session:
-        from finauditpro.domain.entities import AuditTypeEnum, Client, Engagement, EngagementStatusEnum, Firm
-        from finauditpro.infrastructure.persistence.repositories import ClientRepository, EngagementRepository, FirmRepository
+        from finauditpro.domain.entities import (
+            AuditTypeEnum,
+            Client,
+            Engagement,
+            EngagementStatusEnum,
+            Firm,
+        )
+        from finauditpro.infrastructure.persistence.repositories import (
+            ClientRepository,
+            EngagementRepository,
+            FirmRepository,
+        )
         firm = Firm(id="firm-subseq", name="Test Firm")
         FirmRepository(session).add(firm)
         client = Client(id="client-subseq", firm_id=firm.id, name="Test Client")

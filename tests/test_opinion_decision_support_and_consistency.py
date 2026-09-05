@@ -1,6 +1,5 @@
 """Unit tests for Phase E: Opinion Decision Support, Consistency Engine, and Candidate KAM Detection."""
 
-import pytest
 
 from finauditpro.domain.audit_report_entities import (
     AuditOpinionTypeEnum,

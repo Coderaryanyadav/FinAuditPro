@@ -1,8 +1,7 @@
 """Central continuous audit service orchestrating anomaly monitoring, alert fatigue control, and dashboard metrics."""
 
-from datetime import datetime, timezone
-import json
-from typing import Any, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 from sqlalchemy import select
 
@@ -15,7 +14,6 @@ from finauditpro.application.continuous_audit_dtos import (
 )
 from finauditpro.domain.continuous_audit_entities import (
     AlertSeverityEnum,
-    AlertStatusEnum,
     ContinuousAlert,
 )
 from finauditpro.domain.continuous_reconciliation_engine import (
@@ -25,7 +23,6 @@ from finauditpro.domain.journal_analytics_engine import JournalAnalyticsEngine
 from finauditpro.domain.pattern_detection_engine import PatternDetectionEngine
 from finauditpro.infrastructure.persistence.continuous_audit_models import (
     AlertInvestigationModel,
-    ContinuousAlertModel,
     ContinuousReconciliationRecordModel,
     DataQualityIssueModel,
 )
@@ -43,10 +40,10 @@ class ContinuousAuditService:
     def __init__(
         self,
         audit_repo: ContinuousAuditRepository,
-        financial_repo: Optional[FinancialDataRepository] = None,
-        journal_engine: Optional[JournalAnalyticsEngine] = None,
-        pattern_engine: Optional[PatternDetectionEngine] = None,
-        recon_engine: Optional[ContinuousReconciliationEngine] = None,
+        financial_repo: FinancialDataRepository | None = None,
+        journal_engine: JournalAnalyticsEngine | None = None,
+        pattern_engine: PatternDetectionEngine | None = None,
+        recon_engine: ContinuousReconciliationEngine | None = None,
     ):
         self.audit_repo = audit_repo
         self.financial_repo = financial_repo
@@ -57,7 +54,7 @@ class ContinuousAuditService:
     def monitor_transactions(
         self,
         request: ContinuousMonitoringRunRequest,
-        entries_override: Optional[list[dict[str, Any]]] = None,
+        entries_override: list[dict[str, Any]] | None = None,
     ) -> ContinuousMonitoringSummaryDto:
         entries: list[dict[str, Any]] = []
 
@@ -160,10 +157,10 @@ class ContinuousAuditService:
         self,
         engagement_id: str,
         tb_lines: list[dict[str, Any]],
-        subledgers: Optional[dict[str, tuple[int, int]]] = None,
+        subledgers: dict[str, tuple[int, int]] | None = None,
     ) -> list[ContinuousReconciliationRecordModel]:
         records: list[ContinuousReconciliationRecordModel] = []
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
 
         # 1. TB Balance check
         tb_res = self.recon_engine.reconcile_trial_balance(tb_lines)

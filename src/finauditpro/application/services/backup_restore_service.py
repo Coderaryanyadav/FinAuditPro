@@ -12,8 +12,8 @@ from pathlib import Path, PurePosixPath
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-
 from sqlalchemy import text
+
 from finauditpro.domain.entities import AuditEvent
 from finauditpro.domain.exceptions import AuditIntegrityError, ValidationError
 from finauditpro.infrastructure.persistence.database import DatabaseManager

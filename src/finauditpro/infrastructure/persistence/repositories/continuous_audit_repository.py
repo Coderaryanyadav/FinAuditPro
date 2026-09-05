@@ -1,8 +1,7 @@
 """Repository for storing and querying continuous audit alerts, data quality issues, and investigations."""
 
-from datetime import datetime, timezone
 import json
-from typing import Optional
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -24,7 +23,6 @@ from finauditpro.infrastructure.persistence.continuous_audit_models import (
     AlertFeedbackModel,
     AlertInvestigationModel,
     ContinuousAlertModel,
-    ContinuousReconciliationRecordModel,
     DataQualityIssueModel,
 )
 
@@ -56,7 +54,7 @@ class ContinuousAuditRepository:
         self.session.flush()
 
     def get_data_quality_issues(
-        self, engagement_id: str, severity: Optional[str] = None
+        self, engagement_id: str, severity: str | None = None
     ) -> list[DataQualityIssue]:
         stmt = select(DataQualityIssueModel).where(DataQualityIssueModel.engagement_id == engagement_id)
         if severity:
@@ -134,8 +132,8 @@ class ContinuousAuditRepository:
     def get_alerts(
         self,
         engagement_id: str,
-        status: Optional[str] = None,
-        severity: Optional[str] = None,
+        status: str | None = None,
+        severity: str | None = None,
         include_suppressed: bool = False,
     ) -> list[ContinuousAlert]:
         stmt = select(ContinuousAlertModel).where(ContinuousAlertModel.engagement_id == engagement_id)
@@ -182,7 +180,7 @@ class ContinuousAuditRepository:
             )
         return results
 
-    def get_alert_by_id(self, alert_id: str) -> Optional[ContinuousAlert]:
+    def get_alert_by_id(self, alert_id: str) -> ContinuousAlert | None:
         m = self.session.get(ContinuousAlertModel, alert_id)
         if not m:
             return None
@@ -238,11 +236,11 @@ class ContinuousAuditRepository:
         m.management_response = inv.management_response
         m.conclusion = inv.conclusion
         m.outcome = inv.outcome.value
-        m.updated_at = datetime.now(timezone.utc).isoformat()
+        m.updated_at = datetime.now(UTC).isoformat()
         self.session.flush()
         return inv
 
-    def get_investigation_by_alert(self, alert_id: str) -> Optional[AlertInvestigation]:
+    def get_investigation_by_alert(self, alert_id: str) -> AlertInvestigation | None:
         stmt = select(AlertInvestigationModel).where(AlertInvestigationModel.alert_id == alert_id)
         m = self.session.execute(stmt).scalars().first()
         if not m:

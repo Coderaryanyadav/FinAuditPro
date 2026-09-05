@@ -1,9 +1,9 @@
 """Domain entities and value objects for continuous audit, intelligence, and data quality assurance."""
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 
 class DataQualitySeverityEnum(str, Enum):
@@ -34,16 +34,16 @@ class DataQualityTypeEnum(str, Enum):
 class DataQualityIssue:
     issue_id: str
     engagement_id: str
-    dataset_id: Optional[str]
+    dataset_id: str | None
     issue_type: DataQualityTypeEnum
     severity: DataQualitySeverityEnum
     source: str
     detected_at: datetime
     affected_records: list[str]
     description: str
-    resolution: Optional[str] = None
-    resolved_by: Optional[str] = None
-    resolved_at: Optional[datetime] = None
+    resolution: str | None = None
+    resolved_by: str | None = None
+    resolved_at: datetime | None = None
 
 
 class AlertSeverityEnum(str, Enum):
@@ -100,10 +100,10 @@ class ContinuousAlert:
     risk_score: float
     risk_factors: list[RiskFactorContribution] = field(default_factory=list)
     status: AlertStatusEnum = AlertStatusEnum.NEW
-    assigned_user: Optional[str] = None
+    assigned_user: str | None = None
     dedup_hash: str = ""
     suppressed: bool = False
-    suppression_reason: Optional[str] = None
+    suppression_reason: str | None = None
     is_experimental: bool = False
     model_rule_version: str = "v1.0"
 
@@ -132,8 +132,8 @@ class AlertInvestigation:
     management_response: str = ""
     conclusion: str = ""
     outcome: InvestigationOutcomeEnum = InvestigationOutcomeEnum.NEEDS_INVESTIGATION
-    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 @dataclass
@@ -147,7 +147,7 @@ class AuditorFeedback:
     is_misstatement: bool
     procedure_created: bool
     comments: str = ""
-    recorded_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    recorded_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 @dataclass
@@ -167,7 +167,7 @@ class BenfordAnalysisResult:
         "Benford analysis is an analytical indicator of potential distribution divergence. "
         "It does not constitute conclusive evidence of irregularity or accounting error."
     )
-    auditor_conclusion: Optional[str] = None
+    auditor_conclusion: str | None = None
 
 
 @dataclass

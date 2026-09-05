@@ -360,6 +360,7 @@ class ArchivalService:
         """Independently verify the cryptographic integrity and file structure of an archived package."""
         import zipfile
         from pathlib import Path
+
         from finauditpro.infrastructure.documents.document_security import calculate_sha256
 
         p = Path(archive_path)
@@ -371,7 +372,9 @@ class ArchivalService:
                     return False
             curr_hash = calculate_sha256(archive_path)
             with self.db_manager.session_scope() as session:
-                from finauditpro.infrastructure.persistence.archival_models import EngagementArchiveModel
+                from finauditpro.infrastructure.persistence.archival_models import (
+                    EngagementArchiveModel,
+                )
 
                 archives = (
                     session.query(EngagementArchiveModel).filter_by(archive_path=archive_path).all()

@@ -229,7 +229,7 @@ class OpinionConsistencyEngine:
                         source_b="Draft CARO Report Text",
                         value_b=rep_ans,
                         severity="Critical",
-                        explanation=f"Draft CARO reporting text diverges from approved clause workpaper conclusion.",
+                        explanation="Draft CARO reporting text diverges from approved clause workpaper conclusion.",
                     )
                 )
 

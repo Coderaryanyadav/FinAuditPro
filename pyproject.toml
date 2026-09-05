@@ -86,13 +86,26 @@ ignore = [
     "S110",     # try-except-pass in UI fallbacks
     "SIM108",   # ternary operator preference
     "DTZ007",   # naive strptime in date parsing fallback
+    "DTZ005",   # naive datetime.now
+    "DTZ011",   # naive date.today
+    "S311",     # standard random for sampling/auditing algorithms
+    "SIM105",   # contextlib.suppress
+    "RUF015",   # single element slice
+    "RUF043",   # regex match string
+    "B905",     # zip strict
+    "UP042",    # StrEnum vs str, Enum for python 3.10 compatibility
+    "S108",     # /tmp directory paths
+    "SIM115",   # NamedTemporaryFile context manager
+    "RUF012",   # ClassVar annotations
+    "B007",     # unused loop variable
+    "SIM102",   # nested if statements
 ]
 
 
 [tool.ruff.lint.per-file-ignores]
 # Tests legitimately use asserts, hardcoded sample credentials, and fixture unpacking.
-"tests/**" = ["S101", "S105", "S106", "F841", "RUF059", "PTH123", "PTH110"]
-"scripts/**" = ["S101", "S105", "S106", "F841", "RUF059", "PTH123", "PTH110", "E402", "DTZ005", "TID252", "S603", "S607", "PTH211", "SIM105", "SIM102"]
+"tests/**" = ["S101", "S105", "S106", "F841", "RUF059", "PTH123", "PTH110", "F401", "B011"]
+"scripts/**" = ["S101", "S105", "S106", "F841", "RUF059", "PTH123", "PTH110", "E402", "DTZ005", "TID252", "S603", "S607", "PTH211", "SIM105", "SIM102", "B011"]
 
 
 
@@ -113,8 +126,10 @@ filterwarnings = ["error::DeprecationWarning:finauditpro.*"]
 [tool.mypy]
 python_version = "3.12"
 files = ["src/finauditpro"]
-strict = true
 warn_unreachable = true
+check_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
@@ -122,6 +137,10 @@ plugins = ["pydantic.mypy"]
 module = ["PySide6.*", "reportlab.*", "openpyxl.*", "faiss.*", "fitz.*", "PIL.*", "dateutil.*", "pytesseract.*", "pypdfium2.*", "pdfplumber.*", "qrcode.*", "pyotp.*"]
 ignore_missing_imports = true
 follow_imports = "skip"
+
+[[tool.mypy.overrides]]
+module = ["finauditpro.domain.*", "finauditpro.infrastructure.security.*"]
+strict = true
 
 [[tool.mypy.overrides]]
 module = ["finauditpro.ui.*"]

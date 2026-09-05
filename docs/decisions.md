@@ -12,11 +12,11 @@ This document captures the key architectural decisions, rationale, and complianc
 
 ---
 
-## ADR-002: Air-Gapped Local-Only AI via LM Studio (Zero Cloud Egress)
+## ADR-002: Offline-First Local-Only AI via LM Studio (Zero Outbound Egress)
 * **Status**: Accepted
 * **Context**: Cloud LLM providers (e.g. external APIs) violate audit confidentiality if client trial balances or documents are transmitted over the public internet.
 * **Decision**: All generative audit assistance, document chunk summarization, and query reasoning run strictly against local OpenAI-compatible endpoints provided by LM Studio (`http://localhost:1234`) running open-weights models (`deepseek-r1-distill-qwen-14b`, `nomic-embed-text`). If the local AI server is offline, FinAuditPro degrades gracefully to rule-based execution without interruption.
-* **Consequences**: Strict air-gap compliance. AI outputs are advisory and marked `[AI Generated]` with human auditor override.
+* **Consequences**: Strict privacy and confidentiality preservation. AI outputs are advisory and marked `[AI Advisory]` with mandatory human auditor review.
 
 ---
 

@@ -14,6 +14,7 @@ Re-review & Re-approval -> Controlled Version Regeneration.
 
 from pathlib import Path
 from uuid import uuid4
+
 import pytest
 
 from finauditpro.application.audit_completion_dtos import (
@@ -25,7 +26,7 @@ from finauditpro.application.audit_report_dtos import (
     CreateAuditReportWorkpaperDTO,
     PartnerApproveReportDTO,
 )
-from finauditpro.application.completion_dtos import UpdateChecklistItemDTO
+from finauditpro.application.compliance_dtos import ReviewCAROClauseDTO
 from finauditpro.application.financial_statement_dtos import (
     GenerateFinancialStatementsDTO,
     SaveFinancialStatementPackageDTO,
@@ -41,18 +42,15 @@ from finauditpro.application.services.audit_report_service import AuditReportSer
 from finauditpro.application.services.compliance_service import ComplianceService
 from finauditpro.application.services.financial_statement_service import FinancialStatementService
 from finauditpro.domain.account_mapping_entities import AccountTypeEnum
-from finauditpro.domain.audit_completion_entities import (
-    SubsequentEventProcedureEnum,
-    SubsequentEventTypeEnum,
+from finauditpro.domain.audit_matrix_entities import (
+    AuditRisk,
+    RiskSeverityEnum,
 )
 from finauditpro.domain.audit_report_entities import (
     AuditOpinionTypeEnum,
-    CandidateKAMSourceEnum,
     ReportWorkpaperStatusEnum,
     SourceLineageTypeEnum,
 )
-from finauditpro.application.compliance_dtos import ReviewCAROClauseDTO
-from finauditpro.domain.compliance_entities import CAROClauseEnum, CAROReportAnswerEnum
 from finauditpro.domain.entities import (
     AuditTypeEnum,
     Client,
@@ -68,11 +66,6 @@ from finauditpro.domain.financial_entities import (
 )
 from finauditpro.infrastructure.first_run import initialize_database
 from finauditpro.infrastructure.persistence.database import DatabaseManager
-from finauditpro.domain.audit_matrix_entities import (
-    AuditRisk,
-    MaterialityAssessment,
-    RiskSeverityEnum,
-)
 from finauditpro.infrastructure.persistence.repositories import (
     ClientRepository,
     EngagementRepository,
@@ -389,7 +382,7 @@ def test_abc_manufacturing_complete_reporting_simulation(
     assert Path(gen_result.pdf_path).exists()
 
     # Verify generated document contents
-    with open(gen_result.pdf_path, "r", encoding="utf-8") as f:
+    with open(gen_result.pdf_path, encoding="utf-8") as f:
         report_text = f.read()
     assert "INDEPENDENT AUDITOR'S REPORT" in report_text
     assert "ABC Manufacturing Pvt Ltd" in report_text
@@ -404,8 +397,9 @@ def test_abc_manufacturing_complete_reporting_simulation(
     # =======================================================
     # Mutate an underlying financial value in the trial balance
     with db_manager.session_scope() as session:
-        from finauditpro.infrastructure.persistence.models import TrialBalanceLineModel
         from sqlalchemy import select
+
+        from finauditpro.infrastructure.persistence.models import TrialBalanceLineModel
         stmt = select(TrialBalanceLineModel).where(
             TrialBalanceLineModel.dataset_id == ds.id,
             TrialBalanceLineModel.account_code == "4001",
@@ -462,7 +456,7 @@ def test_abc_manufacturing_complete_reporting_simulation(
     assert gen_result_v2.version == 2
     assert Path(gen_result_v2.pdf_path).exists()
 
-    with open(gen_result_v2.pdf_path, "r", encoding="utf-8") as f:
+    with open(gen_result_v2.pdf_path, encoding="utf-8") as f:
         v2_text = f.read()
     assert "Report Version: v2" in v2_text
     assert "UDIN: 26444444AAAAAA4445" in v2_text

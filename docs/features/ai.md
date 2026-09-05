@@ -1,20 +1,20 @@
 # Local AI Copilot, RAG Pipeline & Prompt Defense
 
-FinAuditPro incorporates an air-gapped local AI copilot running against local LLM instances (LM Studio).
+FinAuditPro incorporates an optional local AI assistant running against local LLM instances (via LM Studio) with zero outbound client data transmission.
 
 ---
 
-## 1. Zero Cloud Dependency & Air-Gapped Operation
+## 1. Zero Cloud Dependency & Local Operation
 
-- **Local REST Endpoint**: Connects to LM Studio via HTTP REST API (`http://localhost:1234/v1`).
+- **Local REST Endpoint**: Interfaces with local LM Studio via loopback HTTP REST API (`http://localhost:1234/v1`).
 - **Models**:
-  - Chat / Extraction Model: `deepseek-r1-distill-qwen-14b` (or other local GGUF models)
+  - Chat / Extraction Model: `deepseek-r1-distill-qwen-14b` (or compatible local GGUF models)
   - Embedding Model: `nomic-embed-text`
-- **Degraded Fallback**: If LM Studio is not running, FinAuditPro operates seamlessly in air-gapped mode with full access to deterministic financial analytics and statutory checklists.
+- **Degraded Fallback**: If LM Studio is not running, FinAuditPro operates seamlessly with full access to deterministic financial analytics and statutory checklists while AI advisory features remain gracefully disabled.
 
 ---
 
-## 2. Air-Gapped RAG Pipeline
+## 2. Local RAG Pipeline
 
 ```text
 Document Text Chunks
@@ -36,6 +36,6 @@ Auditor UI Output with [AI Generated] Disclaimer & Citations
 
 ---
 
-## 3. Human Auditor Override
+## 3. Human Auditor Override & Statutory Notice
 
-All AI outputs are explicitly labeled as `[AI Generated]`. The AI copilot acts strictly as an advisory assistant and has zero authority to alter financial records or bypass statutory rules.
+All AI outputs are explicitly labeled with `[AI Advisory]`. The local AI assistant acts strictly as an advisory tool and possesses zero authority to modify database state, compute official accounting balances, or bypass statutory review procedures.

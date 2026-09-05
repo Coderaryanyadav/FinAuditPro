@@ -4,7 +4,6 @@ import pytest
 
 from finauditpro.application.audit_completion_dtos import (
     CreateGoingConcernAssessmentDTO,
-    GoingConcernMitigationDTO,
 )
 from finauditpro.application.security.rbac import RoleEnum
 from finauditpro.application.security.security_context import SecurityContext
@@ -78,7 +77,13 @@ def test_sa570_service_rbac_partner_signoff(tmp_path: any) -> None:
     db_manager = initialize_database(db_path)
 
     with db_manager.session_scope() as session:
-        from finauditpro.domain.entities import AuditTypeEnum, Client, Engagement, EngagementStatusEnum, Firm
+        from finauditpro.domain.entities import (
+            AuditTypeEnum,
+            Client,
+            Engagement,
+            EngagementStatusEnum,
+            Firm,
+        )
         from finauditpro.infrastructure.persistence.repositories import (
             ClientRepository,
             EngagementRepository,

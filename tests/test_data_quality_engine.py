@@ -1,12 +1,10 @@
 """Unit tests for the deterministic Data Quality Engine and DataQualityService."""
 
-from datetime import date, datetime, timezone
-import pytest
+from datetime import date
 
 from finauditpro.application.continuous_audit_dtos import DataQualityRunRequest
 from finauditpro.application.services.data_quality_service import DataQualityService
 from finauditpro.domain.continuous_audit_entities import (
-    DataQualitySeverityEnum,
     DataQualityTypeEnum,
 )
 from finauditpro.domain.data_quality_engine import DataQualityEngine
@@ -147,8 +145,18 @@ def test_data_quality_service_persistence_and_resolution(tmp_path) -> None:
     db_manager = initialize_database(db_file)
 
     with db_manager.session_scope() as session:
-        from finauditpro.domain.entities import AuditTypeEnum, Client, Engagement, EngagementStatusEnum, Firm
-        from finauditpro.infrastructure.persistence.repositories import ClientRepository, EngagementRepository, FirmRepository
+        from finauditpro.domain.entities import (
+            AuditTypeEnum,
+            Client,
+            Engagement,
+            EngagementStatusEnum,
+            Firm,
+        )
+        from finauditpro.infrastructure.persistence.repositories import (
+            ClientRepository,
+            EngagementRepository,
+            FirmRepository,
+        )
 
         firm = Firm(id="firm-test", name="Test Firm")
         FirmRepository(session).add(firm)

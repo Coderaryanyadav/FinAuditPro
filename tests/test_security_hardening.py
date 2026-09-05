@@ -245,6 +245,7 @@ def test_legacy_key_migration_flow(tmp_path, monkeypatch) -> None:
 def test_uninitialized_cipher_fails_closed(tmp_path, monkeypatch) -> None:
     """Verify that get_fernet_cipher fails closed when uninitialized without hardcoded fallbacks."""
     import pytest
+
     import finauditpro.infrastructure.security.encryption as enc
 
     monkeypatch.setattr(enc, "_get_key_file_path", lambda: tmp_path / "nonexistent.key")
@@ -258,6 +259,7 @@ def test_uninitialized_cipher_fails_closed(tmp_path, monkeypatch) -> None:
 def test_decryption_tampered_ciphertext_fails_closed(tmp_path, monkeypatch) -> None:
     """Verify that decrypt_sensitive_string raises ValueError on invalid/tampered ciphertext."""
     import pytest
+
     import finauditpro.infrastructure.security.encryption as enc
 
     monkeypatch.setattr(enc, "_get_key_file_path", lambda: tmp_path / "test_key.key")
@@ -274,7 +276,9 @@ def test_decryption_tampered_ciphertext_fails_closed(tmp_path, monkeypatch) -> N
 def test_brute_force_lockout_tamper_and_deletion_resistance(tmp_path, monkeypatch) -> None:
     """Verify that deleting or tampering with lockout.json cannot bypass brute force lockout."""
     import json
+
     import pytest
+
     import finauditpro.infrastructure.security.lockout as lock
     from finauditpro.domain.exceptions import ValidationError
 

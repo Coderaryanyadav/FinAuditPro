@@ -1,18 +1,18 @@
 """Hostile red-team adversarial tests proving resolution of P0/P1 security, accounting, and finalization findings."""
 
-from datetime import datetime, timezone
 import pytest
 
 from finauditpro.application.audit_adjustment_dtos import CreateAJEDTO, CreateAJELineDTO
-from finauditpro.application.completion_dtos import PartnerSignoffDTO
 from finauditpro.application.financial_dtos import ImportDatasetDTO
 from finauditpro.application.security.rbac import RBACManager, RoleEnum, UserSession
 from finauditpro.application.security.security_context import SecurityContext
 from finauditpro.application.services.audit_adjustment_service import AuditAdjustmentService
 from finauditpro.application.services.document_service import DocumentService, UploadDocumentDTO
-from finauditpro.application.services.engagement_finalization_service import EngagementFinalizationService
 from finauditpro.application.services.financial_data_service import FinancialDataService
-from finauditpro.application.services.working_paper_service import CreateWorkingPaperDTO, WorkingPaperService
+from finauditpro.application.services.working_paper_service import (
+    CreateWorkingPaperDTO,
+    WorkingPaperService,
+)
 from finauditpro.domain.audit_adjustment_entities import AuditJournalEntry, AuditJournalLine
 from finauditpro.domain.entities import (
     AuditTypeEnum,

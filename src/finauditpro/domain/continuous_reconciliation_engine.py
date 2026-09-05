@@ -1,7 +1,7 @@
 """Continuous reconciliation and materiality exposure monitoring engine."""
 
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 from finauditpro.domain.continuous_audit_entities import (
     ContinuousReconciliationResult,

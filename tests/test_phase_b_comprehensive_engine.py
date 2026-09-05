@@ -17,16 +17,9 @@ Verifies:
 """
 
 import time
+
 import pytest
 
-from finauditpro.application.account_mapping_dtos import MapAccountDTO, SyncTrialBalanceAccountsDTO
-from finauditpro.application.audit_adjustment_dtos import (
-    ApplyAJEDTO,
-    CreateAJEDTO,
-    CreateAJELineDTO,
-    ReviewAJEDTO,
-    SubmitAJEDTO,
-)
 from finauditpro.application.audit_matrix_dtos import (
     AttachEvidenceDTO,
     CreateProcedureDTO,
@@ -36,24 +29,13 @@ from finauditpro.application.core_audit_dtos import (
     CalculateAuditCompletenessDTO,
     CreateMisstatementDTO,
     EvaluateProcedureConclusionDTO,
-    ExecuteSampleItemTestDTO,
-    GenerateAssertionCoverageDTO,
-    LinkMisstatementToAJEDTO,
     LogAuditExceptionDTO,
-    ResolveAuditExceptionDTO,
 )
 from finauditpro.application.security.rbac import UserSession
 from finauditpro.application.security.security_context import SecurityContext
-from finauditpro.application.services.account_mapping_service import AccountMappingService
-from finauditpro.application.services.audit_adjustment_service import AuditAdjustmentService
 from finauditpro.application.services.audit_matrix_service import AuditMatrixService
 from finauditpro.application.services.core_audit_service import CoreAuditService
-from finauditpro.domain.account_mapping_entities import AccountTypeEnum
 from finauditpro.domain.audit_execution_entities import (
-    AuditSampleItemTest,
-    AuditTestOutcomeEnum,
-    ExceptionStatusEnum,
-    MisstatementStatusEnum,
     MisstatementTypeEnum,
     ProcedureConclusionEnum,
 )
@@ -62,7 +44,6 @@ from finauditpro.domain.audit_matrix_entities import (
     BenchmarkTypeEnum,
     MaterialityAssessment,
     ProcedureStatusEnum,
-    RiskSeverityEnum,
 )
 from finauditpro.domain.entities import (
     AuditTypeEnum,
@@ -74,23 +55,14 @@ from finauditpro.domain.entities import (
     User,
 )
 from finauditpro.domain.exceptions import EntityNotFoundError, ValidationError
-from finauditpro.domain.financial_entities import (
-    DatasetTypeEnum,
-    FinancialDataset,
-    TrialBalanceLine,
-)
-from finauditpro.domain.sampling_engine import AuditSamplingEngine, SamplingMethodEnum
+from finauditpro.domain.sampling_engine import AuditSamplingEngine
 from finauditpro.infrastructure.first_run import initialize_database
 from finauditpro.infrastructure.persistence.repositories import (
     AuditMatrixRepository,
     ClientRepository,
     EngagementRepository,
-    FinancialDataRepository,
     FirmRepository,
     UserRepository,
-)
-from finauditpro.infrastructure.persistence.repositories.core_audit_engine_repository import (
-    CoreAuditEngineRepository,
 )
 
 

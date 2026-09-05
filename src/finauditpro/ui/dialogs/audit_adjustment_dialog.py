@@ -1,6 +1,5 @@
 """CA-oriented interactive Audit Adjusting Journal Entries (AJE) and Lead Schedule Dialog."""
 
-from typing import Any
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (

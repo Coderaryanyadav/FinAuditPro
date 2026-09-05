@@ -1,7 +1,6 @@
 """Application Data Transfer Objects for Phase D Completion Checklist & Finalization Gate."""
 
-from dataclasses import dataclass, field
-from datetime import datetime
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)

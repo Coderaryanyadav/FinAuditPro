@@ -22,7 +22,6 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-import pytest
 
 from finauditpro.application.audit_adjustment_dtos import CreateAJEDTO, CreateAJELineDTO
 from finauditpro.application.audit_planning_dtos import (
@@ -50,16 +49,13 @@ from finauditpro.domain.audit_matrix_entities import (
     RiskSeverityEnum,
 )
 from finauditpro.domain.entities import (
-    AuditEvent,
     AuditTypeEnum,
     Client,
     Engagement,
     EngagementStatusEnum,
     Firm,
-    User,
 )
 from finauditpro.domain.exceptions import (
-    AuditIntegrityError,
     PermissionDeniedError,
     ValidationError,
 )
@@ -73,17 +69,13 @@ from finauditpro.infrastructure.persistence.repositories import (
     AuditEventRepository,
     ClientRepository,
     EngagementRepository,
-    FirmRepository,
     FinancialDataRepository,
+    FirmRepository,
     UserRepository,
 )
 from finauditpro.infrastructure.security.encryption import (
-    decrypt_sensitive_string,
-    encrypt_sensitive_string,
-    get_fernet_cipher,
     initialize_session_cipher,
     initialize_wrapped_dek,
-    rotate_passcode,
 )
 
 

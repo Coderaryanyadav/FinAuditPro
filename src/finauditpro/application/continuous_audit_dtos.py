@@ -1,33 +1,33 @@
 """Data transfer objects for Phase F continuous audit, intelligence, and data quality services."""
 
 from dataclasses import dataclass, field
-from datetime import date, datetime
-from typing import Any, Optional
+from datetime import date
+from typing import Any
 
 
 @dataclass
 class DataQualityRunRequest:
     engagement_id: str
-    dataset_id: Optional[str] = None
-    period_start: Optional[date] = None
-    period_end: Optional[date] = None
-    as_of_date: Optional[date] = None
+    dataset_id: str | None = None
+    period_start: date | None = None
+    period_end: date | None = None
+    as_of_date: date | None = None
 
 
 @dataclass
 class DataQualityIssueDto:
     issue_id: str
     engagement_id: str
-    dataset_id: Optional[str]
+    dataset_id: str | None
     issue_type: str
     severity: str
     source: str
     description: str
     affected_records: list[str]
     detected_at: str
-    resolution: Optional[str] = None
-    resolved_by: Optional[str] = None
-    resolved_at: Optional[str] = None
+    resolution: str | None = None
+    resolved_by: str | None = None
+    resolved_at: str | None = None
 
 
 @dataclass
@@ -44,8 +44,8 @@ class DataQualityRunResultDto:
 @dataclass
 class ContinuousMonitoringRunRequest:
     engagement_id: str
-    dataset_id: Optional[str] = None
-    period_end_date: Optional[date] = None
+    dataset_id: str | None = None
+    period_end_date: date | None = None
     approval_threshold_paise: int = 10_00_00_00  # ₹1 Lakh
     high_value_threshold_paise: int = 50_00_00_00  # ₹50 Lakhs
 
@@ -70,7 +70,7 @@ class ContinuousAlertDto:
     risk_factors: list[RiskFactorContributionDto]
     affected_data: dict[str, Any]
     status: str
-    assigned_user: Optional[str]
+    assigned_user: str | None
     dedup_hash: str
     suppressed: bool
     detected_at: str

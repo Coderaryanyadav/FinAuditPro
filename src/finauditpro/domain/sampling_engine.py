@@ -180,7 +180,7 @@ class AuditSamplingEngine:
             item["amount_paise"] = int(r.get("amount_paise", r.get("amount", 0) * 100))
             indexed.append(item)
 
-        selected = []
+        selected: list[dict[str, Any]] = []
         curr = start_index % k
         while curr < N and len(selected) < n:
             selected.append(indexed[curr])
@@ -217,9 +217,7 @@ class AuditSamplingEngine:
             item["original_index"] = idx + 1
             amt = int(r.get("amount_paise", r.get("amount", 0) * 100))
             item["amount_paise"] = amt
-            if threshold_paise is not None and amt >= threshold_paise:
-                selected.append(item)
-            elif filter_key and r.get(filter_key):
+            if (threshold_paise is not None and amt >= threshold_paise) or (filter_key and r.get(filter_key)):
                 selected.append(item)
 
         if not selected and threshold_paise is None and not filter_key:

@@ -1,9 +1,9 @@
 """Pure deterministic data quality validation engine for financial ledgers, journals, and trial balances."""
 
-from collections import defaultdict
-from datetime import date, datetime, timezone
-from typing import Any, Optional
 import uuid
+from collections import defaultdict
+from datetime import UTC, date, datetime
+from typing import Any
 
 from finauditpro.domain.continuous_audit_entities import (
     DataQualityIssue,
@@ -20,13 +20,13 @@ class DataQualityEngine:
         engagement_id: str,
         dataset_id: str,
         entries: list[dict[str, Any]],
-        known_account_codes: Optional[set[str]] = None,
-        period_start: Optional[date] = None,
-        period_end: Optional[date] = None,
-        as_of_date: Optional[date] = None,
+        known_account_codes: set[str] | None = None,
+        period_start: date | None = None,
+        period_end: date | None = None,
+        as_of_date: date | None = None,
     ) -> list[DataQualityIssue]:
         issues: list[DataQualityIssue] = []
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         eval_date = as_of_date or now.date()
 
         voucher_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -141,7 +141,7 @@ class DataQualityEngine:
                 )
 
             # 7. Date & Period Validations
-            parsed_date: Optional[date] = None
+            parsed_date: date | None = None
             if entry_date_str:
                 try:
                     parsed_date = date.fromisoformat(entry_date_str[:10])

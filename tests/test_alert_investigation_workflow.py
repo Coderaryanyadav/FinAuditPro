@@ -1,7 +1,6 @@
 """Unit tests for AlertInvestigationService: investigation workflow, evidence linking, and explainability."""
 
-from datetime import datetime, timezone
-import pytest
+from datetime import UTC, datetime
 
 from finauditpro.application.continuous_audit_dtos import (
     AssignAlertRequest,
@@ -17,7 +16,13 @@ from finauditpro.domain.continuous_audit_entities import (
     InvestigationOutcomeEnum,
     RiskFactorContribution,
 )
-from finauditpro.domain.entities import AuditTypeEnum, Client, Engagement, EngagementStatusEnum, Firm
+from finauditpro.domain.entities import (
+    AuditTypeEnum,
+    Client,
+    Engagement,
+    EngagementStatusEnum,
+    Firm,
+)
 from finauditpro.infrastructure.first_run import initialize_database
 from finauditpro.infrastructure.persistence.repositories import (
     ClientRepository,
@@ -59,7 +64,7 @@ def test_alert_investigation_lifecycle_and_evidence_linking(tmp_path) -> None:
             title="Potential Risk Signal: High-Value Manual JV",
             description="Manual JV posted on weekend",
             source="Continuous JE Monitor",
-            detected_at=datetime.now(timezone.utc),
+            detected_at=datetime.now(UTC),
             affected_data={"voucher_number": "JV-100", "amount_paise": 50000000},
             risk_score=75.0,
             risk_factors=[

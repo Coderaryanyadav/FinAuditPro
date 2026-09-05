@@ -1,7 +1,6 @@
 """Full End-to-End Simulation of Phase F Continuous Audit on ABC Manufacturing Pvt Ltd."""
 
-from datetime import date, datetime, timezone
-import pytest
+from datetime import date
 
 from finauditpro.application.audit_adjustment_dtos import CreateAJEDTO, CreateAJELineDTO
 from finauditpro.application.continuous_audit_dtos import (
@@ -16,7 +15,6 @@ from finauditpro.application.services.continuous_audit_service import Continuous
 from finauditpro.application.services.data_quality_service import DataQualityService
 from finauditpro.domain.audit_adjustment_entities import AJETypeEnum
 from finauditpro.domain.continuous_audit_entities import (
-    AlertSeverityEnum,
     AlertTypeEnum,
     InvestigationOutcomeEnum,
 )

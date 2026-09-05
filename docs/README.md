@@ -1,61 +1,30 @@
-# FinAuditPro — Documentation Index
+# FinAuditPro — Documentation Index (v1.0.0)
 
-Welcome to the FinAuditPro documentation. FinAuditPro is an offline-first desktop audit operating system designed specifically for Indian statutory audit practice.
-
----
-
-## Master Documentation Map
-
-```text
-docs/
-├── README.md                          # Master documentation index and sitemap
-├── guide.md                           # End-to-end operational guide & strategic assessment
-├── product-audit-and-redesign.md      # Tier-1 product audit & UX redesign blueprint
-├── installation.md                    # Installation and launch instructions
-├── design.md                          # UI/UX design tokens and component specification
-├── decisions.md                       # Architecture Decision Records (ADRs 001..005)
-├── roadmap.md                         # Completed milestones and product roadmap
-├── CHANGELOG.md                       # Version release notes & milestone history
-│
-├── architecture/
-│   └── system-architecture.md         # 4-layer DDD architecture, invariants & migrations 1..9
-│
-├── features/
-│   ├── engagements.md                 # Firm, client & multi-year engagement management
-│   ├── documents.md                   # Safe document ingestion, OCR & SQLite FTS5 search
-│   ├── financial-data.md              # TB/GL import & deterministic analytics engine
-│   ├── working-papers.md              # Working paper lifecycle, review notes & sign-off
-│   ├── reporting.md                   # ReportLab PDF generation & formula-escaped XLSX export
-│   ├── archival.md                    # SQC 1 sealed archives & SA 510 roll-forward tie-out
-│   └── ai.md                          # Air-gapped local AI copilot & LM Studio RAG
-│
-├── security/
-│   └── security-guide.md              # Fail-closed RBAC, encryption & threat mitigations
-│
-├── development/
-│   └── developer-guide.md             # Developer environment setup, testing & AST guards
-│
-└── operations/
-    ├── operations-guide.md            # Environment configuration & diagnostics runbook
-    └── backup-restore.md              # Encrypted backup packaging & safe atomic restore
-```
+Welcome to the FinAuditPro documentation suite. FinAuditPro is an offline-first audit intelligence workspace for Indian statutory and internal audit practice.
 
 ---
 
-## Quick Links
-- **[Tier-1 Product Audit & Redesign Blueprint](product-audit-and-redesign.md)**
-- **[Comprehensive User Guide & Strategic Assessment](guide.md)**
-- **[Getting Started & Installation](installation.md)**
-- **[System & Database Architecture](architecture/system-architecture.md)**
-- **[Security Architecture & Threat Defense](security/security-guide.md)**
-- **[Architecture Decision Records](decisions.md)**
-- **[Developer Onboarding & QA Guide](development/developer-guide.md)**
-- **[Operations & Troubleshooting Guide](operations/operations-guide.md)**
-- **[UI Design System](design.md)**
-- **[Release Notes / Changelog](CHANGELOG.md)**
-- **[Canonical Security Policy](../.github/SECURITY.md)**
-- **[Contributing Guidelines](../.github/CONTRIBUTING.md)**
-- **[Code of Conduct](../.github/CODE_OF_CONDUCT.md)**
+## Authoritative Documentation Directory
 
+| Document | Description |
+| :--- | :--- |
+| **[`docs/INSTALLATION.md`](INSTALLATION.md)** | Multi-platform installation guide for standalone installers and source environments. |
+| **[`docs/USER_GUIDE.md`](USER_GUIDE.md)** | Practitioner workflow guide: from onboarding to working papers and reporting. |
+| **[`docs/ARCHITECTURE.md`](ARCHITECTURE.md)** | 4-layer Domain-Driven Architecture specification and domain invariants. |
+| **[`docs/SECURITY.md`](SECURITY.md)** | Canonical security policy, threat model, key hierarchy, and fail-closed crypto. |
+| **[`docs/AUDIT_METHODOLOGY.md`](AUDIT_METHODOLOGY.md)** | Standards on Auditing (SA 230, SA 320, SA 510, CARO 2020) support documentation. |
+| **[`docs/ACCOUNTING_CONTROLS.md`](ACCOUNTING_CONTROLS.md)** | 64-bit integer paise precision, trial balance invariants, and lead schedules. |
+| **[`docs/DATABASE.md`](DATABASE.md)** | SQLite WAL mode, schema design, migrations 1..9, and trigger immutability. |
+| **[`docs/ENCRYPTION.md`](ENCRYPTION.md)** | Fernet DEK/KWK key hierarchy, memory hygiene, and PBKDF2 parameters. |
+| **[`docs/BACKUP_RESTORE.md`](BACKUP_RESTORE.md)** | WAL checkpointing, atomic SQLite backups, encryption, and restore verification. |
+| **[`docs/TESTING.md`](TESTING.md)** | 307-test automated QA architecture, execution guides, and verification scripts. |
+| **[`docs/COMPLIANCE_SCOPE.md`](COMPLIANCE_SCOPE.md)** | Statutory compliance boundaries, regulatory disclaimer, and DPDP Act 2023 posture. |
+| **docs/LIMITATIONS.md`** | Single-workstation operating boundaries and technical constraints. |
+| **[`docs/TROUBLESHOOTING.md`](TROUBLESHOOTING.md)** | Operational diagnostic runbook and error resolution steps. |
+| **[`docs/RELEASE_NOTES.md`](RELEASE_NOTES.md)** | Official v1.0.0 release notes and feature summary. |
+| **[`docs/CHANGELOG.md`](CHANGELOG.md)** | Semantic version history adhering to Keep a Changelog. |
 
+---
 
+## Historical Documentation Archive
+Historical phase roadmaps (Phases A..F) and prior forensic evaluation reports are preserved under [`docs/archive/`](archive/).

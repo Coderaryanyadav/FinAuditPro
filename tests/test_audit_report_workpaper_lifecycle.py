@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from uuid import uuid4
+
 import pytest
 
 from finauditpro.application.audit_report_dtos import (
@@ -19,7 +20,14 @@ from finauditpro.domain.audit_report_entities import (
     AuditOpinionTypeEnum,
     ReportWorkpaperStatusEnum,
 )
-from finauditpro.domain.entities import AuditTypeEnum, Client, Engagement, EngagementStatusEnum, Firm, User
+from finauditpro.domain.entities import (
+    AuditTypeEnum,
+    Client,
+    Engagement,
+    EngagementStatusEnum,
+    Firm,
+    User,
+)
 from finauditpro.domain.exceptions import PermissionDeniedError, ValidationError
 from finauditpro.infrastructure.first_run import initialize_database
 from finauditpro.infrastructure.persistence.database import DatabaseManager

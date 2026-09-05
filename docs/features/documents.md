@@ -1,6 +1,6 @@
 # Document Processing, Security & FTS5 Search
 
-FinAuditPro provides a secure, air-gapped document management and full-text search pipeline.
+FinAuditPro provides a secure, offline-first document management and full-text search pipeline with zero outbound client data transmission.
 
 ---
 

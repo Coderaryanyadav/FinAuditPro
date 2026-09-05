@@ -46,13 +46,12 @@ python -m finauditpro
 finauditpro
 ```
 
-### Step 4: Sign In
+### Step 4: Administrator Onboarding & Sign In
 
-On initial launch, sign in with the pre-seeded local administrator account:
-- **Username:** `admin@finauditpro.com`
-- **Password:** `Admin@123`
+On initial launch, FinAuditPro opens the **Administrator Setup Wizard** prompting you to create your custom administrator email and master password. No default credentials exist.
 
-You can add additional Partner, Manager, and Associate accounts via the user management service.
+You can configure additional Partner, Manager, and Associate accounts in the user management settings.
+
 
 ---
 

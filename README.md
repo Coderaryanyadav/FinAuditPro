@@ -355,8 +355,9 @@ python -m finauditpro
 ## Automated Verification & Diagnostics
 
 ```bash
-# Run the complete test suite (303/303 passing)
+# Run the complete test suite (306/306 passing)
 pytest tests/ -v
+
 
 # Run strict static type checking
 mypy src/finauditpro

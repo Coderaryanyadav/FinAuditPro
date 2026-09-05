@@ -6,15 +6,17 @@ This document describes the reproducible production release pipeline for **FinAu
 
 ## 1. Overview & Release Artifacts
 
-For each release tag (e.g. `v1.2.0`), the automated build system produces:
+For each release tag (e.g. `v1.0.0`), the automated build system produces:
 
 | Platform | Format | Artifact | Description |
 | :--- | :--- | :--- | :--- |
-| **macOS** | `.dmg` | `FinAuditPro-1.2.0-macOS-arm64.dmg` | Drag-and-drop installer with Applications shortcut and icon |
-| **Windows** | `.exe` | `FinAuditPro-Setup-1.2.0-x64.exe` | Inno Setup standalone offline installer |
-| **Windows (Portable)** | `.zip` | `FinAuditPro-1.2.0-Windows-x64.zip` | Standalone portable zero-install directory |
+| **macOS** | `.dmg` | `FinAuditPro-1.0.0-macOS-arm64.dmg` | Drag-and-drop installer with Applications shortcut and icon |
+| **Windows** | `.exe` | `FinAuditPro-Setup-1.0.0-x64.exe` | Inno Setup standalone offline installer |
+| **Windows (Portable)** | `.zip` | `FinAuditPro-1.0.0-Windows-x64.zip` | Standalone portable zero-install directory |
+| **Python Wheel** | `.whl` | `finauditpro-1.0.0-py3-none-any.whl` | Standard Python wheel package |
+| **Source Tarball** | `.tar.gz` | `finauditpro-1.0.0.tar.gz` | Standard source distribution |
 | **Checksums** | `.txt` | `SHA256SUMS.txt` | Cryptographic SHA-256 validation manifest |
-| **Manifest** | `.json` | `release_manifest.json` | Machine-readable build provenance and metadata |
+| **Manifest** | `.txt` | `RELEASE_MANIFEST_v1.0.0.txt` | Machine-readable build provenance and metadata |
 
 ---
 
@@ -97,8 +99,8 @@ To publish a new production release:
 1. Update version in `src/finauditpro/version.py` and `pyproject.toml`.
 2. Commit and tag the commit:
    ```bash
-   git tag -a v1.2.0 -m "Release v1.2.0"
-   git push origin v1.2.0
+   git tag -a v1.0.0 -m "Release v1.0.0"
+   git push origin v1.0.0
    ```
 3. GitHub Actions will:
    - Run tests on macOS and Windows runners
@@ -109,15 +111,15 @@ To publish a new production release:
 
 ---
 
-## 6. Release Notes Template (v1.2.0)
+## 6. Release Notes Template (v1.0.0)
 
 ```markdown
-### FinAuditPro v1.2.0 — Enterprise Audit Operating System
+### FinAuditPro v1.0.0 — Statutory & Internal Audit Workstation
 
-FinAuditPro is an offline-first, air-gapped audit intelligence platform tailored for Indian statutory audits, CARO 2020 compliance, and ICAI Standards on Auditing.
+FinAuditPro is an offline-first statutory and internal audit workstation tailored for Indian CA firms, supporting CARO 2020, Schedule III, and ICAI Standards on Auditing.
 
 #### Highlights
-- **100% Offline-First Architecture**: Zero data exfiltration; all evidence, analytics, and vector indices remain strictly local.
+- **Offline-First Architecture**: Zero outbound client data transmission; all evidence, analytics, and vector indices remain strictly local.
 - **Precision Audit Matrix**: Automated SA 320 materiality calculation, risk-to-procedure mapping, and real-time finding promotion.
 - **Deterministic Analytics Engine**: Benford's Law distribution analysis, duplicate payment clustering, and outlier detection.
 - **Enterprise UI/UX**: Professional desktop application with high-DPI rendering, keyboard shortcuts, and dark/light palettes.

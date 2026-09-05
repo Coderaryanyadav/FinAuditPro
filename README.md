@@ -10,7 +10,7 @@
 [![PySide6](https://img.shields.io/badge/PySide6-6.8-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://www.qt.io/)
 [![SQLite WAL](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 [![LM Studio](https://img.shields.io/badge/LM%20Studio-Air--Gapped%20AI-4F46E5?style=for-the-badge&logo=openai&logoColor=white)](https://lmstudio.ai/)
-[![Tests](https://img.shields.io/badge/Tests-160%2F160%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-307%2F307%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
 [![Type Checked](https://img.shields.io/badge/MyPy-Strict%20Passed-blue?style=for-the-badge&logo=python)](pyproject.toml)
 [![Code Style](https://img.shields.io/badge/Code%20Style-Ruff-black?style=for-the-badge&logo=ruff)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
@@ -287,14 +287,14 @@ Pre-built, standalone release packages are available on the
 
 ### macOS (Apple Silicon & Intel)
 
-1. Download `FinAuditPro-1.2.0-macOS-arm64.dmg` (or Intel `x86_64`).
+1. Download `FinAuditPro-1.0.0-macOS-arm64.dmg` (or Intel `x86_64`).
 2. Double-click the DMG to open the installer.
 3. Drag **FinAuditPro** into your **Applications** folder.
 4. Launch FinAuditPro from Launchpad or Spotlight.
 
 ### Windows (64-bit)
 
-1. Download `FinAuditPro-Setup-1.2.0-x64.exe` (or standalone portable `.zip`).
+1. Download `FinAuditPro-Setup-1.0.0-x64.exe` (or standalone portable `.zip`).
 2. Run the installer wizard (or extract portable folder).
 3. Launch **FinAuditPro** from your Start Menu or Desktop shortcut.
 
@@ -405,7 +405,7 @@ FinAuditPro/
 │
 ├── src/
 │   └── finauditpro/               # 4-Layer Domain-Driven Architecture Source Tree
-│       ├── __init__.py            # Package root (__version__ = "1.2.0")
+│       ├── __init__.py            # Package root (__version__ = "1.0.0")
 │       ├── __main__.py            # Desktop GUI & headless CLI entry point
 │       ├── version.py             # Single source of truth application metadata
 │       ├── domain/                # Pure entities, value objects & calculation rules
@@ -416,7 +416,7 @@ FinAuditPro/
 │       └── ui/                    # PySide6 desktop views, dialogs & neutral dark theme
 │           └── resources.py       # Standard importlib.resources icon loader
 │
-├── tests/                         # 161-Test Automated QA Verification Suite
+├── tests/                         # 307-Test Automated QA Verification Suite
 │   ├── fixtures/                  # Synthetic audit test spreadsheets & datasets
 │   └── test_*.py                  # Unit, integration, security & architecture tests
 │

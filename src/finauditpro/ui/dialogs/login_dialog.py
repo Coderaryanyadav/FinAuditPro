@@ -97,9 +97,9 @@ class LoginDialog(QDialog):
 
         # Feature checklist
         features = [
-            "100% air-gapped — no cloud dependency",
-            "SA 230 compliant electronic working papers",
-            "ICAI statutory audit workflows (CARO 2020)",
+            "Offline-first — zero outbound client data transmission",
+            "SA 230 supporting electronic working papers",
+            "Statutory audit workflows (CARO 2020 & Schedule III)",
         ]
         for f in features:
             row = QHBoxLayout()

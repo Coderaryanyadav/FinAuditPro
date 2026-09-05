@@ -1,14 +1,16 @@
 Product: FinAuditPro
 Version: 1.0.0
 Build date: 2026-09-05
-Commit: e31b8730b231621a120b4aaf0daed33a8ea5a23c
+Commit: ddda6ad923cea8bf312eecac4fd9a0dd691f6b5c
 Python: 3.14.7
 Platform: macOS Darwin 24.6.0 arm64
 Tests: 307 collected, 307 passed, 0 failed, 0 skipped, 0 errors (pytest -q)
 Package: dist/finauditpro-1.0.0-py3-none-any.whl, dist/finauditpro-1.0.0.tar.gz
-SHA-256 (whl): f1f9b6024f052e14643418ee635eb1c75c06ac9bb7c94edbb46b1af1d9694365
-SHA-256 (sdist): 59c6c60d3e229e324be1bd85cfa94b40045f562984456e2ac909b3dfbe71fa17
-Security status: PASS (0 hardcoded secrets, fail-closed crypto, persistent lockout, immutable audit triggers)
+SHA-256 (whl): d432a7485691f9621758eb854d39a4f27f24a42975eb6105e220d6d4e58b53b1
+SHA-256 (sdist): d9a469888501cd0bfea93ad7b361e0c89239854d6c5325a764fe7bb2c4d9c2cb
+Security status: PASS (Fail-closed encryption, no hardcoded secrets, authenticated lockout state, trigger-protected audit trail)
 Known limitations:
-1. Workstation-level OS root/debugger access can inspect process memory.
-2. Local AI assistant features require a local LM Studio server on http://localhost:1234.
+1. Offline-First Desktop Scope: Designed strictly for single-workstation local database execution; does not provide real-time multi-user LAN synchronization or cloud backend synchronization.
+2. macOS Code Signing & Notarization: Release packages built and verified locally on macOS Darwin arm64; binary codesigning and Apple notarization require external Apple Developer Developer ID credentials in CI/CD pipeline.
+3. Optical Character Recognition (OCR): Document OCR capabilities depend on system-installed Tesseract binary (`tesseract`) and PyMuPDF bindings when processing scanned PDFs or image evidence.
+4. Professional Judgment Disclaimer: FinAuditPro provides automated audit workflows and mathematical controls supporting procedures under applicable auditing standards; the engagement partner remains exclusively responsible for professional audit opinions and regulatory compliance.

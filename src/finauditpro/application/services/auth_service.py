@@ -61,14 +61,36 @@ class AuthService:
                 "New password cannot be the default administrator password (Admin@123)."
             )
 
+    def _record_auth_failure(self, actor: str, reason: str) -> None:
+        from finauditpro.domain.entities import AuditEvent
+        from finauditpro.infrastructure.persistence.repositories import AuditEventRepository
+        from finauditpro.infrastructure.security.lockout import record_failed_attempt
+
+        record_failed_attempt()
+        with self.db_manager.session_scope() as session:
+            audit_repo = AuditEventRepository(session)
+            audit_repo.add(
+                AuditEvent(
+                    actor=actor,
+                    action="Failed Login Attempt",
+                    details=reason,
+                )
+            )
+
     def authenticate(
         self, username: str, password: str, totp_token: str | None = None
     ) -> UserSession:
-        """Verify username and password against database and return UserSession with lockout protection."""
+        """Verify username and password against database and return UserSession with multi-layered lockout protection."""
+        from datetime import UTC, datetime, timedelta
+
+        from sqlalchemy import func, select
+
+        from finauditpro.domain.entities import AuditEvent
+        from finauditpro.infrastructure.persistence.models import AuditEventModel
+        from finauditpro.infrastructure.persistence.repositories import AuditEventRepository
         from finauditpro.infrastructure.security.lockout import (
             check_lockout,
             clear_failed_attempts,
-            record_failed_attempt,
         )
 
         check_lockout()
@@ -78,35 +100,86 @@ class AuthService:
             raise ValidationError("Username and password are required.")
 
         with self.db_manager.session_scope() as session:
+            # 1. Database-backed lockout check (persists across process restarts and file deletion)
+            now_utc = datetime.now(UTC)
+            fifteen_mins_ago = now_utc - timedelta(minutes=15)
+            last_success_stmt = (
+                select(AuditEventModel.timestamp)
+                .where(AuditEventModel.action == "Successful Login")
+                .order_by(AuditEventModel.timestamp.desc())
+                .limit(1)
+            )
+            last_success_time = session.scalar(last_success_stmt)
+            if last_success_time is not None and last_success_time.tzinfo is None:
+                last_success_time = last_success_time.replace(tzinfo=UTC)
+
+            cutoff_time = (
+                max(fifteen_mins_ago, last_success_time)
+                if last_success_time
+                else fifteen_mins_ago
+            )
+
+            db_failed_stmt = select(func.count(AuditEventModel.id)).where(
+                AuditEventModel.action == "Failed Login Attempt",
+                AuditEventModel.timestamp >= cutoff_time,
+            )
+            db_failed_count = session.scalar(db_failed_stmt) or 0
+            if db_failed_count >= 5:
+                raise ValidationError(
+                    "Account locked out due to too many failed attempts. Please try again in 15 minutes."
+                )
+
             repo = UserRepository(session)
             user = repo.get_by_username(cleaned_user)
             if not user:
-                record_failed_attempt()
-                raise ValidationError("Invalid username or password.")
+                # User does not exist
+                pass_verified = False
+                user_active = False
+                user_totp = False
+            else:
+                pass_verified = verify_password(password, user.password_hash, user.salt)
+                user_active = user.is_active
+                user_totp = user.is_totp_enabled
 
-            if not user.is_active:
-                raise ValidationError(
-                    "This user account is inactive. Please contact your administrator."
-                )
+        # Handle authentication outcomes outside session to ensure audit logging commits cleanly
+        if not user:
+            self._record_auth_failure(cleaned_user, "Invalid username attempted")
+            raise ValidationError("Invalid username or password.")
 
-            if not verify_password(password, user.password_hash, user.salt):
-                record_failed_attempt()
-                raise ValidationError("Invalid username or password.")
-
-            if user.is_totp_enabled:
-                if not totp_token:
-                    raise ValidationError("TOTP_REQUIRED")
-                if not user.totp_secret or not self.verify_totp_token(user.totp_secret, totp_token):
-                    record_failed_attempt()
-                    raise ValidationError("Invalid 2FA token.")
-
-            clear_failed_attempts()
-            return UserSession(
-                user_id=user.id,
-                username=user.username,
-                role=user.role,
-                must_change_password=user.must_change_password,
+        if not user_active:
+            raise ValidationError(
+                "This user account is inactive. Please contact your administrator."
             )
+
+        if not pass_verified:
+            self._record_auth_failure(cleaned_user, "Invalid password attempted")
+            raise ValidationError("Invalid username or password.")
+
+        if user_totp:
+            if not totp_token:
+                raise ValidationError("TOTP_REQUIRED")
+            if not user.totp_secret or not self.verify_totp_token(user.totp_secret, totp_token):
+                self._record_auth_failure(cleaned_user, "Invalid 2FA token attempted")
+                raise ValidationError("Invalid 2FA token.")
+
+        clear_failed_attempts()
+        with self.db_manager.session_scope() as session:
+            audit_repo = AuditEventRepository(session)
+            audit_repo.add(
+                AuditEvent(
+                    actor=user.username,
+                    action="Successful Login",
+                    details=f"User authenticated successfully with role {user.role.value if hasattr(user.role, 'value') else user.role}",
+                )
+            )
+        return UserSession(
+            user_id=user.id,
+            username=user.username,
+            role=user.role,
+            must_change_password=user.must_change_password,
+        )
+
+
 
     def force_setup_credentials(
         self, user_id: str, new_email: str, new_password: str

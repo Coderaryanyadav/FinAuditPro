@@ -247,3 +247,37 @@ def test_forced_email_and_password_setup_flow(db_env):
     assert new_login.username == custom_email
     assert new_login.role == RoleEnum.ADMINISTRATOR
     assert new_login.must_change_password is False
+
+
+def test_db_backed_lockout_persists_across_file_deletion_and_restart(tmp_path, monkeypatch):
+    """Verify that brute-force attempts recorded in the database lock out even if lockout.json is deleted and process restarts."""
+    import finauditpro.infrastructure.security.lockout as lock
+
+    db_manager = DatabaseManager(str(tmp_path / "lockout_db_test.db"))
+    db_manager.create_tables()
+
+    lockout_file = tmp_path / "lockout.json"
+    monkeypatch.setattr(lock, "_get_lockout_file_path", lambda: lockout_file)
+
+    auth_svc = AuthService(db_manager)
+    auth_svc.setup_initial_admin("target.auditor@firm.com", "CorrectPassword#2026")
+
+    lock.clear_failed_attempts()
+
+    # 1. Simulate 5 failed login attempts
+    for _ in range(5):
+        with pytest.raises(ValidationError, match="Invalid username or password"):
+            auth_svc.authenticate("target.auditor@firm.com", "WrongPassword")
+
+    # 2. Malicious user deletes the local lockout.json and resets process memory
+    lockout_file.unlink(missing_ok=True)
+    lock._LOCKOUT_UNTIL = None
+    lock._FAILED_ATTEMPTS = 0
+
+    # 3. Simulate brand new AuthService / app restart against the same database
+    fresh_auth_svc = AuthService(db_manager)
+
+    # 4. Attempting login (even with CORRECT password) MUST be blocked by DB-backed lockout!
+    with pytest.raises(ValidationError, match="Account locked out"):
+        fresh_auth_svc.authenticate("target.auditor@firm.com", "CorrectPassword#2026")
+

@@ -162,7 +162,7 @@ def initialize_session_cipher(passcode: str) -> None:
 
 
 def get_fernet_cipher() -> Fernet:
-    """Return active session cipher, falling back to legacy fallback auto-initialization for unit tests."""
+    """Return active session cipher. Fail closed if not initialized."""
     global _CIPHER
     if _CIPHER is not None:
         return _CIPHER
@@ -172,7 +172,7 @@ def get_fernet_cipher() -> Fernet:
 
     if key_path.exists() and salt_path.exists():
         wrapped_dek = key_path.read_bytes()
-        # Fallback support for legacy raw Fernet keys
+        # Fallback support for legacy raw Fernet keys during migration
         if len(wrapped_dek) == 44:
             try:
                 _CIPHER = Fernet(wrapped_dek)
@@ -180,21 +180,13 @@ def get_fernet_cipher() -> Fernet:
             except Exception:
                 pass
 
-        try:
-            initialize_session_cipher("FinAuditPro-Local-Column-Secret-Key")
-            if _CIPHER is not None:
-                return _CIPHER
-        except Exception:
-            raise ValueError(
-                "Access Denied: The Data Encryption Key is locked and requires user authorization."
-            ) from None
-    else:
-        # Legacy/testing auto-initialization
-        initialize_wrapped_dek("FinAuditPro-Local-Column-Secret-Key")
+        raise RuntimeError(
+            "Access Denied: The Data Encryption Key is locked. Call initialize_session_cipher(passcode) first."
+        )
 
-    if _CIPHER is None:
-        raise RuntimeError("Failed to initialize cryptographic cipher.")
-    return _CIPHER
+    raise RuntimeError(
+        "Encryption subsystem not initialized. Call initialize_wrapped_dek(passcode) during onboarding."
+    )
 
 
 _CIPHER: Fernet | None = None
@@ -204,21 +196,19 @@ def encrypt_sensitive_string(text: str | None) -> str | None:
     """Encrypt sensitive text column using active session cipher."""
     if not text:
         return text
-    global _CIPHER
-    if _CIPHER is None:
-        _CIPHER = get_fernet_cipher()
-    return _CIPHER.encrypt(text.encode("utf-8")).decode("utf-8")
+    cipher = get_fernet_cipher()
+    return cipher.encrypt(text.encode("utf-8")).decode("utf-8")
 
 
 def decrypt_sensitive_string(cipher_text: str | None) -> str | None:
-    """Decrypt sensitive text column using active session cipher. Fallback to raw string if unencrypted."""
+    """Decrypt sensitive text column using active session cipher. Fails closed on invalid ciphertext."""
     if not cipher_text:
         return cipher_text
-    global _CIPHER
-    if _CIPHER is None:
-        _CIPHER = get_fernet_cipher()
+    cipher = get_fernet_cipher()
     try:
-        return _CIPHER.decrypt(cipher_text.encode("utf-8")).decode("utf-8")
-    except Exception:
-        # Fallback if plaintext or key rotated
-        return cipher_text
+        return cipher.decrypt(cipher_text.encode("utf-8")).decode("utf-8")
+    except Exception as ex:
+        raise ValueError(
+            f"Decryption failed: Ciphertext is corrupted or invalid session key: {ex}"
+        ) from ex
+

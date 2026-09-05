@@ -13,6 +13,7 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
+from sqlalchemy import text
 from finauditpro.domain.entities import AuditEvent
 from finauditpro.domain.exceptions import AuditIntegrityError, ValidationError
 from finauditpro.infrastructure.persistence.database import DatabaseManager
@@ -64,9 +65,14 @@ class BackupRestoreService:
         temp_zip_path = output.with_suffix(output.suffix + ".tmp.zip")
 
         with zipfile.ZipFile(temp_zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
-            # 1. Archive DB File
+            # 1. Archive DB File (Ensure WAL checkpoint occurs first)
             db_path = Path(str(self.db_manager.engine.url.database))
             if db_path.exists() and str(db_path) != ":memory:":
+                try:
+                    with self.db_manager.engine.connect() as conn:
+                        conn.execute(text("PRAGMA wal_checkpoint(TRUNCATE);"))
+                except Exception:
+                    pass
                 db_bytes = db_path.read_bytes()
                 db_hash = hashlib.sha256(db_bytes).hexdigest()
                 zf.writestr("database/finauditpro.db", db_bytes)
@@ -203,7 +209,21 @@ class BackupRestoreService:
                     elif name == "database/finauditpro.db":
                         db_path_str = str(self.db_manager.engine.url.database)
                         if db_path_str != ":memory:":
-                            Path(db_path_str).write_bytes(zf.read(name))
+                            import sqlite3
+                            self.db_manager.engine.dispose()
+                            temp_db = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
+                            try:
+                                temp_db.write(zf.read(name))
+                                temp_db.close()
+                                src_conn = sqlite3.connect(temp_db.name)
+                                dst_conn = sqlite3.connect(db_path_str)
+                                with dst_conn:
+                                    src_conn.backup(dst_conn)
+                                src_conn.close()
+                                dst_conn.close()
+                            finally:
+                                Path(temp_db.name).unlink(missing_ok=True)
+                            self.db_manager.engine.dispose()
         finally:
             temp_extract_zip.unlink(missing_ok=True)
 

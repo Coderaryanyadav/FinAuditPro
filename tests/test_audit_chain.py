@@ -51,3 +51,31 @@ def test_db_triggers_reject_update_and_delete(tmp_path) -> None:
     with pytest.raises(Exception) as excinfo2, manager.engine.begin() as conn:
         conn.execute(text("DELETE FROM audit_events WHERE id = :id"), {"id": event_id})
     assert "append-only" in str(excinfo2.value).lower()
+
+
+def test_same_second_events_chain_integrity(tmp_path) -> None:
+    """Verify that multiple events created in the exact same second maintain strictly valid hash chains."""
+    from datetime import UTC, datetime
+
+    db_file = tmp_path / "test_same_second.db"
+    manager = DatabaseManager(db_path=db_file)
+    manager.create_tables()
+
+    frozen_timestamp = datetime(2026, 9, 5, 12, 0, 0, tzinfo=UTC)
+
+    # Perform 25 trials of same-second insertions
+    with manager.session_scope() as session:
+        repo = AuditEventRepository(session)
+        for i in range(25):
+            repo.add(
+                AuditEvent(
+                    actor=f"Auditor {i % 3}",
+                    action=f"Action_{i}",
+                    details=f"Detail payload {i}",
+                    timestamp=frozen_timestamp,
+                )
+            )
+
+        # Full chain must pass verification
+        assert repo.verify_chain() is True
+

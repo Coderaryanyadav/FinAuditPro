@@ -267,12 +267,14 @@ flowchart TD
 
 > [!IMPORTANT]
 >
-> ### 100% Air-Gap & Confidentiality Guarantee
+> ### Local-First On-Premise Architecture & Data Privacy
 >
-> **FinAuditPro** is engineered for statutory confidentiality. It makes **zero
-> outbound internet connections**. All document OCR processing, LLM inferences,
-> vector embeddings, mathematical analytics, database transactions, and report
-> generation run **100% locally on your machine**.
+> **FinAuditPro** is engineered for statutory confidentiality and local
+> on-premise execution. All document OCR processing, mathematical analytics,
+> database transactions, vector embeddings, and report generation execute
+> locally on your workstation. Local AI assistant features interface with your
+> local LM Studio instance (`http://localhost:1234`) by default with zero
+> mandatory cloud dependencies.
 
 ---
 
@@ -342,18 +344,18 @@ python scripts/development/automated_system_check.py
 python -m finauditpro
 ```
 
-> **Default Administrator Credentials:**
+> **Administrator Account Setup:**
 >
-> - **Username:** `admin@finauditpro.com`
-> - **Password:** `Admin@123` _(Seeded automatically on first launch; manage
->   users in Settings)_
+> On first launch, FinAuditPro automatically opens the **Administrator Setup
+> Wizard** prompting you to configure your custom administrator email and master
+> password. No default or hardcoded credentials exist.
 
 ---
 
 ## Automated Verification & Diagnostics
 
 ```bash
-# Run the complete test suite (161/161 passing)
+# Run the complete test suite (303/303 passing)
 pytest tests/ -v
 
 # Run strict static type checking
@@ -362,7 +364,7 @@ mypy src/finauditpro
 # Run code linter
 ruff check src/ tests/ scripts/
 
-# Run the master 15-stage 1,000-point forensic runner
+# Run the master 15-stage end-to-end lifecycle verification runner
 python scripts/development/run_1000_verifications.py
 
 # Run statutory database optimization

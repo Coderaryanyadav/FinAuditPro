@@ -29,8 +29,19 @@ def test_prompt_injection_sanitization() -> None:
     assert "[PROMPT_INJECTION_NEUTRALIZED]" in sanitized
 
 
-def test_column_encryption_and_decryption() -> None:
-    """Verify Fernet AES-128-CBC encryption and decryption of sensitive strings."""
+def test_column_encryption_and_decryption(tmp_path, monkeypatch) -> None:
+    """Verify Fernet AES-128-CBC encryption and decryption of sensitive strings.
+
+    Explicitly initializes an isolated cipher in tmp_path so this test is not
+    order-dependent on global cipher state set by other tests.
+    """
+    import finauditpro.infrastructure.security.encryption as enc
+
+    monkeypatch.setattr(enc, "_get_key_file_path", lambda: tmp_path / "test_key.key")
+    monkeypatch.setattr(enc, "_get_salt_file_path", lambda: tmp_path / "test_salt.bin")
+    monkeypatch.setattr(enc, "_CIPHER", None)
+    enc.initialize_wrapped_dek("IsolatedTestPasscode@2026")
+
     original = "Confidential PAN/GSTIN or Note"
     cipher_text = encrypt_sensitive_string(original)
 
@@ -229,3 +240,75 @@ def test_legacy_key_migration_flow(tmp_path, monkeypatch) -> None:
     key_file.write_bytes(b"invalid_44_byte_key_garbage_data_here!!!!!!!")
     with pytest.raises(ValueError, match="Corrupt legacy key"):
         enc.initialize_session_cipher(passcode)
+
+
+def test_uninitialized_cipher_fails_closed(tmp_path, monkeypatch) -> None:
+    """Verify that get_fernet_cipher fails closed when uninitialized without hardcoded fallbacks."""
+    import pytest
+    import finauditpro.infrastructure.security.encryption as enc
+
+    monkeypatch.setattr(enc, "_get_key_file_path", lambda: tmp_path / "nonexistent.key")
+    monkeypatch.setattr(enc, "_get_salt_file_path", lambda: tmp_path / "nonexistent.bin")
+    monkeypatch.setattr(enc, "_CIPHER", None)
+
+    with pytest.raises(RuntimeError, match="Encryption subsystem not initialized"):
+        enc.get_fernet_cipher()
+
+
+def test_decryption_tampered_ciphertext_fails_closed(tmp_path, monkeypatch) -> None:
+    """Verify that decrypt_sensitive_string raises ValueError on invalid/tampered ciphertext."""
+    import pytest
+    import finauditpro.infrastructure.security.encryption as enc
+
+    monkeypatch.setattr(enc, "_get_key_file_path", lambda: tmp_path / "test_key.key")
+    monkeypatch.setattr(enc, "_get_salt_file_path", lambda: tmp_path / "test_salt.bin")
+    monkeypatch.setattr(enc, "_CIPHER", None)
+    enc.initialize_wrapped_dek("VaultSecretPassword@2026")
+
+    # Invalid / corrupted ciphertext
+    tampered_cipher = "gAAAAABl-fake-tampered-ciphertext-value=="
+    with pytest.raises(ValueError, match="Decryption failed"):
+        enc.decrypt_sensitive_string(tampered_cipher)
+
+
+def test_brute_force_lockout_tamper_and_deletion_resistance(tmp_path, monkeypatch) -> None:
+    """Verify that deleting or tampering with lockout.json cannot bypass brute force lockout."""
+    import json
+    import pytest
+    import finauditpro.infrastructure.security.lockout as lock
+    from finauditpro.domain.exceptions import ValidationError
+
+    lockout_file = tmp_path / "test_lockout.json"
+    monkeypatch.setattr(lock, "_get_lockout_file_path", lambda: lockout_file)
+
+    lock.clear_failed_attempts()
+
+    # 1. Record 3 failed attempts
+    for _ in range(3):
+        lock.record_failed_attempt()
+
+    assert lock._FAILED_ATTEMPTS == 3
+    assert lockout_file.exists()
+
+    # 2. Malicious user deletes lockout.json mid-session
+    lockout_file.unlink()
+
+    # 3. Next 2 failed attempts in the same process must STILL trigger lockout
+    lock.record_failed_attempt()  # attempt 4
+    lock.record_failed_attempt()  # attempt 5 -> triggers lockout!
+
+    with pytest.raises(ValidationError, match="locked out"):
+        lock.check_lockout()
+
+    # 4. Tampering attack: modifying attempts directly in JSON without valid HMAC
+    tampered_data = {
+        "attempts": 0,
+        "lockout_until": None,
+        "hmac": "fake_forged_hmac_12345",
+    }
+    lockout_file.write_text(json.dumps(tampered_data), encoding="utf-8")
+    lock._LOCKOUT_UNTIL = None  # simulate process reset
+
+    with pytest.raises(ValidationError, match="integrity violation"):
+        lock.check_lockout()
+

@@ -71,21 +71,46 @@ def run_system_check() -> int:
     # 4. Fernet Security & Column Encryption
     print("\n[4/6] Probing Fernet AES-128-CBC Encryption...")
     try:
+        import tempfile as _tempfile
+        import finauditpro.infrastructure.security.encryption as _enc
         from finauditpro.infrastructure.security.encryption import (
             decrypt_sensitive_string,
             encrypt_sensitive_string,
         )
-        test_str = "FinAuditPro-Diagnostic-Secret"
-        enc = encrypt_sensitive_string(test_str)
-        dec = decrypt_sensitive_string(enc)
-        if dec == test_str:
-            print("  • Fernet Encryption Engine: PASS")
+        # If no active cipher, initialize a transient one in a temp dir for diagnostic purposes only.
+        if _enc._CIPHER is None:
+            with _tempfile.TemporaryDirectory() as _tdir:
+                _orig_key = _enc._get_key_file_path
+                _orig_salt = _enc._get_salt_file_path
+                _enc._get_key_file_path = lambda: __import__("pathlib").Path(_tdir) / ".diag_key.key"
+                _enc._get_salt_file_path = lambda: __import__("pathlib").Path(_tdir) / ".diag_salt.bin"
+                try:
+                    _enc.initialize_wrapped_dek("FinAuditPro-Diagnostic-Transient-Key")
+                    test_str = "FinAuditPro-Diagnostic-Secret"
+                    enc_val = encrypt_sensitive_string(test_str)
+                    dec_val = decrypt_sensitive_string(enc_val)
+                    if dec_val == test_str:
+                        print("  • Fernet Encryption Engine: PASS")
+                    else:
+                        print("  • Fernet Encryption Engine: FAIL (Decrypted mismatch)")
+                        failures += 1
+                finally:
+                    _enc._get_key_file_path = _orig_key
+                    _enc._get_salt_file_path = _orig_salt
+                    _enc._CIPHER = None
         else:
-            print("  • Fernet Encryption Engine: FAIL (Decrypted mismatch)")
-            failures += 1
+            test_str = "FinAuditPro-Diagnostic-Secret"
+            enc_val = encrypt_sensitive_string(test_str)
+            dec_val = decrypt_sensitive_string(enc_val)
+            if dec_val == test_str:
+                print("  • Fernet Encryption Engine: PASS")
+            else:
+                print("  • Fernet Encryption Engine: FAIL (Decrypted mismatch)")
+                failures += 1
     except Exception as e:
         print(f"  • Fernet Encryption Engine: FAIL ({e})")
         failures += 1
+
 
     # 5. Local AI & LM Studio REST Endpoint Supervisor
     print("\n[5/6] Probing Local LM Studio Server Supervisor...")

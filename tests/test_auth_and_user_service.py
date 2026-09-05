@@ -32,7 +32,13 @@ def db_env(tmp_path):
     db_manager = DatabaseManager(str(db_file))
     db_manager.create_tables()
     with db_manager.session_scope() as session:
-        UserRepository(session).seed_default_admin_if_empty()
+        repo = UserRepository(session)
+        repo.create_user_with_password(
+            username="admin@finauditpro.com",
+            password="Admin@123",
+            role=RoleEnum.ADMINISTRATOR,
+            must_change_password=True,
+        )
     return db_manager
 
 
@@ -45,23 +51,32 @@ def test_password_hashing_and_verification():
     assert verify_password("WrongPassword", h, salt) is False
 
 
-def test_user_repository_and_default_admin(tmp_path):
+def test_user_repository_and_initial_admin_setup(tmp_path):
     db_manager = DatabaseManager(str(tmp_path / "fresh_admin.db"))
     db_manager.create_tables()
+    auth_svc = AuthService(db_manager)
+
+    assert auth_svc.is_first_run() is True
+
+    # Setup initial custom admin
+    admin_session = auth_svc.setup_initial_admin("founder@apexauditors.in", "StrongPass@2026")
+    assert admin_session is not None
+    assert admin_session.username == "founder@apexauditors.in"
+    assert admin_session.role == RoleEnum.ADMINISTRATOR
+    assert admin_session.must_change_password is False
+
+    # Second setup should fail
+    assert auth_svc.is_first_run() is False
+    with pytest.raises(ValidationError, match="Administrator account already exists"):
+        auth_svc.setup_initial_admin("another@apexauditors.in", "AnotherPass@2026")
+
+    # Lookup
     with db_manager.session_scope() as session:
         repo = UserRepository(session)
-        admin = repo.seed_default_admin_if_empty()
-        assert admin is not None
-        assert admin.username == "admin@finauditpro.com"
-        assert admin.role == RoleEnum.ADMINISTRATOR
-
-        # Second seed should be no-op
-        assert repo.seed_default_admin_if_empty() is None
-
-        # Lookup
-        found = repo.get_by_username("ADMIN@finauditpro.com")
+        found = repo.get_by_username("FOUNDER@apexauditors.in")
         assert found is not None
-        assert found.id == admin.id
+        assert found.id == admin_session.user_id
+
 
 
 def test_auth_service_flow(db_env):

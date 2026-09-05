@@ -218,18 +218,7 @@ class LoginDialog(QDialog):
         self.btn_submit.clicked.connect(self._handle_login)
 
         fl.addWidget(self.btn_submit)
-        fl.addSpacing(10)
-
-        # Reset / Recovery Action
-        btn_reset_pwd = QPushButton("Forgot or Reset Credentials?")
-        btn_reset_pwd.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_reset_pwd.setStyleSheet(
-            "QPushButton { background: transparent; color: #64748B; font-size: 12px; font-weight: 500; border: 1px solid transparent; text-decoration: underline; }"
-            "QPushButton:hover { color: #2563EB; }"
-        )
-        btn_reset_pwd.clicked.connect(self._handle_reset_to_default)
-        fl.addWidget(btn_reset_pwd, alignment=Qt.AlignmentFlag.AlignCenter)
-        fl.addSpacing(8)
+        fl.addSpacing(14)
 
         hint = QLabel("Fully offline · No data leaves your machine")
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -296,18 +285,3 @@ class LoginDialog(QDialog):
         except Exception as ex:
             QMessageBox.critical(self, "Login Error", f"An unexpected error occurred: {ex}")
 
-    def _handle_reset_to_default(self) -> None:
-        reply = QMessageBox.question(
-            self,
-            "Reset Local Credentials",
-            "Reset credentials to default local administrator login?\n\nUsername: admin@finauditpro.com\nPassword: Admin@123",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.No,
-        )
-        if reply == QMessageBox.StandardButton.Yes and self.auth_service:
-            self.auth_service.reset_to_default_admin()
-            self.input_user.setText("admin@finauditpro.com")
-            self.input_pass.setText("Admin@123")
-            QMessageBox.information(
-                self, "Reset Complete", "Credentials reset to default.\nClick 'Sign In' to proceed."
-            )

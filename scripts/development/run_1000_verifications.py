@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""FinAuditPro Master E2E 1000-Point Automated Verification Runner Script.
+"""FinAuditPro Master 15-Stage End-to-End Automated Lifecycle Verification Runner.
 
 Programmatically executes the complete 15-stage FinAuditPro lifecycle from launch,
 DB migration, client setup, financial analytics, working papers, local RAG AI,
@@ -14,10 +14,11 @@ from pathlib import Path
 # Ensure src/ is in sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "src"))
 
-def run_1000_verifications() -> int:
+def run_master_verifications() -> int:
     print("=" * 70)
-    print(" FINAUDITPRO — MASTER 1,000-POINT AUTOMATED VERIFICATION RUNNER")
+    print(" FINAUDITPRO — MASTER 15-STAGE END-TO-END LIFECYCLE VERIFICATION")
     print("=" * 70)
+
 
     failures = 0
     temp_dir = Path(tempfile.mkdtemp(prefix="finauditpro_e2e_"))
@@ -275,13 +276,18 @@ def run_1000_verifications() -> int:
 
     print("\n" + "=" * 70)
     if failures == 0:
-        print(" MASTER 1,000-POINT VERIFICATION STATUS: 100% PASS (0 FAILURES)")
-        print(" ALL FINAUDITPRO WORKFLOWS ARE FULLY FUNCTIONAL AND AUDIT-GRADE.")
+        print(" MASTER 15-STAGE VERIFICATION STATUS: 100% PASS (0 FAILURES)")
+        print(" ALL 15 FINAUDITPRO CORE LIFECYCLE WORKFLOWS VERIFIED SUCCESSFULLY.")
     else:
         print(f" MASTER VERIFICATION STATUS: {failures} FAILURES DETECTED")
     print("=" * 70 + "\n")
 
     return failures
 
+# Backwards compatibility alias
+run_1000_verifications = run_master_verifications
+
 if __name__ == "__main__":
-    sys.exit(run_1000_verifications())
+    sys.exit(run_master_verifications())
+
+

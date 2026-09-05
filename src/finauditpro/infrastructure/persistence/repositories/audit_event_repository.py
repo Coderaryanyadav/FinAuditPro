@@ -2,7 +2,7 @@
 
 import hashlib
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 from finauditpro.domain.entities import AuditEvent
@@ -18,7 +18,7 @@ class AuditEventRepository:
     def add(self, event: AuditEvent) -> AuditEvent:
         stmt = (
             select(AuditEventModel)
-            .order_by(AuditEventModel.timestamp.desc(), AuditEventModel.id.desc())
+            .order_by(text("rowid DESC"))
             .limit(1)
         )
         last_model = self.session.scalars(stmt).first()
@@ -57,9 +57,7 @@ class AuditEventRepository:
 
     def verify_chain(self) -> bool:
         """Verify SHA-256 hash chain integrity across all stored audit events."""
-        stmt = select(AuditEventModel).order_by(
-            AuditEventModel.timestamp.asc(), AuditEventModel.id.asc()
-        )
+        stmt = select(AuditEventModel).order_by(text("rowid ASC"))
         models = self.session.scalars(stmt).all()
         expected_prev = "GENESIS_HASH"
 
@@ -76,7 +74,7 @@ class AuditEventRepository:
         return True
 
     def list_recent(self, limit: int = 20) -> list[AuditEvent]:
-        stmt = select(AuditEventModel).order_by(AuditEventModel.timestamp.desc()).limit(limit)
+        stmt = select(AuditEventModel).order_by(text("rowid DESC")).limit(limit)
         models = self.session.scalars(stmt).all()
         return [
             AuditEvent(

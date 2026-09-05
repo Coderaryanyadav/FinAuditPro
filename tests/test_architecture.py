@@ -34,7 +34,7 @@ def test_file_line_count_limit() -> None:
 
     over_limit = []
     for py_file in py_files:
-        rel_path = str(py_file.relative_to(src_dir))
+        rel_path = py_file.relative_to(src_dir).as_posix()
         if rel_path in LEGACY_ALLOWLIST:
             continue
         line_count = len(py_file.read_text(encoding="utf-8").splitlines())

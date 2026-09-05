@@ -304,7 +304,7 @@ def test_dat01_working_paper_integrity_detects_tampered_and_deleted_evidence(
     tmp_path = remediation_env["tmp_path"]
 
     doc_file = tmp_path / "bank_evidence.txt"
-    doc_file.write_text("SBI Confirmed Bank Balance: ₹50,00,000.00")
+    doc_file.write_text("SBI Confirmed Bank Balance: ₹50,00,000.00", encoding="utf-8")
     doc = doc_svc.upload_and_process_document(
         UploadDocumentDTO(engagement_id=eng_a.id, file_path=str(doc_file))
     )

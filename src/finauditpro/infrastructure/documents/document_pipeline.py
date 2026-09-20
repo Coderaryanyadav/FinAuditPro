@@ -9,10 +9,10 @@ from finauditpro.domain.document_entities import (
     DocumentCategoryEnum,
     DocumentPage,
     DocumentStatusEnum,
+    DocumentStructuredMetadata,
     DocumentTable,
 )
 from finauditpro.domain.entities import AuditEvent
-from finauditpro.infrastructure.documents.document_classifier import classify_document_text
 from finauditpro.infrastructure.documents.document_extractors import (
     extract_document_content,
 )
@@ -22,6 +22,9 @@ from finauditpro.infrastructure.documents.document_security import (
     get_native_storage_dir,
     sanitize_filename,
     validate_document_security,
+)
+from finauditpro.infrastructure.documents.smart_document_intelligence import (
+    process_smart_document_classification_and_metadata,
 )
 
 
@@ -43,6 +46,7 @@ class ProcessedDocumentResult:
     pages: list[DocumentPage]
     tables: list[DocumentTable]
     audit_events: list[AuditEvent]
+    extracted_metadata: DocumentStructuredMetadata | None = None
 
 
 class DocumentPipeline:
@@ -210,17 +214,19 @@ class DocumentPipeline:
                 audit_events=events,
             )
 
-        # Stage 6: CLASSIFYING
+        # Stage 6: CLASSIFYING & SMART METADATA EXTRACTION
         full_text = "\n".join(p.extracted_text for p in pages)
-        machine_cat, conf, evidence = classify_document_text(full_text, filename=clean_name)
-        final_cat: DocumentCategoryEnum = category if category != DocumentCategoryEnum.GENERAL else machine_cat
-
+        final_cat, conf, evidence, extracted_meta = process_smart_document_classification_and_metadata(
+            text=full_text,
+            filename=clean_name,
+            category_hint=category,
+        )
 
         events.append(
             AuditEvent(
                 engagement_id=engagement_id,
                 actor="System",
-                action="Document Classified",
+                action="Document Classified & Metadata Extracted",
                 details=f"Category: '{final_cat.value}' (Confidence: {conf:.0%}, Evidence: {evidence[:3]})",
             )
         )
@@ -252,4 +258,5 @@ class DocumentPipeline:
             pages=pages,
             tables=tables,
             audit_events=events,
+            extracted_metadata=extracted_meta,
         )

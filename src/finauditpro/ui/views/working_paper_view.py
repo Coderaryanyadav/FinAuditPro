@@ -1,4 +1,4 @@
-"""Working Papers Workspace View for FinAuditPro. Maker-Checker control, review notes, and cryptographic tamper verification."""
+"""Working Papers Workspace View for FinAuditPro. Maker-Checker control, review notes, split evidence inspector, and cryptographic tamper verification."""
 
 from typing import Any
 
@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 )
 
 from finauditpro.application.security.rbac import UserSession
+from finauditpro.application.services.document_service import DocumentService
 from finauditpro.application.services.engagement_service import EngagementService
 from finauditpro.application.services.working_paper_service import WorkingPaperService
 from finauditpro.application.working_paper_dtos import CreateWorkingPaperDTO, ReopenWorkingPaperDTO
@@ -29,10 +30,11 @@ from finauditpro.domain.working_paper_entities import FileCategoryEnum, WorkingP
 from finauditpro.ui.dialogs.review_notes_dialog import ReviewNotesDialog
 from finauditpro.ui.dialogs.signoff_dialog import SignOffDialog
 from finauditpro.ui.theme import CardWidget, EmptyStateWidget, MetricCard, PageHeader
+from finauditpro.ui.widgets.evidence_inspector_panel import EvidenceInspectorPanel
 
 
 class WorkingPaperView(QWidget):
-    """Primary Working Papers Workspace View."""
+    """Unified Evidence & Working Papers Workspace View."""
 
     wp_changed = Signal()
 
@@ -40,29 +42,36 @@ class WorkingPaperView(QWidget):
         self,
         engagement_service: EngagementService,
         working_paper_service: WorkingPaperService,
+        document_service: DocumentService | None = None,
         user_session: UserSession | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
-        self.engagement_service, self.wp_service, self.user_session = (
-            engagement_service,
-            working_paper_service,
-            user_session,
-        )
+        self.engagement_service = engagement_service
+        self.wp_service = working_paper_service
+        self.document_service = document_service
+        self.user_session = user_session
         self.current_engagement: Engagement | None = None
+        self.selected_wp_id: str | None = None
+
         self._init_ui()
 
     def set_user_session(self, session: UserSession | None) -> None:
         self.user_session = session
 
+    def set_document_service(self, service: DocumentService) -> None:
+        self.document_service = service
+        if hasattr(self, "evidence_inspector"):
+            self.evidence_inspector.set_document_service(service)
+
     def _init_ui(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 20, 24, 24)
-        layout.setSpacing(14)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(12)
 
         self.header = PageHeader(
-            title="Working Papers & Controls",
-            subtitle="Prepare, review, sign off, and cryptographically seal statutory audit documentation (SA 230).",
+            title="Working Papers & Evidence Workspace",
+            subtitle="Prepare, review, sign off, and cryptographically seal statutory audit documentation & linked evidence (SA 230).",
             action_text="+ New Working Paper",
             action_callback=self._on_new_wp_clicked,
         )
@@ -115,7 +124,14 @@ class WorkingPaperView(QWidget):
         filter_box.addStretch()
         layout.addLayout(filter_box)
 
+        # Resizable Splitter Layout: LEFT = Working Papers, RIGHT = Evidence Inspector Panel
         self.splitter = QSplitter(Qt.Orientation.Horizontal)
+
+        left_pane = QWidget()
+        left_layout = QVBoxLayout(left_pane)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setSpacing(10)
+
         self.table_card = CardWidget("WORKING PAPERS DIRECTORY")
         self.table = QTableWidget()
         self.table.setColumnCount(9)
@@ -134,9 +150,7 @@ class WorkingPaperView(QWidget):
         )
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         for c in [0, 1, 3, 4, 5, 6, 7, 8]:
-            self.table.horizontalHeader().setSectionResizeMode(
-                c, QHeaderView.ResizeMode.ResizeToContents
-            )
+            self.table.horizontalHeader().setSectionResizeMode(c, QHeaderView.ResizeMode.ResizeToContents)
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
         self.table.itemSelectionChanged.connect(self._on_wp_selected)
@@ -150,13 +164,13 @@ class WorkingPaperView(QWidget):
         self.table.setVisible(False)
         self.table_card.content_layout.addWidget(self.table)
         self.table_card.content_layout.addWidget(self.empty_state)
-        self.splitter.addWidget(self.table_card)
+        left_layout.addWidget(self.table_card, stretch=1)
 
-        self.preview_card = CardWidget("DOCUMENT EVIDENCE & TESTING PREVIEW")
+        self.preview_card = CardWidget("WORKING PAPER PROCEDURES & EVIDENCE LINKS")
         self.preview_text = QTextEdit()
         self.preview_text.setReadOnly(True)
         self.preview_text.setStyleSheet(
-            "QTextEdit { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; color: #334155; font-family: monospace; font-size: 12px; padding: 12px; }"
+            "QTextEdit { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; color: #334155; font-family: monospace; font-size: 11px; padding: 10px; }"
         )
         pal = self.preview_text.palette()
         pal.setColor(QPalette.ColorRole.PlaceholderText, QColor("#94A3B8"))
@@ -165,10 +179,19 @@ class WorkingPaperView(QWidget):
             "Select a working paper to inspect testing procedures, audit conclusions, and linked evidence."
         )
         self.preview_card.content_layout.addWidget(self.preview_text)
-        self.splitter.addWidget(self.preview_card)
-        self.splitter.setStretchFactor(0, 6)
-        self.splitter.setStretchFactor(1, 4)
+        left_layout.addWidget(self.preview_card, stretch=1)
+
+        self.splitter.addWidget(left_pane)
+
+        # Right Pane: Evidence Inspector
+        self.evidence_inspector = EvidenceInspectorPanel(document_service=self.document_service)
+        self.evidence_inspector.attach_evidence_requested.connect(self._on_attach_evidence_from_inspector)
+        self.splitter.addWidget(self.evidence_inspector)
+
+        self.splitter.setStretchFactor(0, 5)
+        self.splitter.setStretchFactor(1, 5)
         layout.addWidget(self.splitter, 1)
+
         self.refresh()
 
     def set_engagement(self, engagement: Any) -> None:
@@ -185,6 +208,9 @@ class WorkingPaperView(QWidget):
         else:
             self.current_engagement = None
             self.header.action_btn.setEnabled(False)
+
+        if self.current_engagement:
+            self.evidence_inspector.load_engagement_documents(self.current_engagement.id)
         self.refresh()
 
     set_active_engagement = set_engagement
@@ -208,19 +234,9 @@ class WorkingPaperView(QWidget):
             return
 
         if self.radio_paf.isChecked():
-            wps = [
-                w
-                for w in all_wps
-                if getattr(w, "file_category", FileCategoryEnum.CURRENT_FILE)
-                == FileCategoryEnum.PERMANENT_FILE
-            ]
+            wps = [w for w in all_wps if getattr(w, "file_category", FileCategoryEnum.CURRENT_FILE) == FileCategoryEnum.PERMANENT_FILE]
         elif self.radio_caf.isChecked():
-            wps = [
-                w
-                for w in all_wps
-                if getattr(w, "file_category", FileCategoryEnum.CURRENT_FILE)
-                == FileCategoryEnum.CURRENT_FILE
-            ]
+            wps = [w for w in all_wps if getattr(w, "file_category", FileCategoryEnum.CURRENT_FILE) == FileCategoryEnum.CURRENT_FILE]
         else:
             wps = all_wps
 
@@ -236,11 +252,7 @@ class WorkingPaperView(QWidget):
             if wp.is_locked:
                 signed_count += 1
 
-            cat_str = (
-                wp.file_category.value
-                if hasattr(wp.file_category, "value")
-                else str(getattr(wp, "file_category", "Current File"))
-            )
+            cat_str = wp.file_category.value if hasattr(wp.file_category, "value") else str(getattr(wp, "file_category", "Current File"))
             is_paf = "Permanent" in cat_str
             self.table.setItem(r, 0, QTableWidgetItem(wp.index_reference))
             cat_item = QTableWidgetItem("PAF" if is_paf else "CAF")
@@ -251,11 +263,7 @@ class WorkingPaperView(QWidget):
             self.table.setItem(r, 4, QTableWidgetItem(f"● {wp.status.value}"))
             self.table.setItem(r, 5, QTableWidgetItem(wp.preparer_id))
             self.table.setItem(r, 6, QTableWidgetItem(str(op_count)))
-            hash_str = (
-                f"LOCKED ({wp.content_hash[:8]}...)"
-                if wp.is_locked and wp.content_hash
-                else "EDITABLE"
-            )
+            hash_str = f"LOCKED ({wp.content_hash[:8]}...)" if wp.is_locked and wp.content_hash else "EDITABLE"
             self.table.setItem(r, 7, QTableWidgetItem(hash_str))
 
             act_widget = QWidget()
@@ -271,10 +279,7 @@ class WorkingPaperView(QWidget):
                 btn_submit = QPushButton("Submit")
                 btn_submit.clicked.connect(lambda _, wpid=wp.id: self._submit_wp(wpid))
                 act_layout.addWidget(btn_submit)
-            elif wp.status in (
-                WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW,
-                WorkingPaperStatusEnum.RESUBMITTED,
-            ):
+            elif wp.status in (WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW, WorkingPaperStatusEnum.RESUBMITTED):
                 btn_review = QPushButton("Review")
                 btn_review.clicked.connect(lambda _, wpid=wp.id: self._start_review(wpid))
                 act_layout.addWidget(btn_review)
@@ -300,11 +305,72 @@ class WorkingPaperView(QWidget):
         self.card_open_notes.set_value(str(total_open_notes))
         self.card_signed.set_value(str(signed_count))
 
+    def _on_wp_selected(self) -> None:
+        selected_rows = self.table.selectedItems()
+        if not selected_rows or not self.current_engagement:
+            return
+        row = selected_rows[0].row()
+        wps = self.wp_service.list_working_papers(self.current_engagement.id)
+        if row < len(wps):
+            wp = wps[row]
+            self.selected_wp_id = wp.id
+            sections = self.wp_service.get_sections(wp.id)
+            links = self.wp_service.list_links(wp.id)
+
+            lines = [
+                "===========================================================",
+                f" WORKING PAPER: [{wp.index_reference}] {wp.title}",
+                f" Area: {wp.area} | Status: {wp.status.value}",
+                f" Preparer: {wp.preparer_id} | Version: {wp.version}",
+                f" Locked: {'YES (Tamper-Sealed)' if wp.is_locked else 'NO (Draft / Editable)'}",
+                f" Content Hash: {wp.content_hash or 'Not sealed yet'}",
+                "===========================================================\n",
+                "--- SECTIONS & PROCEDURAL TESTING ---",
+            ]
+            for s in sections:
+                lines.append(f"\n▶ {s.title}\n  {s.content_markdown}")
+            lines.append("\n--- LINKED AUDIT EVIDENCE & PROCEDURES ---")
+            first_doc_id = None
+            if links:
+                for l in links:
+                    l_type = l.get("link_type", "evidence").upper()
+                    target_id = l.get("target_id")
+                    lines.append(f"• [{l_type}] Target ID: {target_id}")
+                    if not first_doc_id and l.get("link_type") in ("Document", "Evidence", "procedure"):
+                        first_doc_id = target_id
+            else:
+                lines.append("• No external PDF / document evidence linked yet.")
+
+            self.preview_text.setText("\n".join(lines))
+
+            # Automatically trigger right pane evidence inspector when evidence is referenced
+            if first_doc_id and hasattr(self, "evidence_inspector"):
+                self.evidence_inspector.open_document_page(first_doc_id, page_number=1)
+
+    def _on_attach_evidence_from_inspector(self, doc_id: str, page_num: int, excerpt: str) -> None:
+        if not self.selected_wp_id:
+            QMessageBox.warning(
+                self,
+                "No Working Paper Selected",
+                "Please select a Working Paper from the directory list first.",
+            )
+            return
+
+        try:
+            self.wp_service.add_working_paper_link(self.selected_wp_id, "Document", doc_id)
+            QMessageBox.information(
+                self,
+                "Evidence Attached",
+                f"Successfully linked Document ID '{doc_id}' (Page {page_num}) to Working Paper.",
+            )
+            self._on_wp_selected()
+            self.wp_changed.emit()
+        except Exception as ex:
+            QMessageBox.critical(self, "Error Attaching Evidence", str(ex))
+
     def _on_scaffold_paf_clicked(self) -> None:
         if not self.current_engagement:
-            QMessageBox.warning(
-                self, "No Engagement", "Please select an active audit engagement first."
-            )
+            QMessageBox.warning(self, "No Engagement", "Please select an active audit engagement first.")
             return
         created = self.wp_service.scaffold_permanent_audit_file(self.current_engagement.id)
         msg = (
@@ -318,9 +384,7 @@ class WorkingPaperView(QWidget):
 
     def _on_new_wp_clicked(self) -> None:
         if not self.current_engagement:
-            QMessageBox.warning(
-                self, "No Engagement", "Please select an active audit engagement first."
-            )
+            QMessageBox.warning(self, "No Engagement", "Please select an active audit engagement first.")
             return
         preparer = self.user_session.username if self.user_session else "Lead Auditor"
         wp = self.wp_service.create_working_paper(
@@ -352,9 +416,7 @@ class WorkingPaperView(QWidget):
 
     def _on_scaffold_clicked(self) -> None:
         if not self.current_engagement:
-            QMessageBox.warning(
-                self, "No Engagement", "Please select an active audit engagement first."
-            )
+            QMessageBox.warning(self, "No Engagement", "Please select an active audit engagement first.")
             return
         created = self.wp_service.scaffold_schedule_iii_working_papers(self.current_engagement.id)
         msg = (
@@ -366,38 +428,6 @@ class WorkingPaperView(QWidget):
         self.refresh()
         self.wp_changed.emit()
 
-    def _on_wp_selected(self) -> None:
-        selected_rows = self.table.selectedItems()
-        if not selected_rows or not self.current_engagement:
-            return
-        row = selected_rows[0].row()
-        wps = self.wp_service.list_working_papers(self.current_engagement.id)
-        if row < len(wps):
-            wp = wps[row]
-            sections = self.wp_service.get_sections(wp.id)
-            links = self.wp_service.list_links(wp.id)
-            lines = [
-                "===========================================================",
-                f" WORKING PAPER: [{wp.index_reference}] {wp.title}",
-                f" Area: {wp.area} | Status: {wp.status.value}",
-                f" Preparer: {wp.preparer_id} | Version: {wp.version}",
-                f" Locked: {'YES (Tamper-Sealed)' if wp.is_locked else 'NO (Draft / Editable)'}",
-                f" Content Hash: {wp.content_hash or 'Not sealed yet'}",
-                "===========================================================\n",
-                "--- SECTIONS & PROCEDURAL TESTING ---",
-            ]
-            for s in sections:
-                lines.append(f"\n▶ {s.title}\n  {s.content_markdown}")
-            lines.append("\n--- LINKED AUDIT EVIDENCE & PROCEDURES ---")
-            if links:
-                for l in links:
-                    lines.append(
-                        f"• [{l.get('link_type', 'evidence').upper()}] ID: {l.get('target_id')}"
-                    )
-            else:
-                lines.append("• No external PDF / document evidence linked yet.")
-            self.preview_text.setText("\n".join(lines))
-
     def _verify_hash(self, wp_id: str) -> None:
         is_valid, msg = self.wp_service.verify_integrity(wp_id)
         if is_valid:
@@ -407,9 +437,8 @@ class WorkingPaperView(QWidget):
 
     def _submit_wp(self, wp_id: str) -> None:
         try:
-            self.wp_service.submit_for_review(
-                wp_id, self.user_session.username if self.user_session else "Auditor"
-            )
+            actor = self.user_session.username if self.user_session else "Auditor"
+            self.wp_service.submit_for_review(wp_id, actor)
             self.refresh()
             self.wp_changed.emit()
         except Exception as ex:
@@ -417,9 +446,8 @@ class WorkingPaperView(QWidget):
 
     def _start_review(self, wp_id: str) -> None:
         try:
-            self.wp_service.start_review(
-                wp_id, self.user_session.username if self.user_session else "Auditor"
-            )
+            actor = self.user_session.username if self.user_session else "Auditor"
+            self.wp_service.start_review(wp_id, actor)
             self.refresh()
             self.wp_changed.emit()
         except Exception as ex:
@@ -427,9 +455,8 @@ class WorkingPaperView(QWidget):
 
     def _return_wp(self, wp_id: str) -> None:
         try:
-            self.wp_service.return_working_paper(
-                wp_id, self.user_session.username if self.user_session else "Auditor"
-            )
+            actor = self.user_session.username if self.user_session else "Auditor"
+            self.wp_service.return_working_paper(wp_id, actor)
             self.refresh()
             self.wp_changed.emit()
         except Exception as ex:
@@ -437,9 +464,7 @@ class WorkingPaperView(QWidget):
 
     def _reopen_wp(self, wp_id: str) -> None:
         user_name = self.user_session.username if self.user_session else "Auditor"
-        reason, ok = QInputDialog.getText(
-            self, "Reopen Working Paper", "Enter reason for reopening:"
-        )
+        reason, ok = QInputDialog.getText(self, "Reopen Working Paper", "Enter reason for reopening:")
         if ok and reason.strip():
             try:
                 self.wp_service.reopen_working_paper(

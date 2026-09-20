@@ -302,6 +302,7 @@ from finauditpro.infrastructure.persistence.migration_sqls_c import MIGRATION_01
 from finauditpro.infrastructure.persistence.migration_sqls_d import MIGRATION_014_SQL
 from finauditpro.infrastructure.persistence.migration_sqls_e import MIGRATION_015_SQL
 from finauditpro.infrastructure.persistence.migration_sqls_f import MIGRATION_016_SQL
+from finauditpro.infrastructure.persistence.migration_sqls_g import migration_018_fn
 
 MIGRATION_010_SQL = """
 CREATE TABLE IF NOT EXISTS engagement_members (
@@ -343,6 +344,34 @@ def migration_009_fn(conn: sqlite3.Connection) -> None:
     conn.executescript(MIGRATION_009_SQL)
 
 
+MIGRATION_017_SQL = """
+CREATE TABLE IF NOT EXISTS work_tasks (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    client_id TEXT,
+    engagement_id TEXT,
+    assignee TEXT NOT NULL DEFAULT 'Unassigned',
+    created_at TEXT NOT NULL,
+    due_at TEXT,
+    status TEXT NOT NULL DEFAULT 'TODO',
+    priority TEXT NOT NULL DEFAULT 'MEDIUM',
+    source TEXT NOT NULL DEFAULT 'MANUAL',
+    linked_document TEXT,
+    linked_workpaper TEXT,
+    linked_finding TEXT,
+    is_confirmed INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY(client_id) REFERENCES clients(id) ON DELETE CASCADE,
+    FOREIGN KEY(engagement_id) REFERENCES engagements(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_work_tasks_client ON work_tasks(client_id);
+CREATE INDEX IF NOT EXISTS idx_work_tasks_engagement ON work_tasks(engagement_id);
+CREATE INDEX IF NOT EXISTS idx_work_tasks_status ON work_tasks(status);
+CREATE INDEX IF NOT EXISTS idx_work_tasks_source ON work_tasks(source);
+"""
+
+
 def get_all_migrations() -> list[tuple[int, str, Any]]:
     return [
         (1, "001_initial_schema", MIGRATION_001_SQL),
@@ -361,4 +390,8 @@ def get_all_migrations() -> list[tuple[int, str, Any]]:
         (14, "014_create_audit_completion_tables", MIGRATION_014_SQL),
         (15, "015_create_audit_reporting_phase_e_tables", MIGRATION_015_SQL),
         (16, "016_create_continuous_audit_phase_f_tables", MIGRATION_016_SQL),
+        (17, "017_create_work_tasks_table", MIGRATION_017_SQL),
+        (18, "018_performance_indexes", migration_018_fn),
     ]
+
+

@@ -1,2 +1,2 @@
-fbf4c86924eecb8d3ee856d9837a15efda2879e8f7cd5db96f17d24fca95bbc4  finauditpro-1.0.0-py3-none-any.whl
-e5d5190f764d042776712194114297dc298c13787f7b1e3ef7e8831a963bff67  finauditpro-1.0.0.tar.gz
+74f2df9232c0a57119aaf0a7ff40e8904d35c5e10fcd03994988a89004e0b777  FinAuditPro-1.0.0-macOS-arm64.dmg
+a1d1dfdcef6816fec4890da9788459c6a7e5a8dfe0013022701b8fd9aefc9a54  FinAuditPro-Setup-1.0.0-x64.exe

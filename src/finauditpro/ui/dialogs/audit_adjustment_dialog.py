@@ -243,7 +243,15 @@ class AuditAdjustmentDialog(QDialog):
         if not aje or aje.status != AJEStatusEnum.DRAFT:
             QMessageBox.warning(self, "Cannot Delete", "Only Draft adjustments can be deleted.")
             return
-        if QMessageBox.question(self, "Confirm", f"Delete draft AJE '{aje.aje_number}'?") == QMessageBox.StandardButton.Yes:
+
+        from finauditpro.ui.dialogs.confirm_dialog import confirm_destructive_action
+
+        if confirm_destructive_action(
+            self,
+            "Delete Draft Adjustment",
+            f"Are you sure you want to delete draft AJE '{aje.aje_number}' ({aje.title})?",
+            "Delete AJE",
+        ):
             self.adjustment_service.delete_draft_adjustment(self.engagement_id, aje.id)
             self._load_data()
 

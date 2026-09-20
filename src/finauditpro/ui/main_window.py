@@ -2,14 +2,9 @@
 
 from typing import Any
 
-from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
-    QButtonGroup,
-    QFrame,
     QHBoxLayout,
-    QLabel,
-    QLineEdit,
     QMainWindow,
     QMenu,
     QMessageBox,
@@ -32,13 +27,15 @@ from finauditpro.application.services.firm_service import FirmService
 from finauditpro.application.services.report_service import ReportService
 from finauditpro.application.services.working_paper_service import WorkingPaperService
 from finauditpro.domain.entities import RoleEnum
+from finauditpro.ui.components.context_bar import WorkspaceContextBar
+from finauditpro.ui.components.header import GlobalHeaderBar
+from finauditpro.ui.components.sidebar import PRIMARY_NAV_ITEMS, NavigationSidebar
 from finauditpro.ui.dialogs.engagement_dialog import EngagementDialog
 from finauditpro.ui.dialogs.login_dialog import LoginDialog
 from finauditpro.ui.dialogs.onboarding_dialog import OnboardingDialog
 from finauditpro.ui.styles import GLOBAL_QSS
-from finauditpro.ui.theme import FinAuditLogoWidget
-from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
+# Legacy Navigation Definitions preserved for backward compatibility
 NAV_ITEMS = [
     ("btn_dashboard", "Command Center", "WORKSPACE"),
     ("btn_pbc", "Intake && PBC", "GUIDED PIPELINE"),
@@ -59,6 +56,7 @@ NAV_ITEMS = [
     ("btn_roll_forward", "Roll-Forward Tie-Out", "SYSTEM"),
     ("btn_settings", "Settings", "SYSTEM"),
 ]
+
 GUIDED_STEPS = [
     ("Intake && PBC", "btn_pbc"),
     ("Planning (SA 320)", "btn_audit_matrix"),
@@ -66,6 +64,38 @@ GUIDED_STEPS = [
     ("Workpapers", "btn_working_papers"),
     ("Report && Sign-Off", "btn_reports"),
 ]
+
+# Category sub-navigation configurations
+CATEGORY_SUB_TABS: dict[int, list[tuple[str, str]]] = {
+    0: [("dashboard", "Overview")],
+    1: [("inbox", "Unified Practice Inbox"), ("pbc", "Intake & PBC Requests"), ("queries", "Client Queries")],
+    2: [
+        ("clients", "Client Directory"),
+        ("client_workspace", "Client Workspace"),
+        ("engagements", "Engagements"),
+        ("firms", "Audit Firms"),
+    ],
+    3: [
+        ("work_center", "Work Center"),
+        ("compliance", "Compliance Checklist"),
+        ("inspection", "PRB Inspection Sandbox"),
+        ("gst", "GST 2B Reconciler"),
+    ],
+    4: [
+        ("guided_workflow", "Guided Audit Workflow"),
+        ("audit_matrix", "Planning & SA 320"),
+        ("financial_data", "TB/GL Scrutiny"),
+        ("working_papers", "Working Papers"),
+        ("documents", "Evidence Store"),
+        ("reports", "Reports & Sign-Off"),
+    ],
+    5: [("ai_assistant", "Copilot Lab")],
+    6: [
+        ("settings", "Settings & Backup"),
+        ("archival", "Archival & Sealing"),
+        ("roll_forward", "Roll-Forward Tie-Out"),
+    ],
+}
 
 
 def _tag(w: Any, name: str) -> Any:
@@ -97,6 +127,7 @@ class MainWindow(QMainWindow):
             if hasattr(firm_service, "session_scope")
             else (db_manager if hasattr(db_manager, "session_scope") else None)
         )
+
         if db:
             from finauditpro.application.services.ai_service import AIService
 
@@ -145,10 +176,11 @@ class MainWindow(QMainWindow):
                 ai_service,
             )
             self.pbc_service, self.query_service, self.auth_service = (
-                DocumentRequestService(firm_service.db_manager),
-                AuditQueryService(firm_service.db_manager),
-                AuthService(firm_service.db_manager),
+                DocumentRequestService(firm_service.db_manager if firm_service else None),
+                AuditQueryService(firm_service.db_manager if firm_service else None),
+                AuthService(firm_service.db_manager if firm_service else None),
             )
+
         self.archival_repo, self.roll_forward_repo, self.db_manager = (
             archival_repo,
             roll_forward_repo,
@@ -158,10 +190,19 @@ class MainWindow(QMainWindow):
         self.current_user_session = UserSession(
             user_id="default", username="admin@finauditpro.com", role=RoleEnum.ADMINISTRATOR
         )
-        self.sidebar_collapsed, self.pipeline_btns = False, []
+        self.sidebar_collapsed = False
+        self.current_category_idx = 0
+
+        # Legacy button mapping dictionary for backward compatibility
+        self.legacy_buttons: dict[str, QPushButton] = {}
+        self.route_to_widget_map: dict[str, QWidget] = {}
+        self.route_to_index_map: dict[str, int] = {}
+
         self.setWindowTitle("FinAuditPro — Guided Statutory Audit Operating System")
         self.resize(1440, 920)
         self.setStyleSheet(GLOBAL_QSS)
+
+        self._init_legacy_button_handles()
         self._init_ui()
         self._show_login_flow()
         self._setup_inactivity_timer()
@@ -170,6 +211,24 @@ class MainWindow(QMainWindow):
     @property
     def active_engagement_id(self) -> str | None:
         return self.current_engagement.id if self.current_engagement else None
+
+    def _init_legacy_button_handles(self) -> None:
+        """Creates dummy or proxy button instances for legacy self.btn_* attributes."""
+
+        def create_btn(key: str) -> QPushButton:
+            btn = QPushButton()
+            btn.setObjectName(key)
+            self.legacy_buttons[key] = btn
+            setattr(self, key, btn)
+            return btn
+
+        for attr, _, _ in NAV_ITEMS:
+            create_btn(attr)
+
+        # Primary Hub buttons
+        for hub_key in ["btn_inbox", "btn_clients_hub", "btn_work", "btn_audit", "btn_system"]:
+            if not hasattr(self, hub_key):
+                create_btn(hub_key)
 
     def _show_login_flow(self) -> None:
         import sys
@@ -193,8 +252,11 @@ class MainWindow(QMainWindow):
                 if hasattr(self.current_user_session.role, "value")
                 else str(self.current_user_session.role)
             )
-            self.lbl_user_name.setText(name)
-            self.lbl_user_role.setText(role_str)
+            self.sidebar.set_user_info(name, role_str)
+            if hasattr(self, "lbl_user_name"):
+                self.lbl_user_name.setText(name)
+            if hasattr(self, "lbl_user_role"):
+                self.lbl_user_role.setText(role_str)
             if hasattr(self, "view_working_papers") and self.view_working_papers:
                 self.view_working_papers.set_user_session(self.current_user_session)
 
@@ -204,149 +266,91 @@ class MainWindow(QMainWindow):
         main_layout = QHBoxLayout(central)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
-        self.sidebar = _tag(QFrame(), "dashboardSidebar")
-        self.sidebar.setFixedWidth(240)
-        sb_layout = QVBoxLayout(self.sidebar)
-        sb_layout.setContentsMargins(10, 14, 10, 14)
-        sb_layout.setSpacing(3)
-        logo_row = QHBoxLayout()
-        logo_box = FinAuditLogoWidget(size=30)
-        self.logo_name = _tag(QLabel("FinAuditPro"), "sidebarAppTitle")
-        self.btn_collapse = QPushButton("◀")
-        self.btn_collapse.setFixedSize(24, 24)
-        self.btn_collapse.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_collapse.setStyleSheet(
-            "QPushButton { border: 1px solid transparent; background: transparent; color: #64748B; font-size: 11px; font-weight: 600; }"
-        )
-        self.btn_collapse.clicked.connect(self._toggle_sidebar)
-        for w in (logo_box, self.logo_name):
-            logo_row.addWidget(w)
-        logo_row.addStretch()
-        logo_row.addWidget(self.btn_collapse)
-        sb_layout.addLayout(logo_row)
-        sb_layout.addSpacing(8)
-        self.btn_group = QButtonGroup(self)
-        cur_sec = None
-        for idx, (attr, title, sec) in enumerate(NAV_ITEMS):
-            if sec != cur_sec:
-                cur_sec = sec
-                sb_layout.addWidget(_tag(QLabel(sec), "sidebarSectionLabel"))
-            btn = _tag(QPushButton(title), "navButton")
-            btn.setCheckable(True)
-            setattr(self, attr, btn)
-            self.btn_group.addButton(btn, idx)
-            sb_layout.addWidget(btn)
-        self.btn_dashboard.setChecked(True)
-        sb_layout.addStretch()
-        prof = _tag(QFrame(), "sidebarProfileFrame")
-        prof.setCursor(Qt.CursorShape.PointingHandCursor)
-        prof.mousePressEvent = lambda e: self.btn_settings.click()
-        pf_l = QHBoxLayout(prof)
-        pf_l.setContentsMargins(4, 6, 4, 4)
-        av = _tag(QLabel("CA"), "userAvatar")
-        av.setFixedSize(28, 28)
-        av.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        u_info = QVBoxLayout()
-        u_info.setSpacing(0)
-        self.lbl_user_name = _tag(QLabel("Partner"), "userName")
-        self.lbl_user_role = _tag(QLabel("Chartered Accountant"), "userRole")
-        u_info.addWidget(self.lbl_user_name)
-        u_info.addWidget(self.lbl_user_role)
-        btn_more = QPushButton("•••")
-        btn_more.setFixedSize(22, 22)
-        btn_more.setStyleSheet(
-            "QPushButton { border: 1px solid transparent; background: transparent; color: #64748B; font-weight: 600; }"
-        )
-        btn_more.clicked.connect(self._show_profile_menu)
-        for w in (av,):
-            pf_l.addWidget(w)
-        pf_l.addLayout(u_info)
-        pf_l.addStretch()
-        pf_l.addWidget(btn_more)
-        sb_layout.addWidget(prof)
+
+        # Reusable Primary Navigation Sidebar
+        self.sidebar = NavigationSidebar(self)
+        self.sidebar.category_changed.connect(self._on_category_changed)
+        self.sidebar.profile_menu_requested.connect(self._show_profile_menu)
         main_layout.addWidget(self.sidebar)
+
+        # Right Container
         right_container = QWidget()
         rc_layout = QVBoxLayout(right_container)
         rc_layout.setContentsMargins(0, 0, 0, 0)
         rc_layout.setSpacing(0)
-        header = _tag(QFrame(), "dashboardHeader")
-        header.setFixedHeight(68)
-        h_layout = QHBoxLayout(header)
-        h_layout.setContentsMargins(20, 12, 20, 0)
-        search_frame = _tag(QFrame(), "globalSearchFrame")
-        sf_l = QHBoxLayout(search_frame)
-        sf_l.setContentsMargins(10, 4, 10, 4)
-        sf_s = _tag(QLineEdit(), "globalSearchInput")
-        sf_s.setPlaceholderText("Quick Search (⌘P)...")
-        sf_s.setReadOnly(True)
-        sf_s.setCursor(Qt.CursorShape.PointingHandCursor)
-        sf_s.mousePressEvent = lambda e: self._open_command_palette()
-        sf_l.addWidget(sf_s)
-        sf_l.addWidget(_tag(QLabel("⌘P"), "globalShortcutBadge"))
-        h_layout.addWidget(search_frame)
-        h_layout.addStretch()
-        act_lbl = QLabel("ACTIVE AUDIT:")
-        act_lbl.setStyleSheet("font-size: 11px; font-weight: 600; color: #94A3B8;")
-        self.eng_selector_combo = _tag(CustomComboBox(), "clientSelectorCombo")
-        self.eng_selector_combo.setMinimumWidth(280)
-        self.eng_selector_combo.currentIndexChanged.connect(self._on_header_engagement_changed)
-        self.eng_selector_combo.empty_clicked.connect(self._handle_empty_engagement_click)
-        btn_new_audit = _tag(QPushButton("+ New Engagement"), "primaryBtn")
-        btn_new_audit.clicked.connect(self._on_new_engagement)
-        self.btn_copilot_toggle = QPushButton("AI Copilot ⌘K")
-        self.btn_copilot_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_copilot_toggle.setStyleSheet(
-            "QPushButton { background-color: #0F172A; color: #38BDF8; border: 1px solid #334155; border-radius: 6px; padding: 6px 14px; font-weight: 600; font-size: 12px; } QPushButton:hover { background-color: #1E293B; color: #7DD3FC; border-color: #0284C7; } QPushButton:pressed { background-color: #0284C7; color: #FFFFFF; }"
-        )
-        self.btn_copilot_toggle.clicked.connect(self._toggle_ai_drawer)
-        for hw in (act_lbl, self.eng_selector_combo):
-            h_layout.addWidget(hw)
-        h_layout.addSpacing(6)
-        h_layout.addWidget(btn_new_audit)
-        h_layout.addSpacing(6)
-        h_layout.addWidget(self.btn_copilot_toggle)
-        rc_layout.addWidget(header)
-        pipeline_bar = QFrame()
-        pipeline_bar.setFixedHeight(38)
-        pipeline_bar.setStyleSheet("background-color: #FFFFFF; border-bottom: 1px solid #E2E8F0;")
-        p_layout = QHBoxLayout(pipeline_bar)
-        p_layout.setContentsMargins(18, 0, 18, 0)
-        p_layout.setSpacing(6)
-        p_lbl = QLabel("AUDIT PIPELINE:")
-        p_lbl.setStyleSheet("font-size: 11px; font-weight: 600; color: #64748B;")
-        p_layout.addWidget(p_lbl)
-        self.pipeline_btns = []
-        for step_name, btn_attr in GUIDED_STEPS:
-            pbtn = QPushButton(step_name)
-            pbtn.setCursor(Qt.CursorShape.PointingHandCursor)
-            pbtn.setStyleSheet(
-                "QPushButton { background: #F8FAFC; color: #475569; border: 1px solid #E2E8F0; border-radius: 4px; padding: 3px 8px; font-size: 12px; font-weight: 500; } QPushButton:hover { background: #EFF6FF; color: #2563EB; border-color: #93C5FD; }"
-            )
-            pbtn.clicked.connect(lambda _, a=btn_attr: getattr(self, a).click())
-            self.pipeline_btns.append(pbtn)
-            p_layout.addWidget(pbtn)
-            if step_name != GUIDED_STEPS[-1][0]:
-                arr = QLabel("➔")
-                arr.setStyleSheet("color: #CBD5E1; font-size: 9px; font-weight: bold;")
-                p_layout.addWidget(arr)
-        p_layout.addStretch()
-        rc_layout.addWidget(pipeline_bar)
+
+        # Reusable Persistent Global Header Bar
+        self.header = GlobalHeaderBar(self)
+        self.header.search_clicked.connect(self._open_command_palette)
+        self.header.new_engagement_clicked.connect(self._on_new_engagement)
+        self.header.copilot_toggled.connect(self._toggle_ai_drawer)
+        self.header.engagement_changed.connect(self._on_header_engagement_changed)
+        self.header.empty_engagement_clicked.connect(self._handle_empty_engagement_click)
+
+        # Proxy handles for header widgets for legacy tests/access
+        self.eng_selector_combo = self.header.eng_selector_combo
+        self.btn_copilot_toggle = self.header.btn_copilot_toggle
+        self.lbl_user_name = self.sidebar.lbl_user_name
+        self.lbl_user_role = self.sidebar.lbl_user_role
+        self.btn_collapse = self.sidebar.btn_collapse
+
+        rc_layout.addWidget(self.header)
+
+        # Reusable Workspace Context Bar (Sub-tabs & Breadcrumbs)
+        self.context_bar = WorkspaceContextBar(self)
+        self.context_bar.sub_tab_selected.connect(self._on_sub_tab_selected)
+        rc_layout.addWidget(self.context_bar)
+
+        # Main Body Stack + AI Drawer
         body_layout = QHBoxLayout()
         body_layout.setContentsMargins(0, 0, 0, 0)
         body_layout.setSpacing(0)
+
         self.stack = QStackedWidget()
         self._init_views()
         body_layout.addWidget(self.stack, stretch=1)
+
         from finauditpro.ui.views.ai_copilot_drawer import AICopilotDrawer
 
         self.ai_drawer = AICopilotDrawer(self.ai_service, parent=self)
         self.ai_drawer.setVisible(False)
         self.ai_drawer.closed.connect(lambda: self.ai_drawer.setVisible(False))
         body_layout.addWidget(self.ai_drawer)
+
         rc_layout.addLayout(body_layout, stretch=1)
         main_layout.addWidget(right_container, stretch=1)
-        self.btn_group.idClicked.connect(self._on_nav_clicked)
+
+        self._connect_legacy_buttons()
         self._register_shortcuts()
+        self._on_category_changed(0)  # Start at Command Center
+
+    def _connect_legacy_buttons(self) -> None:
+        """Connects legacy button click signals to route handlers."""
+        route_map: dict[str, str] = {
+            "btn_dashboard": "dashboard",
+            "btn_pbc": "pbc",
+            "btn_audit_matrix": "audit_matrix",
+            "btn_financial_data": "financial_data",
+            "btn_working_papers": "working_papers",
+            "btn_reports": "reports",
+            "btn_queries": "queries",
+            "btn_documents": "documents",
+            "btn_gst": "gst",
+            "btn_compliance": "compliance",
+            "btn_inspection": "inspection",
+            "btn_ai_assistant": "ai_assistant",
+            "btn_clients": "clients",
+            "btn_engagements": "engagements",
+            "btn_firms": "firms",
+            "btn_archival": "archival",
+            "btn_roll_forward": "roll_forward",
+            "btn_settings": "settings",
+        }
+
+        for attr, route_key in route_map.items():
+            btn = getattr(self, attr, None)
+            if btn:
+                btn.clicked.connect(lambda _, r=route_key: self.navigate_to_route(r))
 
     def _register_shortcuts(self) -> None:
         for s, h in [
@@ -355,7 +359,7 @@ class MainWindow(QMainWindow):
             (("Ctrl+Q", "Meta+Q", "Alt+F4"), self.close),
             (("Ctrl+W", "Meta+W"), self._handle_close_shortcut),
             (("Ctrl+R", "Meta+R", "F5"), self._handle_refresh_shortcut),
-            (("Ctrl+,", "Meta+,"), lambda: self.btn_settings.click()),
+            (("Ctrl+,", "Meta+,"), lambda: self.navigate_to_route("settings")),
             (("Ctrl+N", "Meta+N"), self._on_new_engagement),
             (("Ctrl+L", "Meta+L"), self._lock_workstation),
         ]:
@@ -372,11 +376,14 @@ class MainWindow(QMainWindow):
             curr_view.refresh()
 
     def _handle_empty_engagement_click(self) -> None:
-        self.btn_clients.click()
+        self.navigate_to_route("clients")
         if hasattr(self.view_clients, "_create_client"):
             self.view_clients._create_client()
 
     def _init_views(self) -> None:
+        from finauditpro.application.services.practice_dashboard_service import (
+            PracticeDashboardService,
+        )
         from finauditpro.ui.views.ai_assistant_view import AIAssistantView
         from finauditpro.ui.views.archival_view import ArchivalView
         from finauditpro.ui.views.audit_matrix_view import AuditMatrixView
@@ -396,16 +403,33 @@ class MainWindow(QMainWindow):
         from finauditpro.ui.views.settings_view import SettingsView
         from finauditpro.ui.views.working_paper_view import WorkingPaperView
 
+        self.practice_dashboard_service = (
+            PracticeDashboardService(self.db_manager) if hasattr(self, "db_manager") and self.db_manager else None
+        )
+
         self.view_dashboard = DashboardView(
             self.firm_service,
             self.client_service,
             self.engagement_service,
             self.audit_matrix_service,
+            practice_dashboard_service=self.practice_dashboard_service,
         )
-        self.view_dashboard.navigate_to_clients.connect(lambda: self.btn_clients.click())
-        self.view_dashboard.navigate_to_engagements.connect(lambda: self.btn_engagements.click())
-        self.view_dashboard.navigate_to_matrix.connect(lambda: self.btn_audit_matrix.click())
+        self.view_dashboard.navigate_to_clients.connect(lambda: self.navigate_to_route("clients"))
+        self.view_dashboard.navigate_to_engagements.connect(
+            lambda: self.navigate_to_route("engagements")
+        )
+        self.view_dashboard.navigate_to_matrix.connect(
+            lambda: self.navigate_to_route("audit_matrix")
+        )
+        self.view_dashboard.navigate_to_pbc.connect(lambda: self.navigate_to_route("pbc"))
+        self.view_dashboard.navigate_to_documents.connect(lambda: self.navigate_to_route("documents"))
+        self.view_dashboard.navigate_to_working_papers.connect(
+            lambda: self.navigate_to_route("working_papers")
+        )
+        self.view_dashboard.navigate_to_reports.connect(lambda: self.navigate_to_route("reports"))
+        self.view_dashboard.navigate_to_route.connect(self.navigate_to_route)
         self.view_dashboard.engagement_selected.connect(self.set_active_engagement)
+
         self.view_firms, self.view_clients = (
             FirmView(self.firm_service),
             ClientView(self.firm_service, self.client_service),
@@ -414,11 +438,13 @@ class MainWindow(QMainWindow):
         self.view_firms.firm_changed.connect(self._on_firms_changed)
         self.view_clients.client_selected.connect(self.set_active_client)
         self.view_clients.client_changed.connect(self._on_clients_changed)
+
         self.view_engagements = EngagementView(
             self.firm_service, self.client_service, self.engagement_service
         )
         self.view_engagements.engagement_changed.connect(self.set_active_engagement)
         self.view_engagements.engagement_selected.connect(self.set_active_engagement)
+
         self.view_documents, self.view_financial_data = (
             DocumentView(self.document_service),
             FinancialDataView(self.financial_data_service, self.engagement_service),
@@ -435,9 +461,23 @@ class MainWindow(QMainWindow):
             self.ai_service, self.document_service, self.engagement_service
         )
         self.view_working_papers, self.view_reports = (
-            WorkingPaperView(self.engagement_service, self.working_paper_service),
+            WorkingPaperView(
+                self.engagement_service,
+                self.working_paper_service,
+                document_service=self.document_service,
+            ),
             ReportView(self.engagement_service, self.report_service),
         )
+        from finauditpro.application.services.inbox_service import InboxService
+        from finauditpro.ui.views.inbox_view import InboxView
+
+        self.inbox_service = (
+            InboxService(self.db_manager) if hasattr(self, "db_manager") and self.db_manager else None
+        )
+        self.view_inbox = InboxView(self.inbox_service) if self.inbox_service else None
+        if self.view_inbox:
+            self.view_inbox.navigate_to_route.connect(self.navigate_to_route)
+
         self.view_pbc, self.view_queries = (
             PBCTrackerView(self.pbc_service),
             AuditQueryView(self.query_service),
@@ -447,39 +487,165 @@ class MainWindow(QMainWindow):
             RollForwardView(self.db_manager),
             SettingsView(auth_service=self.auth_service),
         )
-        views = (
-            self.view_dashboard,
-            self.view_pbc,
-            self.view_audit_matrix,
-            self.view_financial_data,
-            self.view_working_papers,
-            self.view_reports,
-            self.view_queries,
-            self.view_documents,
-            self.view_gst,
-            self.view_compliance,
-            self.view_inspection,
-            self.view_ai_assistant,
-            self.view_clients,
-            self.view_engagements,
-            self.view_firms,
-            self.view_archival,
-            self.view_roll_forward,
-            self.view_settings,
+
+        from finauditpro.application.services.client_workspace_service import ClientWorkspaceService
+        from finauditpro.application.services.work_center_service import WorkCenterService
+        from finauditpro.ui.views.client_workspace_view import ClientWorkspaceView
+        from finauditpro.ui.views.work_center_view import WorkCenterView
+
+        self.client_workspace_service = (
+            ClientWorkspaceService(self.db_manager) if hasattr(self, "db_manager") and self.db_manager else None
         )
-        for v in views:
-            self.stack.addWidget(v)
+        self.view_client_workspace = ClientWorkspaceView(self.client_workspace_service) if self.client_workspace_service else None
+        if self.view_client_workspace:
+            self.view_client_workspace.engagement_selected.connect(self.set_active_engagement)
+            self.view_client_workspace.navigate_to_route.connect(self.navigate_to_route)
+
+        self.work_center_service = (
+            WorkCenterService(self.db_manager) if hasattr(self, "db_manager") and self.db_manager else None
+        )
+        self.view_work_center = WorkCenterView(self.work_center_service) if self.work_center_service else None
+
+        from finauditpro.ui.views.guided_workflow_view import GuidedWorkflowView
+        from finauditpro.ui.views.unified_reconciliation_view import UnifiedReconciliationView
+
+        self.view_guided_workflow = (
+            GuidedWorkflowView(self.db_manager) if hasattr(self, "db_manager") and self.db_manager else None
+        )
+        if self.view_guided_workflow:
+            self.view_guided_workflow.navigate_to_route.connect(self.navigate_to_route)
+
+        self.view_reconciliations = (
+            UnifiedReconciliationView(self.db_manager, ai_service=self.ai_service)
+            if hasattr(self, "db_manager") and self.db_manager else None
+        )
+
+        routes_with_widgets: list[tuple[str, QWidget]] = [
+            ("dashboard", self.view_dashboard),
+            ("inbox", self.view_inbox if self.view_inbox else self.view_pbc),
+            ("work_center", self.view_work_center if self.view_work_center else self.view_pbc),
+            ("guided_workflow", self.view_guided_workflow if self.view_guided_workflow else self.view_audit_matrix),
+            ("reconciliations", self.view_reconciliations if self.view_reconciliations else self.view_gst),
+            ("pbc", self.view_pbc),
+            ("audit_matrix", self.view_audit_matrix),
+            ("financial_data", self.view_financial_data),
+            ("working_papers", self.view_working_papers),
+            ("reports", self.view_reports),
+            ("queries", self.view_queries),
+            ("documents", self.view_documents),
+            ("gst", self.view_gst),
+            ("compliance", self.view_compliance),
+            ("inspection", self.view_inspection),
+            ("ai_assistant", self.view_ai_assistant),
+            ("clients", self.view_clients),
+            ("client_workspace", self.view_client_workspace if self.view_client_workspace else self.view_clients),
+            ("engagements", self.view_engagements),
+            ("firms", self.view_firms),
+            ("archival", self.view_archival),
+            ("roll_forward", self.view_roll_forward),
+            ("settings", self.view_settings),
+        ]
+
+        for route_key, widget in routes_with_widgets:
+            idx = self.stack.addWidget(widget)
+            self.route_to_widget_map[route_key] = widget
+            self.route_to_index_map[route_key] = idx
+
+    def _on_category_changed(self, cat_idx: int) -> None:
+        """Handles primary sidebar category changes."""
+        self.current_category_idx = cat_idx
+        sub_tabs = CATEGORY_SUB_TABS.get(cat_idx, [])
+        cat_title = PRIMARY_NAV_ITEMS[cat_idx][1] if 0 <= cat_idx < len(PRIMARY_NAV_ITEMS) else ""
+
+        self.sidebar.set_active_category_by_index(cat_idx)
+
+        if sub_tabs:
+            first_route = sub_tabs[0][0]
+            self.context_bar.set_sub_tabs(sub_tabs, active_key=first_route)
+            self.context_bar.set_breadcrumb(f"{cat_title} / {sub_tabs[0][1]}")
+            self.navigate_to_route(first_route, update_context_bar=False)
+        else:
+            self.context_bar.set_sub_tabs([])
+            self.context_bar.set_breadcrumb(cat_title)
+
+    def _on_sub_tab_selected(self, route_key: str) -> None:
+        """Handles sub-tab selection within the current category."""
+        sub_tabs = CATEGORY_SUB_TABS.get(self.current_category_idx, [])
+        sub_title = next((title for k, title in sub_tabs if k == route_key), "")
+        cat_title = (
+            PRIMARY_NAV_ITEMS[self.current_category_idx][1]
+            if 0 <= self.current_category_idx < len(PRIMARY_NAV_ITEMS)
+            else ""
+        )
+        self.context_bar.set_breadcrumb(f"{cat_title} / {sub_title}")
+        self.navigate_to_route(route_key, update_context_bar=False)
+
+    def navigate_to_route(self, route_key: str, update_context_bar: bool = True) -> None:
+        """Navigates to a specific view by route key and updates active category/tab state."""
+        if route_key not in self.route_to_index_map:
+            return
+
+        idx = self.route_to_index_map[route_key]
+        self.stack.setCurrentIndex(idx)
+
+        # Determine category for this route: preserve current category if route is within it
+        curr_sub_tabs = CATEGORY_SUB_TABS.get(self.current_category_idx, [])
+        if any(k == route_key for k, _ in curr_sub_tabs):
+            found_cat_idx = self.current_category_idx
+        else:
+            found_cat_idx = None
+            for cat_i, sub_tabs in CATEGORY_SUB_TABS.items():
+                if any(k == route_key for k, _ in sub_tabs):
+                    found_cat_idx = cat_i
+                    break
+
+        if found_cat_idx is not None:
+            self.current_category_idx = found_cat_idx
+            self.sidebar.set_active_category_by_index(found_cat_idx)
+            if update_context_bar:
+                sub_tabs = CATEGORY_SUB_TABS.get(found_cat_idx, [])
+                self.context_bar.set_sub_tabs(sub_tabs, active_key=route_key)
+                sub_title = next((t for k, t in sub_tabs if k == route_key), "")
+                cat_title = PRIMARY_NAV_ITEMS[found_cat_idx][1]
+                self.context_bar.set_breadcrumb(f"{cat_title} / {sub_title}")
 
     def _toggle_ai_drawer(self) -> None:
+        if not self.ai_drawer.isVisible():
+            curr_widget = self.stack.currentWidget()
+            view_name = "Command Center"
+            for k, w in self.route_to_widget_map.items():
+                if w == curr_widget:
+                    view_name = k.replace("_", " ").title()
+                    break
+
+            c_id = self.current_client.id if hasattr(self, "current_client") and self.current_client else None
+            c_name = self.current_client.name if hasattr(self, "current_client") and self.current_client else None
+            f_id = self.current_firm.id if hasattr(self, "current_firm") and self.current_firm else None
+            f_name = self.current_firm.name if hasattr(self, "current_firm") and self.current_firm else None
+            e_id = self.current_engagement.id if hasattr(self, "current_engagement") and self.current_engagement else None
+            e_name = self.current_engagement.audit_type if hasattr(self, "current_engagement") and self.current_engagement else None
+            fy = self.current_engagement.financial_year if hasattr(self, "current_engagement") and self.current_engagement else "FY 2025-26"
+
+            from finauditpro.application.dtos_copilot import CopilotContextDTO
+            ctx = CopilotContextDTO(
+                firm=f_name,
+                firm_id=f_id,
+                client=c_name,
+                client_id=c_id,
+                financial_year=fy,
+                engagement=e_name,
+                engagement_id=e_id,
+                current_view=view_name,
+            )
+            self.ai_drawer.set_context(ctx)
+
         self.ai_drawer.setVisible(not self.ai_drawer.isVisible())
         if self.ai_drawer.isVisible():
             self.ai_drawer.inp_query.setFocus()
 
     def _toggle_sidebar(self) -> None:
-        self.sidebar_collapsed = not self.sidebar_collapsed
-        self.sidebar.setFixedWidth(64 if self.sidebar_collapsed else 240)
-        self.logo_name.setVisible(not self.sidebar_collapsed)
-        self.btn_collapse.setText("▶" if self.sidebar_collapsed else "◀")
+        self.sidebar.toggle_collapse_state()
+        self.sidebar_collapsed = self.sidebar.is_collapsed
 
     def _show_profile_menu(self) -> None:
         menu = QMenu(self)
@@ -488,7 +654,7 @@ class MainWindow(QMainWindow):
         )
         menu.addAction("Lock Workstation (Ctrl+L)", self._lock_workstation)
         menu.addAction("Edit Profile & Password", self._open_edit_profile_dialog)
-        menu.addAction("System Settings", lambda: self.btn_settings.click())
+        menu.addAction("System Settings", lambda: self.navigate_to_route("settings"))
         menu.addSeparator()
         menu.addAction("Sign Out", self.close)
         menu.exec(self.cursor().pos())
@@ -520,20 +686,36 @@ class MainWindow(QMainWindow):
         self.view_engagements.refresh()
 
     def _on_nav_clicked(self, idx: int) -> None:
-        self.stack.setCurrentIndex(idx)
-        current_nav = NAV_ITEMS[idx][0] if 0 <= idx < len(NAV_ITEMS) else ""
-        for i, (_, attr) in enumerate(GUIDED_STEPS):
-            if attr == current_nav:
-                self.pipeline_btns[i].setStyleSheet(
-                    "QPushButton { background: #2563EB; color: #FFFFFF; border: 1px solid #1D4ED8; border-radius: 4px; padding: 3px 8px; font-size: 12px; font-weight: 600; }"
-                )
-            else:
-                self.pipeline_btns[i].setStyleSheet(
-                    "QPushButton { background: #F8FAFC; color: #475569; border: 1px solid #E2E8F0; border-radius: 4px; padding: 3px 8px; font-size: 12px; font-weight: 500; } QPushButton:hover { background: #EFF6FF; color: #2563EB; border-color: #93C5FD; }"
-                )
+        """Legacy slot for indexed button clicks."""
+        if 0 <= idx < len(NAV_ITEMS):
+            attr = NAV_ITEMS[idx][0]
+            route_map = {
+                "btn_dashboard": "dashboard",
+                "btn_pbc": "pbc",
+                "btn_audit_matrix": "audit_matrix",
+                "btn_financial_data": "financial_data",
+                "btn_working_papers": "working_papers",
+                "btn_reports": "reports",
+                "btn_queries": "queries",
+                "btn_documents": "documents",
+                "btn_gst": "gst",
+                "btn_compliance": "compliance",
+                "btn_inspection": "inspection",
+                "btn_ai_assistant": "ai_assistant",
+                "btn_clients": "clients",
+                "btn_engagements": "engagements",
+                "btn_firms": "firms",
+                "btn_archival": "archival",
+                "btn_roll_forward": "roll_forward",
+                "btn_settings": "settings",
+            }
+            if attr in route_map:
+                self.navigate_to_route(route_map[attr])
 
     def _sync_views_engagement(self, eng: Any) -> None:
         views = (
+            self.view_guided_workflow,
+            self.view_reconciliations,
             self.view_documents,
             self.view_financial_data,
             self.view_gst,
@@ -579,6 +761,8 @@ class MainWindow(QMainWindow):
         if not client:
             return
         self.current_client = client
+        if hasattr(self, "view_client_workspace") and self.view_client_workspace:
+            self.view_client_workspace.set_client(client.id)
         if client.firm_id and (self.current_firm is None or self.current_firm.id != client.firm_id):
             parent_firm = self.firm_service.get_firm_by_id(client.firm_id)
             if parent_firm:
@@ -656,7 +840,7 @@ class MainWindow(QMainWindow):
     def _on_header_engagement_changed(self, idx: int) -> None:
         data = self.eng_selector_combo.itemData(idx)
         if data is None:
-            self.btn_clients.click()
+            self.navigate_to_route("clients")
             return
         if data:
             if str(data).startswith("eng:"):
@@ -670,7 +854,7 @@ class MainWindow(QMainWindow):
         firms = self.firm_service.list_firms()
         if not firms:
             QMessageBox.warning(self, "No Firm", "Please create an Audit Firm first.")
-            self.btn_firms.click()
+            self.navigate_to_route("firms")
             return
         firm = self.current_firm or firms[0]
         clients = self.client_service.list_clients_for_firm(firm.id)
@@ -678,7 +862,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(
                 self, "No Client", "Please create a Client first before adding an Engagement."
             )
-            self.btn_clients.click()
+            self.navigate_to_route("clients")
             return
         dlg = EngagementDialog(
             self.engagement_service,
@@ -698,12 +882,13 @@ class MainWindow(QMainWindow):
     def _open_command_palette(self) -> None:
         from finauditpro.ui.dialogs.command_palette_dialog import CommandPaletteDialog
 
-        dlg = CommandPaletteDialog(self)
+        db_mgr = getattr(self, "db_manager", None)
+        dlg = CommandPaletteDialog(self, db_manager=db_mgr)
         dlg.action_triggered.connect(
             lambda k, p: (
                 self.stack.setCurrentIndex(p)
-                if k == "nav" and 0 <= p < self.stack.count()
-                else None
+                if isinstance(p, int) and 0 <= p < self.stack.count()
+                else self.navigate_to_route(str(k))
             )
         )
         dlg.exec()
@@ -727,6 +912,7 @@ class MainWindow(QMainWindow):
             self.inactivity_timeout_ms = max(int(timeout_env), 60_000)
         else:
             self.inactivity_timeout_ms = 900_000
+
         self.inactivity_timer = QTimer(self)
         self.inactivity_timer.setInterval(self.inactivity_timeout_ms)
         self.inactivity_timer.timeout.connect(self._lock_workstation)
@@ -749,7 +935,9 @@ class MainWindow(QMainWindow):
                 return False
 
         self.interaction_filter = InteractionFilter(self.inactivity_timer)
-        QApplication.instance().installEventFilter(self.interaction_filter)
+        app_inst = QApplication.instance()
+        if app_inst:
+            app_inst.installEventFilter(self.interaction_filter)
         self.inactivity_timer.start()
 
     def _lock_workstation(self) -> None:

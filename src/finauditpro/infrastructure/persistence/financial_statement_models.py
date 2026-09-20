@@ -151,3 +151,29 @@ class TaxAuditCheckModel(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
     )
+
+
+class ComplianceItemModel(Base):
+    __tablename__ = "compliance_items"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    engagement_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    requirement: Mapped[str] = mapped_column(String(255), nullable=False)
+    statutory_head: Mapped[str] = mapped_column(String(100), nullable=False)
+    rule_code: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    applicable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    applicability_reason: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    due_date: Mapped[str] = mapped_column(String(20), nullable=False)
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="NOT_STARTED", index=True)
+    evidence_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    owner: Mapped[str] = mapped_column(String(100), nullable=False, default="Auditor")
+    reviewer: Mapped[str] = mapped_column(String(100), nullable=False, default="Senior Reviewer")
+    notes: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
+    )

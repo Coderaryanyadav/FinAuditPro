@@ -10,6 +10,7 @@ from finauditpro.domain.document_entities import (
     DocumentCategoryEnum,
     DocumentPage,
     DocumentStatusEnum,
+    DocumentStructuredMetadata,
     DocumentTable,
     TextSourceEnum,
 )
@@ -34,6 +35,15 @@ class DocumentRepository:
             except Exception:
                 evidence_list = []
 
+        extracted_metadata = None
+        if hasattr(model, "extracted_metadata_json") and model.extracted_metadata_json:
+            try:
+                extracted_metadata = DocumentStructuredMetadata.model_validate_json(
+                    model.extracted_metadata_json
+                )
+            except Exception:
+                extracted_metadata = None
+
         return Document(
             id=model.id,
             engagement_id=model.engagement_id,
@@ -56,11 +66,17 @@ class DocumentRepository:
             human_category=DocumentCategoryEnum(model.human_category)
             if model.human_category
             else None,
+            extracted_metadata=extracted_metadata,
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
 
     def add(self, document: Document) -> Document:
+        meta_json = (
+            document.extracted_metadata.model_dump_json()
+            if document.extracted_metadata
+            else None
+        )
         model = DocumentModel(
             id=document.id,
             engagement_id=document.engagement_id,
@@ -79,6 +95,7 @@ class DocumentRepository:
             category_confidence=document.category_confidence,
             category_evidence_json=json.dumps(document.category_evidence),
             human_category=document.human_category.value if document.human_category else None,
+            extracted_metadata_json=meta_json,
             created_at=document.created_at,
             updated_at=document.updated_at,
         )
@@ -206,6 +223,16 @@ class DocumentRepository:
         cat_str = category.value if hasattr(category, "value") else str(category)
         model.human_category = cat_str
         model.document_category = cat_str
+        self.session.flush()
+        return self._to_entity(model)
+
+    def update_metadata(
+        self, document_id: str, metadata: DocumentStructuredMetadata
+    ) -> Document:
+        model = self.session.get(DocumentModel, document_id)
+        if not model:
+            raise ValueError(f"Document '{document_id}' not found.")
+        model.extracted_metadata_json = metadata.model_dump_json()
         self.session.flush()
         return self._to_entity(model)
 

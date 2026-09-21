@@ -12,6 +12,8 @@ from finauditpro.application.dtos_dashboard import (
 )
 from finauditpro.infrastructure.persistence.database import DatabaseManager
 from finauditpro.infrastructure.persistence.models import (
+    AuditFindingModel,
+    AuditRiskModel,
     ClientModel,
     DocumentModel,
     EngagementModel,
@@ -135,12 +137,7 @@ class PracticeDashboardService:
 
             # Check open audit findings & risks
             try:
-                from finauditpro.infrastructure.persistence.core_audit_engine_models import (
-                    FindingModel,
-                    RiskModel,
-                )
-
-                open_findings = session.query(FindingModel).filter(FindingModel.status != "Closed").all()
+                open_findings = session.query(AuditFindingModel).filter(AuditFindingModel.status != "Closed").all()
                 if open_findings:
                     attention_items.append(
                         AttentionItemDTO(
@@ -154,7 +151,7 @@ class PracticeDashboardService:
                         )
                     )
 
-                high_risks = session.query(RiskModel).filter(RiskModel.inherent_risk == "HIGH").all()
+                high_risks = session.query(AuditRiskModel).filter(AuditRiskModel.inherent_risk == "HIGH").all()
                 if high_risks:
                     attention_items.append(
                         AttentionItemDTO(
@@ -211,21 +208,16 @@ class PracticeDashboardService:
 
                 if latest_eng:
                     try:
-                        from finauditpro.infrastructure.persistence.core_audit_engine_models import (
-                            FindingModel,
-                            RiskModel,
-                        )
-
                         open_finds = (
-                            session.query(FindingModel)
-                            .filter(FindingModel.engagement_id == latest_eng.id)
-                            .filter(FindingModel.status != "Closed")
+                            session.query(AuditFindingModel)
+                            .filter(AuditFindingModel.engagement_id == latest_eng.id)
+                            .filter(AuditFindingModel.status != "Closed")
                             .count()
                         )
                         r_high = (
-                            session.query(RiskModel)
-                            .filter(RiskModel.engagement_id == latest_eng.id)
-                            .filter(RiskModel.inherent_risk == "HIGH")
+                            session.query(AuditRiskModel)
+                            .filter(AuditRiskModel.engagement_id == latest_eng.id)
+                            .filter(AuditRiskModel.inherent_risk == "HIGH")
                             .count()
                         )
                         if r_high > 0:
@@ -264,12 +256,12 @@ class PracticeDashboardService:
                     recent_activities.append(
                         RecentActivityItemDTO(
                             id=ev.id,
-                            event_type=ev.event_type,
-                            description=ev.details_json or ev.event_type,
+                            event_type=ev.action,
+                            description=ev.details or ev.action,
                             timestamp=dt,
-                            user_name=ev.user_id or "Auditor",
-                            entity_type=ev.entity_type,
-                            entity_id=ev.entity_id,
+                            user_name=ev.actor or "Auditor",
+                            entity_type="Engagement" if ev.engagement_id else "System",
+                            entity_id=ev.engagement_id or ev.id,
                         )
                     )
             except Exception:
@@ -277,26 +269,27 @@ class PracticeDashboardService:
 
             # 4. Reconciliation Exceptions
             reconciliation_exceptions: list[ReconciliationExceptionDTO] = []
-            # Aggregate GST 2B / GL exceptions if present
             try:
-                from finauditpro.infrastructure.persistence.models import GSTEntryModel
+                from finauditpro.infrastructure.persistence.core_audit_engine_models import (
+                    AuditExceptionModel,
+                )
 
-                mismatches = (
-                    session.query(GSTEntryModel)
-                    .filter(GSTEntryModel.reconciliation_status == "MISMATCH")
+                exceptions = (
+                    session.query(AuditExceptionModel)
+                    .filter(AuditExceptionModel.status != "Resolved")
                     .all()
                 )
-                if mismatches:
+                if exceptions:
                     reconciliation_exceptions.append(
                         ReconciliationExceptionDTO(
-                            id="gst_mismatches",
-                            title="GSTR-2B vs General Ledger Mismatches",
-                            category="GST Reconciliation",
-                            mismatch_count=len(mismatches),
+                            id="audit_exceptions",
+                            title="Audit Analytical & Transaction Exceptions",
+                            category="Audit Scrutiny",
+                            mismatch_count=len(exceptions),
                             total_discrepancy_amount=float(
-                                sum(abs(m.taxable_value - m.gstr2b_taxable_value) for m in mismatches)
+                                sum(abs(getattr(e, "absolute_difference_paise", 0) or 0) for e in exceptions) / 100.0
                             ),
-                            engagement_id=mismatches[0].engagement_id if mismatches else "",
+                            engagement_id=exceptions[0].engagement_id if exceptions else "",
                             client_name="Practice Clients",
                         )
                     )

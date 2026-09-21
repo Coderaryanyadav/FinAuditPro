@@ -4,7 +4,7 @@ import uuid
 
 import pytest
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QSplitter
+from PySide6.QtWidgets import QMessageBox, QSplitter
 
 from finauditpro.application.security.rbac import UserSession
 from finauditpro.application.services.document_service import DocumentService
@@ -120,8 +120,11 @@ def test_evidence_click_through_navigation(qtbot, db_mgr, seed_data):
     assert view.evidence_inspector.current_document_id == d_id
 
 
-def test_attach_evidence_from_right_pane(qtbot, db_mgr, seed_data):
+def test_attach_evidence_from_right_pane(qtbot, db_mgr, seed_data, monkeypatch):
     """Test attaching evidence from right pane links document without duplicating records."""
+    monkeypatch.setattr(QMessageBox, "information", lambda *args, **kwargs: QMessageBox.StandardButton.Ok)
+    monkeypatch.setattr(QMessageBox, "warning", lambda *args, **kwargs: QMessageBox.StandardButton.Ok)
+    monkeypatch.setattr(QMessageBox, "critical", lambda *args, **kwargs: QMessageBox.StandardButton.Ok)
     eng_svc = EngagementService(db_mgr)
     wp_svc = WorkingPaperService(db_mgr)
     doc_svc = DocumentService(db_mgr)

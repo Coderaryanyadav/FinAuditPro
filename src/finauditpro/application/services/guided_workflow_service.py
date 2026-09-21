@@ -6,7 +6,6 @@ from typing import Any
 from finauditpro.infrastructure.persistence.database import DatabaseManager
 from finauditpro.infrastructure.persistence.models import (
     ClientModel,
-    DocumentModel,
     EngagementModel,
     FirmModel,
 )
@@ -100,9 +99,9 @@ class GuidedWorkflowService:
 
         mat_count = 0
         try:
-            from finauditpro.infrastructure.persistence.models import MaterialityCalculationModel
+            from finauditpro.infrastructure.persistence.models import MaterialityAssessmentModel
 
-            mat_count = session.query(MaterialityCalculationModel).filter(MaterialityCalculationModel.engagement_id == engagement_id).count()
+            mat_count = session.query(MaterialityAssessmentModel).filter(MaterialityAssessmentModel.engagement_id == engagement_id).count()
         except Exception:
             mat_count = 0
 
@@ -144,7 +143,7 @@ class GuidedWorkflowService:
 
         tb_completed = tb_count > 0
         steps = [
-            WorkflowStepDTO("trial_balance", "Trial Balance & General Ledger Scrutiny", tb_completed, None if tb_completed else "Trial Balance data not imported", "financial_data"),
+            WorkflowStepDTO("trial_balance", "Trial Balance & General Ledger Scrutiny", tb_completed, None if tb_completed else "Trial balance not imported / imbalanced", "financial_data"),
             WorkflowStepDTO("lead_schedules", "Lead Schedules & Classifications", tb_completed, None if tb_completed else "Lead schedules pending", "financial_data"),
             WorkflowStepDTO("analytics", "Substantive Analytics & Exception Scrutiny", tb_completed, None if tb_completed else "Analytics not executed", "financial_data"),
         ]
@@ -152,27 +151,60 @@ class GuidedWorkflowService:
 
     def _evaluate_stage_3(self, session: Any, engagement_id: str) -> WorkflowStageDTO:
         wp_count = 0
+        open_notes_count = 0
+        unreviewed_count = 0
         try:
-            from finauditpro.infrastructure.persistence.working_paper_models import WorkingPaperModel
+            from finauditpro.infrastructure.persistence.working_paper_models import (
+                ReviewNoteModel,
+                WorkingPaperModel,
+            )
 
-            wp_count = session.query(WorkingPaperModel).filter(WorkingPaperModel.engagement_id == engagement_id).count()
+            wps = session.query(WorkingPaperModel).filter(WorkingPaperModel.engagement_id == engagement_id).all()
+            wp_count = len(wps)
+            wp_ids = [w.id for w in wps]
+            if wp_ids:
+                open_notes_count = session.query(ReviewNoteModel).filter(
+                    ReviewNoteModel.working_paper_id.in_(wp_ids),
+                    ReviewNoteModel.status == "Open",
+                ).count()
+                unreviewed_count = sum(1 for w in wps if str(getattr(w, "status", "")).lower() not in ("approved", "locked"))
         except Exception:
             wp_count = 0
+            open_notes_count = 0
+            unreviewed_count = 0
 
-        wp_completed = wp_count > 0
-        steps = [
-            WorkflowStepDTO("evidence_linking", "Audit Evidence & Document Attachment", wp_completed, None if wp_completed else "Evidence documents not attached", "documents"),
-            WorkflowStepDTO("working_papers", "Working Papers Execution & Conclusion", wp_completed, None if wp_completed else "Working papers not created", "working_papers"),
-            WorkflowStepDTO("review_notes", "Maker-Checker & Review Notes Resolution", wp_completed, None if wp_completed else "Review notes pending resolution", "working_papers"),
-        ]
+        if wp_count == 0:
+            steps = [
+                WorkflowStepDTO("evidence_linking", "Audit Evidence & Document Attachment", False, "Evidence documents not attached", "documents"),
+                WorkflowStepDTO("working_papers", "Working Papers Execution & Conclusion", False, "No working papers generated", "working_papers"),
+                WorkflowStepDTO("review_notes", "Maker-Checker & Review Notes Resolution", False, "Review notes pending resolution", "working_papers"),
+            ]
+        else:
+            steps = [
+                WorkflowStepDTO("evidence_linking", "Audit Evidence & Document Attachment", True, target_route="documents"),
+                WorkflowStepDTO(
+                    "working_papers",
+                    "Working Papers Execution & Conclusion",
+                    unreviewed_count == 0,
+                    f"{unreviewed_count} working papers awaiting review" if unreviewed_count > 0 else None,
+                    "working_papers",
+                ),
+                WorkflowStepDTO(
+                    "review_notes",
+                    "Maker-Checker & Review Notes Resolution",
+                    open_notes_count == 0,
+                    f"{open_notes_count} open review notes" if open_notes_count > 0 else None,
+                    "working_papers",
+                ),
+            ]
         return self._build_stage_dto(3, "fieldwork_evidence", "Fieldwork & Evidence", "Execute working papers, attach evidence, and resolve review notes.", steps)
 
     def _evaluate_stage_4(self, session: Any, engagement_id: str) -> WorkflowStageDTO:
         report_count = 0
         try:
-            from finauditpro.infrastructure.persistence.report_models import AuditReportPackageModel
+            from finauditpro.infrastructure.persistence.report_models import ReportModel
 
-            report_count = session.query(AuditReportPackageModel).filter(AuditReportPackageModel.engagement_id == engagement_id).count()
+            report_count = session.query(ReportModel).filter(ReportModel.engagement_id == engagement_id).count()
         except Exception:
             report_count = 0
 
@@ -192,7 +224,7 @@ class GuidedWorkflowService:
             if wp_ids:
                 signoff_count = session.query(SignOffRecordModel).filter(
                     SignOffRecordModel.working_paper_id.in_(wp_ids),
-                    SignOffRecordModel.signoff_type == "PARTNER"
+                    SignOffRecordModel.level == "Partner",
                 ).count()
         except Exception:
             signoff_count = 0
@@ -202,9 +234,11 @@ class GuidedWorkflowService:
 
         arch_count = 0
         try:
-            from finauditpro.infrastructure.persistence.archival_models import ArchivalRecordModel
+            from finauditpro.infrastructure.persistence.archival_models import (
+                EngagementArchiveModel,
+            )
 
-            arch_count = session.query(ArchivalRecordModel).filter(ArchivalRecordModel.engagement_id == engagement_id).count()
+            arch_count = session.query(EngagementArchiveModel).filter(EngagementArchiveModel.engagement_id == engagement_id).count()
         except Exception:
             arch_count = 0
 

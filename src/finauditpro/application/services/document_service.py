@@ -10,6 +10,7 @@ from finauditpro.domain.document_entities import (
     DocumentCategoryEnum,
     DocumentPage,
     DocumentStatusEnum,
+    DocumentStructuredMetadata,
     DocumentTable,
     EvidenceLink,
 )
@@ -245,7 +246,6 @@ class DocumentService:
             if not doc:
                 raise EntityNotFoundError("Document", document_id)
 
-            from finauditpro.domain.entities import DocumentStructuredMetadata
             from finauditpro.infrastructure.documents.smart_document_intelligence import (
                 confirm_human_metadata,
             )

@@ -150,10 +150,9 @@ def process_smart_document_classification_and_metadata(
     # 1. Deterministic classification
     machine_cat, conf, evidence = classify_document_text(text, filename=filename)
 
-    if category_hint != DocumentCategoryEnum.GENERAL:
-        final_cat = category_hint
-    else:
-        final_cat = machine_cat
+    final_cat: DocumentCategoryEnum = (
+        category_hint if category_hint != DocumentCategoryEnum.GENERAL else machine_cat
+    )
 
     # 2. AI classification if uncertain (confidence < 0.75 or GENERAL)
     used_ai = False

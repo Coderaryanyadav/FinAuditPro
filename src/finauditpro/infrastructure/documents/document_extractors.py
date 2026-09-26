@@ -93,6 +93,7 @@ def extract_pdf_pages_and_tables(file_path: Path) -> tuple[list[ExtractedPage], 
         try:
             import pypdfium2
             import pytesseract
+            from PIL import Image
 
             pdf_doc = pypdfium2.PdfDocument(file_path)
             num_pages = len(pdf_doc)

@@ -78,36 +78,6 @@ class DocumentTable(DomainBaseModel):
     created_at: datetime = Field(default_factory=utc_now)
 
 
-class MetadataFieldStatusEnum(StrEnum):
-    PENDING_REVIEW = "PENDING_REVIEW"
-    CONFIRMED = "CONFIRMED"
-
-
-class MetadataSourceEnum(StrEnum):
-    DETERMINISTIC = "DETERMINISTIC"
-    AI = "AI"
-    HUMAN = "HUMAN"
-
-
-class DocumentMetadataField(DomainBaseModel):
-    value: str | float | None = None
-    source: MetadataSourceEnum = MetadataSourceEnum.AI
-    confidence: float = 0.50
-    status: MetadataFieldStatusEnum = MetadataFieldStatusEnum.PENDING_REVIEW
-
-
-class DocumentStructuredMetadata(DomainBaseModel):
-    document_type: DocumentMetadataField = Field(default_factory=DocumentMetadataField)
-    client: DocumentMetadataField = Field(default_factory=DocumentMetadataField)
-    fy: DocumentMetadataField = Field(default_factory=DocumentMetadataField)
-    period: DocumentMetadataField = Field(default_factory=DocumentMetadataField)
-    document_date: DocumentMetadataField = Field(default_factory=DocumentMetadataField)
-    financial_amount: DocumentMetadataField = Field(default_factory=DocumentMetadataField)
-    reference_number: DocumentMetadataField = Field(default_factory=DocumentMetadataField)
-    vendor_customer: DocumentMetadataField = Field(default_factory=DocumentMetadataField)
-    tax_identifiers: DocumentMetadataField = Field(default_factory=DocumentMetadataField)
-
-
 class EvidenceLink(DomainBaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     engagement_id: str = Field(...)
@@ -138,7 +108,6 @@ class Document(DomainBaseModel):
     category_confidence: float | None = Field(default=None)
     category_evidence: list[str] = Field(default_factory=list)
     human_category: DocumentCategoryEnum | None = Field(default=None)
-    extracted_metadata: DocumentStructuredMetadata | None = Field(default=None)
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
 

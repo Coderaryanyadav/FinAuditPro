@@ -68,12 +68,10 @@ class DatabaseManager:
 
     def create_tables(self) -> None:
         """Create all tables in database and apply append-only triggers for audit_events."""
-        import finauditpro.infrastructure.persistence.ai_models
         import finauditpro.infrastructure.persistence.archival_models
         import finauditpro.infrastructure.persistence.models
         import finauditpro.infrastructure.persistence.pbc_and_query_models
         import finauditpro.infrastructure.persistence.report_models
-        import finauditpro.infrastructure.persistence.work_models
         import finauditpro.infrastructure.persistence.working_paper_models  # noqa: F401
 
         Base.metadata.create_all(self.engine)

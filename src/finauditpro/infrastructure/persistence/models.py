@@ -9,7 +9,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from finauditpro.domain.clock import utc_now
 from finauditpro.infrastructure.persistence.database import Base as Base
-from finauditpro.infrastructure.persistence.work_models import WorkTaskModel  # noqa: F401
 
 
 class FirmModel(Base):
@@ -132,7 +131,6 @@ class DocumentModel(Base):
     category_confidence: Mapped[float] = mapped_column(nullable=False, default=1.0)
     category_evidence_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     category_reasoning: Mapped[str | None] = mapped_column(Text, nullable=True)
-    extracted_metadata_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     page_count: Mapped[int] = mapped_column(nullable=False, default=1)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="Draft")
     failed_stage: Mapped[str | None] = mapped_column(String(50), nullable=True)

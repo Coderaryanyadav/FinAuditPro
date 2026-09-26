@@ -8,7 +8,6 @@ from uuid import uuid4
 
 from finauditpro.application.ai.llm_provider import LLMProvider, LLMResponse, ProviderStatus
 from finauditpro.application.ai_dtos import AIFindingSchema, RAGQueryResultDTO
-from finauditpro.application.dtos_copilot import CopilotContextDTO, CopilotResponseDTO
 from finauditpro.domain.audit_matrix_entities import (
     AuditEvidence,
     AuditFinding,
@@ -17,15 +16,10 @@ from finauditpro.domain.audit_matrix_entities import (
 )
 from finauditpro.domain.entities import AuditEvent
 from finauditpro.domain.exceptions import EntityNotFoundError
-from finauditpro.domain.prompt_engine import (
-    PromptEngine,
-    sanitize_untrusted_content,
-    strip_think_tokens,
-)
+from finauditpro.domain.prompt_engine import PromptEngine
 from finauditpro.infrastructure.ai.faiss_vector_store import FAISSVectorStore
 from finauditpro.infrastructure.persistence.ai_models import AIRunModel, DocumentChunkModel
 from finauditpro.infrastructure.persistence.database import DatabaseManager
-from finauditpro.infrastructure.persistence.models import EngagementModel
 from finauditpro.infrastructure.persistence.repositories import (
     AuditEventRepository,
     AuditMatrixRepository,
@@ -406,83 +400,3 @@ class AIService:
             )
 
             return created_finding
-
-    def query_copilot(
-        self,
-        context: CopilotContextDTO,
-        question: str,
-        on_token: Callable[[str], None] | None = None,
-    ) -> CopilotResponseDTO:
-        """Execute Context-Aware AI Copilot Q&A with security boundary enforcement."""
-        if context.client_id and context.engagement_id:
-            with self.db_manager.session_scope() as session:
-                eng = session.query(EngagementModel).filter(EngagementModel.id == context.engagement_id).first()
-                if eng and eng.client_id != context.client_id:
-                    return CopilotResponseDTO(
-                        query=question,
-                        response_text="### 🤖 AI Advisory\n\n**Security Boundary Notice:** Access Denied — Cross-client data retrieval is prohibited.",
-                        evidence_citations=[],
-                        suggested_actions=["Verify active client selection before submitting query."],
-                        reasoning_summary="Security boundary check failed due to client_id / engagement_id mismatch.",
-                        security_boundary_passed=False,
-                    )
-
-        safe_q = sanitize_untrusted_content(question)
-        chunks: list[dict[str, Any]] = []
-        if context.engagement_id:
-            with contextlib.suppress(Exception):
-                chunks, _, _ = self._retrieve_chunks(context.engagement_id, safe_q, top_k=5)
-
-        ctx_lines = [
-            f"Practice: {context.practice}",
-            f"View: {context.current_view}",
-            f"Client: {context.client or 'N/A'} (ID: {context.client_id or 'N/A'})",
-            f"Engagement: {context.engagement or 'N/A'} (FY: {context.financial_year})",
-            f"Role: {context.user_role}",
-        ]
-        if context.selected_document:
-            ctx_lines.append(f"Selected Document: {context.selected_document} (Page: {context.selected_page or 1})")
-        if context.selected_workpaper:
-            ctx_lines.append(f"Selected Workpaper: {context.selected_workpaper}")
-        if context.selected_task:
-            ctx_lines.append(f"Selected Task: {context.selected_task}")
-        if context.selected_finding:
-            ctx_lines.append(f"Selected Finding: {context.selected_finding}")
-
-        ctx_str = "\n".join(ctx_lines)
-        messages = PromptEngine.build_copilot_prompt(ctx_str, safe_q, chunks)
-
-        try:
-            resp = self.provider.chat(messages, on_token=on_token)
-            raw_ans = resp.content
-            reasoning = resp.reasoning_text or ""
-        except Exception as ex:
-            offline_lines = ["### 🤖 AI Advisory\n", "**Evidence:**"]
-            if chunks:
-                for c in chunks:
-                    offline_lines.append(f"- Document: {c['title']} (Page {c['page_number']}) [Chunk: {c['chunk_id']}]")
-            else:
-                offline_lines.append(f"- View Context: {context.current_view} ({context.client or 'Practice Workspace'})")
-            offline_lines.extend([
-                "\n**Reasoning / Summary:**",
-                f"Processed operational query for '{context.current_view}'. (LM Studio offline: {ex})",
-                "\n**Suggested Action:**",
-                "- Connect local LLM on port 1234 or verify document uploads for deep generative synthesis."
-            ])
-            raw_ans = "\n".join(offline_lines)
-            reasoning = "Offline Rule Engine Active"
-
-        clean_ans = strip_think_tokens(raw_ans)
-        if "### 🤖 AI Advisory" not in clean_ans and "### AI Advisory" not in clean_ans:
-            clean_ans = f"### 🤖 AI Advisory\n\n{clean_ans}"
-
-        return CopilotResponseDTO(
-            query=question,
-            response_text=clean_ans,
-            evidence_citations=chunks,
-            suggested_actions=["Review suggested audit steps.", "Verify underlying evidence vouchers."],
-            reasoning_summary=reasoning,
-            is_advisory_only=True,
-            context_used=context.model_dump(),
-            security_boundary_passed=True,
-        )

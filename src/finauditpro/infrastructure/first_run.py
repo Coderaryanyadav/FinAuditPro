@@ -4,7 +4,7 @@ import os
 import sqlite3
 from pathlib import Path
 
-from finauditpro.infrastructure.persistence import models, work_models  # noqa: F401
+from finauditpro.infrastructure.persistence import models  # noqa: F401
 from finauditpro.infrastructure.persistence.database import DatabaseManager
 from finauditpro.infrastructure.persistence.migration_list import get_all_migrations
 from finauditpro.infrastructure.persistence.migrations import MigrationRunner

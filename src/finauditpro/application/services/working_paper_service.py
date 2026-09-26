@@ -177,14 +177,6 @@ class WorkingPaperService:
         with self.db_manager.session_scope() as session:
             return WorkingPaperRepository(session).get_links(wp_id)
 
-    def add_working_paper_link(self, wp_id: str, link_type: str, target_id: str) -> None:
-        with self.db_manager.session_scope() as session:
-            repo = WorkingPaperRepository(session)
-            wp = repo.get_working_paper(wp_id)
-            if wp and wp.is_locked:
-                raise ValidationError("Working Paper is locked and sealed.")
-            repo.add_link(str(uuid4()), wp_id, link_type, target_id)
-
     def count_open_review_notes(self, wp_id: str) -> int:
         with self.db_manager.session_scope() as session:
             return WorkingPaperRepository(session).count_open_review_notes(wp_id)

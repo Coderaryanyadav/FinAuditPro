@@ -145,16 +145,6 @@ class CloseWizardDialog(QDialog):
             )
             return
 
-        from finauditpro.ui.dialogs.confirm_dialog import confirm_destructive_action
-
-        if not confirm_destructive_action(
-            self,
-            "Confirm Archival & Sealing",
-            "Sealing is a permanent, non-reversible action. All working papers, reports, and evidence will become read-only. Are you sure you want to proceed?",
-            "Seal Engagement",
-        ):
-            return
-
         report_date = self.report_date_input.text().strip()
         passphrase = self.passphrase_input.text().strip() or None
         override = self.override_input.toPlainText().strip() or None

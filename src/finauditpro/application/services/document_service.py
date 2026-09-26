@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 from finauditpro.application.security.engagement_lock_guard import assert_engagement_not_locked
 from finauditpro.domain.document_entities import (
@@ -10,7 +9,6 @@ from finauditpro.domain.document_entities import (
     DocumentCategoryEnum,
     DocumentPage,
     DocumentStatusEnum,
-    DocumentStructuredMetadata,
     DocumentTable,
     EvidenceLink,
 )
@@ -132,25 +130,36 @@ class DocumentService:
             machine_category=res.machine_category,
             category_confidence=res.category_confidence,
             category_evidence=res.category_evidence,
-            extracted_metadata=res.extracted_metadata,
         )
 
-        pages = [
-            DocumentPage(
-                id=pg.id, document_id=doc.id, page_number=pg.page_number,
-                extracted_text=pg.extracted_text, text_source=pg.text_source,
-                ocr_applied=pg.ocr_applied, confidence_score=pg.confidence_score,
-                layout_json=pg.layout_json,
+        # Update page and table document IDs
+        pages = []
+        for pg in res.pages:
+            pages.append(
+                DocumentPage(
+                    id=pg.id,
+                    document_id=doc.id,
+                    page_number=pg.page_number,
+                    extracted_text=pg.extracted_text,
+                    text_source=pg.text_source,
+                    ocr_applied=pg.ocr_applied,
+                    confidence_score=pg.confidence_score,
+                    layout_json=pg.layout_json,
+                )
             )
-            for pg in res.pages
-        ]
-        tables = [
-            DocumentTable(
-                id=tbl.id, document_id=doc.id, page_number=tbl.page_number,
-                table_index=tbl.table_index, rows_json=tbl.rows_json, bbox_json=tbl.bbox_json,
+
+        tables = []
+        for tbl in res.tables:
+            tables.append(
+                DocumentTable(
+                    id=tbl.id,
+                    document_id=doc.id,
+                    page_number=tbl.page_number,
+                    table_index=tbl.table_index,
+                    rows_json=tbl.rows_json,
+                    bbox_json=tbl.bbox_json,
+                )
             )
-            for tbl in res.tables
-        ]
 
         with self.db_manager.session_scope() as session:
             doc_repo = DocumentRepository(session)
@@ -159,23 +168,11 @@ class DocumentService:
             if tables:
                 doc_repo.add_tables(tables)
 
+            # Index pages into FTS5 virtual table if READY
             if doc.status == DocumentStatusEnum.READY or doc.status == DocumentStatusEnum.COMPLETED:
                 doc_repo.index_pages_fts(dto.engagement_id, doc.id, pages)
-                from uuid import uuid4
 
-                from finauditpro.infrastructure.persistence.ai_models import DocumentChunkModel
-
-                for p in pages:
-                    if p.extracted_text and p.extracted_text.strip():
-                        session.add(
-                            DocumentChunkModel(
-                                id=str(uuid4()), engagement_id=dto.engagement_id,
-                                document_id=doc.id, page_number=p.page_number,
-                                char_start=0, char_end=len(p.extracted_text),
-                                chunk_text=p.extracted_text,
-                            )
-                        )
-
+            # Persist Hash-Chained Audit Events for each pipeline stage
             audit_repo = AuditEventRepository(session)
             for ev in res.audit_events:
                 ev.engagement_id = dto.engagement_id
@@ -185,7 +182,8 @@ class DocumentService:
 
     def list_documents_for_engagement(self, engagement_id: str) -> list[Document]:
         with self.db_manager.session_scope() as session:
-            return DocumentRepository(session).list_by_engagement(engagement_id)
+            repo = DocumentRepository(session)
+            return repo.list_by_engagement(engagement_id)
 
     def get_document_details(self, document_id: str) -> DocumentDetailsDTO:
         with self.db_manager.session_scope() as session:
@@ -195,26 +193,37 @@ class DocumentService:
                 raise EntityNotFoundError("Document", document_id)
 
             pages = doc_repo.get_document_pages(document_id)
+
             ev_repo = EvidenceRepository(session)
             evidence_links = ev_repo.list_links_by_document(document_id)
 
+            # Fetch tables
             from sqlalchemy import select
 
             from finauditpro.infrastructure.persistence.models import DocumentTableModel
 
-            tbl_models = session.scalars(
-                select(DocumentTableModel).where(DocumentTableModel.document_id == document_id)
-            ).all()
+            tbl_stmt = select(DocumentTableModel).where(
+                DocumentTableModel.document_id == document_id
+            )
+            tbl_models = session.scalars(tbl_stmt).all()
             tables = [
                 DocumentTable(
-                    id=m.id, document_id=m.document_id, page_number=m.page_number,
-                    table_index=m.table_index, rows_json=m.rows_json, bbox_json=m.bbox_json,
+                    id=m.id,
+                    document_id=m.document_id,
+                    page_number=m.page_number,
+                    table_index=m.table_index,
+                    rows_json=m.rows_json,
+                    bbox_json=m.bbox_json,
                     created_at=m.created_at,
                 )
                 for m in tbl_models
             ]
+
             return DocumentDetailsDTO(
-                document=doc, pages=pages, tables=tables, evidence_links=evidence_links
+                document=doc,
+                pages=pages,
+                tables=tables,
+                evidence_links=evidence_links,
             )
 
     def override_document_category(
@@ -235,41 +244,6 @@ class DocumentService:
                 )
             )
             return doc
-
-    def confirm_document_metadata(
-        self, document_id: str, field_overrides: dict[str, Any]
-    ) -> Document:
-        """Confirm or update document metadata fields with human auditor provenance locks."""
-        with self.db_manager.session_scope() as session:
-            repo = DocumentRepository(session)
-            doc = repo.get_by_id(document_id)
-            if not doc:
-                raise EntityNotFoundError("Document", document_id)
-
-            from finauditpro.infrastructure.documents.smart_document_intelligence import (
-                confirm_human_metadata,
-            )
-
-            meta_obj = doc.extracted_metadata or DocumentStructuredMetadata()
-            updated_meta = confirm_human_metadata(meta_obj, field_overrides)
-
-            if field_overrides.get("document_type"):
-                val_str = str(field_overrides["document_type"])
-                if val_str in DocumentCategoryEnum._value2member_map_:
-                    repo.update_category(document_id, DocumentCategoryEnum(val_str))
-
-            updated_doc = repo.update_metadata(document_id, updated_meta)
-
-            audit_repo = AuditEventRepository(session)
-            audit_repo.add(
-                AuditEvent(
-                    engagement_id=doc.engagement_id,
-                    actor="Auditor",
-                    action="Document Metadata Confirmed",
-                    details=f"Auditor confirmed metadata for '{doc.filename}'.",
-                )
-            )
-            return updated_doc
 
     def search_documents(self, engagement_id: str, query: str) -> list[DocumentSearchResultDTO]:
         """Perform FTS5 search strictly isolated within the engagement boundary."""

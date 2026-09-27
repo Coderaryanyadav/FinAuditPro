@@ -51,10 +51,11 @@ All project documentation is structured in the [`docs/`](./docs/README.md) direc
 
 | Section | Focus Area | Canonical Documents |
 | :--- | :--- | :--- |
+| **Codebase Map** | Complete File & Directory Map | [`PROJECT_STRUCTURE.md`](./PROJECT_STRUCTURE.md) |
 | **Architecture** | System Design & Invariants | [`ARCHITECTURE.md`](./docs/architecture/ARCHITECTURE.md), [`DOMAIN_MODEL.md`](./docs/architecture/DOMAIN_MODEL.md), [`DATABASE.md`](./docs/architecture/DATABASE.md), [`SECURITY.md`](./docs/architecture/SECURITY.md) |
 | **Product** | PRD & Workflows | [`PRODUCT_REQUIREMENTS.md`](./docs/product/PRODUCT_REQUIREMENTS.md), [`USER_WORKFLOW.md`](./docs/product/USER_WORKFLOW.md) |
 | **Audit** | SAs, CARO & Workpapers | [`AUDIT_WORKFLOW.md`](./docs/audit/AUDIT_WORKFLOW.md), [`RISK_MODEL.md`](./docs/audit/RISK_MODEL.md), [`WORKING_PAPERS.md`](./docs/audit/WORKING_PAPERS.md), [`FINALISATION.md`](./docs/audit/FINALISATION.md) |
-| **Engineering** | Dev Setup, Tests & Packaging | [`DEVELOPMENT.md`](./docs/engineering/DEVELOPMENT.md), [`TESTING.md`](./docs/engineering/TESTING.md), [`RELEASE.md`](./docs/engineering/RELEASE.md) |
+| **Engineering** | Dev Setup, Tests & Packaging | [`DEVELOPMENT.md`](./docs/engineering/DEVELOPMENT.md), [`TESTING.md`](./docs/engineering/TESTING.md), [`RELEASE.md`](./docs/engineering/RELEASE.md), [`RELEASE_READINESS_REPORT.md`](./docs/release/RELEASE_READINESS_REPORT.md) |
 | **AI** | Local Copilot & Safety | [`AI_ARCHITECTURE.md`](./docs/ai/AI_ARCHITECTURE.md), [`AI_SAFETY.md`](./docs/ai/AI_SAFETY.md) |
 | **UI/UX** | Design System & Shortcuts | [`DESIGN_SYSTEM.md`](./docs/ui/DESIGN_SYSTEM.md), [`UI_WORKFLOW.md`](./docs/ui/UI_WORKFLOW.md) |
 | **Roadmap** | Milestones & ADRs | [`MASTER_ROADMAP.md`](./docs/roadmap/MASTER_ROADMAP.md), [`CURRENT_PHASE.md`](./docs/roadmap/CURRENT_PHASE.md) |

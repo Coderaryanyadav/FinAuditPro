@@ -1,7 +1,6 @@
 """Local AI Provider Abstraction Layer for FinAuditPro."""
 
 import json
-import urllib.request
 from abc import ABC, abstractmethod
 
 from finauditpro.domain.ai_entities import AICitation, AIStructuredObservation

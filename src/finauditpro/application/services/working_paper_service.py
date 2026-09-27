@@ -10,6 +10,7 @@ from finauditpro.application.services.working_paper_scaffolder import (
     archive_working_paper_version,
     execute_clear_review_note,
     execute_raise_review_note,
+    execute_reopen_review_note,
     execute_respond_review_note,
     execute_update_content,
     resolve_user_role,
@@ -20,9 +21,12 @@ from finauditpro.application.working_paper_dtos import (
     ClearReviewNoteDTO,
     CreateReviewNoteDTO,
     CreateWorkingPaperDTO,
+    HistoricalVersionSnapshotDTO,
+    ReopenReviewNoteDTO,
     ReopenWorkingPaperDTO,
     RespondReviewNoteDTO,
     SignOffDTO,
+    WorkingPaperWorkbenchDTO,
 )
 from finauditpro.domain.clock import utc_now
 from finauditpro.domain.entities import AuditEvent
@@ -30,6 +34,7 @@ from finauditpro.domain.exceptions import EntityNotFoundError, ValidationError
 from finauditpro.domain.working_paper_entities import (
     FileCategoryEnum,
     ReviewNote,
+    ReviewNoteStatusEnum,
     SignOffLevelEnum,
     SignOffRecord,
     WorkingPaper,
@@ -434,25 +439,12 @@ class WorkingPaperService:
                 )
 
             chash = self.compute_content_hash(wp, sections, links, session=session)
-            wp.content_hash = chash
 
             if level_enum == SignOffLevelEnum.REVIEWED:
-                if wp.status in (
-                    WorkingPaperStatusEnum.DRAFT,
-                    WorkingPaperStatusEnum.PREPARED,
-                    WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW,
-                ):
-                    wp.status = WorkingPaperStatusEnum.UNDER_REVIEW
-                wp.transition_to(WorkingPaperStatusEnum.APPROVED)
+                wp.approve(actor_id, res_role)
+                wp.content_hash = chash
             else:
-                if wp.status in (
-                    WorkingPaperStatusEnum.DRAFT,
-                    WorkingPaperStatusEnum.PREPARED,
-                    WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW,
-                    WorkingPaperStatusEnum.UNDER_REVIEW,
-                ):
-                    wp.status = WorkingPaperStatusEnum.APPROVED
-                wp.transition_to(WorkingPaperStatusEnum.LOCKED)
+                wp.partner_sign_off(actor_id, res_role, chash)
 
             wp_repo.update_working_paper(wp)
             saved_signoff = wp_repo.add_sign_off(
@@ -561,3 +553,386 @@ class WorkingPaperService:
                 )
             )
             return updated
+
+    def add_link(
+        self,
+        working_paper_id: str,
+        target_type: str,
+        target_id: str,
+        link_description: str = "",
+        actor: str = "Auditor",
+    ) -> None:
+        """Add an evidence, procedure, or finding link to a working paper."""
+        from uuid import uuid4
+
+        with self.db_manager.session_scope() as session:
+            wp_repo = WorkingPaperRepository(session)
+            wp_repo.add_link(str(uuid4()), working_paper_id, target_type, target_id)
+
+    def get_links(self, working_paper_id: str) -> list[dict[str, str]]:
+        """Retrieve all links associated with a working paper."""
+        with self.db_manager.session_scope() as session:
+            wp_repo = WorkingPaperRepository(session)
+            return wp_repo.get_links(working_paper_id)
+
+    def reopen_review_note(self, dto: ReopenReviewNoteDTO) -> ReviewNote:
+        """Reopen a review note."""
+        with self.db_manager.session_scope() as session:
+            return execute_reopen_review_note(session, dto)
+
+    def approve_working_paper(self, wp_id: str, approver_id: str) -> WorkingPaper:
+        """Approve a working paper, enforcing precondition that no blocking review notes remain."""
+        with self.db_manager.session_scope() as session:
+            wp_repo = WorkingPaperRepository(session)
+            wp = wp_repo.get_working_paper(wp_id)
+            if not wp:
+                raise EntityNotFoundError("WorkingPaper", wp_id)
+            if wp.is_locked:
+                raise ValidationError("Working Paper is locked and cannot be modified.")
+            role = self._resolve_user_role(session, wp.engagement_id, approver_id)
+            if not role:
+                raise ValidationError(f"Unauthorized: User '{approver_id}' is not an authorized member of engagement '{wp.engagement_id}'.")
+            if role in ("Administrator", "Admin"):
+                raise ValidationError("Administrator accounts do not have audit professional authority to approve.")
+            open_notes = wp_repo.count_open_review_notes(wp.id)
+            if open_notes > 0:
+                raise ValidationError(
+                    f"Audit Quality Precondition Violation: Approval blocked. Working Paper '{wp.index_reference}' has {open_notes} open review notes."
+                )
+            wp.approve(approver_id, role)
+            updated = wp_repo.update_working_paper(wp)
+            AuditEventRepository(session).add(
+                AuditEvent(
+                    engagement_id=wp.engagement_id,
+                    actor=approver_id,
+                    action="Working Paper Approved",
+                    details=f"Approved Working Paper '{wp.index_reference}' by {role} {approver_id}",
+                )
+            )
+            return updated
+
+    def partner_sign_off(self, wp_id: str, partner_id: str, note: str | None = None) -> SignOffRecord:
+        """Execute final partner sign-off and cryptographic lock under segregation of duties."""
+        return self.sign_off_working_paper(
+            SignOffDTO(
+                working_paper_id=wp_id,
+                level=SignOffLevelEnum.FINAL_SIGN_OFF,
+                user_id=partner_id,
+                user_role="Partner",
+                note=note,
+            )
+        )
+
+    def lock_working_paper(self, wp_id: str, locker_id: str) -> WorkingPaper:
+        """Lock a working paper, sealing content at domain/application layer."""
+        with self.db_manager.session_scope() as session:
+            wp_repo = WorkingPaperRepository(session)
+            wp = wp_repo.get_working_paper(wp_id)
+            if not wp:
+                raise EntityNotFoundError("WorkingPaper", wp_id)
+            if wp.is_locked:
+                return wp
+            open_notes = wp_repo.count_open_review_notes(wp.id)
+            if open_notes > 0:
+                raise ValidationError(
+                    f"Locking Blocked: Cannot lock Working Paper '{wp.index_reference}' while {open_notes} open review notes exist."
+                )
+            if wp.status not in (WorkingPaperStatusEnum.APPROVED, WorkingPaperStatusEnum.UNDER_REVIEW):
+                wp.status = WorkingPaperStatusEnum.APPROVED
+            sections = wp_repo.get_sections(wp.id)
+            links = wp_repo.get_links(wp.id)
+            wp.content_hash = self.compute_content_hash(wp, sections, links, session=session)
+            wp.transition_to(WorkingPaperStatusEnum.LOCKED)
+            updated = wp_repo.update_working_paper(wp)
+            AuditEventRepository(session).add(
+                AuditEvent(
+                    engagement_id=wp.engagement_id,
+                    actor=locker_id,
+                    action="Working Paper Locked",
+                    details=f"Cryptographically locked Working Paper '{wp.index_reference}' (v{wp.version}). Content Hash: {wp.content_hash[:16]}...",
+                )
+            )
+            return updated
+
+    def list_historical_versions(self, wp_id: str) -> list[HistoricalVersionSnapshotDTO]:
+        """List historical snapshot versions for a working paper."""
+        with self.db_manager.session_scope() as session:
+            wp_repo = WorkingPaperRepository(session)
+            models = wp_repo.list_historical_versions(wp_id)
+            snapshots = []
+            for m in models:
+                try:
+                    sec_data = json.loads(m.sections_json) if m.sections_json else []
+                except Exception:
+                    sec_data = []
+                snapshots.append(
+                    HistoricalVersionSnapshotDTO(
+                        id=m.id,
+                        working_paper_id=m.working_paper_id,
+                        version=m.version,
+                        title=m.title,
+                        area=m.area,
+                        status=m.status,
+                        conclusion=m.conclusion,
+                        preparer_id=m.preparer_id,
+                        reviewer_id=m.reviewer_id,
+                        content_hash=m.content_hash,
+                        sections=sec_data,
+                        created_at_iso=m.created_at.isoformat() if m.created_at else "",
+                    )
+                )
+            return snapshots
+
+    def get_version_snapshot(self, wp_id: str, version: int) -> HistoricalVersionSnapshotDTO | None:
+        """Reconstruct a specific historical version snapshot."""
+        with self.db_manager.session_scope() as session:
+            wp_repo = WorkingPaperRepository(session)
+            m = wp_repo.get_historical_version(wp_id, version)
+            if not m:
+                return None
+            try:
+                sec_data = json.loads(m.sections_json) if m.sections_json else []
+            except Exception:
+                sec_data = []
+            return HistoricalVersionSnapshotDTO(
+                id=m.id,
+                working_paper_id=m.working_paper_id,
+                version=m.version,
+                title=m.title,
+                area=m.area,
+                status=m.status,
+                conclusion=m.conclusion,
+                preparer_id=m.preparer_id,
+                reviewer_id=m.reviewer_id,
+                content_hash=m.content_hash,
+                sections=sec_data,
+                created_at_iso=m.created_at.isoformat() if m.created_at else "",
+            )
+
+    def get_workbench_data(self, wp_id: str) -> WorkingPaperWorkbenchDTO:
+        """Retrieve unified canonical audit workbench representation for a working paper."""
+        with self.db_manager.session_scope() as session:
+            wp_repo = WorkingPaperRepository(session)
+            wp = wp_repo.get_working_paper(wp_id)
+            if not wp:
+                raise EntityNotFoundError("WorkingPaper", wp_id)
+
+            sections = wp_repo.get_sections(wp.id)
+            links = wp_repo.get_links(wp.id)
+            review_notes = wp_repo.list_review_notes(wp.id)
+            sign_offs = wp_repo.list_sign_offs(wp.id)
+            hist_models = wp_repo.list_historical_versions(wp.id)
+
+            historical_snapshots = []
+            for hm in hist_models:
+                try:
+                    sec_data = json.loads(hm.sections_json) if hm.sections_json else []
+                except Exception:
+                    sec_data = []
+                historical_snapshots.append(
+                    HistoricalVersionSnapshotDTO(
+                        id=hm.id,
+                        working_paper_id=hm.working_paper_id,
+                        version=hm.version,
+                        title=hm.title,
+                        area=hm.area,
+                        status=hm.status,
+                        conclusion=hm.conclusion,
+                        preparer_id=hm.preparer_id,
+                        reviewer_id=hm.reviewer_id,
+                        content_hash=hm.content_hash,
+                        sections=sec_data,
+                        created_at_iso=hm.created_at.isoformat() if hm.created_at else "",
+                    )
+                )
+
+            from finauditpro.infrastructure.persistence.repositories.audit_matrix_repository import (
+                AuditMatrixRepository,
+            )
+
+            matrix_repo = AuditMatrixRepository(session)
+
+            all_procs = matrix_repo.list_procedures_for_engagement(wp.engagement_id)
+            proc_links = {
+                l["target_id"]
+                for l in links
+                if l.get("link_type", "").lower() in ("procedure", "proc")
+            }
+            matched_procs = [
+                p
+                for p in all_procs
+                if p.id in proc_links or (wp.area and wp.area.lower() in p.account_area.lower())
+            ]
+
+            all_risks = matrix_repo.list_risks_for_engagement(wp.engagement_id)
+            risk_links = {
+                l["target_id"]
+                for l in links
+                if l.get("link_type", "").lower() in ("risk", "audit_risk")
+            }
+            proc_risk_ids = {r_id for p in matched_procs for r_id in p.linked_risk_ids}
+            matched_risks = [
+                r
+                for r in all_risks
+                if r.id in risk_links
+                or r.id in proc_risk_ids
+                or (wp.area and wp.area.lower() in r.financial_statement_area.lower())
+            ]
+
+            assertions_set = set()
+            for p in matched_procs:
+                for a in p.assertions:
+                    assertions_set.add(a.value if hasattr(a, "value") else str(a))
+            for r in matched_risks:
+                for a in r.assertions:
+                    assertions_set.add(a.value if hasattr(a, "value") else str(a))
+            assertions = sorted(list(assertions_set))
+
+            all_evidence = matrix_repo.list_evidence_for_engagement(wp.engagement_id)
+            ev_links = {
+                l["target_id"]
+                for l in links
+                if l.get("link_type", "").lower() in ("evidence", "document")
+            }
+            proc_ids = {p.id for p in matched_procs}
+            matched_evidence = [
+                e
+                for e in all_evidence
+                if e.id in ev_links
+                or e.working_paper_id == wp.id
+                or (e.procedure_id in proc_ids)
+            ]
+
+            all_findings = matrix_repo.list_findings_for_engagement(wp.engagement_id)
+            find_links = {
+                l["target_id"]
+                for l in links
+                if l.get("link_type", "").lower() in ("finding", "audit_finding")
+            }
+            matched_findings = [
+                f
+                for f in all_findings
+                if f.id in find_links
+                or f.working_paper_id == wp.id
+                or (f.procedure_id in proc_ids)
+            ]
+
+            from finauditpro.infrastructure.persistence.repositories.core_audit_engine_repository import (
+                CoreAuditEngineRepository,
+            )
+
+            core_repo = CoreAuditEngineRepository(session)
+            samples = []
+            test_executions = []
+            exceptions = []
+
+            for p in matched_procs:
+                for t in core_repo.list_sample_items_for_procedure(p.id):
+                    samples.append(
+                        {
+                            "id": t.id,
+                            "procedure_id": t.procedure_id,
+                            "item_identifier": t.item_identifier,
+                            "account_code": t.account_code,
+                            "expected_value_paise": t.expected_value_paise,
+                            "actual_value_paise": t.actual_value_paise,
+                            "difference_paise": t.difference_paise,
+                            "result": t.test_result.value
+                            if hasattr(t.test_result, "value")
+                            else str(t.test_result),
+                            "explanation": t.explanation,
+                            "tested_by": t.tested_by,
+                        }
+                    )
+
+            try:
+                all_execs = core_repo.list_test_executions_for_engagement(wp.engagement_id)
+                for ex in all_execs:
+                    if ex.procedure_id in proc_ids:
+                        test_executions.append(
+                            {
+                                "id": ex.id,
+                                "procedure_id": ex.procedure_id,
+                                "population": getattr(ex, "population", "") or getattr(ex, "population_reference", ""),
+                                "sample_size": getattr(ex, "sample_size", 0),
+                                "result": getattr(ex, "result", "PASS"),
+                                "tester": getattr(ex, "tester", "") or getattr(ex, "tested_by", ""),
+                                "executed_at": ex.executed_at.isoformat() if hasattr(ex, "executed_at") and ex.executed_at else "",
+                            }
+                        )
+            except Exception:
+                test_executions = []
+
+            all_excs = core_repo.list_exceptions_for_engagement(wp.engagement_id)
+            for exc in all_excs:
+                if exc.procedure_id in proc_ids:
+                    exceptions.append(
+                        {
+                            "id": exc.id,
+                            "exception_code": exc.exception_code,
+                            "title": exc.title,
+                            "source": exc.source,
+                            "rule": exc.rule,
+                            "severity": exc.severity,
+                            "amount_paise": exc.amount_paise,
+                            "is_resolved": exc.is_resolved,
+                            "explanation": exc.explanation,
+                        }
+                    )
+
+            proc_objectives = "; ".join(p.objective for p in matched_procs if p.objective)
+            sec_objective = ""
+            for s in sections:
+                if "objective" in s.title.lower() and s.content_markdown and s.content_markdown.strip() != "Document audit procedure objectives.":
+                    sec_objective = s.content_markdown
+                    break
+
+            if sec_objective and proc_objectives:
+                objective = f"{sec_objective} | {proc_objectives}"
+            elif proc_objectives:
+                objective = proc_objectives
+            elif sec_objective:
+                objective = sec_objective
+            else:
+                objective = f"Audit verification for {wp.area} ({wp.title})"
+
+            population = ""
+            for p in matched_procs:
+                if p.population_definition:
+                    population = p.population_definition
+                    break
+
+            open_notes_count = sum(
+                1
+                for n in review_notes
+                if n.status
+                in (
+                    ReviewNoteStatusEnum.OPEN,
+                    ReviewNoteStatusEnum.RESPONDED,
+                    ReviewNoteStatusEnum.REOPENED,
+                )
+            )
+
+            return WorkingPaperWorkbenchDTO(
+                working_paper=wp,
+                sections=sections,
+                objective=objective,
+                risks=matched_risks,
+                assertions=assertions,
+                procedures=matched_procs,
+                population=population or f"General ledger population for {wp.area}",
+                samples=samples,
+                test_executions=test_executions,
+                evidence_items=matched_evidence,
+                exceptions=exceptions,
+                findings=matched_findings,
+                conclusion=wp.conclusion,
+                reviewer=wp.reviewer_id,
+                sign_offs=sign_offs,
+                version=wp.version,
+                open_review_notes_count=open_notes_count,
+                review_notes=review_notes,
+                historical_versions=historical_snapshots,
+                is_locked=wp.is_locked,
+                content_hash=wp.content_hash,
+            )

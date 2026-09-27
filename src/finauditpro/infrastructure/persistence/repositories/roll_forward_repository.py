@@ -20,12 +20,31 @@ class RollForwardRepository:
 
     def _to_record_entity(self, model: RollForwardRecordModel) -> RollForwardRecord:
         items = json.loads(model.items_carried_json) if model.items_carried_json else []
+        omitted = (
+            json.loads(model.items_omitted_json)
+            if getattr(model, "items_omitted_json", None)
+            else [
+                "Current-Year Evidence",
+                "Current-Year Conclusions",
+                "Current-Year Testing",
+                "Current-Year Management Representations",
+            ]
+        )
+        decisions = (
+            json.loads(model.decisions_json)
+            if getattr(model, "decisions_json", None)
+            else {}
+        )
         return RollForwardRecord(
             id=model.id,
             new_engagement_id=model.new_engagement_id,
             source_engagement_id=model.source_engagement_id,
             source_fy=model.source_fy,
+            target_fy=getattr(model, "target_fy", "") or "",
+            decisions=decisions,
             items_carried=items,
+            items_omitted=omitted,
+            content_hash=getattr(model, "content_hash", None),
             performed_by=model.performed_by,
             created_at=model.created_at,
         )
@@ -54,7 +73,11 @@ class RollForwardRepository:
             new_engagement_id=record.new_engagement_id,
             source_engagement_id=record.source_engagement_id,
             source_fy=record.source_fy,
+            target_fy=record.target_fy,
+            decisions_json=json.dumps(record.decisions),
             items_carried_json=json.dumps(record.items_carried),
+            items_omitted_json=json.dumps(record.items_omitted),
+            content_hash=record.content_hash,
             performed_by=record.performed_by,
             created_at=record.created_at,
         )

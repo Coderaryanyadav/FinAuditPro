@@ -19,7 +19,11 @@ class RollForwardRecordModel(Base):
         String, ForeignKey("engagements.id", ondelete="CASCADE"), nullable=False
     )
     source_fy: Mapped[str] = mapped_column(String, nullable=False)
+    target_fy: Mapped[str] = mapped_column(String, nullable=False, default="")
+    decisions_json: Mapped[str] = mapped_column(Text, nullable=False, default="{}")
     items_carried_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    items_omitted_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    content_hash: Mapped[str | None] = mapped_column(String, nullable=True)
     performed_by: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[str] = mapped_column(String, nullable=False)
 

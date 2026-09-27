@@ -104,6 +104,22 @@ class EngagementDialog(QDialog):
             self.status_combo.addItem(st.value, st)
         self.status_combo.setStyleSheet(field_style)
 
+        self.partner_input = QLineEdit()
+        self.partner_input.setPlaceholderText("e.g. CA Rajesh Sharma (FCA)")
+        self.partner_input.setStyleSheet(field_style)
+
+        self.manager_input = QLineEdit()
+        self.manager_input.setPlaceholderText("e.g. Amit Verma (Audit Manager)")
+        self.manager_input.setStyleSheet(field_style)
+
+        self.start_date_input = QLineEdit()
+        self.start_date_input.setPlaceholderText("YYYY-MM-DD (e.g. 2025-04-01)")
+        self.start_date_input.setStyleSheet(field_style)
+
+        self.reporting_date_input = QLineEdit()
+        self.reporting_date_input.setPlaceholderText("YYYY-MM-DD (e.g. 2025-09-30)")
+        self.reporting_date_input.setStyleSheet(field_style)
+
         self.team_input = QLineEdit()
         self.team_input.setPlaceholderText("e.g. Partner, Manager, Senior (comma separated)")
         self.team_input.setText("Partner, Senior Auditor")
@@ -116,6 +132,10 @@ class EngagementDialog(QDialog):
 
         form_layout.addRow(make_lbl("Financial Year *:"), self.fy_input)
         form_layout.addRow(make_lbl("Audit Type:"), self.audit_type_combo)
+        form_layout.addRow(make_lbl("Engagement Partner:"), self.partner_input)
+        form_layout.addRow(make_lbl("Audit Manager:"), self.manager_input)
+        form_layout.addRow(make_lbl("Commencement Date:"), self.start_date_input)
+        form_layout.addRow(make_lbl("Reporting Deadline:"), self.reporting_date_input)
         form_layout.addRow(make_lbl("Initial Status:"), self.status_combo)
         form_layout.addRow(make_lbl("Assigned Team:"), self.team_input)
 
@@ -157,6 +177,14 @@ class EngagementDialog(QDialog):
 
     def _populate_fields(self, engagement: Engagement) -> None:
         self.fy_input.setText(engagement.financial_year)
+        if engagement.partner:
+            self.partner_input.setText(engagement.partner)
+        if engagement.manager:
+            self.manager_input.setText(engagement.manager)
+        if engagement.start_date:
+            self.start_date_input.setText(engagement.start_date)
+        if engagement.reporting_date:
+            self.reporting_date_input.setText(engagement.reporting_date)
         idx_at = self.audit_type_combo.findData(engagement.audit_type)
         if idx_at >= 0:
             self.audit_type_combo.setCurrentIndex(idx_at)
@@ -173,6 +201,10 @@ class EngagementDialog(QDialog):
 
         audit_type = self.audit_type_combo.currentData()
         status = self.status_combo.currentData()
+        partner = self.partner_input.text().strip() or None
+        manager = self.manager_input.text().strip() or None
+        start_date = self.start_date_input.text().strip() or None
+        reporting_date = self.reporting_date_input.text().strip() or None
         raw_team = self.team_input.text().strip()
         assigned_team = [t.strip() for t in raw_team.split(",") if t.strip()]
 
@@ -182,6 +214,10 @@ class EngagementDialog(QDialog):
                     financial_year=fy,
                     audit_type=audit_type,
                     status=status,
+                    partner=partner,
+                    manager=manager,
+                    start_date=start_date,
+                    reporting_date=reporting_date,
                     assigned_team=assigned_team,
                 )
                 self.result_engagement = self.engagement_service.update_engagement(
@@ -194,6 +230,10 @@ class EngagementDialog(QDialog):
                     financial_year=fy,
                     audit_type=audit_type,
                     status=status,
+                    partner=partner,
+                    manager=manager,
+                    start_date=start_date,
+                    reporting_date=reporting_date,
                     assigned_team=assigned_team,
                 )
                 self.result_engagement = self.engagement_service.create_engagement(create_dto)

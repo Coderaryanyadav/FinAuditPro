@@ -2,12 +2,14 @@
 
 from datetime import datetime
 from enum import StrEnum
+from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from finauditpro.domain.audit_matrix_entities import AssertionEnum
 from finauditpro.domain.clock import utc_now
+
 
 
 class DomainBaseModel(BaseModel):
@@ -97,26 +99,60 @@ class AuditSampleItemTest(DomainBaseModel):
         return self.difference_paise
 
 
+class TestExecution(DomainBaseModel):
+    """Encapsulates a full test run execution against a population and sample."""
+
+    __test__ = False
+
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    engagement_id: str = Field(default="")
+    procedure_id: str = Field(default="")
+    population_reference: str = Field(default="")
+    population: str = Field(default="")
+    sample_ids: list[str] = Field(default_factory=list)
+    sample_size: int = Field(default=0)
+    sample_refs: list[str] = Field(default_factory=list)
+    tested_by: str = Field(default="Auditor")
+    tester: str = Field(default="Auditor")
+    executed_at: datetime = Field(default_factory=utc_now)
+    methodology_version: Any = Field(default="1.0.0")
+    result: Any = Field(default="PASS")
+
+    exception_ids: list[str] = Field(default_factory=list)
+    exceptions: list[Any] = Field(default_factory=list)
+    notes: str = Field(default="")
+    created_at: datetime = Field(default_factory=utc_now)
+
+
 class AuditException(DomainBaseModel):
     """First-class audit exception resulting from sample execution or substantive testing."""
 
     id: str = Field(default_factory=lambda: str(uuid4()))
-    engagement_id: str = Field(...)
-    procedure_id: str = Field(...)
+    engagement_id: str = Field(default="")
+    procedure_id: str = Field(default="")
     sample_item_id: str | None = Field(default=None)
-    exception_code: str = Field(..., min_length=1)
-    title: str = Field(..., min_length=1)
-    description: str = Field(..., min_length=1)
+    exception_code: str = Field(default_factory=lambda: f"EXC-{uuid4().hex[:4].upper()}")
+    title: str = Field(default="Audit Exception")
+    description: str = Field(default="")
+    source: str = Field(default="Substantive Procedure Execution")
+    rule: str = Field(default="SA 330 Audit Invariant")
+    evidence_ref: str | None = Field(default=None)
+    severity: str = Field(default="High")
     amount_paise: int = Field(default=0, ge=0)
     root_cause: str = Field(default="")
     management_response: str = Field(default="")
     is_resolved: bool = Field(default=False)
     resolution: str = Field(default="")
-    status: ExceptionStatusEnum = Field(default=ExceptionStatusEnum.OPEN)
+    status: Any = Field(default="OPEN")
     evidence_id: str | None = Field(default=None)
     reviewer: str | None = Field(default=None)
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
+
+    @property
+    def explanation(self) -> str:
+        return self.description or self.root_cause
+
 
 
 class AuditMisstatement(DomainBaseModel):

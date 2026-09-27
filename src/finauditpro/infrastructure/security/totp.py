@@ -6,7 +6,6 @@ import hmac
 import secrets
 import struct
 import time
-import urllib.parse
 
 
 def generate_totp_secret() -> str:

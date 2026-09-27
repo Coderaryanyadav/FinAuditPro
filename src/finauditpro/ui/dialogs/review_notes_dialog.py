@@ -56,12 +56,17 @@ class ReviewNotesDialog(QDialog):
         raise_box = QGroupBox("Raise New Review Note")
         raise_layout = QVBoxLayout(raise_box)
 
+        self.ref_input = QLineEdit()
+        self.ref_input.setPlaceholderText("Target / Line Pin (e.g. 'Testing Grid Row #3', 'Procedure PROC-01', 'Section 1')...")
+
         self.note_input = QLineEdit()
         self.note_input.setPlaceholderText("Enter review point or feedback for preparer...")
 
         btn_raise = QPushButton("Raise Review Note")
+        btn_raise.setStyleSheet("background-color: #2563EB; color: white; font-weight: 600; padding: 6px 14px; border-radius: 6px;")
         btn_raise.clicked.connect(self._on_raise_clicked)
 
+        raise_layout.addWidget(self.ref_input)
         raise_layout.addWidget(self.note_input)
         raise_layout.addWidget(btn_raise)
         layout.addWidget(raise_box)
@@ -77,6 +82,7 @@ class ReviewNotesDialog(QDialog):
         btn_respond.clicked.connect(self._on_respond_clicked)
 
         btn_clear = QPushButton("Clear Note (Reviewer Only)")
+        btn_clear.setStyleSheet("background-color: #10B981; color: white; font-weight: 600; padding: 6px 14px; border-radius: 6px;")
         btn_clear.clicked.connect(self._on_clear_clicked)
 
         row = QHBoxLayout()
@@ -95,6 +101,8 @@ class ReviewNotesDialog(QDialog):
             item_text = f"[{n.status.value.upper()}] Raised by {n.raised_by}: {n.note_text}"
             if n.response_text:
                 item_text += f"\n   ➜ Response ({n.responded_by}): {n.response_text}"
+            if n.cleared_by:
+                item_text += f"\n   ✓ Cleared by: {n.cleared_by}"
             item = QListWidgetItem(item_text)
             item.setData(Qt.ItemDataRole.UserRole, n.id)
             self.notes_list.addItem(item)
@@ -104,17 +112,21 @@ class ReviewNotesDialog(QDialog):
 
     def _on_raise_clicked(self) -> None:
         txt = self.note_input.text().strip()
+        ref = self.ref_input.text().strip()
         if not txt:
             return
 
+        final_note = f"[PIN: {ref}] {txt}" if ref else txt
         self.wp_service.raise_review_note(
             CreateReviewNoteDTO(
                 working_paper_id=self.working_paper_id,
                 raised_by=self.current_user,
-                note_text=txt,
+                note_text=final_note,
+                section_id=ref[:36] if ref else None,
             )
         )
         self.note_input.clear()
+        self.ref_input.clear()
         self._load_notes()
 
     def _on_respond_clicked(self) -> None:

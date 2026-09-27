@@ -15,6 +15,7 @@ class MapAccountDTO:
     schedule_iii_line_item: str
     lead_schedule_ref: str
     account_type: AccountTypeEnum = AccountTypeEnum.ASSET
+    audit_area: str | None = None
     notes: str | None = None
     reason: str | None = None
 
@@ -27,8 +28,10 @@ class BulkMapAccountsDTO:
     schedule_iii_line_item: str
     lead_schedule_ref: str
     account_type: AccountTypeEnum = AccountTypeEnum.ASSET
+    audit_area: str | None = None
     notes: str | None = None
     reason: str | None = None
+
 
 
 @dataclass(frozen=True)

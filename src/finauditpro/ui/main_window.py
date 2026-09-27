@@ -41,26 +41,25 @@ from finauditpro.ui.widgets.custom_combo import CustomComboBox
 
 NAV_ITEMS = [
     ("btn_dashboard", "Command Center", "WORKSPACE"),
-    ("btn_pbc", "Intake && PBC", "GUIDED PIPELINE"),
-    ("btn_audit_matrix", "Planning && SA 320", "GUIDED PIPELINE"),
-    ("btn_financial_data", "TB/GL && Scrutiny", "GUIDED PIPELINE"),
-    ("btn_working_papers", "Working Papers", "GUIDED PIPELINE"),
-    ("btn_reports", "Reports && Sign-Off", "GUIDED PIPELINE"),
-    ("btn_queries", "Client Queries", "FIELDWORK TOOLS"),
-    ("btn_documents", "Uploaded Evidence", "FIELDWORK TOOLS"),
-    ("btn_gst", "GST 2B Reconciler", "FIELDWORK TOOLS"),
-    ("btn_compliance", "Compliance Checklist", "FIELDWORK TOOLS"),
-    ("btn_inspection", "PRB Inspection Sandbox", "FIELDWORK TOOLS"),
-    ("btn_ai_assistant", "AI Copilot Lab", "FIELDWORK TOOLS"),
-    ("btn_clients", "Clients", "ADMINISTRATION"),
-    ("btn_engagements", "Engagements", "ADMINISTRATION"),
-    ("btn_firms", "Audit Firms", "ADMINISTRATION"),
-    ("btn_archival", "Archival && Sealing", "SYSTEM"),
-    ("btn_roll_forward", "Roll-Forward Tie-Out", "SYSTEM"),
+    ("btn_pbc", "Intake && PBC", "PLANNING"),
+    ("btn_audit_matrix", "Planning && SA 320", "PLANNING"),
+    ("btn_financial_data", "TB/GL && Scrutiny", "FINANCIAL DATA"),
+    ("btn_working_papers", "Working Papers", "FIELDWORK"),
+    ("btn_reports", "Reports && Sign-Off", "FINALISATION"),
+    ("btn_queries", "Client Queries", "FIELDWORK"),
+    ("btn_documents", "Uploaded Evidence", "FIELDWORK"),
+    ("btn_gst", "GST 2B Reconciler", "FINANCIAL DATA"),
+    ("btn_compliance", "Compliance Checklist", "FIELDWORK"),
+    ("btn_inspection", "PRB Inspection Sandbox", "FINALISATION"),
+    ("btn_ai_assistant", "AI Copilot Lab", "FIELDWORK"),
+    ("btn_clients", "Clients", "PRACTICE MANAGEMENT"),
+    ("btn_engagements", "Engagements", "PRACTICE MANAGEMENT"),
+    ("btn_firms", "Audit Firms", "PRACTICE MANAGEMENT"),
+    ("btn_archival", "Archival && Sealing", "FINALISATION"),
+    ("btn_roll_forward", "Roll-Forward Tie-Out", "FINALISATION"),
     ("btn_settings", "Settings", "SYSTEM"),
 ]
 GUIDED_STEPS = [
-    ("Intake && PBC", "btn_pbc"),
     ("Planning (SA 320)", "btn_audit_matrix"),
     ("TB/GL Scrutiny", "btn_financial_data"),
     ("Workpapers", "btn_working_papers"),
@@ -435,7 +434,11 @@ class MainWindow(QMainWindow):
             self.ai_service, self.document_service, self.engagement_service
         )
         self.view_working_papers, self.view_reports = (
-            WorkingPaperView(self.engagement_service, self.working_paper_service),
+            WorkingPaperView(
+                self.engagement_service,
+                self.working_paper_service,
+                audit_matrix_service=self.audit_matrix_service,
+            ),
             ReportView(self.engagement_service, self.report_service),
         )
         self.view_pbc, self.view_queries = (
@@ -534,6 +537,7 @@ class MainWindow(QMainWindow):
 
     def _sync_views_engagement(self, eng: Any) -> None:
         views = (
+            self.view_dashboard,
             self.view_documents,
             self.view_financial_data,
             self.view_gst,
@@ -600,11 +604,29 @@ class MainWindow(QMainWindow):
         self.current_engagement = eng
         client = self.client_service.get_client_by_id(eng.client_id)
         self.current_client = client
+        parent_firm = None
         if client:
             parent_firm = self.firm_service.get_firm_by_id(client.firm_id)
             if parent_firm:
                 self.current_firm = parent_firm
                 self.view_dashboard.set_firm(parent_firm)
+
+        from finauditpro.application.engagement_context import current_context
+
+        current_context.set_context(
+            firm_id=parent_firm.id if parent_firm else eng.firm_id,
+            firm_name=parent_firm.name if parent_firm else "Firm",
+            client_id=client.id if client else eng.client_id,
+            client_name=client.name if client else "Client",
+            engagement_id=eng.id,
+            financial_year=eng.financial_year,
+            engagement_type=eng.audit_type.value if hasattr(eng.audit_type, "value") else str(eng.audit_type),
+            status=eng.status.value if hasattr(eng.status, "value") else str(eng.status),
+            partner=eng.partner,
+            manager=eng.manager,
+            version=getattr(eng, "version", 1) or 1,
+        )
+
         self._sync_views_engagement(eng)
         self._update_header_combo()
 

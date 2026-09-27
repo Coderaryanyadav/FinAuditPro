@@ -1,5 +1,6 @@
 """Pure domain entities and SA 510 tie-out math for multi-year audit roll-forward."""
 
+from enum import StrEnum
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -9,6 +10,13 @@ from finauditpro.domain.clock import utc_now
 
 class DomainBaseModel(BaseModel):
     model_config = ConfigDict(frozen=False, arbitrary_types_allowed=True)
+
+
+class CarriedItemDecisionEnum(StrEnum):
+    KEEP = "KEEP"
+    UPDATE = "UPDATE"
+    REMOVE = "REMOVE"
+    NEW = "NEW"
 
 
 class OpeningBalanceLink(DomainBaseModel):
@@ -37,8 +45,19 @@ class RollForwardRecord(DomainBaseModel):
     new_engagement_id: str = Field(...)
     source_engagement_id: str = Field(...)
     source_fy: str = Field(...)
+    target_fy: str = Field(default="")
+    decisions: dict[str, str] = Field(default_factory=dict)
     items_carried: list[str] = Field(default_factory=list)
+    items_omitted: list[str] = Field(
+        default_factory=lambda: [
+            "Current-Year Evidence",
+            "Current-Year Conclusions",
+            "Current-Year Testing",
+            "Current-Year Management Representations",
+        ]
+    )
     performed_by: str = Field(...)
+    content_hash: str | None = Field(default=None)
     created_at: str = Field(default_factory=lambda: utc_now().isoformat())
 
 

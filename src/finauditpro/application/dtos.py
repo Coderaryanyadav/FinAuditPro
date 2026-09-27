@@ -54,14 +54,55 @@ class CreateEngagementDTO(BaseModel):
     financial_year: str = Field(..., min_length=4)
     audit_type: AuditTypeEnum = AuditTypeEnum.STATUTORY_AUDIT
     status: EngagementStatusEnum = EngagementStatusEnum.PLANNING
+    partner: str | None = None
+    manager: str | None = None
     assigned_team: list[str] = Field(default_factory=list)
+    start_date: str | None = None
+    reporting_date: str | None = None
 
 
 class UpdateEngagementDTO(BaseModel):
     financial_year: str | None = None
     audit_type: AuditTypeEnum | None = None
     status: EngagementStatusEnum | None = None
+    partner: str | None = None
+    manager: str | None = None
     assigned_team: list[str] | None = None
+    start_date: str | None = None
+    reporting_date: str | None = None
+
+
+class EngagementDashboardDTO(BaseModel):
+    engagement_id: str
+    client_id: str
+    client_name: str
+    firm_id: str
+    firm_name: str
+    financial_year: str
+    engagement_type: str
+    status: str
+    partner: str | None = None
+    manager: str | None = None
+    team: list[str] = Field(default_factory=list)
+    start_date: str | None = None
+    reporting_date: str | None = None
+    version: int = 1
+    completion_percentage: float = 0.0
+    open_working_papers: int = 0
+    total_working_papers: int = 0
+    open_review_notes: int = 0
+    addressed_review_notes: int = 0
+    cleared_review_notes: int = 0
+    outstanding_pbc: int = 0
+    unresolved_findings: int = 0
+    high_risk_areas: list[str] = Field(default_factory=list)
+    materiality_overall_paise: int = 0
+    materiality_performance_paise: int = 0
+    materiality_trivial_paise: int = 0
+    financial_data_status: str = "Not Imported"
+    tb_balanced: bool = False
+    finalisation_status: str = "In Progress"
+    is_locked: bool = False
 
 
 class DashboardSummaryDTO(BaseModel):
@@ -73,3 +114,4 @@ class DashboardSummaryDTO(BaseModel):
     pending_documents: int = 0
     open_findings: int = 0
     recent_activities: list[dict[str, str]] = Field(default_factory=list)
+    active_engagement_dashboard: EngagementDashboardDTO | None = None

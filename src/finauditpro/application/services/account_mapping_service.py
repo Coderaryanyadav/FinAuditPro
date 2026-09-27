@@ -190,6 +190,7 @@ class AccountMappingService:
                 account_type=dto.account_type,
                 actor=actor,
                 notes=dto.notes,
+                audit_area=dto.audit_area,
             )
             return map_repo.update_mapping(mapping)
 
@@ -224,9 +225,11 @@ class AccountMappingService:
                     account_type=dto.account_type,
                     actor=actor,
                     notes=dto.notes,
+                    audit_area=dto.audit_area,
                 )
                 updated = map_repo.update_mapping(mapping)
                 updated_list.append(updated)
+
 
             return updated_list
 

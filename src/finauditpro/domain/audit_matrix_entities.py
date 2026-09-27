@@ -61,6 +61,16 @@ class BenchmarkTypeEnum(StrEnum):
     EQUITY = "Total Equity / Net Worth"
 
 
+class EvidenceStatusEnum(StrEnum):
+    UPLOADED = "UPLOADED"
+    VALIDATING = "VALIDATING"
+    VALIDATED = "VALIDATED"
+    LINKED = "LINKED"
+    REVIEWED = "REVIEWED"
+    ACCEPTED = "ACCEPTED"
+    REJECTED = "REJECTED"
+
+
 class DomainBaseModel(BaseModel):
     model_config = ConfigDict(frozen=False, arbitrary_types_allowed=True)
 
@@ -99,12 +109,46 @@ class AuditRisk(DomainBaseModel):
     planned_response: str = Field(default="")
     owner: str = Field(default="Auditor")
     status: str = Field(default="Identified")
+    evidence_ids: list[str] = Field(default_factory=list)
+    linked_procedure_ids: list[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
 
     def calculate_romm(self) -> RiskSeverityEnum:
         self.derived_romm = derive_qualitative_romm(self.inherent_risk, self.control_risk)
         return self.derived_romm
+
+    @property
+    def area(self) -> str:
+        return self.financial_statement_area
+
+    @area.setter
+    def area(self, value: str) -> None:
+        self.financial_statement_area = value
+
+    @property
+    def overall_risk(self) -> RiskSeverityEnum:
+        return self.derived_romm
+
+    @overall_risk.setter
+    def overall_risk(self, value: RiskSeverityEnum) -> None:
+        self.derived_romm = value
+
+    @property
+    def rationale(self) -> str:
+        return self.planned_response
+
+    @rationale.setter
+    def rationale(self, value: str) -> None:
+        self.planned_response = value
+
+    @property
+    def evidence(self) -> list[str]:
+        return self.evidence_ids
+
+    @property
+    def related_procedures(self) -> list[str]:
+        return self.linked_procedure_ids
 
     @property
     def assertion(self) -> AssertionEnum:
@@ -183,8 +227,38 @@ class AuditProcedure(DomainBaseModel):
     updated_at: datetime = Field(default_factory=utc_now)
 
     @property
+    def audit_area(self) -> str:
+        return self.account_area
+
+    @audit_area.setter
+    def audit_area(self, value: str) -> None:
+        self.account_area = value
+
+    @property
+    def population(self) -> str:
+        return self.population_definition
+
+    @population.setter
+    def population(self, value: str) -> None:
+        self.population_definition = value
+
+    @property
+    def expected_evidence(self) -> str:
+        return self.evidence_requirement
+
+    @expected_evidence.setter
+    def expected_evidence(self, value: str) -> None:
+        self.evidence_requirement = value
+
+    @property
     def risk_id(self) -> str | None:
         return self.linked_risk_ids[0] if self.linked_risk_ids else None
+
+    @risk_id.setter
+    def risk_id(self, value: str | None) -> None:
+        if value:
+            self.linked_risk_ids = [value]
+
 
     @property
     def assertion(self) -> AssertionEnum:
@@ -196,6 +270,7 @@ class AuditFinding(DomainBaseModel):
     engagement_id: str = Field(...)
     procedure_id: str | None = Field(default=None)
     risk_id: str | None = Field(default=None)
+    working_paper_id: str | None = Field(default=None)
     title: str = Field(..., min_length=1)
     description: str = Field(..., min_length=1)
     category: str = Field(default="Substantive Audit Exception")
@@ -205,6 +280,9 @@ class AuditFinding(DomainBaseModel):
     assertion: AssertionEnum = Field(default=AssertionEnum.ACCURACY)
     recommendation: str | None = Field(default=None)
     status: FindingStatusEnum = Field(default=FindingStatusEnum.OPEN)
+    resolution: str | None = Field(default=None)
+    linked_exception_ids: list[str] = Field(default_factory=list)
+    evidence_ids: list[str] = Field(default_factory=list)
     preparer: str = Field(default="Auditor")
     reviewer: str | None = Field(default=None)
     source: FindingSourceEnum = Field(default=FindingSourceEnum.MANUAL)
@@ -221,8 +299,10 @@ class AuditFinding(DomainBaseModel):
 class AuditEvidence(DomainBaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     engagement_id: str = Field(...)
+    evidence_code: str = Field(default="")
     finding_id: str | None = Field(default=None)
     procedure_id: str | None = Field(default=None)
+    working_paper_id: str | None = Field(default=None)
     document_id: str | None = Field(default=None)
     dataset_id: str | None = Field(default=None)
     row_index: int | None = Field(default=None)
@@ -230,4 +310,41 @@ class AuditEvidence(DomainBaseModel):
     bounding_box_json: str | None = Field(default=None)
     title: str = Field(..., min_length=1)
     excerpt_or_reference: str = Field(...)
+    source: str = Field(default="Uploaded Document")
+    file_path: str | None = Field(default=None)
+    content_hash: str | None = Field(default=None)
+    version: int = Field(default=1, ge=1)
+    document_type: str = Field(default="General")
+    location: str | None = Field(default=None)
+    uploaded_by: str = Field(default="Auditor")
+    status: EvidenceStatusEnum = Field(default=EvidenceStatusEnum.UPLOADED)
+    sample_ref: str | None = Field(default=None)
+    test_execution_id: str | None = Field(default=None)
+    reviewed_by: str | None = Field(default=None)
+    review_notes: str | None = Field(default=None)
     created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now)
+
+    @property
+    def file(self) -> str | None:
+        return self.file_path
+
+    @property
+    def hash(self) -> str | None:
+        return self.content_hash
+
+    @property
+    def related_procedure(self) -> str | None:
+        return self.procedure_id
+
+    @property
+    def related_test(self) -> str | None:
+        return self.test_execution_id
+
+    @property
+    def related_finding(self) -> str | None:
+        return self.finding_id
+
+    @property
+    def related_working_paper(self) -> str | None:
+        return self.working_paper_id

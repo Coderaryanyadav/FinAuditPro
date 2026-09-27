@@ -62,6 +62,14 @@ class AuditIntegrityError(DomainError):
         super().__init__(message)
 
 
+class EvidenceIntegrityError(AuditIntegrityError):
+    """Raised when evidence content hash does not match baseline file hash."""
+
+
+class EngagementLockedError(ValidationError):
+    """Raised when modifications are attempted on a finalized or archived engagement."""
+
+
 class SecurityError(DomainError):
     """Raised when path traversal, Zip-Slip, or security controls are violated."""
 

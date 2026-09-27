@@ -157,6 +157,30 @@ class ReviewNote(DomainBaseModel):
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
 
+    @property
+    def author(self) -> str:
+        return self.raised_by
+
+    @property
+    def timestamp(self) -> datetime:
+        return self.created_at
+
+    @property
+    def target(self) -> str:
+        return self.section_id or self.working_paper_id
+
+    @property
+    def comment(self) -> str:
+        return self.note_text
+
+    @property
+    def response(self) -> str | None:
+        return self.response_text
+
+    @property
+    def resolver(self) -> str | None:
+        return self.cleared_by
+
     def respond(self, response_text: str, responder: str) -> None:
         if not response_text or not response_text.strip():
             raise ValidationError("Response text cannot be empty.")
@@ -168,6 +192,13 @@ class ReviewNote(DomainBaseModel):
     def clear(self, reviewer: str) -> None:
         self.cleared_by = reviewer
         self.status = ReviewNoteStatusEnum.CLEARED
+        self.updated_at = utc_now()
+
+    def reopen(self, reviewer: str, reason: str = "") -> None:
+        self.status = ReviewNoteStatusEnum.REOPENED
+        self.cleared_by = None
+        if reason:
+            self.note_text = f"{self.note_text}\n[Reopened by {reviewer}: {reason}]"
         self.updated_at = utc_now()
 
 
@@ -204,6 +235,8 @@ class WorkingPaper(DomainBaseModel):
     updated_at: datetime = Field(default_factory=utc_now)
 
     def transition_to(self, new_status: WorkingPaperStatusEnum) -> None:
+        if self.is_locked and new_status != WorkingPaperStatusEnum.REOPENED:
+            raise ValidationError("Working Paper is locked and cannot be modified or transitioned without reopening.")
         allowed = LEGAL_WP_TRANSITIONS.get(self.status, set())
         if new_status not in allowed:
             raise InvalidStateTransitionError("WorkingPaper", self.status.value, new_status.value)
@@ -214,3 +247,33 @@ class WorkingPaper(DomainBaseModel):
             self.is_locked = False
             self.version += 1
         self.updated_at = utc_now()
+
+    def approve(self, reviewer_id: str, role: str) -> None:
+        """Domain action: Approve working paper under segregation of duties."""
+        if self.is_locked:
+            raise ValidationError("Working Paper is locked and cannot be modified.")
+        if self.preparer_id == reviewer_id:
+            raise ValidationError("Segregation of Duties Violation: Preparer cannot approve own workpaper.")
+        if role not in ("Senior", "Manager", "Partner"):
+            raise ValidationError("Unauthorized: Must be Senior, Manager, or Partner to approve.")
+        self.reviewer_id = reviewer_id
+        if self.status in (
+            WorkingPaperStatusEnum.DRAFT,
+            WorkingPaperStatusEnum.PREPARED,
+            WorkingPaperStatusEnum.SUBMITTED_FOR_REVIEW,
+        ):
+            self.status = WorkingPaperStatusEnum.UNDER_REVIEW
+        self.transition_to(WorkingPaperStatusEnum.APPROVED)
+
+    def partner_sign_off(self, partner_id: str, role: str, content_hash: str) -> None:
+        """Domain action: Final Partner Sign-off and cryptographic sealing under segregation of duties."""
+        if self.is_locked:
+            raise ValidationError("Working Paper is already locked.")
+        if self.preparer_id == partner_id:
+            raise ValidationError("Segregation of Duties Violation: Preparer cannot sign off own workpaper as Partner.")
+        if role != "Partner":
+            raise ValidationError("Unauthorized: Only Partners can perform final partner sign-off and locking.")
+        self.content_hash = content_hash
+        if self.status != WorkingPaperStatusEnum.APPROVED:
+            self.status = WorkingPaperStatusEnum.APPROVED
+        self.transition_to(WorkingPaperStatusEnum.LOCKED)

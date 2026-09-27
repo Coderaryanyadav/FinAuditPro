@@ -90,12 +90,17 @@ class SignOffDialog(QDialog):
         else:
             self.role_input.setCurrentIndex(3)  # Partner default
 
+        self.udin_input = QLineEdit()
+        self.udin_input.setPlaceholderText("Optional for internal; 18-char alphanumeric e.g. 24098765ABCD123456")
+        self.udin_input.setMaxLength(18)
+
         self.note_input = QLineEdit()
         self.note_input.setPlaceholderText("Optional sign-off notes...")
 
         form.addRow("Sign-Off Level:", self.level_combo)
         form.addRow("Signer Identity (User ID):", self.user_id_input)
         form.addRow("Signer Role:", self.role_input)
+        form.addRow("ICAI UDIN (Partner):", self.udin_input)
         form.addRow("Sign-Off Note:", self.note_input)
 
         layout.addLayout(form)
@@ -130,7 +135,23 @@ class SignOffDialog(QDialog):
                 )
         else:
             level = SignOffLevelEnum.REVIEWED
-        note = self.note_input.text().strip()
+
+        udin = self.udin_input.text().strip().upper()
+        if udin and (len(udin) != 18 or not udin.isalnum()):
+            QMessageBox.warning(
+                self,
+                "Invalid UDIN Format",
+                "ICAI UDIN must be exactly 18 alphanumeric characters (e.g. 24098765ABCD123456).",
+            )
+            return
+
+        note_text = self.note_input.text().strip()
+        full_note_parts = []
+        if udin:
+            full_note_parts.append(f"[UDIN: {udin}]")
+        if note_text:
+            full_note_parts.append(note_text)
+        note = " ".join(full_note_parts) if full_note_parts else None
 
         if not user_id:
             QMessageBox.warning(self, "Validation Error", "Please enter signer User ID.")
@@ -143,13 +164,14 @@ class SignOffDialog(QDialog):
                     level=level,
                     user_id=user_id,
                     user_role=user_role,
-                    note=note if note else None,
+                    note=note,
                 )
             )
+            udin_msg = f"\nICAI UDIN: {udin}" if udin else ""
             QMessageBox.information(
                 self,
                 "Sign-Off Complete",
-                f"Working Paper '{self.wp.index_reference}' successfully signed off!\nPaper is now locked and content hash bound.",
+                f"Working Paper '{self.wp.index_reference}' successfully signed off!{udin_msg}\nPaper is now locked and content hash bound.",
             )
             self.accept()
         except Exception as ex:

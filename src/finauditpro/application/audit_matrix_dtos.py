@@ -48,6 +48,10 @@ class CreateProcedureDTO(BaseModel):
     instructions: str = Field(default="")
     evidence_requirement: str = Field(default="")
     requires_evidence: bool = Field(default=True)
+    account_area: str = Field(default="")
+    population: str = Field(default="")
+    methodology: str = Field(default="")
+
 
 
 class UpdateProcedureStatusDTO(BaseModel):

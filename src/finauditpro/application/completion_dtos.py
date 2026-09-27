@@ -72,6 +72,10 @@ class FinalizationGateResultDTO:
     warnings: list[str]
     total_open_items: int
     critical_items_count: int
+    status: str = "BLOCKED"
+    summary_headline: str = "FINALISATION BLOCKED"
+    display_text: str = ""
+    formatted_reasons: list[str] = None  # type: ignore
 
     @property
     def is_ready_for_finalization(self) -> bool:

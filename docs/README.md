@@ -1,30 +1,47 @@
-# FinAuditPro — Documentation Index (v1.0.0)
+# FinAuditPro Documentation Hub
 
-Welcome to the FinAuditPro documentation suite. FinAuditPro is an offline-first audit intelligence workspace for Indian statutory and internal audit practice.
-
----
-
-## Authoritative Documentation Directory
-
-| Document | Description |
-| :--- | :--- |
-| **[`docs/INSTALLATION.md`](INSTALLATION.md)** | Multi-platform installation guide for standalone installers and source environments. |
-| **[`docs/USER_GUIDE.md`](USER_GUIDE.md)** | Practitioner workflow guide: from onboarding to working papers and reporting. |
-| **[`docs/ARCHITECTURE.md`](ARCHITECTURE.md)** | 4-layer Domain-Driven Architecture specification and domain invariants. |
-| **[`docs/SECURITY.md`](SECURITY.md)** | Canonical security policy, threat model, key hierarchy, and fail-closed crypto. |
-| **[`docs/AUDIT_METHODOLOGY.md`](AUDIT_METHODOLOGY.md)** | Standards on Auditing (SA 230, SA 320, SA 510, CARO 2020) support documentation. |
-| **[`docs/ACCOUNTING_CONTROLS.md`](ACCOUNTING_CONTROLS.md)** | 64-bit integer paise precision, trial balance invariants, and lead schedules. |
-| **[`docs/DATABASE.md`](DATABASE.md)** | SQLite WAL mode, schema design, migrations 1..9, and trigger immutability. |
-| **[`docs/ENCRYPTION.md`](ENCRYPTION.md)** | Fernet DEK/KWK key hierarchy, memory hygiene, and PBKDF2 parameters. |
-| **[`docs/BACKUP_RESTORE.md`](BACKUP_RESTORE.md)** | WAL checkpointing, atomic SQLite backups, encryption, and restore verification. |
-| **[`docs/TESTING.md`](TESTING.md)** | 307-test automated QA architecture, execution guides, and verification scripts. |
-| **[`docs/COMPLIANCE_SCOPE.md`](COMPLIANCE_SCOPE.md)** | Statutory compliance boundaries, regulatory disclaimer, and DPDP Act 2023 posture. |
-| **docs/LIMITATIONS.md`** | Single-workstation operating boundaries and technical constraints. |
-| **[`docs/TROUBLESHOOTING.md`](TROUBLESHOOTING.md)** | Operational diagnostic runbook and error resolution steps. |
-| **[`docs/RELEASE_NOTES.md`](RELEASE_NOTES.md)** | Official v1.0.0 release notes and feature summary. |
-| **[`docs/CHANGELOG.md`](CHANGELOG.md)** | Semantic version history adhering to Keep a Changelog. |
+Welcome to the canonical documentation for **FinAuditPro**, the offline-first statutory audit operating system for Indian Chartered Accountants.
 
 ---
 
-## Historical Documentation Archive
-Historical phase roadmaps (Phases A..F) and prior forensic evaluation reports are preserved under [`docs/archive/`](archive/).
+## Documentation Map
+
+### [Architecture](./architecture/)
+- [`ARCHITECTURE.md`](./architecture/ARCHITECTURE.md) — 4-layer Domain-Driven Design (DDD) specification and domain graph.
+- [`DOMAIN_MODEL.md`](./architecture/DOMAIN_MODEL.md) — Domain entities, aggregates, and integer-paise math.
+- [`DATABASE.md`](./architecture/DATABASE.md) — SQLite WAL mode configuration, concurrency, and trigger immutability.
+- [`SECURITY.md`](./architecture/SECURITY.md) — Cryptographic architecture, AES-128, PBKDF2, and threat model.
+
+### [Product Specification](./product/)
+- [`PRODUCT_REQUIREMENTS.md`](./product/PRODUCT_REQUIREMENTS.md) — Product vision, functional requirements, and RBAC matrix.
+- [`USER_WORKFLOW.md`](./product/USER_WORKFLOW.md) — User personas and end-to-end statutory audit journey.
+
+### [Audit Methodology](./audit/)
+- [`AUDIT_WORKFLOW.md`](./audit/AUDIT_WORKFLOW.md) — ICAI Standards on Auditing (SA 200–SA 700), CARO 2020, and Form 3CD.
+- [`RISK_MODEL.md`](./audit/RISK_MODEL.md) — Audit risk formula, assertion-level mapping, and Materiality Engine (SA 320).
+- [`WORKING_PAPERS.md`](./audit/WORKING_PAPERS.md) — Electronic working papers (SA 230), sampling algorithms (SA 530), and review notes.
+- [`FINALISATION.md`](./audit/FINALISATION.md) — Finalisation gate checks, misstatement evaluation (SA 450), and SQC 1 archival.
+
+### [Engineering & Operations](./engineering/)
+- [`DEVELOPMENT.md`](./engineering/DEVELOPMENT.md) — Developer environment setup, coding standards, and project layout.
+- [`TESTING.md`](./engineering/TESTING.md) — Pytest suite execution, coverage, and E2E validation.
+- [`RELEASE.md`](./engineering/RELEASE.md) — Desktop binary packaging (macOS DMG, Windows EXE, Linux) and verification.
+
+### [Artificial Intelligence](./ai/)
+- [`AI_ARCHITECTURE.md`](./ai/AI_ARCHITECTURE.md) — Local LM Studio AI integration with zero cloud egress.
+- [`AI_SAFETY.md`](./ai/AI_SAFETY.md) — Deterministic math guardrails and AST prompt injection defenses.
+
+### [UI/UX Design](./ui/)
+- [`DESIGN_SYSTEM.md`](./ui/DESIGN_SYSTEM.md) — Dark mode color palette tokens, typography, and table styles.
+- [`UI_WORKFLOW.md`](./ui/UI_WORKFLOW.md) — Information architecture, sidebar navigation, and keyboard shortcuts.
+
+### [Roadmap & Decisions](./roadmap/)
+- [`MASTER_ROADMAP.md`](./roadmap/MASTER_ROADMAP.md) — Development milestones and Architecture Decision Records (ADRs).
+- [`CURRENT_PHASE.md`](./roadmap/CURRENT_PHASE.md) — Production Release v1.2.0 status and feature backlog.
+
+---
+
+## Root Documentation
+- [README.md](../README.md) — Main repository landing page and quick start guide.
+- [SECURITY.md](../SECURITY.md) — Vulnerability reporting and security policy.
+- [CHANGELOG.md](../CHANGELOG.md) — Version release history.

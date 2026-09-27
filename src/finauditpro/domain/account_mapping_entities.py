@@ -294,6 +294,7 @@ class AccountMapping(DomainBaseModel):
     schedule_iii_line_item: str = Field(default="")
     lead_schedule_ref: str = Field(default="WP-MISC")
     account_type: AccountTypeEnum = Field(default=AccountTypeEnum.ASSET)
+    audit_area: str = Field(default="")
     status: MappingStatusEnum = Field(default=MappingStatusEnum.UNMAPPED)
     is_material: bool = Field(default=True)
     is_new: bool = Field(default=False)
@@ -303,6 +304,32 @@ class AccountMapping(DomainBaseModel):
     updated_at: str | None = Field(default=None)
     notes: str | None = Field(default=None)
 
+    @property
+    def effective_audit_area(self) -> str:
+        if self.audit_area:
+            return self.audit_area
+        cat = (self.schedule_iii_category or "").lower()
+        item = (self.schedule_iii_line_item or "").lower()
+        if "revenue" in cat or "sales" in item:
+            return "Revenue"
+        if "receivable" in cat or "debtor" in item:
+            return "Trade Receivables"
+        if "cash" in cat or "bank" in item:
+            return "Cash & Bank"
+        if "payable" in cat or "creditor" in item:
+            return "Trade Payables"
+        if "fixed asset" in cat or "property" in cat or "equipment" in item:
+            return "Fixed Assets"
+        if "borrowing" in cat or "loan" in item:
+            return "Borrowings"
+        if "employee" in cat or "salary" in item or "wages" in item:
+            return "Payroll & Employee Benefits"
+        if "inventory" in cat or "stock" in item:
+            return "Inventory"
+        if "tax" in cat:
+            return "Statutory & Tax"
+        return self.schedule_iii_category or "General"
+
     def apply_mapping(
         self,
         category: str,
@@ -311,11 +338,14 @@ class AccountMapping(DomainBaseModel):
         account_type: AccountTypeEnum,
         actor: str,
         notes: str | None = None,
+        audit_area: str | None = None,
     ) -> None:
         self.schedule_iii_category = category
         self.schedule_iii_line_item = line_item
         self.lead_schedule_ref = lead_schedule_ref
         self.account_type = account_type
+        if audit_area:
+            self.audit_area = audit_area
         self.status = MappingStatusEnum.MAPPED
         self.is_new = False
         self.updated_by = actor
@@ -327,6 +357,7 @@ class AccountMapping(DomainBaseModel):
         self.status = MappingStatusEnum.LOCKED
         self.updated_by = actor
         self.updated_at = utc_now().isoformat()
+
 
 
 class AccountMappingHistory(DomainBaseModel):

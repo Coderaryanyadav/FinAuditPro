@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 from typing import Any, cast
 
-from sqlalchemy import DateTime, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from finauditpro.domain.clock import utc_now
@@ -75,8 +75,13 @@ class EngagementModel(Base):
     financial_year: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
     audit_type: Mapped[str] = mapped_column(String(50), nullable=False, default="Statutory Audit")
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="Planning", index=True)
+    partner: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    manager: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    start_date: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    reporting_date: Mapped[str | None] = mapped_column(String(50), nullable=True)
     engagement_lead_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     prior_engagement_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
     assigned_team_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, nullable=False

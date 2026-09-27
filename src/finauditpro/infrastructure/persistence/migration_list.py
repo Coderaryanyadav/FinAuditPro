@@ -343,6 +343,22 @@ def migration_009_fn(conn: sqlite3.Connection) -> None:
     conn.executescript(MIGRATION_009_SQL)
 
 
+def migration_017_fn(conn: sqlite3.Connection) -> None:
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(engagements);")
+    columns = {row[1] for row in cursor.fetchall()}
+    if "partner" not in columns:
+        conn.execute("ALTER TABLE engagements ADD COLUMN partner TEXT;")
+    if "manager" not in columns:
+        conn.execute("ALTER TABLE engagements ADD COLUMN manager TEXT;")
+    if "start_date" not in columns:
+        conn.execute("ALTER TABLE engagements ADD COLUMN start_date TEXT;")
+    if "reporting_date" not in columns:
+        conn.execute("ALTER TABLE engagements ADD COLUMN reporting_date TEXT;")
+    if "version" not in columns:
+        conn.execute("ALTER TABLE engagements ADD COLUMN version INTEGER NOT NULL DEFAULT 1;")
+
+
 def get_all_migrations() -> list[tuple[int, str, Any]]:
     return [
         (1, "001_initial_schema", MIGRATION_001_SQL),
@@ -361,4 +377,5 @@ def get_all_migrations() -> list[tuple[int, str, Any]]:
         (14, "014_create_audit_completion_tables", MIGRATION_014_SQL),
         (15, "015_create_audit_reporting_phase_e_tables", MIGRATION_015_SQL),
         (16, "016_create_continuous_audit_phase_f_tables", MIGRATION_016_SQL),
+        (17, "017_add_engagement_lifecycle_fields", migration_017_fn),
     ]

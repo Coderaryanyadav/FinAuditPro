@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from enum import StrEnum
+from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -94,14 +95,37 @@ class FinalizationBlocker(DomainBaseModel):
     severity: ItemSeverityEnum = Field(default=ItemSeverityEnum.CRITICAL)
 
 
+FinalisationBlocker = FinalizationBlocker
+
+
+class FinalisationGateStatusEnum(StrEnum):
+    READY = "READY"
+    BLOCKED = "BLOCKED"
+
+
+class FinalisationStageEnum(StrEnum):
+    READY = "READY"
+    PARTNER_REVIEW = "PARTNER REVIEW"
+    APPROVED = "APPROVED"
+    LOCKED = "LOCKED"
+    ARCHIVED = "ARCHIVED"
+
+
 class FinalizationGateResult(DomainBaseModel):
     """Deterministic finalization gate assessment result."""
 
     is_finalizable: bool = Field(...)
+    status: FinalisationGateStatusEnum = Field(default=FinalisationGateStatusEnum.BLOCKED)
+    summary_headline: str = Field(default="FINALISATION BLOCKED")
+    display_text: str = Field(default="")
+    formatted_reasons: list[str] = Field(default_factory=list)
     blockers: list[FinalizationBlocker] = Field(default_factory=list)
+    open_items: list[OpenItem] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
     total_open_items: int = Field(default=0)
     critical_items_count: int = Field(default=0)
+    gate_breakdown: dict[str, Any] = Field(default_factory=dict)
+    consistency_checks: dict[str, Any] = Field(default_factory=dict)
 
 
 class RelatedPartyCompletionRecord(DomainBaseModel):

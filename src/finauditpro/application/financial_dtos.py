@@ -1,8 +1,7 @@
-"""Data Transfer Objects (DTOs) for Financial Data and Analytics Services."""
-
+from typing import Any
 from pydantic import BaseModel, Field
 
-from finauditpro.domain.financial_entities import AnalyticsTypeEnum, DatasetTypeEnum
+from finauditpro.domain.financial_entities import AnalyticsTypeEnum, DatasetTypeEnum, RowError
 
 
 class InspectFileResultDTO(BaseModel):
@@ -10,6 +9,30 @@ class InspectFileResultDTO(BaseModel):
     headers: list[str]
     suggested_mappings: dict[str, str]
     preview_rows: list[dict[str, str]]
+
+
+class ValidationRowPreviewDTO(BaseModel):
+    row_no: int
+    is_valid: bool
+    data: dict[str, Any]
+    errors: list[str] = Field(default_factory=list)
+
+
+class ValidationPreviewDTO(BaseModel):
+    file_path: str
+    dataset_type: DatasetTypeEnum
+    total_rows: int
+    valid_rows_count: int
+    error_count: int
+    duplicate_count: int = 0
+    total_debit_paise: int = 0
+    total_credit_paise: int = 0
+    is_balanced: bool = True
+    discrepancy_paise: int = 0
+    validation_passed: bool = True
+    summary_message: str = ""
+    errors: list[RowError] = Field(default_factory=list)
+    sample_preview: list[ValidationRowPreviewDTO] = Field(default_factory=list)
 
 
 class ImportDatasetDTO(BaseModel):
@@ -39,3 +62,28 @@ class FlaggedAnomalyDTO(BaseModel):
     severity: str
     auditor_reviewed: bool
     auditor_notes: str | None
+
+
+class CreateAuditWorkDTO(BaseModel):
+    engagement_id: str = Field(...)
+    dataset_id: str = Field(...)
+    source: str = Field(default="Deterministic Analytics Engine")
+    rule_or_analytic_id: str = Field(...)
+    title: str = Field(...)
+    description: str = Field(...)
+    severity: str = Field(default="Medium")
+    audit_area: str = Field(default="General")
+    assertion: str = Field(default="Accuracy")
+    objective: str = Field(default="")
+    implicated_rows: list[int] = Field(default_factory=list)
+    computed_evidence: str = Field(default="")
+    preparer: str = Field(default="Senior Auditor")
+
+
+class RunReconciliationDTO(BaseModel):
+    engagement_id: str = Field(...)
+    dataset_id: str = Field(default="")
+    reconciliation_type: str = Field(...)  # TB_BALANCE, SUBLEDGER_GL, BRS, GST_2B, FIXED_ASSETS
+    as_of_date: str = Field(default="2026-03-31")
+    data: dict[str, Any] = Field(default_factory=dict)
+

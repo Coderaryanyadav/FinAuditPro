@@ -18,6 +18,7 @@ from finauditpro.infrastructure.persistence.working_paper_models import (
     WorkingPaperLinkModel,
     WorkingPaperModel,
     WorkingPaperSectionModel,
+    WorkingPaperVersionModel,
 )
 
 
@@ -83,6 +84,8 @@ class WorkingPaperRepository:
     def get_working_paper(self, wp_id: str) -> WorkingPaper | None:
         model = self.session.get(WorkingPaperModel, wp_id)
         return self._to_wp_entity(model) if model else None
+
+    get_by_id = get_working_paper
 
     def list_for_engagement(self, engagement_id: str) -> list[WorkingPaper]:
         stmt = (
@@ -262,3 +265,21 @@ class WorkingPaperRepository:
             model.updated_at = wp.updated_at
             self.session.flush()
         return wp
+
+    def list_historical_versions(self, wp_id: str) -> list[WorkingPaperVersionModel]:
+        stmt = (
+            select(WorkingPaperVersionModel)
+            .where(WorkingPaperVersionModel.working_paper_id == wp_id)
+            .order_by(WorkingPaperVersionModel.version.desc())
+        )
+        return list(self.session.scalars(stmt).all())
+
+    def get_historical_version(self, wp_id: str, version: int) -> WorkingPaperVersionModel | None:
+        stmt = (
+            select(WorkingPaperVersionModel)
+            .where(
+                WorkingPaperVersionModel.working_paper_id == wp_id,
+                WorkingPaperVersionModel.version == version,
+            )
+        )
+        return self.session.scalars(stmt).first()

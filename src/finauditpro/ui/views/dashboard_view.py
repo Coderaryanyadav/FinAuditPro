@@ -57,6 +57,20 @@ class DashboardView(QWidget):
         self.current_firm = firm
         self.refresh_dashboard()
 
+    def set_engagement(self, engagement: Engagement | None) -> None:
+        self.current_engagement = engagement
+        self.refresh_dashboard()
+
+    def set_active_engagement(self, engagement_id: str | None) -> None:
+        if engagement_id and self.engagement_service:
+            try:
+                self.current_engagement = self.engagement_service.get_engagement_by_id(engagement_id)
+            except Exception:
+                self.current_engagement = None
+        else:
+            self.current_engagement = None
+        self.refresh_dashboard()
+
     def _init_ui(self) -> None:
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -403,6 +417,32 @@ class DashboardView(QWidget):
             self.lbl_context_text.setText(f"{c_name} · FY {e_active.financial_year}")
             self.lbl_audit_type.setText(audit_t)
             self.status_badge.setText(status_v)
+
+            # Pull engagement dashboard metrics
+            try:
+                eng_dash = self.engagement_service.get_engagement_dashboard(e_active.id)
+                self.lbl_pct_text.setText(f"{eng_dash.completion_percentage}% complete ({eng_dash.total_working_papers - eng_dash.open_working_papers}/{eng_dash.total_working_papers} WPs)")
+                if eng_dash.open_review_notes > 0:
+                    self.att_txt.setText(f"Attention required: {eng_dash.open_review_notes} open review note(s) blocking completion")
+                    self.att_dot.setText("!")
+                    self.att_dot.setStyleSheet(
+                        "font-size: 14px; font-weight: 700; color: #D97706; background: #FEF3C7; border-radius: 12px;"
+                    )
+                elif eng_dash.unresolved_findings > 0:
+                    self.att_txt.setText(f"Substantive exceptions: {eng_dash.unresolved_findings} open finding(s) under review")
+                    self.att_dot.setText("!")
+                    self.att_dot.setStyleSheet(
+                        "font-size: 14px; font-weight: 700; color: #DC2626; background: #FEE2E2; border-radius: 12px;"
+                    )
+                else:
+                    self.att_txt.setText(f"Status: {eng_dash.finalisation_status} · Materiality: ₹{eng_dash.materiality_overall_paise / 100:,.0f}")
+                    self.att_dot.setText("✓")
+                    self.att_dot.setStyleSheet(
+                        "font-size: 14px; font-weight: 700; color: #16A34A; background: #DCFCE7; border-radius: 12px;"
+                    )
+            except Exception:
+                pass
+
             mat = (
                 self.audit_matrix_service.get_latest_materiality(e_active.id)
                 if hasattr(self.audit_matrix_service, "get_latest_materiality")

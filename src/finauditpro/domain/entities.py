@@ -17,8 +17,9 @@ class RoleEnum(StrEnum):
     SENIOR = "Senior"
     SENIOR_AUDITOR = "Senior"
     ASSOCIATE = "Associate"
+    STAFF = "Staff"
     ADMINISTRATOR = "Administrator"
-    ADMIN = "Administrator"
+    ADMIN = "Admin"
 
 
 class AuditTypeEnum(StrEnum):
@@ -31,14 +32,20 @@ class AuditTypeEnum(StrEnum):
 
 
 class EngagementStatusEnum(StrEnum):
+    DRAFT = "Draft"
+    ACCEPTANCE = "Acceptance"
     PLANNING = "Planning"
+    FIELDWORK = "Fieldwork"
+    REVIEW = "Review"
+    FINALISATION = "Finalisation"
+    COMPLETED = "Completed"
+    ARCHIVED = "Archived"
+
+    # Backwards-compatible aliases
     DOCUMENT_COLLECTION = "Document Collection"
     FINANCIAL_ANALYSIS = "Financial Analysis"
     AUDIT_PROCEDURES = "Audit Procedures"
-    REVIEW = "Review"
-    COMPLETED = "Completed"
     FINALIZING = "Finalizing"
-    ARCHIVED = "Archived"
     REOPENED = "Reopened"
 
 
@@ -152,10 +159,27 @@ class Engagement(DomainBaseModel):
     financial_year: str = Field(..., min_length=4, max_length=10)
     audit_type: AuditTypeEnum = Field(default=AuditTypeEnum.STATUTORY_AUDIT)
     status: EngagementStatusEnum = Field(default=EngagementStatusEnum.PLANNING)
-    prior_engagement_id: str | None = Field(default=None)
+    partner: str | None = Field(default=None)
+    manager: str | None = Field(default=None)
     assigned_team: list[str] = Field(default_factory=list)
+    start_date: str | None = Field(default=None)
+    reporting_date: str | None = Field(default=None)
+    prior_engagement_id: str | None = Field(default=None)
+    version: int = Field(default=1)
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
+
+    @property
+    def engagement_id(self) -> str:
+        return self.id
+
+    @property
+    def engagement_type(self) -> AuditTypeEnum:
+        return self.audit_type
+
+    @property
+    def team(self) -> list[str]:
+        return self.assigned_team
 
     @field_validator("financial_year")
     @classmethod
@@ -163,6 +187,14 @@ class Engagement(DomainBaseModel):
         if not v or not v.strip():
             raise ValidationError("Financial Year cannot be empty.")
         return v.strip()
+
+    def transition_to(self, new_status: EngagementStatusEnum) -> None:
+        """Validate and execute status transition using state machine."""
+        from finauditpro.domain.engagement_state_machine import EngagementStateMachine
+
+        EngagementStateMachine.validate_transition(self.status, new_status)
+        self.status = new_status
+        self.updated_at = utc_now()
 
 
 class AuditEvent(DomainBaseModel):

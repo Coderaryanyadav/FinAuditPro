@@ -34,14 +34,22 @@ def get_default_db_path() -> Path:
 def create_sqlite_engine(db_path: Path | str | None = None, echo: bool = False) -> Engine:
     """Create a configured SQLite engine with WAL mode and foreign keys enabled."""
     if db_path is None:
-        db_path = get_default_db_path()
-    elif isinstance(db_path, str):
-        db_path = Path(db_path)
+        p = get_default_db_path()
+        p.parent.mkdir(parents=True, exist_ok=True)
+        connection_url = f"sqlite:///{p}"
+    elif isinstance(db_path, str) and db_path.startswith("sqlite:///"):
+        connection_url = db_path
+        raw_path = db_path[len("sqlite:///"):]
+        if raw_path != ":memory:":
+            Path(raw_path).parent.mkdir(parents=True, exist_ok=True)
+    elif str(db_path) == ":memory:":
+        connection_url = "sqlite:///:memory:"
+    else:
+        p = Path(db_path)
+        if p != Path(":memory:"):
+            p.parent.mkdir(parents=True, exist_ok=True)
+        connection_url = f"sqlite:///{p}"
 
-    if db_path != Path(":memory:"):
-        db_path.parent.mkdir(parents=True, exist_ok=True)
-
-    connection_url = f"sqlite:///{db_path}"
     engine = create_engine(
         connection_url,
         echo=echo,
@@ -72,6 +80,7 @@ class DatabaseManager:
         import finauditpro.infrastructure.persistence.models
         import finauditpro.infrastructure.persistence.pbc_and_query_models
         import finauditpro.infrastructure.persistence.report_models
+        import finauditpro.infrastructure.persistence.roll_forward_models
         import finauditpro.infrastructure.persistence.working_paper_models  # noqa: F401
 
         Base.metadata.create_all(self.engine)

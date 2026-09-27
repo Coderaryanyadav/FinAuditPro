@@ -233,10 +233,10 @@ def resolve_user_role(session: Any, engagement_id: str, identifier: str) -> str 
         return "Senior"
     if "admin" in u_lower:
         return "Administrator"
-    if "preparer" in u_lower or "auditor" in u_lower or "assoc" in u_lower:
-        return "Associate"
+    if "preparer" in u_lower or "auditor" in u_lower or "assoc" in u_lower or "staff" in u_lower:
+        return "Staff"
 
-    return "Associate"
+    return "Staff"
 
 
 def archive_working_paper_version(session: Any, wp: WorkingPaper) -> None:
@@ -388,9 +388,11 @@ def execute_respond_review_note(session: Any, dto: Any) -> ReviewNote:
     )
     note.respond(dto.response_text, dto.responder)
     saved = wp_repo.update_review_note(note)
+    wp = wp_repo.get_working_paper(n_model.working_paper_id)
+    eng_id = wp.engagement_id if wp else ""
     AuditEventRepository(session).add(
         AuditEvent(
-            engagement_id="",
+            engagement_id=eng_id,
             actor=dto.responder,
             action="Review Note Responded",
             details=f"Responded to review note '{saved.id}'",
@@ -437,6 +439,54 @@ def execute_clear_review_note(session: Any, dto: Any) -> ReviewNote:
             actor=cleared_by,
             action="Review Note Cleared",
             details=f"Cleared review note '{saved.id}'",
+        )
+    )
+    return saved
+
+
+def execute_reopen_review_note(session: Any, dto: Any) -> ReviewNote:
+    from finauditpro.domain.exceptions import EntityNotFoundError, ValidationError
+    from finauditpro.domain.working_paper_entities import ReviewNote, ReviewNoteStatusEnum
+    from finauditpro.infrastructure.persistence.working_paper_models import ReviewNoteModel
+
+    n_model = session.get(ReviewNoteModel, dto.review_note_id)
+    if not n_model:
+        raise EntityNotFoundError("ReviewNote", dto.review_note_id)
+    wp_repo = WorkingPaperRepository(session)
+    wp = wp_repo.get_working_paper(n_model.working_paper_id)
+    if not wp:
+        raise EntityNotFoundError("WorkingPaper", n_model.working_paper_id)
+    from finauditpro.application.security.engagement_lock_guard import assert_engagement_not_locked
+    from finauditpro.infrastructure.persistence.repositories import EngagementRepository
+
+    eng = EngagementRepository(session).get_by_id(wp.engagement_id)
+    assert_engagement_not_locked(eng)
+    reviewer = getattr(dto, "reviewer", "Reviewer")
+    role = resolve_user_role(session, wp.engagement_id, reviewer)
+    if role not in ("Senior", "Manager", "Partner"):
+        raise ValidationError("Unauthorized: Must be Senior, Manager, or Partner to reopen review notes.")
+    note = ReviewNote(
+        id=n_model.id,
+        working_paper_id=n_model.working_paper_id,
+        section_id=n_model.section_id,
+        raised_by=n_model.raised_by,
+        note_text=n_model.note_text,
+        status=ReviewNoteStatusEnum(n_model.status),
+        response_text=n_model.response_text,
+        responded_by=n_model.responded_by,
+        cleared_by=n_model.cleared_by,
+    )
+    note.reopen(reviewer, reason=getattr(dto, "reason", ""))
+    saved = wp_repo.update_review_note(note)
+    if wp.status == WorkingPaperStatusEnum.APPROVED:
+        wp.status = WorkingPaperStatusEnum.UNDER_REVIEW
+        wp_repo.update_working_paper(wp)
+    AuditEventRepository(session).add(
+        AuditEvent(
+            engagement_id=wp.engagement_id,
+            actor=reviewer,
+            action="Review Note Reopened",
+            details=f"Reopened review note '{saved.id}' on '{wp.index_reference}'",
         )
     )
     return saved

@@ -73,6 +73,27 @@ class AuditEventRepository:
 
         return True
 
+    def list_for_engagement(self, engagement_id: str) -> list[AuditEvent]:
+        stmt = (
+            select(AuditEventModel)
+            .where(AuditEventModel.engagement_id == engagement_id)
+            .order_by(text("rowid ASC"))
+        )
+        models = self.session.scalars(stmt).all()
+        return [
+            AuditEvent(
+                id=m.id,
+                engagement_id=m.engagement_id,
+                actor=m.actor,
+                action=m.action,
+                details=m.details,
+                previous_hash=m.previous_hash,
+                entry_hash=m.entry_hash,
+                timestamp=m.timestamp,
+            )
+            for m in models
+        ]
+
     def list_recent(self, limit: int = 20) -> list[AuditEvent]:
         stmt = select(AuditEventModel).order_by(text("rowid DESC")).limit(limit)
         models = self.session.scalars(stmt).all()

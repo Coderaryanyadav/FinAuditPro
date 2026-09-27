@@ -16,6 +16,9 @@ from finauditpro.domain.audit_matrix_entities import (
     ProcedureStatusEnum,
     RiskSeverityEnum,
 )
+from finauditpro.application.security.engagement_lock_guard import (
+    assert_engagement_not_locked,
+)
 from finauditpro.domain.entities import AuditEvent
 from finauditpro.domain.exceptions import EntityNotFoundError
 from finauditpro.infrastructure.persistence.database import DatabaseManager
@@ -35,8 +38,10 @@ class AuditMatrixService:
     def create_risk(self, dto: CreateRiskDTO) -> AuditRisk:
         with self.db_manager.session_scope() as session:
             eng_repo = EngagementRepository(session)
-            if not eng_repo.get_by_id(dto.engagement_id):
+            eng = eng_repo.get_by_id(dto.engagement_id)
+            if not eng:
                 raise EntityNotFoundError("Engagement", dto.engagement_id)
+            assert_engagement_not_locked(eng)
 
         assertions_list = getattr(dto, "assertions", None) or (
             [dto.assertion] if hasattr(dto, "assertion") else [AssertionEnum.COMPLETENESS]
@@ -81,8 +86,10 @@ class AuditMatrixService:
     def create_procedure(self, dto: CreateProcedureDTO) -> AuditProcedure:
         with self.db_manager.session_scope() as session:
             eng_repo = EngagementRepository(session)
-            if not eng_repo.get_by_id(dto.engagement_id):
+            eng = eng_repo.get_by_id(dto.engagement_id)
+            if not eng:
                 raise EntityNotFoundError("Engagement", dto.engagement_id)
+            assert_engagement_not_locked(eng)
 
         linked_risks = getattr(dto, "linked_risk_ids", None) or (
             [dto.risk_id] if getattr(dto, "risk_id", None) else []
@@ -97,11 +104,16 @@ class AuditMatrixService:
             procedure_code=dto.procedure_code,
             objective=dto.objective,
             assertions=assertions_list,
-            procedure_type=dto.procedure_type,
-            instructions=dto.instructions,
+            procedure_type=getattr(dto, "procedure_type", "Substantive Procedure"),
+            instructions=getattr(dto, "instructions", ""),
+            account_area=getattr(dto, "account_area", "") or getattr(dto, "audit_area", ""),
+            evidence_requirement=getattr(dto, "evidence_requirement", "") or getattr(dto, "expected_evidence", ""),
+            population_definition=getattr(dto, "population_definition", "") or getattr(dto, "population", ""),
+            methodology=getattr(dto, "methodology", ""),
             requires_evidence=getattr(dto, "requires_evidence", True),
-            status=ProcedureStatusEnum.NOT_STARTED,
+            status=getattr(dto, "status", ProcedureStatusEnum.NOT_STARTED),
         )
+
 
         with self.db_manager.session_scope() as session:
             repo = AuditMatrixRepository(session)
@@ -145,8 +157,10 @@ class AuditMatrixService:
     def create_finding(self, dto: CreateFindingDTO) -> AuditFinding:
         with self.db_manager.session_scope() as session:
             eng_repo = EngagementRepository(session)
-            if not eng_repo.get_by_id(dto.engagement_id):
+            eng = eng_repo.get_by_id(dto.engagement_id)
+            if not eng:
                 raise EntityNotFoundError("Engagement", dto.engagement_id)
+            assert_engagement_not_locked(eng)
 
         finding = AuditFinding(
             engagement_id=dto.engagement_id,
@@ -196,8 +210,10 @@ class AuditMatrixService:
     def attach_evidence(self, dto: AttachEvidenceDTO) -> AuditEvidence:
         with self.db_manager.session_scope() as session:
             eng_repo = EngagementRepository(session)
-            if not eng_repo.get_by_id(dto.engagement_id):
+            eng = eng_repo.get_by_id(dto.engagement_id)
+            if not eng:
                 raise EntityNotFoundError("Engagement", dto.engagement_id)
+            assert_engagement_not_locked(eng)
 
         ev = AuditEvidence(
             engagement_id=dto.engagement_id,
@@ -231,3 +247,13 @@ class AuditMatrixService:
         with self.db_manager.session_scope() as session:
             repo = AuditMatrixRepository(session)
             return repo.list_evidence_for_engagement(engagement_id)
+
+    def link_evidence_to_finding(self, finding_id: str, evidence_id: str) -> None:
+        """Associate an evidence record with a specific audit finding."""
+        from finauditpro.infrastructure.persistence.models import AuditEvidenceModel
+
+        with self.db_manager.session_scope() as session:
+            model = session.get(AuditEvidenceModel, evidence_id)
+            if model:
+                model.finding_id = finding_id
+                session.flush()

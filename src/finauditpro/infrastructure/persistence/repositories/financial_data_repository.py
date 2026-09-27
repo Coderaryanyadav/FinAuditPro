@@ -318,11 +318,12 @@ class FinancialDataRepository:
         ]
 
     def add_exceptions(self, exceptions: list[ExceptionItem]) -> None:
+        valid_ids = {row[0] for row in self.session.execute(select(FinancialDatasetModel.id)).all()}
         models = [
             ExceptionItemModel(
                 id=e.id,
                 analysis_run_id=e.analysis_run_id,
-                dataset_id=e.dataset_id,
+                dataset_id=e.dataset_id if e.dataset_id in valid_ids else None,
                 analytic_id=e.analytic_id,
                 severity=e.severity,
                 title=e.title,
@@ -338,6 +339,7 @@ class FinancialDataRepository:
         ]
         self.session.add_all(models)
         self.session.flush()
+
 
     def list_exceptions_by_dataset(self, dataset_id: str) -> list[ExceptionItem]:
         stmt = (

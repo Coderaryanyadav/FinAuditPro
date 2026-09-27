@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QMenu,
     QMessageBox,
     QPushButton,
+    QScrollArea,
     QStackedWidget,
     QVBoxLayout,
     QWidget,
@@ -206,9 +207,13 @@ class MainWindow(QMainWindow):
         self.sidebar = _tag(QFrame(), "dashboardSidebar")
         self.sidebar.setFixedWidth(240)
         sb_layout = QVBoxLayout(self.sidebar)
-        sb_layout.setContentsMargins(10, 14, 10, 14)
-        sb_layout.setSpacing(3)
-        logo_row = QHBoxLayout()
+        sb_layout.setContentsMargins(0, 14, 0, 14)
+        sb_layout.setSpacing(0)
+
+        # 1. Fixed Top Logo Row
+        logo_container = QWidget()
+        logo_row = QHBoxLayout(logo_container)
+        logo_row.setContentsMargins(10, 0, 10, 8)
         logo_box = FinAuditLogoWidget(size=30)
         self.logo_name = _tag(QLabel("FinAuditPro"), "sidebarAppTitle")
         self.btn_collapse = QPushButton("◀")
@@ -222,21 +227,42 @@ class MainWindow(QMainWindow):
             logo_row.addWidget(w)
         logo_row.addStretch()
         logo_row.addWidget(self.btn_collapse)
-        sb_layout.addLayout(logo_row)
-        sb_layout.addSpacing(8)
+        sb_layout.addWidget(logo_container)
+
+        # 2. Scrollable Navigation Button Area
+        self.sb_scroll = QScrollArea()
+        self.sb_scroll.setWidgetResizable(True)
+        self.sb_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self.sb_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.sb_scroll.setStyleSheet("background: transparent; border: none;")
+
+        sb_nav_content = QWidget()
+        sb_nav_content.setStyleSheet("background: transparent;")
+        sb_nav_layout = QVBoxLayout(sb_nav_content)
+        sb_nav_layout.setContentsMargins(10, 4, 10, 4)
+        sb_nav_layout.setSpacing(3)
+
         self.btn_group = QButtonGroup(self)
         cur_sec = None
         for idx, (attr, title, sec) in enumerate(NAV_ITEMS):
             if sec != cur_sec:
                 cur_sec = sec
-                sb_layout.addWidget(_tag(QLabel(sec), "sidebarSectionLabel"))
+                sb_nav_layout.addWidget(_tag(QLabel(sec), "sidebarSectionLabel"))
             btn = _tag(QPushButton(title), "navButton")
             btn.setCheckable(True)
             setattr(self, attr, btn)
             self.btn_group.addButton(btn, idx)
-            sb_layout.addWidget(btn)
+            sb_nav_layout.addWidget(btn)
         self.btn_dashboard.setChecked(True)
-        sb_layout.addStretch()
+        sb_nav_layout.addStretch()
+
+        self.sb_scroll.setWidget(sb_nav_content)
+        sb_layout.addWidget(self.sb_scroll, 1)
+
+        # 3. Fixed Bottom Profile Box
+        prof_container = QWidget()
+        prof_box_layout = QVBoxLayout(prof_container)
+        prof_box_layout.setContentsMargins(10, 8, 10, 0)
         prof = _tag(QFrame(), "sidebarProfileFrame")
         prof.setCursor(Qt.CursorShape.PointingHandCursor)
         prof.mousePressEvent = lambda e: self.btn_settings.click()
@@ -262,7 +288,8 @@ class MainWindow(QMainWindow):
         pf_l.addLayout(u_info)
         pf_l.addStretch()
         pf_l.addWidget(btn_more)
-        sb_layout.addWidget(prof)
+        prof_box_layout.addWidget(prof)
+        sb_layout.addWidget(prof_container)
         main_layout.addWidget(self.sidebar)
         right_container = QWidget()
         rc_layout = QVBoxLayout(right_container)
@@ -491,10 +518,17 @@ class MainWindow(QMainWindow):
         )
         menu.addAction("Lock Workstation (Ctrl+L)", self._lock_workstation)
         menu.addAction("Edit Profile & Password", self._open_edit_profile_dialog)
+        menu.addAction("Team & Role Management", self._open_user_management_dialog)
         menu.addAction("System Settings", lambda: self.btn_settings.click())
         menu.addSeparator()
         menu.addAction("Sign Out", self.close)
         menu.exec(self.cursor().pos())
+
+    def _open_user_management_dialog(self) -> None:
+        if hasattr(self, "view_settings") and hasattr(
+            self.view_settings, "_on_manage_team_clicked"
+        ):
+            self.view_settings._on_manage_team_clicked()
 
     def _open_edit_profile_dialog(self) -> None:
         if hasattr(self, "view_settings") and hasattr(
@@ -721,13 +755,14 @@ class MainWindow(QMainWindow):
         from finauditpro.ui.dialogs.command_palette_dialog import CommandPaletteDialog
 
         dlg = CommandPaletteDialog(self)
-        dlg.action_triggered.connect(
-            lambda k, p: (
+
+        def _handle_action(k: str, p: Any) -> None:
+            if k == "nav" and 0 <= p < self.stack.count():
                 self.stack.setCurrentIndex(p)
-                if k == "nav" and 0 <= p < self.stack.count()
-                else None
-            )
-        )
+            elif k == "manage_team":
+                self._open_user_management_dialog()
+
+        dlg.action_triggered.connect(_handle_action)
         dlg.exec()
 
     def resizeEvent(self, event: Any) -> None:

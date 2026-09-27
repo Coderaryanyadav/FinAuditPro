@@ -8,6 +8,7 @@ from typing import Any
 import openpyxl
 
 from finauditpro.application.report_dtos import ApproveReportDTO, ExportReportDTO, GenerateReportDTO
+from finauditpro.application.security.engagement_lock_guard import assert_engagement_not_locked
 from finauditpro.application.services.report_renderer import render_pdf
 from finauditpro.domain.clock import utc_now
 from finauditpro.domain.entities import AuditEvent
@@ -157,8 +158,10 @@ class ReportService:
         """Assemble report data, compute content hash digest, and render PDF artifact."""
         with self.db_manager.session_scope() as session:
             eng_repo = EngagementRepository(session)
-            if not eng_repo.get_by_id(dto.engagement_id):
+            eng = eng_repo.get_by_id(dto.engagement_id)
+            if not eng:
                 raise EntityNotFoundError("Engagement", dto.engagement_id)
+            assert_engagement_not_locked(eng)
 
             report_repo = ReportRepository(session)
             tpl = report_repo.get_template(dto.template_id)
@@ -368,6 +371,9 @@ class ReportService:
             report = report_repo.get_report(dto.report_id)
             if not report:
                 raise EntityNotFoundError("Report", dto.report_id)
+
+            eng = EngagementRepository(session).get_by_id(report.engagement_id)
+            assert_engagement_not_locked(eng)
 
             if user:
                 member = (

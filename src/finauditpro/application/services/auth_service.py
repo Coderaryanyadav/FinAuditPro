@@ -331,3 +331,33 @@ class AuthService:
             if not user or not user.is_totp_enabled or not user.totp_secret:
                 return True
             return self.verify_totp_token(user.totp_secret, token)
+
+    def update_user_role(self, user_id: str, new_role: RoleEnum) -> User:
+        """Update role of an existing user."""
+        with self.db_manager.session_scope() as session:
+            repo = UserRepository(session)
+            return repo.update_role(user_id, new_role)
+
+    def admin_reset_password(
+        self, user_id: str, new_password: str, must_change_password: bool = True
+    ) -> UserSession:
+        """Administrative password reset that forces user to set new password on next login."""
+        self.validate_password_complexity(new_password)
+        with self.db_manager.session_scope() as session:
+            repo = UserRepository(session)
+            user = repo.update_password(
+                user_id, new_password, must_change_password=must_change_password
+            )
+            return UserSession(
+                user_id=user.id,
+                username=user.username,
+                role=user.role,
+                must_change_password=must_change_password,
+            )
+
+    def delete_user(self, user_id: str) -> bool:
+        """Delete user account."""
+        with self.db_manager.session_scope() as session:
+            repo = UserRepository(session)
+            return repo.delete_user(user_id)
+

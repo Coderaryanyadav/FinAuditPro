@@ -33,6 +33,7 @@ var/
 wheels/
 share/python-wheels/
 *.egg-info/
+*.zip
 .installed.cfg
 *.egg
 MANIFEST

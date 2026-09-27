@@ -18,7 +18,11 @@ from PySide6.QtWidgets import (
 )
 
 from finauditpro.application.audit_completion_dtos import CreateGoingConcernAssessmentDTO
+from finauditpro.application.completion_dtos import PartnerSignoffDTO
 from finauditpro.application.services.audit_completion_service import AuditCompletionService
+from finauditpro.application.services.engagement_finalization_service import (
+    EngagementFinalizationService,
+)
 
 
 class AuditCompletionDialog(QDialog):
@@ -31,8 +35,9 @@ class AuditCompletionDialog(QDialog):
         self.db_manager = db_manager
         self.engagement_id = engagement_id
         self.completion_service = AuditCompletionService(db_manager)
+        self.finalization_service = EngagementFinalizationService(db_manager)
 
-        self.setWindowTitle("Audit Completion & Misstatement Evaluation — FinAuditPro")
+        self.setWindowTitle("Audit Completion & Finalisation Gate — FinAuditPro")
         self.resize(1100, 750)
         self._init_ui()
         self._load_data()
@@ -54,18 +59,21 @@ class AuditCompletionDialog(QDialog):
 
         # Tab Widget
         self.tabs = QTabWidget()
+        self.tab_gate = QWidget()
         self.tab_sa450 = QWidget()
         self.tab_sa570 = QWidget()
         self.tab_sa580 = QWidget()
         self.tab_sa560 = QWidget()
         self.tab_sa520 = QWidget()
 
+        self.tabs.addTab(self.tab_gate, "🔒 Finalisation Gate")
         self.tabs.addTab(self.tab_sa450, "SA 450 Misstatements (SUM)")
         self.tabs.addTab(self.tab_sa570, "SA 570 Going Concern")
         self.tabs.addTab(self.tab_sa580, "SA 580 Representation Letter (MRL)")
         self.tabs.addTab(self.tab_sa560, "SA 560 Subsequent Events")
         self.tabs.addTab(self.tab_sa520, "SA 520 Final Analytical Review")
 
+        self._setup_gate_tab()
         self._setup_sa450_tab()
         self._setup_sa570_tab()
         self._setup_sa580_tab()
@@ -81,6 +89,46 @@ class AuditCompletionDialog(QDialog):
         self.btn_close.clicked.connect(self.accept)
         bot_bar.addWidget(self.btn_close)
         layout.addLayout(bot_bar)
+
+    def _setup_gate_tab(self) -> None:
+        layout = QVBoxLayout(self.tab_gate)
+
+        # Status Banner
+        self.lbl_gate_status = QLabel("Evaluating Finalisation Gate...")
+        self.lbl_gate_status.setStyleSheet(
+            "padding: 14px; background-color: #f1f5f9; border-radius: 6px; font-weight: bold; font-size: 15px; color: #1e293b;"
+        )
+        layout.addWidget(self.lbl_gate_status)
+
+        # Details text
+        self.txt_gate_details = QLabel()
+        self.txt_gate_details.setWordWrap(True)
+        self.txt_gate_details.setStyleSheet(
+            "padding: 12px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; color: #334155;"
+        )
+        layout.addWidget(self.txt_gate_details)
+
+        # Action Buttons for Lifecycle Transitions
+        act_box = QHBoxLayout()
+        self.btn_partner_review = QPushButton("Submit for Partner Review")
+        self.btn_partner_review.setStyleSheet("""
+            QPushButton { background-color: #2563EB; color: white; font-weight: 600; padding: 8px 16px; border-radius: 6px; }
+            QPushButton:hover { background-color: #1D4ED8; }
+        """)
+        self.btn_partner_review.clicked.connect(self._on_submit_partner_review)
+
+        self.btn_partner_finalize = QPushButton("Partner Sign-Off & Lock Engagement")
+        self.btn_partner_finalize.setStyleSheet("""
+            QPushButton { background-color: #059669; color: white; font-weight: 600; padding: 8px 16px; border-radius: 6px; }
+            QPushButton:hover { background-color: #047857; }
+        """)
+        self.btn_partner_finalize.clicked.connect(self._on_partner_finalize)
+
+        act_box.addWidget(self.btn_partner_review)
+        act_box.addWidget(self.btn_partner_finalize)
+        act_box.addStretch()
+        layout.addLayout(act_box)
+        layout.addStretch()
 
     def _setup_sa450_tab(self) -> None:
         layout = QVBoxLayout(self.tab_sa450)
@@ -170,6 +218,9 @@ class AuditCompletionDialog(QDialog):
         layout.addWidget(self.tbl_ratios)
 
     def _load_data(self) -> None:
+        # Load Finalisation Gate
+        self._load_gate_data()
+
         # Load SA 450
         try:
             summary = self.completion_service.evaluate_sa450_misstatements(self.engagement_id)
@@ -259,6 +310,56 @@ class AuditCompletionDialog(QDialog):
         except Exception:
             pass
 
+    def _load_gate_data(self) -> None:
+        try:
+            gate_res = self.finalization_service.evaluate_finalization_gate(self.engagement_id)
+            if gate_res.is_finalizable:
+                self.lbl_gate_status.setText("✅ FINALISATION READY")
+                self.lbl_gate_status.setStyleSheet(
+                    "padding: 14px; background-color: #ECFDF5; border: 1px solid #10B981; border-radius: 6px; font-weight: bold; font-size: 15px; color: #065F46;"
+                )
+                self.txt_gate_details.setText("All 10 mandatory audit gates and statutory consistency checks are fully satisfied.\nThe engagement is ready for Partner Sign-Off & Sealing.")
+                self.btn_partner_review.setEnabled(True)
+                self.btn_partner_finalize.setEnabled(True)
+            else:
+                self.lbl_gate_status.setText("⛔ FINALISATION BLOCKED")
+                self.lbl_gate_status.setStyleSheet(
+                    "padding: 14px; background-color: #FEF2F2; border: 1px solid #EF4444; border-radius: 6px; font-weight: bold; font-size: 15px; color: #991B1B;"
+                )
+                self.txt_gate_details.setText(gate_res.display_text)
+                self.btn_partner_review.setEnabled(False)
+                self.btn_partner_finalize.setEnabled(False)
+        except Exception as ex:
+            self.lbl_gate_status.setText("⚠️ Finalisation Gate Evaluation Notice")
+            self.txt_gate_details.setText(str(ex))
+
+    def _on_submit_partner_review(self) -> None:
+        try:
+            self.finalization_service.submit_for_partner_review(self.engagement_id)
+            QMessageBox.information(
+                self, "Submitted", "Engagement successfully submitted for Partner Review."
+            )
+            self._load_data()
+        except Exception as ex:
+            QMessageBox.warning(self, "Submission Notice", str(ex))
+
+    def _on_partner_finalize(self) -> None:
+        try:
+            res = self.finalization_service.partner_signoff_and_finalize(
+                PartnerSignoffDTO(
+                    engagement_id=self.engagement_id,
+                    signoff_notes="Final statutory audit sign-off completed.",
+                )
+            )
+            QMessageBox.information(
+                self,
+                "Engagement Finalized & Locked",
+                f"Engagement successfully approved and sealed!\nStatus: {res.get('status')}\nis_locked: {res.get('is_locked')}",
+            )
+            self._load_data()
+        except Exception as ex:
+            QMessageBox.warning(self, "Finalisation Blocked", str(ex))
+
     def _signoff_going_concern(self) -> None:
         try:
             dto = CreateGoingConcernAssessmentDTO(
@@ -274,3 +375,4 @@ class AuditCompletionDialog(QDialog):
             self._load_data()
         except Exception as e:
             QMessageBox.warning(self, "Sign-Off Notice", str(e))
+

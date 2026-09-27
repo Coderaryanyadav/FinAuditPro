@@ -65,3 +65,87 @@ class MaterialityService:
         with self.db_manager.session_scope() as session:
             repo = AuditMatrixRepository(session)
             return repo.list_materiality_history(engagement_id)
+
+    def auto_derive_benchmark_from_trial_balance(
+        self, engagement_id: str, benchmark_type: Any
+    ) -> int:
+        """Derive benchmark amount in paise directly from imported trial balance / ledger entries."""
+        from finauditpro.infrastructure.persistence.repositories.financial_data_repository import (
+            FinancialDataRepository,
+        )
+
+        with self.db_manager.session_scope() as session:
+            repo = FinancialDataRepository(session)
+            datasets = repo.list_datasets_by_engagement(engagement_id)
+            if not datasets:
+                return 0
+
+            b_str = str(getattr(benchmark_type, "value", benchmark_type)).lower()
+
+            for ds in datasets:
+                records = repo.get_records_by_dataset(ds.id)
+                if not records:
+                    continue
+
+                if "revenue" in b_str or "turnover" in b_str or "sales" in b_str:
+                    rev_paise = sum(
+                        int(round(r.credit * 100)) - int(round(r.debit * 100))
+                        for r in records
+                        if any(
+                            kw in (r.account_name or "").lower()
+                            for kw in ["sales", "revenue", "turnover", "income", "fees", "operating"]
+                        )
+                    )
+                    if rev_paise > 0:
+                        return rev_paise
+
+                elif "asset" in b_str:
+                    asset_paise = sum(
+                        max(0, int(round(r.debit * 100)) - int(round(r.credit * 100)))
+                        for r in records
+                        if any(
+                            kw in (r.account_name or "").lower()
+                            for kw in [
+                                "asset", "bank", "cash", "debtor", "receivable",
+                                "inventory", "stock", "equipment", "building", "investment"
+                            ]
+                        )
+                    )
+                    if asset_paise > 0:
+                        return asset_paise
+
+                elif "equity" in b_str or "worth" in b_str:
+                    eq_paise = sum(
+                        max(0, int(round(r.credit * 100)) - int(round(r.debit * 100)))
+                        for r in records
+                        if any(
+                            kw in (r.account_name or "").lower()
+                            for kw in ["capital", "equity", "reserve", "surplus", "retained"]
+                        )
+                    )
+                    if eq_paise > 0:
+                        return eq_paise
+
+                elif "profit" in b_str or "pbt" in b_str:
+                    rev_total = sum(
+                        int(round(r.credit * 100)) - int(round(r.debit * 100))
+                        for r in records
+                        if any(kw in (r.account_name or "").lower() for kw in ["sales", "revenue", "income"])
+                    )
+                    exp_total = sum(
+                        int(round(r.debit * 100)) - int(round(r.credit * 100))
+                        for r in records
+                        if any(
+                            kw in (r.account_name or "").lower()
+                            for kw in ["expense", "purchase", "cost", "salary", "rent", "depreciation", "tax", "fee"]
+                        )
+                    )
+                    pbt_paise = rev_total - exp_total
+                    if pbt_paise > 0:
+                        return pbt_paise
+
+            # Default fallback: total debit volume
+            first_ds = datasets[0]
+            records = repo.get_records_by_dataset(first_ds.id)
+            return sum(int(round(r.debit * 100)) for r in records)
+

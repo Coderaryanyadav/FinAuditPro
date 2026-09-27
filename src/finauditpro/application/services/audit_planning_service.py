@@ -86,22 +86,35 @@ class AuditPlanningService:
     def list_materiality_history(self, engagement_id: str) -> list[MaterialityAssessment]:
         return MaterialityService(self.db_manager).list_materiality_history(engagement_id)
 
+    def auto_derive_benchmark_from_trial_balance(
+        self, engagement_id: str, benchmark_type: Any
+    ) -> int:
+        return MaterialityService(self.db_manager).auto_derive_benchmark_from_trial_balance(
+            engagement_id, benchmark_type
+        )
+
     def create_risk(self, dto: CreateRiskDTO) -> AuditRisk:
         with self.db_manager.session_scope() as session:
             if not EngagementRepository(session).get_by_id(dto.engagement_id):
                 raise EntityNotFoundError("Engagement", dto.engagement_id)
 
+            area = dto.financial_statement_area or dto.area
+            planned_resp = dto.planned_response or dto.rationale
             risk = AuditRisk(
                 engagement_id=dto.engagement_id,
                 risk_code=dto.risk_code,
                 title=dto.title,
                 category=dto.category,
                 description=dto.description,
+                financial_statement_area=area,
                 assertions=dto.assertions,
                 inherent_risk=dto.inherent_risk,
                 control_risk=dto.control_risk,
                 is_significant_risk=dto.is_significant_risk,
-                planned_response=dto.planned_response,
+                planned_response=planned_resp,
+                status=dto.status,
+                evidence_ids=list(dto.evidence_ids),
+                linked_procedure_ids=list(dto.linked_procedure_ids),
             )
             risk.calculate_romm()
 

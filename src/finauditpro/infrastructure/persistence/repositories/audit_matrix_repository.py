@@ -49,6 +49,14 @@ class AuditMatrixRepository:
             return [AssertionEnum.COMPLETENESS]
 
     def _to_risk_entity(self, model: AuditRiskModel) -> AuditRisk:
+        try:
+            ev_ids = json.loads(getattr(model, "evidence_ids_json", "[]") or "[]")
+        except Exception:
+            ev_ids = []
+        try:
+            proc_ids = json.loads(getattr(model, "linked_procedures_json", "[]") or "[]")
+        except Exception:
+            proc_ids = []
         return AuditRisk(
             id=model.id, engagement_id=model.engagement_id, risk_code=model.risk_code,
             title=model.title or f"Risk {model.risk_code}", category=model.category, description=model.description,
@@ -56,7 +64,9 @@ class AuditMatrixRepository:
             assertions=self._parse_assertions(model.assertions_json),
             inherent_risk=RiskSeverityEnum(model.inherent_risk), control_risk=RiskSeverityEnum(model.control_risk),
             derived_romm=RiskSeverityEnum(model.derived_romm), is_significant_risk=bool(model.is_significant_risk),
-            planned_response=model.risk_response or "", created_at=model.created_at, updated_at=model.updated_at,
+            planned_response=model.risk_response or "", status=getattr(model, "status", "Identified") or "Identified",
+            evidence_ids=ev_ids, linked_procedure_ids=proc_ids,
+            created_at=model.created_at, updated_at=model.updated_at,
         )
 
     def _to_materiality_entity(self, model: MaterialityAssessmentModel) -> MaterialityAssessment:
@@ -148,10 +158,14 @@ class AuditMatrixRepository:
     def add_risk(self, risk: AuditRisk) -> AuditRisk:
         model = AuditRiskModel(
             id=risk.id, engagement_id=risk.engagement_id, risk_code=risk.risk_code, title=risk.title,
-            category=risk.category, description=risk.description, assertions_json=json.dumps([a.value for a in risk.assertions]),
+            category=risk.category, financial_statement_area=risk.financial_statement_area or risk.area,
+            description=risk.description, assertions_json=json.dumps([a.value for a in risk.assertions]),
             inherent_risk=risk.inherent_risk.value, control_risk=risk.control_risk.value,
             derived_romm=risk.derived_romm.value, is_significant_risk=risk.is_significant_risk,
-            risk_response=risk.risk_response, status=risk.status, created_at=risk.created_at, updated_at=risk.updated_at,
+            risk_response=risk.risk_response, status=risk.status,
+            evidence_ids_json=json.dumps(risk.evidence_ids),
+            linked_procedures_json=json.dumps(risk.linked_procedure_ids),
+            created_at=risk.created_at, updated_at=risk.updated_at,
         )
         self.session.add(model)
         self.session.flush()

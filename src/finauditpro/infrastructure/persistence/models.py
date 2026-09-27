@@ -315,6 +315,7 @@ class AuditRiskModel(Base):
     risk_code: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     category: Mapped[str] = mapped_column(String(100), nullable=False)
+    financial_statement_area: Mapped[str | None] = mapped_column(String(100), nullable=True, default="")
     description: Mapped[str] = mapped_column(Text, nullable=False)
     assertions_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
     financial_statement_level: Mapped[bool] = mapped_column(nullable=False, default=False)
@@ -324,6 +325,8 @@ class AuditRiskModel(Base):
     is_significant_risk: Mapped[bool] = mapped_column(nullable=False, default=False)
     risk_response: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="Identified")
+    evidence_ids_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    linked_procedures_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
     prior_engagement_risk_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, nullable=False

@@ -218,9 +218,9 @@ class LoginDialog(QDialog):
         self.btn_submit.clicked.connect(self._handle_login)
 
         fl.addWidget(self.btn_submit)
-        fl.addSpacing(14)
+        fl.addSpacing(18)
 
-        hint = QLabel("Fully offline · No data leaves your machine")
+        hint = QLabel("Enterprise Multi-Tier Governance · Offline Secured")
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
         hint.setStyleSheet(
             "font-size: 11px; color: #64748b; line-height: 1.4; border: none; background: transparent;"

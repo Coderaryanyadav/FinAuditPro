@@ -16,6 +16,42 @@ class UserSession:
 
 
 _ROLE_PERMISSIONS: dict[RoleEnum, set[str]] = {
+    RoleEnum.ADMIN: {
+        "firm:create",
+        "firm:edit",
+        "client:create",
+        "client:edit",
+        "engagement:create",
+        "engagement:edit",
+        "engagement:delete",
+        "engagement:signoff",
+        "audit:review",
+        "audit:edit",
+        "audit:view",
+        "document:upload",
+        "user:manage",
+        "finalization:approve",
+        "workpaper:lock",
+        "icfr:issue",
+    },
+    RoleEnum.ADMINISTRATOR: {
+        "firm:create",
+        "firm:edit",
+        "client:create",
+        "client:edit",
+        "engagement:create",
+        "engagement:edit",
+        "engagement:delete",
+        "engagement:signoff",
+        "audit:review",
+        "audit:edit",
+        "audit:view",
+        "document:upload",
+        "user:manage",
+        "finalization:approve",
+        "workpaper:lock",
+        "icfr:issue",
+    },
     RoleEnum.PARTNER: {
         "firm:create",
         "firm:edit",
@@ -26,22 +62,64 @@ _ROLE_PERMISSIONS: dict[RoleEnum, set[str]] = {
         "engagement:delete",
         "engagement:signoff",
         "audit:review",
+        "audit:edit",
+        "audit:view",
+        "document:upload",
+        "user:manage",
+        "finalization:approve",
+        "workpaper:lock",
+        "icfr:issue",
+    },
+    RoleEnum.CHECKER: {
+        "client:view",
+        "engagement:view",
+        "engagement:edit",
+        "audit:review",
+        "audit:edit",
+        "audit:view",
+        "document:upload",
+        "review_notes:manage",
+        "sample:validate",
+        "exception:review",
     },
     RoleEnum.MANAGER: {
         "client:create",
         "client:edit",
+        "client:view",
         "engagement:create",
         "engagement:edit",
+        "engagement:view",
         "audit:review",
         "audit:edit",
+        "audit:view",
+        "document:upload",
+        "review_notes:manage",
+        "sample:validate",
     },
     RoleEnum.SENIOR: {
         "engagement:edit",
+        "engagement:view",
+        "audit:edit",
+        "audit:view",
+        "document:upload",
+        "review_notes:manage",
+        "sample:validate",
+    },
+    RoleEnum.MAKER: {
+        "audit:view",
         "audit:edit",
         "document:upload",
+        "control_testing:execute",
+        "workpaper:draft",
     },
     RoleEnum.ASSOCIATE: {
         "audit:view",
+        "audit:edit",
+        "document:upload",
+    },
+    RoleEnum.STAFF: {
+        "audit:view",
+        "audit:edit",
         "document:upload",
     },
 }
@@ -103,6 +181,9 @@ class RBACManager:
             return False
         allowed = _ROLE_PERMISSIONS.get(self.current_session.role, set())
         return permission in allowed
+
+    has_permission = check_permission
+
 
     def require_permission(self, permission: str) -> None:
         """Raise PermissionDeniedError if session is missing or role is unprivileged."""

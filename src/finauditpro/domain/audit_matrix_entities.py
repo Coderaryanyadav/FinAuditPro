@@ -348,3 +348,7 @@ class AuditEvidence(DomainBaseModel):
     @property
     def related_working_paper(self) -> str | None:
         return self.working_paper_id
+
+    @property
+    def timestamp(self) -> datetime:
+        return self.created_at

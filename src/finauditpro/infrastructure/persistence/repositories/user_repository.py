@@ -145,9 +145,28 @@ class UserRepository:
             user_id, new_password=new_password, must_change_password=must_change_password
         )
 
+    def update_role(self, user_id: str, new_role: RoleEnum) -> User:
+        """Update user role in database."""
+        model = self.session.get(UserModel, user_id)
+        if not model:
+            raise ValueError(f"User with ID '{user_id}' not found.")
+        model.role = new_role.value if hasattr(new_role, "value") else str(new_role)
+        self.session.flush()
+        return self._to_entity(model)
+
+    def delete_user(self, user_id: str) -> bool:
+        """Delete user by ID from database."""
+        model = self.session.get(UserModel, user_id)
+        if not model:
+            return False
+        self.session.delete(model)
+        self.session.flush()
+        return True
+
     def is_empty(self) -> bool:
         """Check if the users table is completely empty."""
         stmt = select(UserModel).limit(1)
         first_user = self.session.scalars(stmt).first()
         return first_user is None
+
 

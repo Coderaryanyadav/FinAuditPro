@@ -120,6 +120,23 @@ class AuditMatrixView(QWidget):
         self.bm_amount_input.setPlaceholderText("Enter benchmark amount in INR...")
         self.bm_amount_input.setStyleSheet(field_style)
 
+        auto_pull_btn = QPushButton("⚡ Auto-Pull from Trial Balance")
+        auto_pull_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        auto_pull_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #059669; color: #FFFFFF;
+                font-size: 12px; font-weight: 600;
+                border-radius: 6px; padding: 7px 14px; border: 1px solid transparent;
+            }
+            QPushButton:hover { background-color: #047857; }
+            QPushButton:pressed { background-color: #065F46; }
+        """)
+        auto_pull_btn.clicked.connect(self._on_auto_pull_tb_clicked)
+
+        amt_row = QHBoxLayout()
+        amt_row.addWidget(self.bm_amount_input, 1)
+        amt_row.addWidget(auto_pull_btn)
+
         calc_btn = QPushButton("Calculate && Save Materiality")
         calc_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         calc_btn.setStyleSheet("""
@@ -139,7 +156,7 @@ class AuditMatrixView(QWidget):
             return lbl
 
         form.addRow(make_lbl("Benchmark Type:"), self.bm_combo)
-        form.addRow(make_lbl("Amount (INR):"), self.bm_amount_input)
+        form.addRow(make_lbl("Amount (INR):"), amt_row)
         form.addRow("", calc_btn)
         card.content_layout.addLayout(form)
         layout.addWidget(card)
@@ -475,6 +492,37 @@ class AuditMatrixView(QWidget):
             TraceabilityDialog(
                 self.traceability_service, self.current_engagement.id, finding_id, parent=self
             ).exec()
+
+    def _on_auto_pull_tb_clicked(self) -> None:
+        if not self.current_engagement or not self.planning_service:
+            QMessageBox.warning(
+                self, "No Engagement", "Please select an active audit engagement first."
+            )
+            return
+        bm_type = self.bm_combo.currentData()
+        try:
+            if hasattr(self.planning_service, "auto_derive_benchmark_from_trial_balance"):
+                paise = self.planning_service.auto_derive_benchmark_from_trial_balance(
+                    self.current_engagement.id, bm_type
+                )
+            else:
+                paise = 0
+            if paise > 0:
+                rupees = paise / 100.0
+                self.bm_amount_input.setText(f"{rupees:,.2f}")
+                QMessageBox.information(
+                    self,
+                    "Benchmark Extracted",
+                    f"Successfully pulled {bm_type.value if hasattr(bm_type, 'value') else bm_type} benchmark of ₹{rupees:,.2f} from imported Trial Balance datasets.",
+                )
+            else:
+                QMessageBox.information(
+                    self,
+                    "No Data Found",
+                    "No matching ledger / Trial Balance accounts found for this benchmark in current engagement datasets. Please verify dataset import or enter manually.",
+                )
+        except Exception as ex:
+            QMessageBox.critical(self, "Extraction Error", f"Failed to pull from Trial Balance: {ex}")
 
     def _on_calculate_materiality(self) -> None:
         if not self.current_engagement or not self.planning_service:

@@ -86,8 +86,14 @@ class SettingsView(QWidget):
         sec_layout.addWidget(sec_desc)
 
         sec_btn_row = QHBoxLayout()
-        btn_change_pwd = QPushButton("Edit Profile && Credentials")
-        btn_change_pwd.setObjectName("primaryButton")
+        btn_manage_team = QPushButton("Manage Team && Roles (Maker / Checker / Admin)")
+        btn_manage_team.setObjectName("primaryButton")
+        btn_manage_team.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_manage_team.clicked.connect(self._on_manage_team_clicked)
+        sec_btn_row.addWidget(btn_manage_team)
+
+        btn_change_pwd = QPushButton("Edit Profile && Password")
+        btn_change_pwd.setObjectName("secondaryButton")
         btn_change_pwd.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_change_pwd.clicked.connect(self._on_change_password_clicked)
         sec_btn_row.addWidget(btn_change_pwd)
@@ -237,5 +243,18 @@ class SettingsView(QWidget):
         dlg = TOTPDialog(self.window(), auth_service=self.auth_service, user_session=user_sess)
         dlg.exec()
 
+    def _on_manage_team_clicked(self) -> None:
+        if not self.auth_service:
+            QMessageBox.warning(self, "Service Error", "Authentication service is unavailable.")
+            return
+
+        from finauditpro.ui.dialogs.user_management_dialog import UserManagementDialog
+
+        win = self.window()
+        user_sess = getattr(win, "current_user_session", None)
+        dlg = UserManagementDialog(self.auth_service, current_session=user_sess, parent=self)
+        dlg.exec()
+
     def _open_self_check(self) -> None:
         SelfCheckDialog(self).exec()
+

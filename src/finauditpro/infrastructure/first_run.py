@@ -131,3 +131,4 @@ def initialize_database(db_file_path: str | Path | None = None) -> DatabaseManag
     db_manager._create_audit_triggers()
 
     return db_manager
+

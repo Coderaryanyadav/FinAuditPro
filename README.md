@@ -14,7 +14,7 @@
 
 - **100% Offline & Local Privacy:** Zero cloud telemetry or external network calls. All financial analytics and AI co-pilot queries execute locally on the practitioner's workstation.
 - **Deterministic Integer-Paise Math:** Storage and math in exact integer paise (1 INR = 100 paise) preventing floating-point rounding errors.
-- **4-Layer Domain-Driven Design (DDD):** Pure Python domain layer decoupled from presentation (PyQt6) and persistence (SQLite).
+- **4-Layer Domain-Driven Design (DDD):** Pure Python domain layer decoupled from presentation (PyQt6) and persistence (SQLite). 
 - **SQLite WAL with Immutability Triggers:** High-performance ACID storage with database-level triggers enforcing immutable audit trails.
 - **Local AI Copilot via LM Studio:** On-device RAG assistant querying statutory standards with prompt injection defenses.
 - **Electronic Working Papers (SA 230):** Full maker-checker review workflows, threaded notes, and SQC 1 10-year archival sealing.

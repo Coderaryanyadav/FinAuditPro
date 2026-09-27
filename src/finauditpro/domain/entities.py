@@ -12,6 +12,9 @@ from finauditpro.domain.exceptions import ValidationError
 
 
 class RoleEnum(StrEnum):
+    ADMIN = "Admin"
+    CHECKER = "Checker"
+    MAKER = "Maker"
     PARTNER = "Partner"
     MANAGER = "Manager"
     SENIOR = "Senior"
@@ -19,7 +22,6 @@ class RoleEnum(StrEnum):
     ASSOCIATE = "Associate"
     STAFF = "Staff"
     ADMINISTRATOR = "Administrator"
-    ADMIN = "Admin"
 
 
 class AuditTypeEnum(StrEnum):

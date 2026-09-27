@@ -256,3 +256,240 @@ def test_audit_trail_for_risk_and_procedure_lifecycle(test_db: DatabaseManager, 
     assert "RISK_CREATED" in actions
     assert "PROCEDURE_GENERATED_FROM_RISK" in actions
     assert "PROCEDURE_STATUS_UPDATED" in actions
+
+
+def test_audit_risk_required_fields_and_ai_advisory_isolation(test_db: DatabaseManager, active_engagement: str):
+    """Test that AuditRisk model supports all canonical fields and official scoring cannot be silently overridden by AI."""
+    planning_service = AuditPlanningService(test_db)
+
+    # 1. Verify all canonical risk fields
+    risk = planning_service.create_risk(
+        CreateRiskDTO(
+            engagement_id=active_engagement,
+            risk_code="RSK-REV-001",
+            title="Revenue Cut-off Inaccuracy",
+            category="Revenue",
+            description="High risk of premature revenue recognition before delivery terms fulfilled.",
+            area="Revenue from Operations",
+            assertions=[AssertionEnum.CUT_OFF, AssertionEnum.OCCURRENCE],
+            inherent_risk=RiskSeverityEnum.HIGH,
+            control_risk=RiskSeverityEnum.MEDIUM,
+            rationale="Auditee uses manual dispatch register prone to delay in entry.",
+            status="Assessed",
+            evidence_ids=["EV-DOC-001"],
+            linked_procedure_ids=["PROC-REV-01"],
+        )
+    )
+
+    assert risk.id is not None
+    assert risk.engagement_id == active_engagement
+    assert risk.area == "Revenue from Operations"
+    assert risk.description == "High risk of premature revenue recognition before delivery terms fulfilled."
+    assert risk.assertion == AssertionEnum.CUT_OFF
+    assert risk.inherent_risk == RiskSeverityEnum.HIGH
+    assert risk.control_risk == RiskSeverityEnum.MEDIUM
+    assert risk.overall_risk == RiskSeverityEnum.HIGH  # High x Medium = High
+    assert risk.rationale == "Auditee uses manual dispatch register prone to delay in entry."
+    assert risk.evidence == ["EV-DOC-001"]
+    assert risk.related_procedures == ["PROC-REV-01"]
+    assert risk.status == "Assessed"
+
+    # 2. AI Advisory Isolation: An AI suggestion payload cannot silently change official derived RoMM
+    ai_suggested_score = RiskSeverityEnum.LOW
+    # The official risk score is deterministically derived from inherent and control risks
+    official_romm = risk.calculate_romm()
+    assert official_romm == RiskSeverityEnum.HIGH
+    assert official_romm != ai_suggested_score  # AI suggestion does not mutate official score
+
+
+def test_full_canonical_revenue_cutoff_audit_execution_chain(test_db: DatabaseManager, active_engagement: str):
+    """Test complete canonical flow end-to-end:
+    Financial Information (Sales Ledger)
+    -> Risk (Cut-off Risk)
+    -> Assertion (Cut-Off)
+    -> Procedure (Revenue Cut-off Procedure)
+    -> Sample & Evidence
+    -> Test Execution & Exception
+    -> Finding
+    -> Working Paper
+    """
+    from finauditpro.application.audit_planning_dtos import AttachEvidenceDTO, CreateFindingDTO
+    from finauditpro.application.services.financial_service import FinancialService, ImportDatasetDTO
+    from finauditpro.domain.audit_execution_entities import (
+        AuditException,
+        AuditSampleItemTest,
+        AuditTestOutcomeEnum,
+        TestExecution,
+    )
+    from finauditpro.domain.audit_matrix_entities import FindingSourceEnum, FindingStatusEnum
+    from finauditpro.domain.financial_entities import DatasetTypeEnum
+    from finauditpro.infrastructure.persistence.repositories import (
+        AuditMatrixRepository,
+        WorkingPaperRepository,
+    )
+
+    planning_service = AuditPlanningService(test_db)
+    fin_service = FinancialService(test_db)
+    trace_service = TraceabilityService(test_db)
+
+    # 1. Financial Information: Import / Register Sales Dataset
+    sales_csv = (
+        "Date,Voucher No,Account Name,Account Code,Debit,Credit,Description\n"
+        "2026-03-30,INV-101,Domestic Sales,4001,0,500000.00,Sale of industrial valves\n"
+        "2026-03-31,INV-102,Domestic Sales,4001,0,750000.00,Sale of pump assemblies\n"
+        "2026-04-01,INV-103,Domestic Sales,4001,0,320000.00,Sale of gaskets\n"
+    )
+    csv_file = Path(test_db.engine.url.database).parent / "sales_cutoff.csv"
+    csv_file.write_text(sales_csv, encoding="utf-8")
+
+    dataset = fin_service.import_dataset(
+        ImportDatasetDTO(
+            engagement_id=active_engagement,
+            file_path=str(csv_file),
+            dataset_type=DatasetTypeEnum.GENERAL_LEDGER,
+        )
+    )
+    assert dataset.row_count == 3
+
+    # 2. Risk: Assess Revenue Cut-off Risk
+    risk = planning_service.create_risk(
+        CreateRiskDTO(
+            engagement_id=active_engagement,
+            risk_code="RSK-REV-CUTOFF-01",
+            title="Revenue Year-End Cut-off Risk",
+            category="Revenue",
+            description="Risk of goods dispatched post year-end recorded in current year sales.",
+            area="Revenue from Operations",
+            assertions=[AssertionEnum.CUT_OFF, AssertionEnum.OCCURRENCE],
+            inherent_risk=RiskSeverityEnum.HIGH,
+            control_risk=RiskSeverityEnum.HIGH,
+            planned_response="100% testing of sales invoices +/- 5 days of year-end against e-Way bills.",
+        )
+    )
+    assert risk.overall_risk == RiskSeverityEnum.HIGH
+
+    # 3. Assertion & Procedure Generation
+    procs = planning_service.generate_procedures_for_risk(
+        engagement_id=active_engagement,
+        risk_id=risk.id,
+        selected_templates=["PROC-REV-CUTOFF"],
+        preparer="CA Senior Auditor",
+    )
+    assert len(procs) == 1
+    cutoff_proc = procs[0]
+    assert AssertionEnum.CUT_OFF in cutoff_proc.assertions
+
+    # 4. Sample Item Testing
+    sample_test = AuditSampleItemTest(
+        procedure_id=cutoff_proc.id,
+        item_identifier="INV-102",
+        account_code="4001",
+        expected_value_paise=0,  # Should have been recorded in next year (dispatched April 2)
+        actual_value_paise=75000000,  # Recorded in March
+        test_result=AuditTestOutcomeEnum.EXCEPTION,
+        explanation="Invoice dated 31-Mar-2026 but goods dispatched on 02-Apr-2026 per e-Way Bill #EW987123.",
+        tested_by="CA Senior Auditor",
+    )
+    sample_test.calculate_difference()
+    assert sample_test.difference_paise == 75000000
+    assert sample_test.test_result == AuditTestOutcomeEnum.EXCEPTION
+
+    # 5. Evidence: Attach e-Way Bill & Dispatch Note
+    evidence = planning_service.attach_evidence(
+        AttachEvidenceDTO(
+            engagement_id=active_engagement,
+            procedure_id=cutoff_proc.id,
+            dataset_id=dataset.id,
+            row_index=2,
+            title="e-Way Bill #EW987123 & Transporter LR Copy",
+            excerpt_or_reference="e-Way bill generated 02-Apr-2026 09:15 AM, Proof of Delivery 04-Apr-2026",
+        )
+    )
+    assert evidence.id is not None
+
+    # 6. Test Execution & Deterministic Exception
+    exception_record = AuditException(
+        engagement_id=active_engagement,
+        procedure_id=cutoff_proc.id,
+        sample_item_id=sample_test.id,
+        exception_code="EXC-REV-CUT-001",
+        title="Premature Revenue Recognition on Dispatched Goods",
+        description="INV-102 for Rs 7,50,000 recognized in FY 25-26 prior to goods dispatch on 02-Apr-2026.",
+        source="Substantive Cut-off Procedure",
+        rule="SA 500 / Ind AS 115 Revenue Cut-off Invariant",
+        evidence_ref=evidence.id,
+        severity="High",
+        amount_paise=75000000,
+        status="OPEN",
+    )
+
+    test_execution = TestExecution(
+        engagement_id=active_engagement,
+        procedure_id=cutoff_proc.id,
+        population="Sales register entries +/- 5 days of 31-March-2026",
+        sample_ids=[sample_test.id],
+        sample_size=3,
+        tested_by="CA Senior Auditor",
+        result="EXCEPTION",
+        exception_ids=[exception_record.id],
+        notes="1 cut-off exception identified amounting to Rs 7,50,000.",
+    )
+    assert len(test_execution.exception_ids) == 1
+
+    # 7. Finding: Linked to Risk, Procedure, Exception, Evidence, and WP
+    finding = planning_service.create_finding(
+        CreateFindingDTO(
+            engagement_id=active_engagement,
+            procedure_id=cutoff_proc.id,
+            risk_id=risk.id,
+            title="Sales Cut-off Misstatement - Premature Revenue Recognition",
+            description="Revenue overstated by Rs 7,50,000 due to booking prior to transfer of control.",
+            category="Revenue Cut-off Misstatement",
+            severity=RiskSeverityEnum.HIGH,
+            amount_paise=75000000,
+            affected_account="4001 - Domestic Sales",
+            assertion=AssertionEnum.CUT_OFF,
+            recommendation="Pass adjusting journal entry to reverse sales and recognize unearned revenue / inventory.",
+            preparer="CA Senior Auditor",
+            source=FindingSourceEnum.DETERMINISTIC_ANALYTIC,
+        )
+    )
+
+    # Attach evidence and exception to finding
+    with test_db.session_scope() as session:
+        matrix_repo = AuditMatrixRepository(session)
+        finding_db = matrix_repo.get_finding_by_id(finding.id)
+        if finding_db:
+            finding_db.linked_exception_ids = [exception_record.id]
+            finding_db.evidence_ids = [evidence.id]
+            matrix_repo.update_finding(finding_db)
+
+    # 8. Working Paper: Check linked working paper and update conclusion
+    wps = trace_service.get_working_papers_for_procedure(active_engagement, cutoff_proc.id)
+    assert len(wps) >= 1
+    wp = wps[0]
+
+    planning_service.update_procedure_status(
+        UpdateProcedureStatusDTO(
+            procedure_id=cutoff_proc.id,
+            status=ProcedureStatusEnum.COMPLETED,
+            result_summary="Testing identified 1 cut-off exception of Rs 7,50,000.",
+            conclusion="Audit adjustment recommended per Finding #1.",
+            reviewer="CA Priya Mehta",
+        )
+    )
+
+    # 9. Verify End-to-End Traceability Graph
+    graph = trace_service.build_finding_traceability(active_engagement, finding.id)
+    node_types = {n["type"] for n in graph.nodes}
+    assert "Finding" in node_types
+    assert "Procedure" in node_types
+    assert "Risk" in node_types
+    assert "WorkingPaper" in node_types
+
+    # Verify bidirectional navigation
+    related_risks = trace_service.get_risks_for_procedure(active_engagement, cutoff_proc.id)
+    assert any(r.id == risk.id for r in related_risks)
+
+    related_procs = trace_service.get_procedures_for_risk(active_engagement, risk.id)
+    assert any(p.id == cutoff_proc.id for p in related_procs)

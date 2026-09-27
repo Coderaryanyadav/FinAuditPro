@@ -33,11 +33,17 @@ class CreateRiskDTO:
     title: str
     category: str
     description: str
+    financial_statement_area: str = ""
+    area: str = ""
     assertions: list[AssertionEnum] = field(default_factory=lambda: [AssertionEnum.COMPLETENESS])
     inherent_risk: RiskSeverityEnum = RiskSeverityEnum.MEDIUM
     control_risk: RiskSeverityEnum = RiskSeverityEnum.MEDIUM
     is_significant_risk: bool = False
     planned_response: str = ""
+    rationale: str = ""
+    status: str = "Identified"
+    evidence_ids: list[str] = field(default_factory=list)
+    linked_procedure_ids: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True)

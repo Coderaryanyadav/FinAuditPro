@@ -269,6 +269,13 @@ class CommandPaletteDialog(QDialog):
                 "payload": 15,
             },
             {
+                "title": "Manage Team & Credentials (Maker / Checker / Admin)",
+                "category": "Admin",
+                "shortcut": "⌘U",
+                "key": "manage_team",
+                "payload": None,
+            },
+            {
                 "title": "System Settings & Credentials",
                 "category": "System",
                 "shortcut": "⌘,",

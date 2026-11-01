@@ -206,6 +206,83 @@ def test_working_papers_full_workflow():
     print("ALL WORKING PAPERS TESTS PASSED SUCCESSFULLY!")
 
 
+def test_seeded_working_papers_have_evidence_and_cross_links():
+    """Verify that seeded working papers have genuine attached files and cross references."""
+    token = get_auth_token()
+    headers = {"Authorization": f"Bearer {token}"}
+    conn = get_db_connection()
+    cy_eng = conn.execute("SELECT id FROM engagements WHERE status = 'In Progress' LIMIT 1").fetchone()
+    conn.close()
+    assert cy_eng is not None
+    eng_id = cy_eng["id"]
+
+    res = client.get(f"/api/working-papers/{eng_id}", headers=headers)
+    assert res.status_code == 200
+    data = res.json()
+    wps = data.get("working_papers", [])
+    assert len(wps) > 0
+
+    for wp in wps:
+        assert len(wp.get("attached_files", [])) > 0, f"Working paper {wp['wp_reference']} has no attached files"
+        first_doc = wp["attached_files"][0]
+        assert "name" in first_doc
+        assert first_doc["name"].endswith(".csv")
+
+        # Verify preview data endpoint for each attached CSV
+        prev_res = client.get(
+            f"/api/working-papers/{wp['id']}/preview-data/{first_doc['id']}",
+            headers=headers
+        )
+        assert prev_res.status_code == 200, f"Preview failed: {prev_res.text}"
+        prev_data = prev_res.json()
+        assert prev_data["status"] == "success"
+        assert len(prev_data["columns"]) > 0
+        assert len(prev_data["rows"]) > 0
+        assert prev_data["total_rows"] > 0
+
+        # Verify cross links
+        total_links = len(wp.get("linked_findings", [])) + len(wp.get("linked_transactions", [])) + len(wp.get("linked_checklists", []))
+        assert total_links > 0, f"Working paper {wp['wp_reference']} has no cross references"
+
+
+def test_link_engagement_file_to_working_paper():
+    """Verify that an auditor can link an engagement repository file to a working paper."""
+    token = get_auth_token()
+    headers = {"Authorization": f"Bearer {token}"}
+    conn = get_db_connection()
+    wp_row = conn.execute("SELECT id, engagement_id FROM working_papers LIMIT 1").fetchone()
+    assert wp_row is not None
+    wp_id = wp_row["id"]
+    eng_id = wp_row["engagement_id"]
+
+    file_row = conn.execute("SELECT id, file_name FROM uploaded_files WHERE engagement_id = ? LIMIT 1", (eng_id,)).fetchone()
+    conn.close()
+    assert file_row is not None
+    file_id = file_row["id"]
+
+    # 1. Fetch available files
+    avail_res = client.get(f"/api/working-papers/{wp_id}/available-engagement-files", headers=headers)
+    assert avail_res.status_code == 200
+    avail_files = avail_res.json()
+    assert any(f["id"] == file_id for f in avail_files)
+
+    # 2. Link file
+    link_res = client.post(
+        f"/api/working-papers/{wp_id}/link-uploaded-file/{file_id}?description=Linked+from+repository",
+        headers=headers
+    )
+    assert link_res.status_code == 200
+    link_data = link_res.json()
+    assert link_data["status"] == "success"
+    assert "document" in link_data
+
+    # 3. Verify preview works on newly linked file
+    new_doc_id = link_data["document"]["id"]
+    prev_res = client.get(f"/api/working-papers/{wp_id}/preview-data/{new_doc_id}", headers=headers)
+    assert prev_res.status_code == 200
+    assert len(prev_res.json()["rows"]) > 0
+
+
 if __name__ == "__main__":
     setup_database()
     test_working_papers_full_workflow()

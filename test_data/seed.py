@@ -243,6 +243,106 @@ def seed_company_engagement(conn, company: dict) -> dict:
             except Exception as ex:
                 print(f"[!] Warning: Live ingest failed for {fname}: {ex}")
 
+    # 10. Link Supporting Evidence CSV Files & Cross-References to Working Papers
+    from backend.app.routers.working_papers import BASE_UPLOAD_DIR
+    import hashlib
+    import uuid
+    import json
+
+    f_rows = cursor.execute("SELECT id, finding_code, title FROM audit_findings WHERE engagement_id = ? ORDER BY id ASC", (cy_eng_id,)).fetchall()
+    txn_rows = cursor.execute("SELECT id, voucher_no, ledger, amount, debit, credit FROM transactions WHERE engagement_id = ? LIMIT 10", (cy_eng_id,)).fetchall()
+    chk_rows = cursor.execute("SELECT id, item_code, question FROM audit_checklists WHERE engagement_id = ? LIMIT 10", (cy_eng_id,)).fetchall()
+
+    def make_evidence_doc(wp_id, original_name, source_file_name, desc, uploader="Audit Staff"):
+        src_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{company['short_code'].lower()}_fintech", source_file_name)
+        if not os.path.exists(src_path):
+            return None
+        with open(src_path, "rb") as f:
+            content = f.read()
+        sha = hashlib.sha256(content).hexdigest()
+        file_size = len(content)
+        stored_name = f"{uuid.uuid4().hex}.csv"
+        dest_dir = os.path.join(BASE_UPLOAD_DIR, f"wp_{wp_id}")
+        os.makedirs(dest_dir, exist_ok=True)
+        with open(os.path.join(dest_dir, stored_name), "wb") as f:
+            f.write(content)
+        doc_id = str(uuid.uuid4())[:8]
+        return {
+            "id": doc_id,
+            "name": original_name,
+            "file_name": stored_name,
+            "file_path": f"uploaded_files/working_papers/wp_{wp_id}/{stored_name}",
+            "size_bytes": file_size,
+            "size_display": f"{file_size / 1024:.1f} KB",
+            "content_type": "text/csv",
+            "sha256_hash": sha,
+            "version": 1,
+            "parent_id": None,
+            "description": desc,
+            "uploaded_by": uploader,
+            "uploaded_at": now_str
+        }
+
+    wp_rows = cursor.execute("SELECT id, wp_reference FROM working_papers WHERE engagement_id = ? ORDER BY id ASC", (cy_eng_id,)).fetchall()
+    for w in wp_rows:
+        w_id = w["id"]
+        ref = w["wp_reference"]
+        attached_docs = []
+        linked_findings = []
+        linked_txns = []
+        linked_chks = []
+
+        if "BNK" in ref:
+            doc = make_evidence_doc(w_id, "bank_statement.csv", "bank_statement.csv", "Direct statutory bank statement extract covering operational transactions.", "Senior Auditor")
+            if doc:
+                attached_docs.append(doc)
+            if f_rows:
+                linked_findings.append({"id": f_rows[0]["id"], "finding_code": f_rows[0]["finding_code"], "title": f_rows[0]["title"]})
+            for t in txn_rows[:3]:
+                linked_txns.append({"id": t["id"], "voucher_no": t["voucher_no"], "ledger": t["ledger"]})
+            if chk_rows:
+                linked_chks.append({"id": chk_rows[0]["id"], "item_code": chk_rows[0]["item_code"], "question": chk_rows[0]["question"]})
+
+        elif "REV" in ref:
+            doc = make_evidence_doc(w_id, "sales_register.csv", "sales_register.csv", "General Ledger sales register schedule and revenue cut-off vouchers.", "Audit Staff")
+            if doc:
+                attached_docs.append(doc)
+            if len(f_rows) > 1:
+                linked_findings.append({"id": f_rows[1]["id"], "finding_code": f_rows[1]["finding_code"], "title": f_rows[1]["title"]})
+            for t in txn_rows[3:6]:
+                linked_txns.append({"id": t["id"], "voucher_no": t["voucher_no"], "ledger": t["ledger"]})
+            if len(chk_rows) > 1:
+                linked_chks.append({"id": chk_rows[1]["id"], "item_code": chk_rows[1]["item_code"], "question": chk_rows[1]["question"]})
+
+        elif "GST" in ref:
+            doc1 = make_evidence_doc(w_id, "gst_portal.csv", "gst_portal.csv", "Official GSTR-2B portal extract downloaded from GSTN portal.", "Audit Staff")
+            doc2 = make_evidence_doc(w_id, "purchase_register.csv", "purchase_register.csv", "Inward purchase register schedule for input tax credit eligibility testing.", "Audit Staff")
+            if doc1:
+                attached_docs.append(doc1)
+            if doc2:
+                attached_docs.append(doc2)
+            if len(f_rows) > 2:
+                linked_findings.append({"id": f_rows[2]["id"], "finding_code": f_rows[2]["finding_code"], "title": f_rows[2]["title"]})
+            for t in txn_rows[6:9]:
+                linked_txns.append({"id": t["id"], "voucher_no": t["voucher_no"], "ledger": t["ledger"]})
+            if len(chk_rows) > 2:
+                linked_chks.append({"id": chk_rows[2]["id"], "item_code": chk_rows[2]["item_code"], "question": chk_rows[2]["question"]})
+
+        cursor.execute("""
+            UPDATE working_papers
+            SET attached_files_json = ?,
+                linked_findings_json = ?,
+                linked_transactions_json = ?,
+                linked_checklists_json = ?
+            WHERE id = ?
+        """, (
+            json.dumps(attached_docs),
+            json.dumps(linked_findings),
+            json.dumps(linked_txns),
+            json.dumps(linked_chks),
+            w_id
+        ))
+
     return {
         "client_id": client_id,
         "cy_engagement_id": cy_eng_id,

@@ -951,6 +951,20 @@ class FinAuditAPI {
     return this.attachAuthToken(`/api/working-papers/download-file/${wpId}/${docId}`);
   }
 
+  static getWorkingPaperDocumentPreviewData(wpId, docId, limit = 500) {
+    return this.request(`/api/working-papers/${wpId}/preview-data/${docId}?limit=${limit}`);
+  }
+
+  static getWorkingPaperAvailableFiles(wpId) {
+    return this.request(`/api/working-papers/${wpId}/available-engagement-files`);
+  }
+
+  static linkUploadedFileToWorkingPaper(wpId, fileId, description = "") {
+    return this.request(`/api/working-papers/${wpId}/link-uploaded-file/${fileId}${description ? `?description=${encodeURIComponent(description)}` : ""}`, {
+      method: "POST"
+    });
+  }
+
   static addWorkingPaperComment(wpId, data) {
     return this.request(`/api/working-papers/${wpId}/comments`, {
       method: "POST",

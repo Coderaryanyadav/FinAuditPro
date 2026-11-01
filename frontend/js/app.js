@@ -2042,7 +2042,12 @@ function setupNavigation() {
 async function loadEngagements() {
   try {
     const list = await FinAuditAPI.getEngagements();
-    state.engagements = list || [];
+    const seenEngIds = new Set();
+    state.engagements = (list || []).filter(e => {
+      if (!e || !e.id || seenEngIds.has(e.id)) return false;
+      seenEngIds.add(e.id);
+      return true;
+    });
     const select = document.getElementById("engagement-select");
     if (select) {
       if (state.engagements.length === 0) {
@@ -10314,22 +10319,23 @@ async function renderWorkingPapers() {
                       ${w.description ? `<div style="max-width: 320px; font-size: 11.5px; color: var(--text-muted); white-space: normal; margin-top: 2px; line-height: 1.3;">${escapeHtml(w.description.length > 90 ? w.description.substring(0, 90) + '...' : w.description)}</div>` : ''}
                     </td>
                     <td>
-                      <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                        ${attachedCount > 0 ? `
-                          <span class="badge" style="background: var(--bg-sidebar); color: var(--text-secondary); border: 1px solid var(--border);">
-                            <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
-                            ${attachedCount} Doc${attachedCount > 1 ? 's' : ''}
-                          </span>
-                        ` : '<span style="color: var(--text-muted); font-size: 11px;">No files</span>'}
-                        ${w.evidence ? `<span title="${escapeHtml(w.evidence)}" style="color: #059669; font-size: 11px; font-weight: 500;">Summary</span>` : ''}
+                      <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                        ${attachedCount > 0 ? (w.attached_files || []).map(f => `
+                          <button class="wp-file-chip-btn" onclick="event.stopPropagation(); openWpDocumentPreviewModal(${w.id}, '${escapeHtml(f.id || f.file_name)}', '${escapeHtml(f.name)}')" title="Click to inspect '${escapeHtml(f.name)}' data in Tabular Format">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span class="file-chip-name">${escapeHtml(f.name)}</span>
+                            <span class="file-chip-size">${escapeHtml(f.size_display || '')}</span>
+                          </button>
+                        `).join("") : '<span style="color: var(--text-muted); font-size: 11.5px;">No files</span>'}
+                        ${w.evidence ? `<span title="${escapeHtml(w.evidence)}" style="color: #059669; font-size: 11px; font-weight: 500;">✓ Substantive summary</span>` : ''}
                       </div>
                     </td>
                     <td>
                       <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
-                        ${fCount > 0 ? `<span class="badge badge-high" style="font-size: 10.5px; padding: 2px 5px;" title="${fCount} Linked Audit Finding(s)">F: ${fCount}</span>` : ''}
-                        ${tCount > 0 ? `<span class="badge badge-open" style="font-size: 10.5px; padding: 2px 5px;" title="${tCount} Linked GL Transaction(s)">Tx: ${tCount}</span>` : ''}
-                        ${cCount > 0 ? `<span class="badge badge-low" style="font-size: 10.5px; padding: 2px 5px;" title="${cCount} Linked Checklist Item(s)">Chk: ${cCount}</span>` : ''}
-                        ${(fCount === 0 && tCount === 0 && cCount === 0) ? '<span style="color: var(--text-muted); font-size: 11px;">None</span>' : ''}
+                        ${fCount > 0 ? `<span class="badge badge-high" style="font-size: 10.5px; padding: 2px 6px; cursor: pointer;" onclick="event.stopPropagation(); openWorkingPaperDrawer(${w.id}, 'links')" title="${fCount} Linked Audit Finding(s)">F: ${fCount}</span>` : ''}
+                        ${tCount > 0 ? `<span class="badge badge-open" style="font-size: 10.5px; padding: 2px 6px; cursor: pointer;" onclick="event.stopPropagation(); openWorkingPaperDrawer(${w.id}, 'links')" title="${tCount} Linked GL Transaction(s)">Tx: ${tCount}</span>` : ''}
+                        ${cCount > 0 ? `<span class="badge badge-low" style="font-size: 10.5px; padding: 2px 6px; cursor: pointer;" onclick="event.stopPropagation(); openWorkingPaperDrawer(${w.id}, 'links')" title="${cCount} Linked Checklist Item(s)">Chk: ${cCount}</span>` : ''}
+                        ${(fCount === 0 && tCount === 0 && cCount === 0) ? '<span style="color: var(--text-muted); font-size: 11.5px;">None</span>' : ''}
                       </div>
                     </td>
                     <td>
@@ -10564,16 +10570,16 @@ async function openWorkingPaperDrawer(wpId, defaultTab = "overview") {
               Overview
             </div>
             <div class="wp-nav-tab ${currentDrawerTab === 'evidence' ? 'active' : ''}" onclick="switchWpDrawerTab('evidence')">
-              Supporting Evidence (<span id="drawer-tab-docs-count">0</span>)
+              Supporting Evidence <span class="wp-tab-badge" id="drawer-tab-docs-count">0</span>
             </div>
             <div class="wp-nav-tab ${currentDrawerTab === 'notes' ? 'active' : ''}" onclick="switchWpDrawerTab('notes')">
               Working Notes
             </div>
             <div class="wp-nav-tab ${currentDrawerTab === 'links' ? 'active' : ''}" onclick="switchWpDrawerTab('links')">
-              Cross References (<span id="drawer-tab-links-count">0</span>)
+              Cross References <span class="wp-tab-badge" id="drawer-tab-links-count">0</span>
             </div>
             <div class="wp-nav-tab ${currentDrawerTab === 'comments' ? 'active' : ''}" onclick="switchWpDrawerTab('comments')">
-              Review Comments (<span id="drawer-tab-comments-count">0</span>)
+              Review Comments <span class="wp-tab-badge" id="drawer-tab-comments-count">0</span>
             </div>
             <div class="wp-nav-tab ${currentDrawerTab === 'audit_trail' ? 'active' : ''}" onclick="switchWpDrawerTab('audit_trail')">
               Audit Trail
@@ -10809,12 +10815,32 @@ async function saveWorkingPaperOverview(wpId) {
 
 function renderWpEvidenceTab(wp) {
   const files = wp.attached_files || [];
+  const tabularFiles = files.filter(f => isTabularFileName(f.name));
+  const primaryTabular = tabularFiles[0];
+
+  setTimeout(() => {
+    if (primaryTabular) {
+      loadWpInlineTabularData(wp.id, primaryTabular.id || primaryTabular.file_name, primaryTabular.name);
+    }
+  }, 40);
 
   return `
-    <div style="margin-bottom: 20px;">
-      <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">Supporting Evidence & Documents</div>
-      <div style="font-size: 12px; color: var(--text-muted);">
-        Upload bank statements, confirmations, certificates, sample invoices, ledger extracts, or statutory returns (SA 230).
+    <div style="display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap;">
+      <div>
+        <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 2px;">Supporting Evidence & Audit Documentation</div>
+        <div style="font-size: 12px; color: var(--text-muted);">
+          Attached bank statements, ledgers, invoice schedules, confirmations & portal returns (SA 230).
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-secondary btn-sm" onclick="openLinkEngagementFileModal(${wp.id})">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+          + Attach from Engagement Repository
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="triggerWpDocUpload()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          + Upload Supporting File
+        </button>
       </div>
     </div>
 
@@ -10822,46 +10848,58 @@ function renderWpEvidenceTab(wp) {
     <input type="file" id="wp-file-input" style="display: none;" onchange="handleWpFileInputChange(event, ${wp.id})" />
 
     <!-- Drag & Drop Upload Zone -->
-    <div class="wp-upload-dropzone" onclick="triggerWpDocUpload()" ondragover="event.preventDefault();" ondrop="handleWpDocDrop(event, ${wp.id})">
-      <svg width="32" height="32" fill="none" stroke="#3b82f6" viewBox="0 0 24 24" style="margin: 0 auto 8px auto; display: block;">
+    <div class="wp-upload-dropzone" onclick="triggerWpDocUpload()" ondragover="event.preventDefault();" ondrop="handleWpDocDrop(event, ${wp.id})" style="padding: 16px 20px;">
+      <svg width="28" height="28" fill="none" stroke="#3b82f6" viewBox="0 0 24 24" style="margin: 0 auto 6px auto; display: block;">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
       </svg>
-      <div style="font-size: 13.5px; font-weight: 700; color: #1e293b;">Click or Drag files here to attach evidence</div>
-      <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;">Supports PDF, XLSX, XLS, CSV, DOCX, PNG, JPG (Auto recorded in Audit Trail)</div>
+      <div style="font-size: 13px; font-weight: 700; color: #1e293b;">Click or Drag files here to attach supporting evidence</div>
+      <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Supports CSV, XLSX, XLS, PDF, DOCX, Images (SHA-256 fingerprint verified)</div>
     </div>
 
     <!-- Uploaded Documents List -->
-    <div style="margin-top: 24px;">
-      <div style="font-size: 12.5px; font-weight: 700; color: var(--text-secondary); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
-        <span>Attached Supporting Files (${files.length})</span>
+    <div style="margin-top: 20px;">
+      <div style="font-size: 12.5px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+        <span>Attached Evidence Files (${files.length})</span>
       </div>
 
       ${files.length === 0 ? `
         <div style="padding: 24px; text-align: center; color: var(--text-muted); background: var(--bg-app); border: 1px dashed #cbd5e1; border-radius: var(--radius-md); font-size: 12.5px;">
-          No supporting documents attached yet. Click above to upload evidence files.
+          No supporting documents attached yet. Click "+ Attach from Engagement Repository" or upload evidence files above.
         </div>
-      ` : files.map((file, idx) => `
+      ` : files.map((file, idx) => {
+        const isTab = isTabularFileName(file.name);
+        return `
         <div class="wp-attachment-card">
           <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1;">
-            <div style="width: 36px; height: 36px; border-radius: 6px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
+            <div style="width: 38px; height: 38px; border-radius: 6px; background: ${isTab ? '#ecfdf5' : '#eff6ff'}; color: ${isTab ? '#059669' : '#2563eb'}; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; border: 1px solid ${isTab ? '#a7f3d0' : '#bfdbfe'};">
               ${getFileTypeIcon(file.name)}
             </div>
             <div style="min-width: 0; flex: 1;">
-              <div style="font-weight: 600; font-size: 13px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                ${escapeHtml(file.name)}
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-weight: 700; font-size: 13.5px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${escapeHtml(file.name)}
+                </span>
+                ${isTab ? `<span class="badge" style="background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; font-size: 10px; padding: 1px 6px;">Tabular CSV</span>` : ''}
               </div>
-              <div style="font-size: 11px; color: var(--text-muted); display: flex; gap: 8px; align-items: center; margin-top: 2px;">
-                <span>${escapeHtml(file.size_display || 'File')}</span>
+              <div style="font-size: 11px; color: var(--text-muted); display: flex; gap: 8px; align-items: center; margin-top: 3px; flex-wrap: wrap;">
+                <span class="font-mono">${escapeHtml(file.size_display || 'File')}</span>
                 <span>•</span>
                 <span>By ${escapeHtml(file.uploaded_by || 'Auditor')}</span>
                 <span>•</span>
                 <span>${escapeHtml(file.uploaded_at ? file.uploaded_at.substring(0, 10) : '')}</span>
+                ${file.sha256_hash ? `<span style="color: #059669; font-size: 10.5px;">✓ SHA-256 Verified</span>` : ''}
               </div>
-              ${file.description ? `<div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px; font-style: italic;">"${escapeHtml(file.description)}"</div>` : ''}
+              ${file.description ? `<div style="font-size: 11px; color: var(--text-secondary); margin-top: 3px; font-style: italic;">"${escapeHtml(file.description)}"</div>` : ''}
             </div>
           </div>
           <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0; margin-left: 12px;">
-            <a class="btn btn-secondary btn-sm" href="${FinAuditAPI.getWorkingPaperDocumentDownloadUrl(wp.id, file.id || file.file_name)}" target="_blank" download="${escapeHtml(file.name)}" title="Download / Preview file">
+            ${isTab ? `
+              <button class="btn btn-primary btn-sm" onclick="openWpDocumentPreviewModal(${wp.id}, '${escapeHtml(file.id || file.file_name)}', '${escapeHtml(file.name)}')" title="Inspect full records in interactive table modal">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                View Tabular Data
+              </button>
+            ` : ''}
+            <a class="btn btn-secondary btn-sm" href="${FinAuditAPI.getWorkingPaperDocumentDownloadUrl(wp.id, file.id || file.file_name)}" target="_blank" download="${escapeHtml(file.name)}" title="Download raw file">
               <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
               Download
             </a>
@@ -10870,8 +10908,11 @@ function renderWpEvidenceTab(wp) {
             </button>
           </div>
         </div>
-      `).join("")}
+      `;}).join("")}
     </div>
+
+    <!-- Inline Tabular Data Viewer -->
+    <div id="wp-inline-tabular-viewer"></div>
   `;
 }
 
@@ -10883,6 +10924,354 @@ function getFileTypeIcon(filename) {
   if (["doc", "docx", "txt"].includes(ext)) return ICONS.clipboard;
   if (["png", "jpg", "jpeg", "webp"].includes(ext)) return ICONS.fileText;
   return ICONS.folder;
+}
+
+function isTabularFileName(filename) {
+  if (!filename) return false;
+  const ext = String(filename).split(".").pop().toLowerCase();
+  return ["csv", "xlsx", "xls", "txt"].includes(ext);
+}
+
+function isColNumeric(colName) {
+  const c = String(colName).toLowerCase();
+  return c.includes("amount") || c.includes("debit") || c.includes("credit") || c.includes("balance") || c.includes("tax") || c.includes("rate") || c.includes("total") || c.includes("turnover") || c.includes("value") || c.includes("fee") || c.includes("price");
+}
+
+function isColDate(colName) {
+  const c = String(colName).toLowerCase();
+  return c.includes("date") || c.includes("time") || c.includes("period");
+}
+
+function formatColumnTitle(colName) {
+  return String(colName)
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, l => l.toUpperCase());
+}
+
+function formatCellValue(val, colName) {
+  if (val === null || val === undefined || val === "") return "—";
+  if (isColNumeric(colName)) {
+    const num = Number(val);
+    if (!isNaN(num)) {
+      return num === 0 ? "₹0.00" : formatINR(num);
+    }
+  }
+  return escapeHtml(String(val));
+}
+
+let currentInlineTabularData = null;
+
+async function loadWpInlineTabularData(wpId, docId, filename) {
+  const container = document.getElementById("wp-inline-tabular-viewer");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="padding: 24px; text-align: center; color: var(--text-muted); background: var(--bg-app); border-radius: 8px; margin-top: 16px;">
+      <div class="spinner" style="display: inline-block; margin-bottom: 8px;"></div>
+      <div style="font-size: 13px; font-weight: 600;">Parsing & Rendering Tabular CSV Data...</div>
+      <div style="font-size: 11.5px; margin-top: 2px;">Extracting ${escapeHtml(filename)} records</div>
+    </div>
+  `;
+
+  try {
+    const data = await FinAuditAPI.getWorkingPaperDocumentPreviewData(wpId, docId, 500);
+    currentInlineTabularData = data;
+    renderInlineTabularView(data);
+  } catch (err) {
+    container.innerHTML = `
+      <div style="padding: 16px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #991b1b; font-size: 12.5px; margin-top: 16px;">
+        <b>Failed to preview tabular data:</b> ${escapeHtml(err.message)}
+      </div>
+    `;
+  }
+}
+
+function renderInlineTabularView(data, filterTerm = "") {
+  const container = document.getElementById("wp-inline-tabular-viewer");
+  if (!container || !data) return;
+
+  const cols = data.columns || [];
+  let rows = data.rows || [];
+
+  if (filterTerm) {
+    const term = filterTerm.toLowerCase().trim();
+    rows = rows.filter(r => Object.values(r).some(val => String(val).toLowerCase().includes(term)));
+  }
+
+  container.innerHTML = `
+    <div class="wp-inline-tabular-card">
+      <div class="wp-tabular-header">
+        <div class="wp-tabular-title-wrap">
+          <span class="wp-tabular-title">
+            <svg width="15" height="15" fill="none" stroke="#2563eb" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            ${escapeHtml(data.filename)}
+          </span>
+          <span class="wp-tabular-badge">${data.total_rows.toLocaleString('en-IN')} Records</span>
+          <span class="wp-tabular-badge" style="background: #f1f5f9; color: #475569; border-color: #cbd5e1;">${cols.length} Columns</span>
+          <span class="wp-tabular-badge" style="background: #f0fdf4; color: #166534; border-color: #bbf7d0;">${escapeHtml(data.file_size || '')}</span>
+        </div>
+
+        <div class="wp-tabular-toolbar">
+          <input type="text" class="wp-tabular-search" placeholder="Search in records..." value="${escapeHtml(filterTerm)}" oninput="filterWpInlineTable(this.value)" />
+          <button class="btn btn-secondary btn-sm" onclick="openWpDocumentPreviewModal(${data.wp_id}, '${escapeHtml(data.doc_id)}', '${escapeHtml(data.filename)}')" title="Maximize to full screen table modal">
+            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+            Maximize Table
+          </button>
+        </div>
+      </div>
+
+      <div class="wp-tabular-table-wrap">
+        <table class="wp-tabular-table">
+          <thead>
+            <tr>
+              <th style="width: 45px; text-align: center;">#</th>
+              ${cols.map(c => `
+                <th style="${isColNumeric(c) ? 'text-align: right;' : 'text-align: left;'}">
+                  ${formatColumnTitle(c)}
+                </th>
+              `).join("")}
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.length === 0 ? `
+              <tr>
+                <td colspan="${cols.length + 1}" style="text-align: center; padding: 28px; color: var(--text-muted);">
+                  No matching records found for "${escapeHtml(filterTerm)}".
+                </td>
+              </tr>
+            ` : rows.slice(0, 150).map((r, i) => `
+              <tr>
+                <td style="text-align: center; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted);">${i + 1}</td>
+                ${cols.map(c => {
+                  const val = r[c];
+                  const num = isColNumeric(c);
+                  return `
+                    <td class="${num ? 'cell-num' : (isColDate(c) ? 'cell-date' : '')}" style="${num ? 'text-align: right;' : ''}">
+                      ${formatCellValue(val, c)}
+                    </td>
+                  `;
+                }).join("")}
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="wp-tabular-footer">
+        <span>Displaying ${Math.min(rows.length, 150)} of ${rows.length} ${filterTerm ? `(filtered from ${data.total_rows})` : 'rows'}</span>
+        <span style="font-size: 11px; color: var(--text-muted);">Tabular dataset verified against server file storage</span>
+      </div>
+    </div>
+  `;
+}
+
+function filterWpInlineTable(term) {
+  if (currentInlineTabularData) {
+    renderInlineTabularView(currentInlineTabularData, term);
+  }
+}
+
+let currentModalTabularData = null;
+
+async function openWpDocumentPreviewModal(wpId, docId, filename) {
+  const existing = document.getElementById("wp-doc-preview-modal-overlay");
+  if (existing) existing.remove();
+
+  const modalHtml = `
+    <div class="wp-modal-tabular-overlay" id="wp-doc-preview-modal-overlay" onclick="if(event.target===this) closeWpDocumentPreviewModal()">
+      <div class="wp-modal-tabular-box">
+        <div class="wp-tabular-header" style="padding: 16px 20px;">
+          <div class="wp-tabular-title-wrap">
+            <span class="wp-tabular-title" style="font-size: 15px;">
+              <svg width="18" height="18" fill="none" stroke="#2563eb" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+              Supporting Evidence Data: <span style="font-weight: 800; color: #2563eb;">${escapeHtml(filename)}</span>
+            </span>
+            <span class="wp-tabular-badge" id="modal-tab-row-count">Loading...</span>
+            <span class="wp-tabular-badge" id="modal-tab-col-count" style="background: #f1f5f9; color: #475569; border-color: #cbd5e1;"></span>
+          </div>
+
+          <div class="wp-tabular-toolbar">
+            <input type="text" class="wp-tabular-search" id="modal-tab-search-input" placeholder="Search across all records..." oninput="filterWpModalTable(this.value)" style="width: 260px;" />
+            <a class="btn btn-secondary btn-sm" href="${FinAuditAPI.getWorkingPaperDocumentDownloadUrl(wpId, docId)}" download="${escapeHtml(filename)}" target="_blank" title="Download raw source file">
+              ${ICONS.download} Download CSV
+            </a>
+            <button class="btn btn-secondary btn-sm" onclick="closeWpDocumentPreviewModal()">${ICONS.close}</button>
+          </div>
+        </div>
+
+        <div style="flex: 1; overflow: auto; min-height: 400px; max-height: calc(85vh - 120px); position: relative;" id="modal-tab-body-area">
+          <div style="padding: 60px; text-align: center; color: var(--text-muted);">
+            <div class="spinner" style="display: inline-block; margin-bottom: 12px;"></div>
+            <div style="font-size: 14px; font-weight: 600;">Parsing & Loading Tabular Records...</div>
+            <div style="font-size: 12px; margin-top: 4px;">Direct extraction of verified audit schedule data</div>
+          </div>
+        </div>
+
+        <div class="wp-tabular-footer" id="modal-tab-footer-area">
+          <span id="modal-tab-footer-text">Loading dataset...</span>
+          <button class="btn btn-secondary btn-sm" onclick="closeWpDocumentPreviewModal()">Close Table Viewer</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+
+  try {
+    const data = await FinAuditAPI.getWorkingPaperDocumentPreviewData(wpId, docId, 1000);
+    currentModalTabularData = data;
+    renderModalTabularView(data);
+  } catch (err) {
+    const body = document.getElementById("modal-tab-body-area");
+    if (body) {
+      body.innerHTML = `
+        <div style="padding: 40px; text-align: center; color: #dc2626;">
+          <div style="font-size: 15px; font-weight: 700;">Failed to load tabular data</div>
+          <div style="font-size: 12.5px; margin-top: 6px; color: var(--text-muted);">${escapeHtml(err.message)}</div>
+        </div>
+      `;
+    }
+  }
+}
+
+function closeWpDocumentPreviewModal() {
+  const modal = document.getElementById("wp-doc-preview-modal-overlay");
+  if (modal) modal.remove();
+  currentModalTabularData = null;
+}
+
+function renderModalTabularView(data, filterTerm = "") {
+  const body = document.getElementById("modal-tab-body-area");
+  const rowCountBadge = document.getElementById("modal-tab-row-count");
+  const colCountBadge = document.getElementById("modal-tab-col-count");
+  const footerText = document.getElementById("modal-tab-footer-text");
+
+  if (!body || !data) return;
+
+  const cols = data.columns || [];
+  let rows = data.rows || [];
+
+  if (filterTerm) {
+    const term = filterTerm.toLowerCase().trim();
+    rows = rows.filter(r => Object.values(r).some(val => String(val).toLowerCase().includes(term)));
+  }
+
+  if (rowCountBadge) rowCountBadge.innerText = `${data.total_rows.toLocaleString('en-IN')} Records`;
+  if (colCountBadge) colCountBadge.innerText = `${cols.length} Columns`;
+  if (footerText) footerText.innerText = `Displaying ${rows.length.toLocaleString('en-IN')} ${filterTerm ? `filtered records (of ${data.total_rows.toLocaleString('en-IN')})` : 'records'} • Working Paper: ${data.wp_reference || ''}`;
+
+  body.innerHTML = `
+    <table class="wp-tabular-table" style="font-size: 12.5px;">
+      <thead>
+        <tr>
+          <th style="width: 50px; text-align: center;">#</th>
+          ${cols.map(c => `
+            <th style="${isColNumeric(c) ? 'text-align: right;' : 'text-align: left;'}">
+              ${formatColumnTitle(c)}
+            </th>
+          `).join("")}
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.length === 0 ? `
+          <tr>
+            <td colspan="${cols.length + 1}" style="text-align: center; padding: 48px; color: var(--text-muted);">
+              No records match your search filter "${escapeHtml(filterTerm)}".
+            </td>
+          </tr>
+        ` : rows.map((r, i) => `
+          <tr>
+            <td style="text-align: center; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">${i + 1}</td>
+            ${cols.map(c => {
+              const val = r[c];
+              const num = isColNumeric(c);
+              return `
+                <td class="${num ? 'cell-num' : (isColDate(c) ? 'cell-date' : '')}" style="${num ? 'text-align: right;' : ''}">
+                  ${formatCellValue(val, c)}
+                </td>
+              `;
+            }).join("")}
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function filterWpModalTable(term) {
+  if (currentModalTabularData) {
+    renderModalTabularView(currentModalTabularData, term);
+  }
+}
+
+async function openLinkEngagementFileModal(wpId) {
+  const existing = document.getElementById("wp-link-file-modal-overlay");
+  if (existing) existing.remove();
+
+  try {
+    const files = await FinAuditAPI.getWorkingPaperAvailableFiles(wpId);
+    const modalHtml = `
+      <div class="dash-modal-overlay" id="wp-link-file-modal-overlay" onclick="if(event.target===this) closeLinkEngagementFileModal()">
+        <div class="dash-modal-box" style="max-width: 650px;">
+          <div class="dash-modal-header">
+            <div>
+              <div style="font-size: 16px; font-weight: 700; color: var(--text-main);">Attach from Engagement Repository</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Select any file uploaded in this audit engagement to attach as working paper supporting evidence</div>
+            </div>
+            <button class="btn btn-sm btn-secondary" onclick="closeLinkEngagementFileModal()">${ICONS.close}</button>
+          </div>
+          <div class="dash-modal-body" style="padding: 16px;">
+            ${files.length === 0 ? `
+              <div style="padding: 30px; text-align: center; color: var(--text-muted);">
+                No files found in this engagement's repository. You can upload files via the Data Import tab.
+              </div>
+            ` : `
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                ${files.map(f => `
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-app); border: 1px solid var(--border); border-radius: 6px;">
+                    <div>
+                      <div style="font-weight: 700; font-size: 13px; color: var(--text-main);">${escapeHtml(f.file_name)}</div>
+                      <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">
+                        Category: <b>${escapeHtml(f.data_category || 'General')}</b> • ${f.row_count || 0} rows • ${f.uploaded_at ? f.uploaded_at.substring(0, 10) : ''}
+                      </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="confirmLinkEngagementFile(${wpId}, ${f.id})">
+                      + Attach File
+                    </button>
+                  </div>
+                `).join("")}
+              </div>
+            `}
+          </div>
+          <div class="dash-modal-footer">
+            <button class="btn btn-secondary" onclick="closeLinkEngagementFileModal()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML("beforeend", modalHtml);
+  } catch (err) {
+    FinNotify.error("Failed to load engagement files: " + err.message);
+  }
+}
+
+function closeLinkEngagementFileModal() {
+  const m = document.getElementById("wp-link-file-modal-overlay");
+  if (m) m.remove();
+}
+
+async function confirmLinkEngagementFile(wpId, fileId) {
+  try {
+    await FinAuditAPI.linkUploadedFileToWorkingPaper(wpId, fileId);
+    closeLinkEngagementFileModal();
+    const updated = await FinAuditAPI.getWorkingPaperDetail(wpId);
+    currentDrawerWp = updated;
+    populateWorkingPaperDrawer();
+    renderWorkingPapers();
+    FinNotify.success("Engagement file successfully attached as supporting evidence.");
+  } catch (err) {
+    FinNotify.error("Failed to attach file: " + err.message);
+  }
 }
 
 function triggerWpDocUpload() {

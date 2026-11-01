@@ -751,6 +751,214 @@ def verify_working_paper_document(wp_id: int, doc_id: str, current_user: dict = 
     }
 
 
+@router.get("/{wp_id}/preview-data/{doc_id}")
+def preview_working_paper_document_data(
+    wp_id: int,
+    doc_id: str,
+    limit: int = 500,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Parses and returns tabular data (CSV, XLSX, XLS) from an attached working paper document.
+    Enables auditors to inspect underlying records directly in tabular format.
+    """
+    conn = get_db_connection()
+    row = conn.execute("SELECT * FROM working_papers WHERE id = ?", (wp_id,)).fetchone()
+    conn.close()
+    if not row:
+        raise HTTPException(status_code=404, detail="Working paper not found.")
+
+    wp = _parse_wp_row(row)
+    require_engagement_access(wp["engagement_id"], current_user)
+
+    target_doc = None
+    for doc in wp.get("attached_files", []):
+        if str(doc.get("id")) == str(doc_id) or doc.get("file_name") == doc_id or doc.get("name") == doc_id:
+            target_doc = doc
+            break
+
+    if not target_doc:
+        raise HTTPException(status_code=404, detail="Document file not found.")
+
+    stored_name = target_doc.get("file_name") or os.path.basename(target_doc.get("file_path", ""))
+    full_path = resolve_safe_evidence_path(wp_id, stored_name)
+    if not full_path.exists() and target_doc.get("file_path"):
+        alt_path = Path(target_doc["file_path"]).resolve()
+        if alt_path.exists():
+            full_path = alt_path
+
+    if not full_path.exists():
+        raise HTTPException(status_code=404, detail="File content not found on server disk.")
+
+    ext = full_path.suffix.lower()
+    original_name = target_doc.get("name", full_path.name)
+
+    import pandas as pd
+    try:
+        if ext in [".xlsx", ".xls"]:
+            df = pd.read_excel(full_path)
+            total_rows = len(df)
+            df = df.head(limit)
+        elif ext in [".csv", ".txt"]:
+            try:
+                df = pd.read_csv(full_path, nrows=limit)
+            except UnicodeDecodeError:
+                df = pd.read_csv(full_path, encoding="latin-1", nrows=limit)
+            try:
+                with open(full_path, "rb") as f:
+                    total_rows = sum(1 for _ in f) - 1
+            except Exception:
+                total_rows = len(df)
+        else:
+            raise HTTPException(status_code=400, detail=f"File format '{ext}' is not a tabular format. Only CSV and Excel files can be viewed as tabular data.")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to parse tabular file: {str(e)}")
+
+    df = df.fillna("")
+    columns = [str(c) for c in df.columns]
+
+    column_types = {}
+    for col in columns:
+        if pd.api.types.is_numeric_dtype(df[col]):
+            column_types[col] = "numeric"
+        elif pd.api.types.is_datetime64_any_dtype(df[col]):
+            column_types[col] = "date"
+        else:
+            column_types[col] = "text"
+
+    rows = df.to_dict(orient="records")
+
+    return {
+        "status": "success",
+        "wp_id": wp_id,
+        "wp_reference": wp.get("wp_reference"),
+        "doc_id": doc_id,
+        "filename": original_name,
+        "file_size": target_doc.get("size_display", ""),
+        "total_rows": max(len(rows), total_rows),
+        "columns": columns,
+        "column_types": column_types,
+        "rows": rows
+    }
+
+
+@router.get("/{wp_id}/available-engagement-files")
+def get_available_engagement_files(wp_id: int, current_user: dict = Depends(get_current_user)):
+    """
+    Returns files in the engagement repository that can be linked to this working paper.
+    """
+    conn = get_db_connection()
+    row = conn.execute("SELECT * FROM working_papers WHERE id = ?", (wp_id,)).fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Working paper not found.")
+
+    wp = _parse_wp_row(row)
+    require_engagement_access(wp["engagement_id"], current_user)
+
+    files = conn.execute(
+        "SELECT id, file_name, file_type, data_category, row_count, uploaded_at FROM uploaded_files WHERE engagement_id = ? ORDER BY id ASC",
+        (wp["engagement_id"],)
+    ).fetchall()
+    conn.close()
+
+    return [dict(f) for f in files]
+
+
+@router.post("/{wp_id}/link-uploaded-file/{file_id}")
+def link_uploaded_file_to_wp(
+    wp_id: int,
+    file_id: int,
+    description: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Links an existing file from the engagement repository (uploaded_files)
+    as official supporting evidence for this working paper.
+    """
+    conn = get_db_connection()
+    row = conn.execute("SELECT * FROM working_papers WHERE id = ?", (wp_id,)).fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Working paper not found.")
+
+    wp = _parse_wp_row(row)
+    require_engagement_access(wp["engagement_id"], current_user)
+
+    file_row = conn.execute(
+        "SELECT * FROM uploaded_files WHERE id = ? AND engagement_id = ?",
+        (file_id, wp["engagement_id"])
+    ).fetchone()
+
+    if not file_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Engagement file not found.")
+
+    source_path = Path(file_row["file_path"])
+    if not source_path.is_absolute():
+        project_root = Path(__file__).resolve().parent.parent.parent.parent
+        source_path = (project_root / file_row["file_path"]).resolve()
+
+    if not source_path.exists():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Source file missing on server disk.")
+
+    with open(source_path, "rb") as f:
+        content = f.read()
+
+    import hashlib
+    sha256_hash = hashlib.sha256(content).hexdigest()
+    file_size = len(content)
+
+    original_name = file_row["file_name"]
+    display_name = original_name
+    for pfx in ["aryan_", "hitansh_", "jeet_"]:
+        if display_name.lower().startswith(pfx):
+            display_name = display_name[len(pfx):]
+
+    file_ext = Path(original_name).suffix.lower()
+    stored_filename = f"{uuid.uuid4().hex}{file_ext}"
+
+    dest_path = resolve_safe_evidence_path(wp_id, stored_filename)
+    dest_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(dest_path, "wb") as f:
+        f.write(content)
+
+    rel_path = f"uploaded_files/working_papers/wp_{wp_id}/{stored_filename}"
+    doc_id = str(uuid.uuid4())[:8]
+    now_str = datetime.now().isoformat()
+
+    attached_files = wp.get("attached_files") or []
+    new_doc = {
+        "id": doc_id,
+        "name": display_name,
+        "file_name": stored_filename,
+        "file_path": rel_path,
+        "size_bytes": file_size,
+        "size_display": f"{file_size / 1024:.1f} KB" if file_size < 1024 * 1024 else f"{file_size / (1024 * 1024):.2f} MB",
+        "content_type": "text/csv" if file_ext == ".csv" else "application/octet-stream",
+        "sha256_hash": sha256_hash,
+        "version": len(attached_files) + 1,
+        "parent_id": None,
+        "description": description or f"Linked from Engagement Repository ({file_row.get('data_category', 'General')})",
+        "uploaded_by": current_user.get("full_name", "Auditor"),
+        "uploaded_at": now_str
+    }
+    attached_files.append(new_doc)
+
+    conn.execute(
+        "UPDATE working_papers SET attached_files_json = ?, updated_at = ? WHERE id = ?",
+        (json.dumps(attached_files), now_str, wp_id)
+    )
+    conn.commit()
+    conn.close()
+
+    return {"status": "success", "document": new_doc, "total_files": len(attached_files)}
+
+
 @router.post("/{wp_id}/comments")
 def add_reviewer_comment(
     wp_id: int,

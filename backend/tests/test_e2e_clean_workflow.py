@@ -67,7 +67,7 @@ class TestE2ECleanWorkflow(unittest.TestCase):
         eng_id = e_res.json()["id"]
 
         # 4. Import Sample General Ledger
-        with open("backend/sample_files/apex_general_ledger_fy2425.csv", "rb") as f:
+        with open("test_data/apex_general_ledger_fy2425.csv", "rb") as f:
             upload_res = self.client.post(
                 "/api/import/upload",
                 data={"engagement_id": str(eng_id), "data_category": "General Ledger"},

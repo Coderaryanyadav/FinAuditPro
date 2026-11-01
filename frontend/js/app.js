@@ -4941,7 +4941,7 @@ async function renderDashboard() {
           </div>
         </div>
 
-        <div class="dash-stat-card card-red" onclick="openDashboardFindingsModal('HIGH', null)" title="Click to inspect Critical & High risk findings">
+        <div class="dash-stat-card card-red" onclick="openDashboardFindingsModal('HIGH_CRITICAL', null)" title="Click to inspect Critical & High risk findings">
           <div class="dash-stat-header">
             <span class="dash-stat-title">High-Risk Findings</span>
             <div class="dash-stat-icon" style="background: #fee2e2; color: #dc2626;">${ICONS.alertTriangle}</div>
@@ -5054,9 +5054,12 @@ async function renderDashboard() {
             </div>
             <div class="dash-chart-subtitle">Click any severity segment to view underlying findings</div>
           </div>
-          <div style="text-align: right;">
-            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">AVG RISK SCORE</div>
-            <div class="font-mono font-bold" style="font-size: 18px; color: var(--text-main);">${risk.average_risk_score || 0.0} / 10.0</div>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <button class="btn btn-sm btn-secondary" onclick="navigateTo('findings')">Open Risk & Findings →</button>
+            <div style="text-align: right;">
+              <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">AVG RISK SCORE</div>
+              <div class="font-mono font-bold" style="font-size: 18px; color: var(--text-main);">${risk.average_risk_score || 0.0} / 10.0</div>
+            </div>
           </div>
         </div>
 
@@ -5169,7 +5172,12 @@ function switchDashboardEngagement(engId) {
 
 // 1. Findings Drill-Down Modal (Triggered by Severity or Area Click)
 async function openDashboardFindingsModal(severity = null, area = null) {
-  const title = severity ? `${severity} Severity Findings` : area ? `Findings in ${area}` : `Audit Findings`;
+  let title = severity ? `${severity} Severity Findings` : area ? `Findings in ${area}` : `Audit Findings`;
+  if (severity === 'HIGH_CRITICAL') {
+    title = 'Critical & High Risk Findings';
+  } else if (severity === 'OPEN') {
+    title = 'Open & Unresolved Findings';
+  }
 
   let findings = [];
   try {
@@ -5177,7 +5185,7 @@ async function openDashboardFindingsModal(severity = null, area = null) {
     if (severity && severity !== 'ALL') {
       if (severity === 'OPEN') {
         findings = findings.filter(f => ['Open', 'In Review', 'Under Review'].includes(f.status || 'Open'));
-      } else if (severity === 'HIGH') {
+      } else if (severity === 'HIGH_CRITICAL') {
         findings = findings.filter(f => ['CRITICAL', 'HIGH'].includes((f.severity || '').toUpperCase()) && !['Resolved', 'Waived'].includes(f.status));
       } else {
         findings = findings.filter(f => (f.severity || '').toUpperCase() === severity.toUpperCase());
@@ -5198,7 +5206,10 @@ async function openDashboardFindingsModal(severity = null, area = null) {
             <div style="font-size: 16px; font-weight: 700; color: var(--text-main);">Drill-Down: ${escapeHtml(title)}</div>
             <div style="font-size: 12px; color: var(--text-muted);">Showing ${findings.length} underlying audit findings from active engagement database</div>
           </div>
-          <button class="btn btn-sm btn-secondary" onclick="closeDashboardModal()">${ICONS.close}</button>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn btn-sm btn-primary" onclick="closeDashboardModal(); navigateTo('findings')">Open Risk & Findings →</button>
+            <button class="btn btn-sm btn-secondary" onclick="closeDashboardModal()">${ICONS.close}</button>
+          </div>
         </div>
         <div class="dash-modal-body">
           ${findings.length === 0 ? `
@@ -5227,7 +5238,7 @@ async function openDashboardFindingsModal(severity = null, area = null) {
                       <td style="font-size: 11.5px; color: var(--text-muted);">${escapeHtml(f.rule_used || 'ICAI Standard')}</td>
                       <td>${getStatusBadge(f.status)}</td>
                       <td class="text-center">
-                        <button class="btn btn-sm btn-primary" onclick="closeDashboardModal(); openEvidenceDrawer(${f.id})">Examine</button>
+                        <button class="btn btn-sm btn-primary" onclick="closeDashboardModal(); openFindingDetailModal(${f.id})" title="Inspect and review audit finding">Open</button>
                       </td>
                     </tr>
                   `).join("")}
@@ -5236,9 +5247,12 @@ async function openDashboardFindingsModal(severity = null, area = null) {
             </div>
           `}
         </div>
-        <div class="dash-modal-footer">
+        <div class="dash-modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
           <span style="font-size: 12px; color: var(--text-muted);">Total ${findings.length} Records</span>
-          <button class="btn btn-secondary" onclick="closeDashboardModal()">Close</button>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-primary" onclick="closeDashboardModal(); navigateTo('findings')">Open Risk & Findings Module</button>
+            <button class="btn btn-secondary" onclick="closeDashboardModal()">Close</button>
+          </div>
         </div>
       </div>
     </div>
@@ -13079,9 +13093,17 @@ function setupDrawer() {
 }
 
 function closeEvidenceDrawer() {
-  document.getElementById("drawer-overlay").style.display = "none";
-  document.getElementById("evidence-drawer").classList.remove("open");
+  const overlay = document.getElementById("drawer-overlay");
+  const drawer = document.getElementById("evidence-drawer");
+  if (overlay) overlay.style.display = "none";
+  if (drawer) drawer.classList.remove("open");
 }
+window.closeEvidenceDrawer = closeEvidenceDrawer;
+window.closeDrawer = closeEvidenceDrawer;
+window.openEvidenceDrawer = openEvidenceDrawer;
+window.openFindingDetailModal = openFindingDetailModal;
+window.openDashboardFindingsModal = openDashboardFindingsModal;
+window.closeDashboardModal = closeDashboardModal;
 
 async function openEvidenceDrawer(findingId) {
   const finding = await FinAuditAPI.getFindingDetail(findingId);
@@ -16435,7 +16457,11 @@ async function updateFindingReview(findingId) {
     });
 
     closeModal("finding-detail-modal");
-    await renderFindings();
+    if (state.currentTab === "findings") {
+      await renderFindings();
+    } else if (state.currentTab === "dashboard") {
+      await renderDashboard();
+    }
   } catch (err) {
     notifyError("Error updating finding: " + err.message);
   }

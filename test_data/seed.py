@@ -265,6 +265,26 @@ def seed_test_database():
     conn = get_db_connection()
     now_str = datetime.now().isoformat()
 
+    # Clean slate for idempotent test seeding (prevents duplicate clients / engagements)
+    tables_to_clear = [
+        "reconciliation_items", "reconciliations", "uploaded_files",
+        "audit_findings", "working_papers", "audit_checklists",
+        "transactions", "ledgers", "duplicate_group_reviews",
+        "missing_sequence_reviews", "anomaly_reviews", "yoy_comparison_reviews",
+        "evidence_items", "engagements", "clients"
+    ]
+    for tbl in tables_to_clear:
+        try:
+            conn.execute(f"DELETE FROM {tbl}")
+        except Exception:
+            pass
+    try:
+        placeholders = ",".join(f"'{tbl}'" for tbl in tables_to_clear)
+        conn.execute(f"DELETE FROM sqlite_sequence WHERE name IN ({placeholders})")
+    except Exception:
+        pass
+    conn.commit()
+
     # Seed app_settings so that the setup wizard does not trap demo users
     default_settings = [
         ("is_initial_setup_completed", "1"),

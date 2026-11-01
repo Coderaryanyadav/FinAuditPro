@@ -6274,50 +6274,86 @@ async function renderGeneralLedger() {
         </div>
       </div>
 
-      <!-- Quick 13-Point Anomaly Filter Chips -->
-      <div class="card" style="padding: 14px 16px; margin-bottom: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 11.5px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
-              13-Point Anomaly Filter Chips
-            </span>
-            <span class="badge" style="font-size: 10.5px; background: var(--bg-app); color: var(--text-muted);">
-              ICAI SA 240 / 500 / 520
-            </span>
+      <!-- Quick 13-Point Anomaly Filter Suite -->
+      <div class="gl-anomaly-panel">
+        <div class="gl-anomaly-header">
+          <div>
+            <div class="gl-anomaly-title-wrap">
+              <span class="gl-anomaly-title">13-Point ICAI Anomaly Testing</span>
+              <span class="gl-anomaly-tag">ICAI SA 240 / 500 / 520</span>
+            </div>
+            <div class="gl-anomaly-subtitle">
+              Deterministic substantive testing • Multi-attribute voucher pattern verification
+            </div>
           </div>
           ${glFilterState.anomaly_rule !== 'ALL' ? `
-            <span style="font-size: 11.5px; color: #dc2626; font-weight: 600;">
-              Active filter: ${GL_RULE_LABELS[glFilterState.anomaly_rule] || glFilterState.anomaly_rule}
-            </span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 12px; font-weight: 600; color: #dc2626;">
+                Active: <b>${GL_RULE_LABELS[glFilterState.anomaly_rule] || (glFilterState.anomaly_rule === 'FLAGGED' ? 'Flagged Vouchers' : 'Clean Entries')}</b>
+              </span>
+              <button class="btn btn-sm btn-secondary" style="padding: 2px 8px; font-size: 11px; color: #dc2626; border-color: #fca5a5;" onclick="setGLAnomalyFilter('ALL')">
+                Clear Filter ✕
+              </button>
+            </div>
           ` : ''}
         </div>
-        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-          <button class="demo-chip ${glFilterState.anomaly_rule === 'ALL' ? 'active' : ''}" 
-                  style="${glFilterState.anomaly_rule === 'ALL' ? 'background: #0f172a; color: white; border-color: #0f172a;' : ''}" 
-                  onclick="setGLAnomalyFilter('ALL')">
-            All Transactions (${(glData.total_transactions || 0).toLocaleString('en-IN')})
+
+        <!-- Master Scope Buttons -->
+        <div class="gl-scope-container">
+          <button class="gl-scope-pill ${glFilterState.anomaly_rule === 'ALL' ? 'active-all' : ''}" onclick="setGLAnomalyFilter('ALL')">
+            <span>All Vouchers</span>
+            <span class="gl-scope-badge" style="${glFilterState.anomaly_rule === 'ALL' ? 'background: rgba(255,255,255,0.25); color: #fff;' : 'background: #e2e8f0; color: #334155;'}">
+              ${(glData.total_transactions || 0).toLocaleString('en-IN')}
+            </span>
           </button>
-          <button class="demo-chip ${glFilterState.anomaly_rule === 'FLAGGED' ? 'active' : ''}" 
-                  style="${glFilterState.anomaly_rule === 'FLAGGED' ? 'background: #dc2626; color: white; border-color: #dc2626;' : 'border-color: #fca5a5; color: #991b1b;'}" 
+
+          <button class="gl-scope-pill ${glFilterState.anomaly_rule === 'FLAGGED' ? 'active-flagged' : ''}" 
+                  style="${glFilterState.anomaly_rule !== 'FLAGGED' ? 'background: #fff5f5; border-color: #fed7d7; color: #991b1b;' : ''}" 
                   onclick="setGLAnomalyFilter('FLAGGED')">
-            Flagged Only (${(glData.flagged_transactions_count || 0).toLocaleString('en-IN')})
+            <span style="display: inline-flex; align-items: center; gap: 5px;">
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+              Flagged Only
+            </span>
+            <span class="gl-scope-badge" style="${glFilterState.anomaly_rule === 'FLAGGED' ? 'background: rgba(255,255,255,0.25); color: #fff;' : 'background: #fee2e2; color: #991b1b;'}">
+              ${(glData.flagged_transactions_count || 0).toLocaleString('en-IN')}
+            </span>
           </button>
-          <button class="demo-chip ${glFilterState.anomaly_rule === 'CLEAN' ? 'active' : ''}" 
-                  style="${glFilterState.anomaly_rule === 'CLEAN' ? 'background: #059669; color: white; border-color: #059669;' : 'border-color: #a7f3d0; color: #065f46;'}" 
+
+          <button class="gl-scope-pill ${glFilterState.anomaly_rule === 'CLEAN' ? 'active-clean' : ''}" 
+                  style="${glFilterState.anomaly_rule !== 'CLEAN' ? 'background: #f0fdf4; border-color: #bbf7d0; color: #166534;' : ''}" 
                   onclick="setGLAnomalyFilter('CLEAN')">
-            Clean Entries (${Math.max(0, (glData.total_transactions || 0) - (glData.flagged_transactions_count || 0)).toLocaleString('en-IN')})
+            <span style="display: inline-flex; align-items: center; gap: 5px;">
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+              Clean Entries
+            </span>
+            <span class="gl-scope-badge" style="${glFilterState.anomaly_rule === 'CLEAN' ? 'background: rgba(255,255,255,0.25); color: #fff;' : 'background: #dcfce7; color: #166534;'}">
+              ${Math.max(0, (glData.total_transactions || 0) - (glData.flagged_transactions_count || 0)).toLocaleString('en-IN')}
+            </span>
           </button>
+        </div>
+
+        <!-- Section Hairline Divider -->
+        <div class="gl-divider-label">
+          ICAI Substantive Anomaly Rules (Click to isolate vouchers)
+        </div>
+
+        <!-- The 13 Specific ICAI Rules -->
+        <div class="gl-rules-grid">
           ${Object.entries(GL_RULE_LABELS).map(([code, label]) => {
-      const count = ruleCountMap[code] || 0;
-      const isSelected = glFilterState.anomaly_rule === code;
-      return `
-              <button class="demo-chip ${isSelected ? 'active' : ''}" 
-                      style="${isSelected ? 'background: #dc2626; color: white; border-color: #dc2626;' : (count > 0 ? 'border-color: #fca5a5;' : 'opacity: 0.75;')}" 
+            const count = ruleCountMap[code] || 0;
+            const isSelected = glFilterState.anomaly_rule === code;
+            const hasAnomalies = count > 0;
+            return `
+              <button class="gl-rule-chip ${isSelected ? 'active' : ''} ${hasAnomalies ? 'has-anomalies' : 'is-zero'}" 
+                      title="${escapeHtml(label)}: ${count} transactions detected"
                       onclick="setGLAnomalyFilter('${code}')">
-                ${label} ${count > 0 ? `<span class="badge" style="background:${isSelected ? '#991b1b' : '#fee2e2'}; color:${isSelected ? '#fff' : '#991b1b'}; margin-left:4px; font-size:10px; padding:1px 5px; font-weight: 700;">${count}</span>` : ''}
+                <span>${escapeHtml(label)}</span>
+                <span class="gl-count-badge ${hasAnomalies ? 'badge-danger' : 'badge-zero'}">
+                  ${count.toLocaleString('en-IN')}
+                </span>
               </button>
             `;
-    }).join('')}
+          }).join('')}
         </div>
       </div>
 
@@ -10232,15 +10268,15 @@ async function renderWorkingPapers() {
           <table class="data-table">
             <thead>
               <tr>
-                <th style="width: 110px;">WP ID</th>
-                <th>Audit Area</th>
+                <th style="min-width: 150px; width: 150px; white-space: nowrap;">WP ID</th>
+                <th style="min-width: 130px; width: 130px;">Audit Area</th>
                 <th>Working Paper Title & Description</th>
-                <th>Evidence & Files</th>
-                <th>Cross References</th>
-                <th>Prepared By</th>
-                <th>Reviewed By</th>
-                <th>Status</th>
-                <th style="text-align: right; width: 140px;">Actions</th>
+                <th style="min-width: 120px;">Evidence & Files</th>
+                <th style="min-width: 120px;">Cross References</th>
+                <th style="min-width: 110px;">Prepared By</th>
+                <th style="min-width: 110px;">Reviewed By</th>
+                <th style="min-width: 120px;">Status</th>
+                <th style="text-align: right; min-width: 185px; width: 185px; white-space: nowrap;">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -10263,8 +10299,8 @@ async function renderWorkingPapers() {
 
       return `
                   <tr style="cursor: pointer;" onclick="openWorkingPaperDrawer(${w.id})">
-                    <td>
-                      <span class="font-mono font-bold" style="color: #2563eb; background: #eff6ff; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); font-size: 12px;">
+                    <td style="white-space: nowrap;">
+                      <span class="font-mono font-bold" style="color: #2563eb; background: #eff6ff; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); font-size: 12px; white-space: nowrap; display: inline-block;">
                         ${escapeHtml(w.wp_reference)}
                       </span>
                     </td>
@@ -10308,8 +10344,8 @@ async function renderWorkingPapers() {
                       ${getWpStatusBadge(w.status)}
                       ${commentsCount > 0 ? `<div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">${commentsCount} note${commentsCount > 1 ? 's' : ''}</div>` : ''}
                     </td>
-                    <td style="text-align: right;" onclick="event.stopPropagation();">
-                      <div style="display: flex; gap: 4px; justify-content: flex-end;">
+                    <td style="text-align: right; white-space: nowrap;" onclick="event.stopPropagation();">
+                      <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center; flex-wrap: nowrap;">
                         <button class="btn btn-secondary btn-sm" onclick="openWorkingPaperDrawer(${w.id})" title="View / Edit Working Paper Details">
                           Open
                         </button>

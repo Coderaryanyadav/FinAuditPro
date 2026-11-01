@@ -8,17 +8,29 @@ from backend.app.database import get_db_connection, init_db
 from backend.app.auth import create_access_token
 
 class TestClientEngagementManagement(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        init_db()
+        cls.run_id = str(int(time.time()))[-4:]
+        cls.admin_token = create_access_token(data={"sub": "admin", "role": "Admin", "id": 1})
+        cls.auditor_token = create_access_token(data={"sub": "auditor", "role": "Auditor", "id": 2})
+        cls.staff_token = create_access_token(data={"sub": "staff", "role": "Audit Staff", "id": 3})
+
+    @classmethod
+    def tearDownClass(cls):
+        conn = get_db_connection()
+        try:
+            rows = conn.execute("SELECT id FROM engagements WHERE title LIKE ?", (f"%{cls.run_id}%",)).fetchall()
+            for r in rows:
+                conn.execute("DELETE FROM audit_checklists WHERE engagement_id = ?", (r["id"],))
+                conn.execute("DELETE FROM engagements WHERE id = ?", (r["id"],))
+            conn.execute("DELETE FROM clients WHERE name LIKE ?", (f"%{cls.run_id}%",))
+            conn.commit()
+        finally:
+            conn.close()
+
     def setUp(self):
         self.client = TestClient(app)
-        init_db()
-        
-        # Unique identifier for this test run
-        self.run_id = str(int(time.time()))[-4:]
-        
-        # Create admin token and auditor token
-        self.admin_token = create_access_token(data={"sub": "admin", "role": "Admin", "id": 1})
-        self.auditor_token = create_access_token(data={"sub": "auditor", "role": "Auditor", "id": 2})
-        self.staff_token = create_access_token(data={"sub": "staff", "role": "Audit Staff", "id": 3})
 
     def test_01_create_client_with_validations(self):
         """Test client creation with PAN and GSTIN format validations."""

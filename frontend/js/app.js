@@ -6345,10 +6345,10 @@ async function renderGeneralLedger() {
         <!-- The 13 Specific ICAI Rules -->
         <div class="gl-rules-grid">
           ${Object.entries(GL_RULE_LABELS).map(([code, label]) => {
-            const count = ruleCountMap[code] || 0;
-            const isSelected = glFilterState.anomaly_rule === code;
-            const hasAnomalies = count > 0;
-            return `
+      const count = ruleCountMap[code] || 0;
+      const isSelected = glFilterState.anomaly_rule === code;
+      const hasAnomalies = count > 0;
+      return `
               <button class="gl-rule-chip ${isSelected ? 'active' : ''} ${hasAnomalies ? 'has-anomalies' : 'is-zero'}" 
                       title="${escapeHtml(label)}: ${count} transactions detected"
                       onclick="setGLAnomalyFilter('${code}')">
@@ -6358,7 +6358,7 @@ async function renderGeneralLedger() {
                 </span>
               </button>
             `;
-          }).join('')}
+    }).join('')}
         </div>
       </div>
 
@@ -10867,8 +10867,8 @@ function renderWpEvidenceTab(wp) {
           No supporting documents attached yet. Click "+ Attach from Engagement Repository" or upload evidence files above.
         </div>
       ` : files.map((file, idx) => {
-        const isTab = isTabularFileName(file.name);
-        return `
+    const isTab = isTabularFileName(file.name);
+    return `
         <div class="wp-attachment-card">
           <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1;">
             <div style="width: 38px; height: 38px; border-radius: 6px; background: ${isTab ? '#ecfdf5' : '#eff6ff'}; color: ${isTab ? '#059669' : '#2563eb'}; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; border: 1px solid ${isTab ? '#a7f3d0' : '#bfdbfe'};">
@@ -10908,7 +10908,8 @@ function renderWpEvidenceTab(wp) {
             </button>
           </div>
         </div>
-      `;}).join("")}
+      `;
+  }).join("")}
     </div>
 
     <!-- Inline Tabular Data Viewer -->
@@ -11043,14 +11044,14 @@ function renderInlineTabularView(data, filterTerm = "") {
               <tr>
                 <td style="text-align: center; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted);">${i + 1}</td>
                 ${cols.map(c => {
-                  const val = r[c];
-                  const num = isColNumeric(c);
-                  return `
+    const val = r[c];
+    const num = isColNumeric(c);
+    return `
                     <td class="${num ? 'cell-num' : (isColDate(c) ? 'cell-date' : '')}" style="${num ? 'text-align: right;' : ''}">
                       ${formatCellValue(val, c)}
                     </td>
                   `;
-                }).join("")}
+  }).join("")}
               </tr>
             `).join("")}
           </tbody>
@@ -11183,14 +11184,14 @@ function renderModalTabularView(data, filterTerm = "") {
           <tr>
             <td style="text-align: center; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">${i + 1}</td>
             ${cols.map(c => {
-              const val = r[c];
-              const num = isColNumeric(c);
-              return `
+    const val = r[c];
+    const num = isColNumeric(c);
+    return `
                 <td class="${num ? 'cell-num' : (isColDate(c) ? 'cell-date' : '')}" style="${num ? 'text-align: right;' : ''}">
                   ${formatCellValue(val, c)}
                 </td>
               `;
-            }).join("")}
+  }).join("")}
           </tr>
         `).join("")}
       </tbody>

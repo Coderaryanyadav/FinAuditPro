@@ -14,26 +14,26 @@ FinAuditPro is designed primarily as a **100% Offline-First Desktop / Local Work
    ```
 2. Run installation script:
    ```bash
-   ./scripts/setup_mac.sh
+   ./scripts/mac/setup.sh
    ```
 3. Launch daily audit operations:
    ```bash
-   ./scripts/start_mac.sh
+   ./scripts/mac/start.sh
    ```
 
 ### Windows Setup
 1. Clone the repository:
    ```cmd
-   git clone https://github.com/Coderaryanyadav/TempAudit.git
-   cd TempAudit
+   git clone https://github.com/Coderaryanyadav/FinAuditPro.git
+   cd FinAuditPro
    ```
 2. Run installation script:
    ```cmd
-   scripts\setup_windows.bat
+   scripts\windows\setup.bat
    ```
 3. Launch daily audit operations:
    ```cmd
-   scripts\start_windows.bat
+   scripts\windows\start.bat
    ```
 
 ---

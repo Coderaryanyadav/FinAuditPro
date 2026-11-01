@@ -9,7 +9,7 @@ echo ===========================================================================
 echo.
 
 :: Move to project root directory
-cd /d "%~dp0\.."
+cd /d "%~dp0\..\.."
 
 :: 1. Activate Python Environment if venv exists
 if exist "venv\Scripts\activate.bat" (

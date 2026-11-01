@@ -1011,15 +1011,15 @@ TempAudit/
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/Coderaryanyadav/TempAudit.git
-cd TempAudit
+git clone https://github.com/Coderaryanyadav/FinAuditPro.git
+cd FinAuditPro
 
-# 2. Setup Virtual Environment & Install Dependencies
-./scripts/setup_mac.sh
-# (or on Windows: scripts\setup_windows.bat)
+# 2. Setup Virtual Environment & Install Dependencies (macOS / Linux)
+./scripts/mac/setup.sh
+# (or on Windows: scripts\windows\setup.bat)
 
-# 3. Launch Platform
-./scripts/start_mac.sh
-# (or on Windows: scripts\start_windows.bat / python run.py)
+# 3. Launch Platform (macOS / Linux)
+./scripts/mac/start.sh
+# (or on Windows: scripts\windows\start.bat / python run.py)
 # Accessible at http://127.0.0.1:8000
 ```

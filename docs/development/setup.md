@@ -18,7 +18,7 @@ This guide details the procedure for setting up an isolated local development en
 ### macOS / Linux
 Run the automated initialization script from the repository root:
 ```bash
-./scripts/setup_mac.sh
+./scripts/mac/setup.sh
 ```
 
 ### Windows
@@ -77,7 +77,10 @@ To launch the local web server and open the browser interface:
 
 ```bash
 # On macOS:
-./scripts/start_mac.sh
+./scripts/mac/start.sh
+
+# On Windows:
+scripts\windows\start.bat
 
 # Or directly with Python:
 python run.py

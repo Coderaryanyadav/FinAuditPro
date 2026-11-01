@@ -1,29 +1,29 @@
 # FinAuditPro Operational Utilities & Automation Scripts
 
-This directory houses maintenance utilities, database seeding tools, testing runners, automated browser suites, cross-platform launchers, and enterprise deliverable generators.
+This directory houses maintenance utilities, database seeding tools, testing runners, automated browser suites, cross-platform launchers, and enterprise deliverable generators organized by environment.
 
 ---
 
 ## 💻 OS-Specific Platform Launchers
 
-### macOS & Linux
-- [`setup_mac.sh`](setup_mac.sh): **Environment Setup:** Verifies Python 3.10+, provisions `venv`, installs locked dependencies, creates runtime data directories, initializes clean database schema, and prompts for admin creation.
+### 🍏 MacBook & Linux (`scripts/mac/`)
+- [`scripts/mac/setup.sh`](mac/setup.sh): **Environment Setup:** Verifies Python 3.10+, provisions `venv`, installs locked dependencies, creates runtime data directories, initializes clean database schema, and prompts for admin creation.
   ```bash
-  ./scripts/setup_mac.sh
+  ./scripts/mac/setup.sh
   ```
-- [`start_mac.sh`](start_mac.sh): **Daily Platform Launcher:** Loads environment variables, activates virtualenv, checks database schema & admin existence, probes local LM Studio AI daemon, and launches the web interface.
+- [`scripts/mac/start.sh`](mac/start.sh): **Daily Platform Launcher:** Loads environment variables, activates virtualenv, checks database schema & admin existence, probes local LM Studio AI daemon, and launches the web interface.
   ```bash
-  ./scripts/start_mac.sh
+  ./scripts/mac/start.sh
   ```
 
-### Windows
-- [`setup_windows.bat`](setup_windows.bat): **Environment Setup:** Windows batch installer that checks Python runtime, provisions virtualenv, installs pip packages, creates data directories, and initializes the database.
+### 🪟 Windows (`scripts/windows/`)
+- [`scripts/windows/setup.bat`](windows/setup.bat): **Environment Setup:** Windows batch installer that checks Python runtime, provisions virtualenv, installs pip packages, creates data directories, and initializes the database.
   ```cmd
-  scripts\setup_windows.bat
+  scripts\windows\setup.bat
   ```
-- [`start_windows.bat`](start_windows.bat): **Daily Platform Launcher:** Activates virtualenv, verifies database, tests local LM Studio AI status, and boots FastAPI desktop server via `python run.py`.
+- [`scripts/windows/start.bat`](windows/start.bat): **Daily Platform Launcher:** Activates virtualenv, verifies database, tests local LM Studio AI status, and boots FastAPI desktop server via `python run.py`.
   ```cmd
-  scripts\start_windows.bat
+  scripts\windows\start.bat
   ```
 
 ---

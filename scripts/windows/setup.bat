@@ -9,7 +9,7 @@ echo ===========================================================================
 echo.
 
 :: Move to project root directory
-cd /d "%~dp0\.."
+cd /d "%~dp0\..\.."
 
 :: 1. Verify Windows Environment
 echo [1/8] Verifying Windows OS Environment...

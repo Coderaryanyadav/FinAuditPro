@@ -2082,8 +2082,9 @@ async function updateActiveEngagement() {
 function navigateTo(tab) {
   state.currentTab = tab;
   document.querySelectorAll(".nav-item").forEach(item => {
-    item.classList.toggle("active", item.dataset.tab === tab);
-    item.setAttribute("aria-selected", item.dataset.tab === tab ? "true" : "false");
+    const itemTab = item.dataset?.tab || item.getAttribute?.("data-tab");
+    item.classList.toggle("active", itemTab === tab);
+    item.setAttribute?.("aria-selected", itemTab === tab ? "true" : "false");
   });
 
   // Close mobile sidebar on navigation

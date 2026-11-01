@@ -2097,7 +2097,7 @@ function navigateTo(tab) {
   const engagementRequiredTabs = [
     "dashboard", "import", "cleaning_logs", "trial_balance", "general_ledger",
     "ledgers", "reconciliation", "yoy_comparison",
-    "duplicate_missing", "anomaly_detection", "findings", "checklist",
+    "duplicate_missing", "findings", "checklist",
     "working_papers", "reports"
   ];
 
@@ -5316,7 +5316,7 @@ async function renderDashboard() {
               </div>
               <div class="dash-chart-subtitle">Click any digit bar to inspect transactions starting with that digit</div>
             </div>
-            <button class="btn btn-sm btn-secondary" onclick="navigateTo('anomaly_detection')">Anomaly Engine →</button>
+            <button class="btn btn-sm btn-secondary" onclick="navigateTo('findings')">View Findings →</button>
           </div>
 
           <!-- Benford's 1st-Digit Comparison Mini-Chart -->
@@ -5917,7 +5917,7 @@ async function triggerRunHybridEngine() {
     const res = await FinAuditAPI.runHybridEngine(state.currentEngagementId);
     notifySuccess(`Hybrid Audit Completed! Found ${res.findings_count} audit exceptions across ${res.total_transactions} transactions.`);
     await updateActiveEngagement();
-    navigateTo("anomaly_detection");
+    navigateTo("findings");
   } catch (err) {
     notifyError("Error executing audit engine: " + err.message);
     renderDashboard();

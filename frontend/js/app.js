@@ -5146,44 +5146,6 @@ async function renderDashboard() {
   }
 }
 
-// Helper: Format compact INR (e.g. 1.5M, 250K)
-function formatCompactINR(val) {
-  const num = Number(val) || 0;
-  if (Math.abs(num) >= 10000000) return "₹" + (num / 10000000).toFixed(2) + " Cr";
-  if (Math.abs(num) >= 100000) return "₹" + (num / 100000).toFixed(1) + " L";
-  if (Math.abs(num) >= 1000) return "₹" + (num / 1000).toFixed(0) + " k";
-  return "₹" + num.toFixed(0);
-}
-
-function getStatusBadgeClass(status) {
-  const st = (status || "In Progress").toLowerCase();
-  if (st === "completed") return "badge-low";
-  if (st === "under review") return "badge-medium";
-  if (st === "archived") return "badge-role-staff";
-  return "badge-role-auditor";
-}
-
-function filterDashboardFindingsTable(sev) {
-  activeFindingsFilter = sev;
-  const rows = document.querySelectorAll("#dash-findings-table tbody tr");
-  rows.forEach(r => {
-    if (sev === "ALL") {
-      r.style.display = "";
-    } else {
-      const rowSev = r.getAttribute("data-sev");
-      r.style.display = (rowSev === sev) ? "" : "none";
-    }
-  });
-  const btnGroup = document.querySelectorAll(".card-header .btn-group button");
-  btnGroup.forEach(btn => {
-    if (btn.innerText.toUpperCase().includes(sev)) {
-      btn.className = "btn btn-sm btn-primary";
-    } else {
-      btn.className = "btn btn-sm btn-secondary";
-    }
-  });
-}
-
 function switchDashboardEngagement(engId) {
   state.currentEngagementId = parseInt(engId, 10);
   updateActiveEngagement().then(() => renderDashboard());
@@ -17496,4 +17458,3 @@ async function handleSanitizePreviewTest() {
     resultBox.innerHTML = `<span style="color: #dc2626;">Error: ${escapeHTML(err.message)}</span>`;
   }
 }
-

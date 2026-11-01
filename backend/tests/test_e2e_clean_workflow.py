@@ -67,11 +67,11 @@ class TestE2ECleanWorkflow(unittest.TestCase):
         eng_id = e_res.json()["id"]
 
         # 4. Import Sample General Ledger
-        with open("test_data/apex_general_ledger_fy2425.csv", "rb") as f:
+        with open("test_data/aryan_fintech/transactions.csv", "rb") as f:
             upload_res = self.client.post(
                 "/api/import/upload",
                 data={"engagement_id": str(eng_id), "data_category": "General Ledger"},
-                files={"file": ("apex_gl.csv", f, "text/csv")},
+                files={"file": ("aryan_transactions.csv", f, "text/csv")},
                 headers=headers
             )
         self.assertEqual(upload_res.status_code, 200)
@@ -91,7 +91,7 @@ class TestE2ECleanWorkflow(unittest.TestCase):
                     "credit": "credit",
                     "amount": "amount",
                     "party_name": "party_name",
-                    "gstin": "gstin",
+                    "gstin": "party_gstin",
                     "description": "description"
                 },
                 "data_category": "General Ledger"

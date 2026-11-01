@@ -1898,7 +1898,6 @@ async function handleGlobalSearchQuery(e) {
     { id: "trial_balance", label: "Trial Balance", desc: "Interactive TB review with drill-down" },
     { id: "general_ledger", label: "General Ledger Explorer", desc: "Search transactions and ledger accounts" },
     { id: "reconciliation", label: "Reconciliation Statements", desc: "GST 2B vs Purchase, Bank Reconciliation" },
-    { id: "financial_statements", label: "Financial Statements", desc: "Balance sheet, P&L, Notes to Accounts" },
     { id: "yoy_comparison", label: "Year-over-Year Analysis", desc: "Variance and ratio trends" },
     { id: "findings", label: "Audit Findings & Exceptions", desc: "Review, waive, or flag high-risk anomalies" },
     { id: "checklist", label: "CARO & Standards Checklist", desc: "Statutory compliance workflows" },
@@ -2097,7 +2096,7 @@ function navigateTo(tab) {
   // Check if this tab requires an active engagement
   const engagementRequiredTabs = [
     "dashboard", "import", "cleaning_logs", "trial_balance", "general_ledger",
-    "ledgers", "reconciliation", "financial_statements", "yoy_comparison",
+    "ledgers", "reconciliation", "yoy_comparison",
     "duplicate_missing", "anomaly_detection", "findings", "checklist",
     "working_papers", "reports"
   ];
@@ -2126,7 +2125,6 @@ function navigateTo(tab) {
     case "general_ledger": renderGeneralLedger(); break;
     case "ledgers": renderGeneralLedger(); break;
     case "reconciliation": renderReconciliation(); break;
-    case "financial_statements": renderFinancialStatements(); break;
     case "yoy_comparison": renderYoYComparison(); break;
     case "duplicate_missing": renderDuplicateAndMissing(); break;
     case "anomaly_detection": renderAnomalyDetection(); break;

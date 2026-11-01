@@ -1,3 +1,0 @@
----
-# This is a control-node dependency file; the basic playbook below uses built-ins.
-collections: []

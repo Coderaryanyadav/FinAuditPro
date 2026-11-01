@@ -5189,65 +5189,6 @@ async function renderDashboard() {
         `}
       </div>
 
-      <!-- MONTHLY CHARTS ROW: TRANSACTION VOLUME & TRANSACTION VALUE -->
-      <div class="dash-section-grid" style="margin-bottom: 20px;">
-        <!-- Chart 4: Monthly Transaction Volume -->
-        <div class="dash-chart-card">
-          <div class="dash-chart-header">
-            <div>
-              <div class="dash-chart-title">4. Monthly Transaction Volume</div>
-              <div class="dash-chart-subtitle">Month-by-month voucher frequency | <b>Click any month bar to inspect transactions</b></div>
-            </div>
-            <div style="font-size: 11.5px; color: #2563eb; font-weight: 600;">
-              Total: ${(overview.total_transactions || 0).toLocaleString()} txns
-            </div>
-          </div>
-
-          <div style="display: flex; align-items: flex-end; gap: 8px; height: 160px; padding: 10px 0 0 0; border-bottom: 1px solid #e2e8f0;">
-            ${monthlyTrends.length === 0 ? `
-              <div style="width: 100%; text-align: center; color: var(--text-muted); align-self: center;">No transactions found for active engagement.</div>
-            ` : monthlyTrends.map(m => {
-      const heightPct = Math.max(12, Math.round((m.transaction_count / maxTxMonth) * 100));
-      return `
-                <div class="chart-bar-interactive" style="flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end;" onclick="openDashboardTransactionsModal('${m.month}', '${m.month_label}')" title="${m.month_label}: ${m.transaction_count} transactions (Click to inspect)">
-                  <div style="font-size: 10.5px; font-weight: 700; color: #2563eb; margin-bottom: 4px;">${m.transaction_count}</div>
-                  <div style="width: 100%; height: ${heightPct}%; background: linear-gradient(180deg, #3b82f6, #1d4ed8); border-radius: 4px 4px 0 0;"></div>
-                  <div style="font-size: 10px; color: var(--text-muted); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 48px;">${m.month_label.split(' ')[0]}</div>
-                </div>
-              `;
-    }).join("")}
-          </div>
-        </div>
-
-        <!-- Chart 5: Monthly Transaction Value -->
-        <div class="dash-chart-card">
-          <div class="dash-chart-header">
-            <div>
-              <div class="dash-chart-title">5. Monthly Turnover Value (₹)</div>
-              <div class="dash-chart-subtitle">Monthly financial turnover | <b>Click bar to open transaction list</b></div>
-            </div>
-            <div style="font-size: 11.5px; color: #059669; font-weight: 600;">
-              Total: ${formatINR(overview.total_turnover_examined || 0)}
-            </div>
-          </div>
-
-          <div style="display: flex; align-items: flex-end; gap: 8px; height: 160px; padding: 10px 0 0 0; border-bottom: 1px solid #e2e8f0;">
-            ${monthlyTrends.length === 0 ? `
-              <div style="width: 100%; text-align: center; color: var(--text-muted); align-self: center;">No transaction values recorded.</div>
-            ` : monthlyTrends.map(m => {
-      const heightPct = Math.max(12, Math.round((m.total_value / maxValMonth) * 100));
-      return `
-                <div class="chart-bar-interactive" style="flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end;" onclick="openDashboardTransactionsModal('${m.month}', '${m.month_label}')" title="${m.month_label}: ${formatINR(m.total_value)} turnover (Click to inspect)">
-                  <div style="font-size: 10px; font-weight: 700; color: #059669; margin-bottom: 4px;">${formatCompactINR(m.total_value)}</div>
-                  <div style="width: 100%; height: ${heightPct}%; background: linear-gradient(180deg, #10b981, #059669); border-radius: 4px 4px 0 0;"></div>
-                  <div style="font-size: 10px; color: var(--text-muted); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 48px;">${m.month_label.split(' ')[0]}</div>
-                </div>
-              `;
-    }).join("")}
-          </div>
-        </div>
-      </div>
-
       <!-- SECTIONS 4 & 5: RECONCILIATION STATUS & ANOMALY SUMMARY -->
       <div class="dash-section-grid" style="margin-bottom: 20px;">
         <!-- SECTION 4: RECONCILIATION STATUS (Chart & Details) -->

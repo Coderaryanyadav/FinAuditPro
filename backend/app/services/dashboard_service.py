@@ -10,7 +10,9 @@ def parse_date_to_ym(date_str: str) -> Optional[str]:
         return None
     d = str(date_str).strip()
     if len(d) >= 7 and d[4] == '-' and d[:4].isdigit() and d[5:7].isdigit():
-        return d[:7] # YYYY-MM
+        month = int(d[5:7])
+        if 1 <= month <= 12:
+            return d[:7] # YYYY-MM
     
     # Try common formats: DD/MM/YYYY, DD-MM-YYYY, YYYY/MM/DD
     for fmt in ["%d/%m/%Y", "%d-%m-%Y", "%Y/%m/%d", "%d.%m.%Y", "%Y-%m-%d"]:

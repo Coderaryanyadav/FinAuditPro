@@ -385,6 +385,21 @@ function applyRoleNavigationPermissions() {
 }
 window.applyRoleNavigationPermissions = applyRoleNavigationPermissions;
 
+// Tab switcher for unified Settings & Backup Center
+let _currentSettingsTab = "general"; // "general" | "users" | "assistant" | "backup"
+
+function switchSettingsTab(tabName) {
+  _currentSettingsTab = tabName;
+  renderSettings();
+}
+window.switchSettingsTab = switchSettingsTab;
+
+function navigateToSettingsTab(tabName) {
+  _currentSettingsTab = tabName;
+  navigateTo("settings");
+}
+window.navigateToSettingsTab = navigateToSettingsTab;
+
 // App Initialization
 async function initApp() {
   setupNavigation();
@@ -2122,14 +2137,15 @@ function navigateTo(tab) {
     case "reports": renderReports(); break;
     case "audit_trail": renderAuditTrail(); break;
     case "settings": renderSettings(); break;
-    case "ai_manager": renderAIManager(); break;
+    case "users": _currentSettingsTab = "users"; renderSettings(); break;
+    case "ai_manager": _currentSettingsTab = "assistant"; renderSettings(); break;
     default: renderDashboard(); break;
   }
 }
 
 // ----------------- USER MANAGEMENT (ADMIN MODULE) -----------------
-async function renderUserManagement() {
-  const container = document.getElementById("content-container");
+async function renderUserManagement(targetContainerId = null) {
+  const container = document.getElementById(targetContainerId || "settings-tab-content") || document.getElementById("content-container");
   if (state.currentUser?.role !== "Admin") {
     container.innerHTML = `
       <div class="card" style="padding: 40px; text-align: center; color: #dc2626;">
@@ -16932,124 +16948,185 @@ function openAuditDiffModal(logId) {
 
 async function renderSettings() {
   const container = document.getElementById("content-container");
+  const activeTab = _currentSettingsTab || "general";
+  const isAdmin = state.currentUser?.role === "Admin";
+
   container.innerHTML = `
     <div style="padding: 24px; max-width: 1400px; margin: 0 auto;">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+      <!-- Unified Header -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 16px;">
         <div>
-          <h1 style="font-size: 24px; font-weight: 700; color: var(--text-main); margin: 0;">Settings & Local Database Center</h1>
+          <h1 style="font-size: 24px; font-weight: 700; color: var(--text-main); margin: 0;">Administration, Settings & Backup Center</h1>
           <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">
-            Manage audit thresholds, firm practice configuration, and create immutable point-in-time local database backups.
+            Manage firm practice configurations, audit team users, local AI assistant parameters, and database backups.
           </p>
         </div>
       </div>
 
-      <!-- System Environment & Offline Status -->
-      <div id="system-info-card-wrap" style="margin-bottom: 24px;">
-        <div style="padding: 20px; text-align: center; color: var(--text-muted);">Loading system information...</div>
+      <!-- Navigation Tabs -->
+      <div class="wp-nav-tabs" style="margin-bottom: 24px; border-bottom: 2px solid var(--border); display: flex; gap: 8px;">
+        <button type="button" class="wp-nav-tab ${activeTab === 'general' ? 'active' : ''}" onclick="switchSettingsTab('general')" style="font-size: 13.5px; padding: 10px 18px;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          <span>Practice & Thresholds</span>
+        </button>
+
+        ${isAdmin ? `
+          <button type="button" class="wp-nav-tab ${activeTab === 'users' ? 'active' : ''}" onclick="switchSettingsTab('users')" style="font-size: 13.5px; padding: 10px 18px;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <span>User Management</span>
+          </button>
+        ` : ''}
+
+        <button type="button" class="wp-nav-tab ${activeTab === 'assistant' ? 'active' : ''}" onclick="switchSettingsTab('assistant')" style="font-size: 13.5px; padding: 10px 18px;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          <span>Assistant Settings</span>
+        </button>
+
+        <button type="button" class="wp-nav-tab ${activeTab === 'backup' ? 'active' : ''}" onclick="switchSettingsTab('backup')" style="font-size: 13.5px; padding: 10px 18px;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+          <span>Database & Backup</span>
+        </button>
       </div>
 
-      <!-- Backup & Restore Center -->
-      <div style="background: white; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px; ">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-          <div>
-            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin: 0;">Local Database Backup & Restore</h3>
-            <p style="font-size: 13px; color: var(--text-muted); margin: 2px 0 0 0;">
-              All backups are kept strictly locally on this PC in SQLite format with SHA-256 integrity checksums.
-            </p>
-          </div>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button class="btn btn-primary" onclick="handleCreateBackupClick()" id="btn-create-backup">
-              <svg style="width: 16px; height: 16px; margin-right: 6px; vertical-align: text-bottom;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
-              </svg>
-              Create Local Backup Now
-            </button>
-            <label class="btn btn-secondary" style="cursor: pointer; margin: 0;">
-              <svg style="width: 16px; height: 16px; margin-right: 6px; vertical-align: text-bottom;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-              </svg>
-              Upload & Restore (.db)
-              <input type="file" id="upload-restore-input" accept=".db,.sqlite" style="display: none;" onchange="handleUploadRestoreFile(event)">
-            </label>
-          </div>
-        </div>
-
-        <div id="backups-list-table-wrap">
-          <div style="padding: 20px; text-align: center; color: var(--text-muted);">Loading backup history...</div>
-        </div>
-      </div>
-
-      <!-- Practice & Engine Configuration -->
-      <div style="background: white; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; ">
-        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin: 0 0 16px 0;">Audit Engine & Practice Configuration</h3>
-        
-        <form id="practice-settings-form" onsubmit="handleSaveSettings(event)">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-            <div class="form-group">
-              <label class="form-label">CA Firm / Practice Name</label>
-              <input type="text" id="setting-firm-name" class="form-control" placeholder="e.g. M/s ABC & Co., Chartered Accountants">
-            </div>
-            <div class="form-group">
-              <label class="form-label">ICAI Firm Registration Number (FRN)</label>
-              <input type="text" id="setting-firm-frn" class="form-control" placeholder="e.g. FRN-012345N">
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-            <div class="form-group">
-              <label class="form-label">Default Materiality Benchmark</label>
-              <select id="setting-materiality-bench" class="form-control">
-                <option value="Turnover">Turnover / Total Revenue</option>
-                <option value="Total Assets">Total Assets</option>
-                <option value="Gross Profit">Gross Profit</option>
-                <option value="Profit Before Tax">Profit Before Tax (PBT)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Materiality Threshold %</label>
-              <input type="number" id="setting-materiality-pct" class="form-control" step="0.1" min="0.1" max="10.0" value="0.5">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Sec 40A(3) Cash Disallowance Limit (₹)</label>
-              <input type="number" id="setting-cash-40a3" class="form-control" step="1000" value="10000">
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-            <div class="form-group">
-              <label class="form-label">Sec 269ST Single Day Cash Limit (₹)</label>
-              <input type="number" id="setting-cash-269st" class="form-control" step="10000" value="200000">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Benford's Law Confidence Level</label>
-              <select id="setting-benford-conf" class="form-control">
-                <option value="0.99">99% (Strict Statistical Test)</option>
-                <option value="0.95" selected>95% (Standard Audit Benchmark)</option>
-                <option value="0.90">90% (Exploratory / Initial Screening)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">User Session Inactivity Timeout</label>
-              <select id="setting-session-timeout" class="form-control">
-                <option value="30">30 Minutes</option>
-                <option value="60" selected>60 Minutes</option>
-                <option value="120">2 Hours</option>
-                <option value="480">8 Hours (Full Working Day)</option>
-              </select>
-            </div>
-          </div>
-
-          <div style="display: flex; justify-content: flex-end; gap: 10px;">
-            <button type="submit" class="btn btn-primary" id="btn-save-settings">Save Configuration Changes</button>
-          </div>
-        </form>
+      <!-- Tab Content Area -->
+      <div id="settings-tab-content">
+        <div style="padding: 20px; text-align: center; color: var(--text-muted);">Loading settings...</div>
       </div>
     </div>
   `;
 
-  await loadSystemInfo();
-  await loadBackupsList();
-  await loadAppSettingsForm();
+  if (activeTab === "users") {
+    await renderUserManagement("settings-tab-content");
+  } else if (activeTab === "assistant") {
+    await renderAIManager("settings-tab-content");
+  } else if (activeTab === "backup") {
+    renderBackupTabContent();
+    await loadSystemInfo();
+    await loadBackupsList();
+  } else {
+    // Default "general" practice settings
+    renderGeneralSettingsTabContent();
+    await loadAppSettingsForm();
+  }
+}
+
+function renderGeneralSettingsTabContent() {
+  const content = document.getElementById("settings-tab-content");
+  if (!content) return;
+
+  content.innerHTML = `
+    <!-- Practice & Engine Configuration -->
+    <div style="background: white; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px;">
+      <div style="margin-bottom: 20px;">
+        <h3 style="font-size: 17px; font-weight: 700; color: var(--text-main); margin: 0 0 4px 0;">Audit Engine & Practice Configuration</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Configure statutory audit materiality benchmarks, tax limits, and Benford statistical parameters.</p>
+      </div>
+      
+      <form id="practice-settings-form" onsubmit="handleSaveSettings(event)">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div class="form-group">
+            <label class="form-label">CA Firm / Practice Name</label>
+            <input type="text" id="setting-firm-name" class="form-control" placeholder="e.g. M/s ABC & Co., Chartered Accountants">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ICAI Firm Registration Number (FRN)</label>
+            <input type="text" id="setting-firm-frn" class="form-control" placeholder="e.g. FRN-012345N">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div class="form-group">
+            <label class="form-label">Default Materiality Benchmark</label>
+            <select id="setting-materiality-bench" class="form-control">
+              <option value="Turnover">Turnover / Total Revenue</option>
+              <option value="Total Assets">Total Assets</option>
+              <option value="Gross Profit">Gross Profit</option>
+              <option value="Profit Before Tax">Profit Before Tax (PBT)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Materiality Threshold %</label>
+            <input type="number" id="setting-materiality-pct" class="form-control" step="0.1" min="0.1" max="10.0" value="0.5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sec 40A(3) Cash Disallowance Limit (₹)</label>
+            <input type="number" id="setting-cash-40a3" class="form-control" step="1000" value="10000">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+          <div class="form-group">
+            <label class="form-label">Sec 269ST Single Day Cash Limit (₹)</label>
+            <input type="number" id="setting-cash-269st" class="form-control" step="10000" value="200000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Benford's Law Confidence Level</label>
+            <select id="setting-benford-conf" class="form-control">
+              <option value="0.99">99% (Strict Statistical Test)</option>
+              <option value="0.95" selected>95% (Standard Audit Benchmark)</option>
+              <option value="0.90">90% (Exploratory / Initial Screening)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">User Session Inactivity Timeout</label>
+            <select id="setting-session-timeout" class="form-control">
+              <option value="30">30 Minutes</option>
+              <option value="60" selected>60 Minutes</option>
+              <option value="120">2 Hours</option>
+              <option value="480">8 Hours (Full Working Day)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="submit" class="btn btn-primary" id="btn-save-settings">Save Configuration Changes</button>
+        </div>
+      </form>
+    </div>
+  `;
+}
+
+function renderBackupTabContent() {
+  const content = document.getElementById("settings-tab-content");
+  if (!content) return;
+
+  content.innerHTML = `
+    <!-- System Environment & Offline Status -->
+    <div id="system-info-card-wrap" style="margin-bottom: 24px;">
+      <div style="padding: 20px; text-align: center; color: var(--text-muted);">Loading system information...</div>
+    </div>
+
+    <!-- Backup & Restore Center -->
+    <div style="background: white; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin: 0;">Local Database Backup & Restore</h3>
+          <p style="font-size: 13px; color: var(--text-muted); margin: 2px 0 0 0;">
+            All backups are kept strictly locally on this PC in SQLite format with SHA-256 integrity checksums.
+          </p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="handleCreateBackupClick()" id="btn-create-backup">
+            <svg style="width: 16px; height: 16px; margin-right: 6px; vertical-align: text-bottom;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+            </svg>
+            Create Local Backup Now
+          </button>
+          <label class="btn btn-secondary" style="cursor: pointer; margin: 0;">
+            <svg style="width: 16px; height: 16px; margin-right: 6px; vertical-align: text-bottom;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+            </svg>
+            Upload & Restore (.db)
+            <input type="file" id="upload-restore-input" accept=".db,.sqlite" style="display: none;" onchange="handleUploadRestoreFile(event)">
+          </label>
+        </div>
+      </div>
+
+      <div id="backups-list-table-wrap">
+        <div style="padding: 20px; text-align: center; color: var(--text-muted);">Loading backup history...</div>
+      </div>
+    </div>
+  `;
 }
 
 async function loadSystemInfo() {
@@ -17315,8 +17392,8 @@ async function refreshTopBarAIStatus() {
   }
 }
 
-async function renderAIManager() {
-  const container = document.getElementById("content-container");
+async function renderAIManager(targetContainerId = null) {
+  const container = document.getElementById(targetContainerId || "settings-tab-content") || document.getElementById("content-container");
   container.innerHTML = `
     <div style="padding: 40px; text-align: center; color: var(--text-muted);">
       <div class="spinner" style="margin: 0 auto 16px auto;"></div>

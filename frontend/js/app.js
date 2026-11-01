@@ -345,6 +345,14 @@ function getStatusBadge(status) {
   return `<span class="badge badge-open">Open</span>`;
 }
 
+function getStatusBadgeClass(status) {
+  const st = (status || "In Progress").toLowerCase();
+  if (st === "completed") return "badge-low";
+  if (st === "under review" || st === "in review") return "badge-medium";
+  if (st === "archived") return "badge-role-staff";
+  return "badge-role-auditor";
+}
+
 function getRoleBadge(role) {
   const r = (role || "").trim();
   if (r === "Admin") return `<span class="badge badge-role-admin">Admin</span>`;
@@ -410,12 +418,7 @@ async function initApp() {
   setupKeyboardShortcuts();
   await checkAuthSession();
 }
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initApp);
-} else {
-  initApp();
-}
+window.initApp = initApp;
 
 // Authentication & Session Bootstrap
 // Global setup wizard transient state
@@ -17456,5 +17459,14 @@ async function handleSanitizePreviewTest() {
     `;
   } catch (err) {
     resultBox.innerHTML = `<span style="color: #dc2626;">Error: ${escapeHTML(err.message)}</span>`;
+  }
+}
+
+// Global Application Bootstrap (Runs after all script functions and state are defined)
+if (typeof document !== "undefined") {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initApp);
+  } else {
+    initApp();
   }
 }

@@ -2126,7 +2126,7 @@ function navigateTo(tab) {
     case "reconciliation": renderReconciliation(); break;
     case "yoy_comparison": renderYoYComparison(); break;
     case "duplicate_missing": renderDuplicateAndMissing(); break;
-    case "anomaly_detection": renderAnomalyDetection(); break;
+    case "anomaly_detection": renderFindings(); break;
     case "findings": renderFindings(); break;
     case "assistant": renderAIAssistant(); break;
     case "checklist": renderChecklist(); break;

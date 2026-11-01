@@ -5352,59 +5352,6 @@ async function renderDashboard() {
           </div>
         </div>
       </div>
-
-      <!-- SECTION 6: AUDIT CHECKLIST PROGRESS -->
-      <div style="margin-bottom: 20px;">
-        <div class="dash-chart-card">
-          <div class="dash-chart-header">
-            <div>
-              <div class="dash-chart-title">6. Audit Checklist Progress (ICAI Standards)</div>
-              <div class="dash-chart-subtitle">Standard compliance audit procedures completion rate</div>
-            </div>
-            <button class="btn btn-sm btn-secondary" onclick="navigateTo('checklist')">Open Checklist →</button>
-          </div>
-
-          <div style="margin-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <span style="font-size: 12px; font-weight: 700; color: var(--text-main);">Overall Completion</span>
-              <span class="font-mono font-bold" style="font-size: 14px; color: #2563eb;">${chk.completion_pct || 0}%</span>
-            </div>
-            <div style="height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden;">
-              <div style="width: ${chk.completion_pct || 0}%; height: 100%; background: linear-gradient(90deg, #3b82f6, #10b981); border-radius: 6px; transition: width 0.4s ease;"></div>
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; text-align: center; font-size: 11px;">
-            <div style="padding: 6px; background: #ecfdf5; border-radius: 4px; color: #059669; font-weight: 700;">
-              <div>Completed</div>
-              <div class="font-mono font-bold" style="font-size: 14px;">${chk.completed_count || 0}</div>
-            </div>
-            <div style="padding: 6px; background: #eff6ff; border-radius: 4px; color: #2563eb; font-weight: 700;">
-              <div>In Progress</div>
-              <div class="font-mono font-bold" style="font-size: 14px;">${chk.in_progress_count || 0}</div>
-            </div>
-            <div style="padding: 6px; background: var(--bg-app); border-radius: 4px; color: var(--text-muted); font-weight: 700;">
-              <div>Not Started</div>
-              <div class="font-mono font-bold" style="font-size: 14px;">${chk.not_started_count || 0}</div>
-            </div>
-            <div style="padding: 6px; background: #fef2f2; border-radius: 4px; color: #dc2626; font-weight: 700;">
-              <div>Review Req.</div>
-              <div class="font-mono font-bold" style="font-size: 14px;">${chk.requires_review_count || 0}</div>
-            </div>
-          </div>
-
-          <!-- Category Progress Snippets -->
-          <div style="font-size: 11.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px;">Key Audit Checklist Sections:</div>
-          <div style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;">
-            ${(chk.category_progress || []).slice(0, 4).map(c => `
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; background: var(--bg-app); border-radius: 4px; font-size: 11.5px; cursor: pointer;" onclick="navigateTo('checklist')">
-                <span style="font-weight: 600; color: var(--text-secondary); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(c.category || c.name || 'Category')}</span>
-                <span class="font-mono" style="color: #2563eb; font-weight: 700;">${c.completed || 0}/${c.total || 0}</span>
-              </div>
-            `).join("")}
-          </div>
-        </div>
-      </div>
     `;
 
   } catch (err) {

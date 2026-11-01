@@ -2026,6 +2026,7 @@ function setupNavigation() {
   if (engSelect) {
     engSelect.addEventListener("change", async (e) => {
       const val = e.target.value;
+      engSelect.title = engSelect.options[engSelect.selectedIndex]?.text || "Select Active Audit Engagement";
       if (!val) {
         state.currentEngagementId = null;
         state.activeEngagement = null;
@@ -2046,6 +2047,7 @@ async function loadEngagements() {
     if (select) {
       if (state.engagements.length === 0) {
         select.innerHTML = `<option value="">No Active Engagement</option>`;
+        select.title = "No Active Engagement";
         state.currentEngagementId = null;
         state.activeEngagement = null;
       } else {
@@ -2058,6 +2060,7 @@ async function loadEngagements() {
             ${escapeHTML(e.client_name)} (${escapeHTML(e.financial_year)}) — ${escapeHTML(e.title)}
           </option>
         `).join("");
+        select.title = select.options[select.selectedIndex]?.text || "Select Active Audit Engagement";
       }
     }
     await updateActiveEngagement();

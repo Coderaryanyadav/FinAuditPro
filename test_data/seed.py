@@ -145,13 +145,14 @@ def seed_company_engagement(conn, company: dict) -> dict:
             t["party_name"], t["party_gstin"], clean_currency(t["tax_amount"]), t["reference"]
         ))
 
-    # 6. Insert Checklists
-    checklists = get_test_checklist_items(cy_eng_id)
-    for c in checklists:
-        cursor.execute("""
-            INSERT INTO audit_checklists (engagement_id, category, item_code, question, guidance, status, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (cy_eng_id, c["category"], c["item_code"], c["question"], c["guidance"], c["status"], now_str))
+    # 6. Insert Checklists (for both PY and CY)
+    for target_eng_id in [py_eng_id, cy_eng_id]:
+        checklists = get_test_checklist_items(target_eng_id)
+        for c in checklists:
+            cursor.execute("""
+                INSERT INTO audit_checklists (engagement_id, category, item_code, question, guidance, status, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (target_eng_id, c["category"], c["item_code"], c["question"], c["guidance"], c["status"], now_str))
 
     # 7. Insert Findings
     findings = get_test_findings_for_company(company["short_code"], cy_eng_id)

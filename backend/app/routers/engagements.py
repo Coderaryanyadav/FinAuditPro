@@ -250,7 +250,7 @@ def list_engagements(
             query += " AND (e.lead_auditor_id = ? OR e.assigned_staff_id = ?)"
             params.extend([user_id, user_id])
 
-        query += " ORDER BY e.id DESC"
+        query += " ORDER BY c.name ASC, e.financial_year DESC, e.id DESC"
         rows = conn.execute(query, tuple(params)).fetchall()
 
         engagements = []

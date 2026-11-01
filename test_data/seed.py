@@ -285,6 +285,65 @@ def seed_test_database():
     res_aryan = seed_company_engagement(conn, ARYAN_COMPANY)
     res_hitansh = seed_company_engagement(conn, HITANSH_COMPANY)
     res_jeet = seed_company_engagement(conn, JEET_COMPANY)
+
+    # Seed initial reconciliations for all 3 entities
+    try:
+        from backend.app.services.gst_reconciliation_engine import run_gst_reconciliation
+        from backend.app.services.bank_reconciliation_engine import run_bank_reconciliation
+        from backend.app.services.sales_purchase_reconciliation_engine import run_sales_purchase_reconciliation
+
+        recon_configs = [
+            (res_aryan["cy_engagement_id"], "Aryan Fintech", "HDFC Bank Ltd", "aryan"),
+            (res_hitansh["cy_engagement_id"], "Hitansh Fintech", "ICICI Bank Ltd", "hitansh"),
+            (res_jeet["cy_engagement_id"], "Jeet Fintech", "Axis Bank Ltd", "jeet")
+        ]
+
+        for eid, cname, bank_ldg, prefix in recon_configs:
+            f_map = {r["file_name"]: r["id"] for r in conn.execute("SELECT id, file_name FROM uploaded_files WHERE engagement_id = ?", (eid,)).fetchall()}
+            # 1. GST Reconciliation (GSTR-2B vs Purchase Register)
+            if f_map.get(f"{prefix}_gst_portal.csv") and f_map.get(f"{prefix}_purchase_register.csv"):
+                run_gst_reconciliation(
+                    engagement_id=eid,
+                    source_a_file_id=f_map[f"{prefix}_gst_portal.csv"],
+                    source_a_type="PORTAL",
+                    source_b_file_id=f_map[f"{prefix}_purchase_register.csv"],
+                    source_b_type="PURCHASE",
+                    ledger_name="GST Input Tax Credit",
+                    recon_title=f"GSTR-2B vs Purchase Register ({cname})",
+                    created_by="SYSTEM_SEED"
+                )
+            # 2. Bank Reconciliation (BRS)
+            if f_map.get(f"{prefix}_bank_statement.csv"):
+                run_bank_reconciliation(
+                    engagement_id=eid,
+                    bank_ledger_name=bank_ldg,
+                    file_b_id=f_map[f"{prefix}_bank_statement.csv"],
+                    title=f"Bank Reconciliation Statement - {bank_ldg} ({cname})",
+                    created_by="SYSTEM_SEED"
+                )
+            # 3. Sales Register vs GL
+            if f_map.get(f"{prefix}_sales_register.csv"):
+                run_sales_purchase_reconciliation(
+                    engagement_id=eid,
+                    recon_type="Sales Reconciliation",
+                    register_file_id=f_map[f"{prefix}_sales_register.csv"],
+                    ledger_name="Sales Revenue",
+                    title=f"Sales Register vs General Ledger ({cname})",
+                    created_by="SYSTEM_SEED"
+                )
+            # 4. Purchase Register vs GL
+            if f_map.get(f"{prefix}_purchase_register.csv"):
+                run_sales_purchase_reconciliation(
+                    engagement_id=eid,
+                    recon_type="Purchase Reconciliation",
+                    register_file_id=f_map[f"{prefix}_purchase_register.csv"],
+                    ledger_name="Cost of Goods Sold",
+                    title=f"Purchase Register vs General Ledger ({cname})",
+                    created_by="SYSTEM_SEED"
+                )
+    except Exception as recon_err:
+        print(f"[!] Warning: Pre-computing reconciliations in seed failed: {recon_err}")
+
     conn.commit()
     conn.close()
     return {

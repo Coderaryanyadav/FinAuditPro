@@ -2116,7 +2116,6 @@ function navigateTo(tab) {
 
   switch (tab) {
     case "dashboard": renderDashboard(); break;
-    case "users": renderUserManagement(); break;
     case "clients": renderClients(); break;
     case "engagements": renderEngagements(); break;
     case "import": renderImportData(); break;

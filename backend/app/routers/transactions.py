@@ -35,23 +35,23 @@ def get_transactions(
     query = "SELECT * FROM transactions WHERE engagement_id = ?"
     params = [engagement_id]
 
-    if ledger and ledger != "All" and ledger.strip():
+    if ledger and ledger.strip() and ledger.strip().lower() not in ("all", "null", "undefined", "none"):
         query += " AND ledger = ?"
         params.append(ledger.strip())
-    if party and party.strip():
+    if party and party.strip() and party.strip().lower() not in ("all", "null", "undefined", "none"):
         query += " AND party_name LIKE ?"
         params.append(f"%{party.strip()}%")
-    if voucher_no and voucher_no.strip():
+    if voucher_no and voucher_no.strip() and voucher_no.strip().lower() not in ("null", "undefined", "none"):
         query += " AND voucher_no LIKE ?"
         params.append(f"%{voucher_no.strip()}%")
-    if search and search.strip():
+    if search and search.strip() and search.strip().lower() not in ("null", "undefined", "none"):
         term = f"%{search.strip()}%"
         query += " AND (description LIKE ? OR voucher_no LIKE ? OR invoice_no LIKE ? OR party_name LIKE ? OR ledger LIKE ?)"
         params.extend([term, term, term, term, term])
-    if start_date and start_date.strip():
+    if start_date and start_date.strip() and start_date.strip().lower() not in ("null", "undefined", "none"):
         query += " AND date >= ?"
         params.append(start_date.strip())
-    if end_date and end_date.strip():
+    if end_date and end_date.strip() and end_date.strip().lower() not in ("null", "undefined", "none"):
         query += " AND date <= ?"
         params.append(end_date.strip())
     if min_amount is not None:

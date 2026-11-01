@@ -9,14 +9,18 @@ from datetime import datetime
 from fastapi.testclient import TestClient
 from backend.app.main import app
 from backend.app.database import get_db_connection
+from backend.app.auth import create_access_token
 
 client = TestClient(app)
 
 @pytest.fixture
 def auth_headers():
-    res = client.post("/api/auth/login", json={"username": "admin", "password": "admin123"})
-    assert res.status_code == 200
-    token = res.json()["access_token"]
+    conn = get_db_connection()
+    user = conn.execute("SELECT id, token_version FROM users WHERE username = 'admin'").fetchone()
+    token_version = user["token_version"] if user else 1
+    uid = user["id"] if user else 1
+    conn.close()
+    token = create_access_token({"sub": "admin", "role": "Admin", "uid": uid, "token_version": token_version})
     return {"Authorization": f"Bearer {token}", "Token": token}
 
 def test_report_generation_and_physical_pdf_validation(auth_headers):

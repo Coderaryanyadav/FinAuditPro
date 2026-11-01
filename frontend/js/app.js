@@ -5545,33 +5545,41 @@ async function openDashboardFindingsModal(severity = null, area = null) {
   document.body.insertAdjacentHTML("beforeend", modalHtml);
 }
 
-// 2. Transactions Drill-Down Modal (Triggered by Monthly Volume / Value Chart Bar Click)
-async function openDashboardTransactionsModal(monthStr = '', monthLabel = 'Transactions') {
+// 2. Transactions Drill-Down Modal (Triggered by Monthly Volume / Value Chart Bar Click or Total Transactions Card)
+async function openDashboardTransactionsModal(monthStr = '', monthLabel = 'All Transactions') {
   let txns = [];
+  let totalCount = 0;
   try {
-    let q = `?engagement_id=${state.currentEngagementId}&limit=300`;
-    if (monthStr && monthStr !== 'Undated') {
-      q += `&start_date=${monthStr}-01&end_date=${monthStr}-31`;
+    const params = { limit: 500 };
+    if (monthStr && monthStr !== 'Undated' && monthStr !== 'All Transactions') {
+      params.start_date = `${monthStr}-01`;
+      params.end_date = `${monthStr}-31`;
     }
-    const res = await FinAuditAPI.getTransactions(state.currentEngagementId, {
-      start_date: (monthStr && monthStr !== 'Undated') ? `${monthStr}-01` : null,
-      end_date: (monthStr && monthStr !== 'Undated') ? `${monthStr}-31` : null,
-      limit: 300
-    });
-    txns = Array.isArray(res) ? res : res.transactions || [];
+    const res = await FinAuditAPI.getTransactions(state.currentEngagementId, params);
+    txns = Array.isArray(res) ? res : (res.items || res.transactions || []);
+    totalCount = res.total || txns.length;
   } catch (err) {
+    console.error("Failed to load dashboard transactions modal:", err);
     txns = [];
+    totalCount = 0;
   }
+
+  const isAllTransactions = !monthStr || monthLabel === 'All Transactions';
+  const displayTitle = isAllTransactions ? `All Recorded Transactions (${totalCount || txns.length} Entries)` : `Monthly Transactions: ${escapeHtml(monthLabel)}`;
+  const displaySubtitle = isAllTransactions ? `Underlying vouchers recorded in general ledger for this audit mandate` : `Examining underlying vouchers recorded in general ledger for this period`;
 
   const modalHtml = `
     <div class="dash-modal-overlay" id="dash-drill-modal" onclick="if(event.target === this) closeDashboardModal()">
-      <div class="dash-modal-box">
+      <div class="dash-modal-box" style="max-width: 960px;">
         <div class="dash-modal-header">
           <div>
-            <div style="font-size: 16px; font-weight: 700; color: var(--text-main);">Monthly Transactions: ${escapeHtml(monthLabel)}</div>
-            <div style="font-size: 12px; color: var(--text-muted);">Examining underlying vouchers recorded in general ledger for this period</div>
+            <div style="font-size: 16px; font-weight: 700; color: var(--text-main);">${escapeHtml(displayTitle)}</div>
+            <div style="font-size: 12px; color: var(--text-muted);">${escapeHtml(displaySubtitle)}</div>
           </div>
-          <button class="btn btn-sm btn-secondary" onclick="closeDashboardModal()">${ICONS.close}</button>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn btn-sm btn-primary" onclick="closeDashboardModal(); navigateTo('general_ledger');">Open General Ledger →</button>
+            <button class="btn btn-sm btn-secondary" onclick="closeDashboardModal()">${ICONS.close}</button>
+          </div>
         </div>
         <div class="dash-modal-body">
           ${txns.length === 0 ? `
@@ -5614,8 +5622,13 @@ async function openDashboardTransactionsModal(monthStr = '', monthLabel = 'Trans
           `}
         </div>
         <div class="dash-modal-footer">
-          <span style="font-size: 12px; color: var(--text-muted);">Showing ${Math.min(100, txns.length)} of ${txns.length} records</span>
-          <button class="btn btn-secondary" onclick="closeDashboardModal()">Close</button>
+          <span style="font-size: 12px; color: var(--text-muted);">
+            Showing ${Math.min(100, txns.length)} of ${totalCount || txns.length} records ${totalCount > 100 ? `(Previewing first 100; search and filter all in General Ledger)` : ''}
+          </span>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" onclick="closeDashboardModal()">Close</button>
+            <button class="btn btn-primary btn-sm" onclick="closeDashboardModal(); navigateTo('general_ledger');">Full General Ledger</button>
+          </div>
         </div>
       </div>
     </div>
@@ -5765,7 +5778,7 @@ async function openDashboardYoYModal(accountName) {
       ledger: accountName,
       limit: 100
     });
-    txns = Array.isArray(res) ? res : res.transactions || [];
+    txns = Array.isArray(res) ? res : (res.items || res.transactions || []);
   } catch (err) {
     txns = [];
   }
@@ -5828,7 +5841,7 @@ async function openDashboardDigitModal(digit) {
   let txns = [];
   try {
     const res = await FinAuditAPI.getTransactions(state.currentEngagementId, { limit: 500 });
-    const all = Array.isArray(res) ? res : res.transactions || [];
+    const all = Array.isArray(res) ? res : (res.items || res.transactions || []);
     txns = all.filter(t => {
       const amt = Number(t.amount) || Math.max(Number(t.debit) || 0, Number(t.credit) || 0);
       if (amt <= 0) return false;

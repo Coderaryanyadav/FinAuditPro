@@ -405,7 +405,13 @@ class FinAuditAPI {
 
   // --- Transactions & General Ledger ---
   static getTransactions(engagementId, params = {}) {
-    const query = new URLSearchParams({ engagement_id: engagementId, ...params }).toString();
+    const cleanParams = { engagement_id: engagementId };
+    for (const [k, v] of Object.entries(params)) {
+      if (v !== undefined && v !== null && v !== "" && v !== "All" && v !== "null" && v !== "undefined") {
+        cleanParams[k] = v;
+      }
+    }
+    const query = new URLSearchParams(cleanParams).toString();
     return this.request(`/api/transactions?${query}`);
   }
 

@@ -1,6 +1,8 @@
 {
   "name": "Hitansh Fintech Pvt. Ltd.",
   "short_code": "HITANSH",
+  "environment": "TEST",
+  "synthetic": true,
   "industry": "Financial Technology / SaaS",
   "company_type": "Private Limited Company",
   "state": "Maharashtra",
@@ -17,7 +19,7 @@
   "email": "hitansh@example.test",
   "phone": "+91 98000 22222",
   "address": "Unit 502, Nariman Point Commercial Hub, Mumbai 400021",
-  "nature_of_business": "B2B SaaS subscription platform for automated treasury management and corporate expense reconciliation.",
+  "nature_of_business": "[SYNTHETIC TEST DATASET - NOT REAL CLIENT DATA] B2B SaaS subscription platform for automated treasury management and corporate expense reconciliation.",
   "authorized_capital": 60000000.0,
   "paid_up_capital": 30000000.0,
   "bank_name": "ICICI Bank Ltd",

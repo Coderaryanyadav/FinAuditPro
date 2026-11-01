@@ -11,7 +11,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from backend.app.database import get_db_connection, init_db
 from backend.app.auth import hash_password
-from test_data.companies import ARYAN_COMPANY, HITANSH_COMPANY
+from test_data.companies import ARYAN_COMPANY, HITANSH_COMPANY, JEET_COMPANY
 from test_data.transactions import get_transactions_for_company, get_prior_year_transactions_for_company
 from test_data.findings import get_test_findings_for_company
 from test_data.working_papers import get_test_working_papers_for_company
@@ -53,8 +53,10 @@ def seed_test_users(conn):
         (3, "staff_aryan", "staff.aryan@finauditpro.in", "Staff A (Aryan Engagement Staff)", "Audit Staff", staff_hash),
         (4, "auditor_hitansh", "lead.hitansh@finauditpro.in", "Auditor B (Hitansh Lead Manager)", "Auditor", audit_hash),
         (5, "staff_hitansh", "staff.hitansh@finauditpro.in", "Staff B (Hitansh Engagement Staff)", "Audit Staff", staff_hash),
-        (6, "auditor", "senior@finauditpro.in", "Rohan Mehta (General Auditor)", "Auditor", audit_hash),
-        (7, "staff", "assistant@finauditpro.in", "Pooja Verma (General Staff)", "Audit Staff", staff_hash),
+        (6, "auditor_jeet", "lead.jeet@finauditpro.in", "Auditor C (Jeet Lead Manager)", "Auditor", audit_hash),
+        (7, "staff_jeet", "staff.jeet@finauditpro.in", "Staff C (Jeet Engagement Staff)", "Audit Staff", staff_hash),
+        (8, "auditor", "senior@finauditpro.in", "Rohan Mehta (General Auditor)", "Auditor", audit_hash),
+        (9, "staff", "assistant@finauditpro.in", "Pooja Verma (General Staff)", "Audit Staff", staff_hash),
     ]
 
     for uid, uname, uemail, ufullname, urole, uhash in test_users:
@@ -67,9 +69,13 @@ def seed_company_engagement(conn, company: dict) -> dict:
     now_str = datetime.now().isoformat()
     cursor = conn.cursor()
 
-    is_aryan = company.get("short_code") == "ARYAN"
-    lead_auditor_id = 2 if is_aryan else 4
-    assigned_staff_id = 3 if is_aryan else 5
+    short_code = company.get("short_code")
+    if short_code == "ARYAN":
+        lead_auditor_id, assigned_staff_id = 2, 3
+    elif short_code == "HITANSH":
+        lead_auditor_id, assigned_staff_id = 4, 5
+    else:
+        lead_auditor_id, assigned_staff_id = 6, 7
 
     # 1. Insert Client with synthetic flag notes
     client_notes = f"[SYNTHETIC TEST DATASET - NOT REAL CLIENT DATA] {company.get('nature_of_business', '')}"
@@ -232,11 +238,13 @@ def seed_test_database():
     seed_test_users(conn)
     res_aryan = seed_company_engagement(conn, ARYAN_COMPANY)
     res_hitansh = seed_company_engagement(conn, HITANSH_COMPANY)
+    res_jeet = seed_company_engagement(conn, JEET_COMPANY)
     conn.commit()
     conn.close()
     return {
         "aryan": res_aryan,
-        "hitansh": res_hitansh
+        "hitansh": res_hitansh,
+        "jeet": res_jeet
     }
 
 if __name__ == "__main__":

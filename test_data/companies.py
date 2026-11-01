@@ -2,9 +2,10 @@
 Test Companies Metadata Definitions
 FinAuditPro - Test Data Architecture
 
-Defines two completely independent test corporate entities:
+Defines three completely independent test corporate entities:
 1. Aryan Fintech Pvt. Ltd. (ARYAN)
 2. Hitansh Fintech Pvt. Ltd. (HITANSH)
+3. Jeet Fintech Pvt. Ltd. (JEET)
 """
 
 from typing import Dict, Any
@@ -67,7 +68,38 @@ HITANSH_COMPANY: Dict[str, Any] = {
     "bank_ifsc": "ICIC0000004"
 }
 
+JEET_COMPANY: Dict[str, Any] = {
+    "name": "Jeet Fintech Pvt. Ltd.",
+    "short_code": "JEET",
+    "environment": "TEST",
+    "synthetic": True,
+    "industry": "Financial Technology / Neo-Banking",
+    "company_type": "Private Limited Company",
+    "state": "Maharashtra",
+    "state_code": "27",
+    "city": "Pune",
+    "pin": "411001",
+    "financial_year": "2025-26",
+    "prior_financial_year": "2024-25",
+    "currency": "INR",
+    "gst_registered": True,
+    "pan": "AAJCJ3333J",
+    "gstin": "27AAJCJ3333J1Z3",
+    "primary_contact": "Jeet Patel",
+    "email": "jeet@example.test",
+    "phone": "+91 98000 33333",
+    "address": "Tower 4, Cybercity Magarpatta, Hadapsar, Pune 411028",
+    "nature_of_business": "[SYNTHETIC TEST DATASET - NOT REAL CLIENT DATA] Digital payments gateway, algorithmic settlement routing, and neo-banking ledger infrastructure.",
+    "authorized_capital": 45000000.0,
+    "paid_up_capital": 20000000.0,
+    "bank_name": "Axis Bank Ltd",
+    "bank_account_no": "91802033334455",
+    "bank_ifsc": "UTIB0000123"
+}
+
 COMPANIES = {
     "ARYAN": ARYAN_COMPANY,
-    "HITANSH": HITANSH_COMPANY
+    "HITANSH": HITANSH_COMPANY,
+    "JEET": JEET_COMPANY
 }
+

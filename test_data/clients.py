@@ -4,7 +4,7 @@ FinAuditPro - Test Data Architecture
 """
 
 from typing import Dict, Any, List
-from test_data.companies import ARYAN_COMPANY, HITANSH_COMPANY
+from test_data.companies import ARYAN_COMPANY, HITANSH_COMPANY, JEET_COMPANY
 
 def get_test_clients() -> List[Dict[str, Any]]:
     return [
@@ -29,5 +29,16 @@ def get_test_clients() -> List[Dict[str, Any]]:
             "email": HITANSH_COMPANY["email"],
             "phone": HITANSH_COMPANY["phone"],
             "address": HITANSH_COMPANY["address"]
+        },
+        {
+            "name": JEET_COMPANY["name"],
+            "company_type": JEET_COMPANY["company_type"],
+            "pan": JEET_COMPANY["pan"],
+            "gstin": JEET_COMPANY["gstin"],
+            "industry": JEET_COMPANY["industry"],
+            "contact_person": JEET_COMPANY["primary_contact"],
+            "email": JEET_COMPANY["email"],
+            "phone": JEET_COMPANY["phone"],
+            "address": JEET_COMPANY["address"]
         }
     ]

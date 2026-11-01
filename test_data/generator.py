@@ -5,6 +5,7 @@ FinAuditPro - Test Data Architecture
 Generates comprehensive, deterministic, mathematically coherent test datasets for:
 1. Aryan Fintech Pvt. Ltd. (ARYAN)
 2. Hitansh Fintech Pvt. Ltd. (HITANSH)
+3. Jeet Fintech Pvt. Ltd. (JEET)
 """
 
 import os
@@ -13,13 +14,14 @@ import csv
 from datetime import datetime, timedelta
 import random
 
-from test_data.companies import ARYAN_COMPANY, HITANSH_COMPANY
+from test_data.companies import ARYAN_COMPANY, HITANSH_COMPANY, JEET_COMPANY
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def create_directories():
     os.makedirs(os.path.join(BASE_DIR, "aryan_fintech"), exist_ok=True)
     os.makedirs(os.path.join(BASE_DIR, "hitansh_fintech"), exist_ok=True)
+    os.makedirs(os.path.join(BASE_DIR, "jeet_fintech"), exist_ok=True)
 
 def generate_datasets_for_company(company: dict):
     short_code = company["short_code"]
@@ -27,7 +29,7 @@ def generate_datasets_for_company(company: dict):
     os.makedirs(c_dir, exist_ok=True)
     
     # Deterministic random seed per company
-    rnd = random.Random(42 if short_code == "ARYAN" else 84)
+    rnd = random.Random(42 if short_code == "ARYAN" else (84 if short_code == "HITANSH" else 126))
 
     # 1. Company JSON
     with open(os.path.join(c_dir, "company.json"), "w", encoding="utf-8") as f:
@@ -980,6 +982,7 @@ def run():
     create_directories()
     generate_datasets_for_company(ARYAN_COMPANY)
     generate_datasets_for_company(HITANSH_COMPANY)
+    generate_datasets_for_company(JEET_COMPANY)
 
 if __name__ == "__main__":
     run()

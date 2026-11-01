@@ -4692,19 +4692,9 @@ async function renderDashboard() {
     const cards = dash.top_cards || {};
     const overview = dash.engagement_overview || {};
     const risk = dash.risk_overview || {};
-    const recentFindings = dash.recent_findings || [];
     const recon = dash.reconciliation_status || {};
-    const anomaly = dash.anomaly_summary || {};
-    const yoy = dash.yoy_summary || [];
-    const chk = dash.checklist_progress || {};
-    const monthlyTrends = dash.monthly_trends || [];
 
     const isAuditorOrAdmin = ["Admin", "Auditor"].includes(state.currentUser?.role);
-
-    // Calculate chart maximums for clean scaling
-    const maxTxMonth = Math.max(...monthlyTrends.map(m => m.transaction_count), 1);
-    const maxValMonth = Math.max(...monthlyTrends.map(m => m.total_value), 1);
-    const maxAreaFinding = Math.max(...Object.values(risk.area_counts || {}), 1);
 
     if (!eng || !eng.id) {
       container.innerHTML = `
@@ -5040,258 +5030,108 @@ async function renderDashboard() {
         </div>
       </div>
 
-      <!-- MAIN SECTION 2: RISK OVERVIEW & CHARTS -->
-      <div class="dash-section-grid">
-        <div class="dash-chart-card">
-          <div class="dash-chart-header">
-            <div>
-              <div class="dash-chart-title">
-                <span>2. Risk Overview & Finding Severity Distribution</span>
-                <span class="risk-posture-badge risk-posture-${risk.risk_posture || 'MODERATE'}">
-                  ● ${risk.risk_posture || 'MODERATE'} RISK POSTURE
-                </span>
-              </div>
-              <div class="dash-chart-subtitle">Click any severity segment to view underlying findings</div>
+      <!-- MAIN SECTION 2: RISK OVERVIEW & SEVERITY DISTRIBUTION -->
+      <div class="dash-chart-card" style="margin-bottom: 20px;">
+        <div class="dash-chart-header">
+          <div>
+            <div class="dash-chart-title">
+              <span>2. Risk Overview & Finding Severity Distribution</span>
+              <span class="risk-posture-badge risk-posture-${risk.risk_posture || 'MODERATE'}">
+                ● ${risk.risk_posture || 'MODERATE'} RISK POSTURE
+              </span>
             </div>
-            <div style="text-align: right;">
-              <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">AVG RISK SCORE</div>
-              <div class="font-mono font-bold" style="font-size: 18px; color: var(--text-main);">${risk.average_risk_score || 0.0} / 10.0</div>
-            </div>
+            <div class="dash-chart-subtitle">Click any severity segment to view underlying findings</div>
           </div>
-
-          <!-- Finding Severity Distribution Chart (Interactive Clickable Bars) -->
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
-            <div class="chart-bar-interactive" style="padding: 12px; border: 1px solid var(--border); background: #fef2f2; border-radius: var(--radius-md); text-align: center;" onclick="openDashboardFindingsModal('CRITICAL', null)" title="Click to view Critical findings">
-              <div style="font-size: 11px; font-weight: 700; color: #dc2626;">CRITICAL</div>
-              <div class="font-mono font-bold" style="font-size: 24px; color: #dc2626; margin: 4px 0;">${risk.severity_counts?.CRITICAL || 0}</div>
-              <div style="font-size: 11px; color: #991b1b;">Immediate Action</div>
-            </div>
-            <div class="chart-bar-interactive" style="padding: 12px; border: 1px solid var(--border); background: #fff7ed; border-radius: var(--radius-md); text-align: center;" onclick="openDashboardFindingsModal('HIGH', null)" title="Click to view High risk findings">
-              <div style="font-size: 11px; font-weight: 700; color: #ea580c;">HIGH</div>
-              <div class="font-mono font-bold" style="font-size: 24px; color: #ea580c; margin: 4px 0;">${risk.severity_counts?.HIGH || 0}</div>
-              <div style="font-size: 11px; color: #c2410c;">Material Deviation</div>
-            </div>
-            <div class="chart-bar-interactive" style="padding: 12px; border: 1px solid var(--border); background: #fffbeb; border-radius: var(--radius-md); text-align: center;" onclick="openDashboardFindingsModal('MEDIUM', null)" title="Click to view Medium risk findings">
-              <div style="font-size: 11px; font-weight: 700; color: #d97706;">MEDIUM</div>
-              <div class="font-mono font-bold" style="font-size: 24px; color: #d97706; margin: 4px 0;">${risk.severity_counts?.MEDIUM || 0}</div>
-              <div style="font-size: 11px; color: #b45309;">Review Required</div>
-            </div>
-            <div class="chart-bar-interactive" style="padding: 12px; border: 1px solid var(--border); background: #ecfdf5; border-radius: var(--radius-md); text-align: center;" onclick="openDashboardFindingsModal('LOW', null)" title="Click to view Low risk findings">
-              <div style="font-size: 11px; font-weight: 700; color: #059669;">LOW</div>
-              <div class="font-mono font-bold" style="font-size: 24px; color: #059669; margin: 4px 0;">${risk.severity_counts?.LOW || 0}</div>
-              <div style="font-size: 11px; color: #047857;">Informational</div>
-            </div>
-          </div>
-
-          <!-- Multi-Engine Detection Distribution Pills -->
-          <div style="display: flex; gap: 10px; background: var(--bg-app); padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border); font-size: 12px; justify-content: space-between;">
-            <div><b>Deterministic Rules:</b> <span class="font-mono font-bold" style="color: #2563eb;">${risk.engine_counts?.DETERMINISTIC || 0}</span></div>
-            <div><b>Statistical & ML Outliers:</b> <span class="font-mono font-bold" style="color: #7c3aed;">${risk.engine_counts?.STATISTICAL_ML || 0}</span></div>
-            <div><b>Local AI Observations:</b> <span class="font-mono font-bold" style="color: #059669;">${risk.engine_counts?.LOCAL_AI || 0}</span></div>
+          <div style="text-align: right;">
+            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">AVG RISK SCORE</div>
+            <div class="font-mono font-bold" style="font-size: 18px; color: var(--text-main);">${risk.average_risk_score || 0.0} / 10.0</div>
           </div>
         </div>
 
-        <!-- Chart: Risk by Audit Area (Interactive Horizontal Bar Chart) -->
-        <div class="dash-chart-card">
-          <div class="dash-chart-header">
-            <div>
-              <div class="dash-chart-title">Risk by Audit Area</div>
-              <div class="dash-chart-subtitle">Click an area to filter findings</div>
-            </div>
+        <!-- Finding Severity Distribution Chart (Interactive Clickable Bars) -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
+          <div class="chart-bar-interactive" style="padding: 12px; border: 1px solid var(--border); background: #fef2f2; border-radius: var(--radius-md); text-align: center;" onclick="openDashboardFindingsModal('CRITICAL', null)" title="Click to view Critical findings">
+            <div style="font-size: 11px; font-weight: 700; color: #dc2626;">CRITICAL</div>
+            <div class="font-mono font-bold" style="font-size: 24px; color: #dc2626; margin: 4px 0;">${risk.severity_counts?.CRITICAL || 0}</div>
+            <div style="font-size: 11px; color: #991b1b;">Immediate Action</div>
           </div>
-          <div>
-            ${Object.keys(risk.area_counts || {}).length === 0 ? `
-              <div style="text-align: center; color: var(--text-muted); padding: 20px 0;">No risk areas flagged yet.</div>
-            ` : Object.entries(risk.area_counts || {}).map(([area, cnt]) => {
-      const pct = Math.round((cnt / maxAreaFinding) * 100);
-      return `
-                <div class="chart-horizontal-bar-row" onclick="openDashboardFindingsModal(null, '${escapeHtml(area)}')" title="Click to filter findings in ${escapeHtml(area)}">
-                  <div class="chart-h-label" title="${escapeHtml(area)}">${escapeHtml(area)}</div>
-                  <div class="chart-h-track">
-                    <div class="chart-h-fill" style="width: ${pct}%; background: linear-gradient(90deg, #3b82f6, #ef4444);"></div>
-                  </div>
-                  <div class="chart-h-val">${cnt}</div>
-                </div>
-              `;
-    }).join("")}
+          <div class="chart-bar-interactive" style="padding: 12px; border: 1px solid var(--border); background: #fff7ed; border-radius: var(--radius-md); text-align: center;" onclick="openDashboardFindingsModal('HIGH', null)" title="Click to view High risk findings">
+            <div style="font-size: 11px; font-weight: 700; color: #ea580c;">HIGH</div>
+            <div class="font-mono font-bold" style="font-size: 24px; color: #ea580c; margin: 4px 0;">${risk.severity_counts?.HIGH || 0}</div>
+            <div style="font-size: 11px; color: #c2410c;">Material Deviation</div>
           </div>
+          <div class="chart-bar-interactive" style="padding: 12px; border: 1px solid var(--border); background: #fffbeb; border-radius: var(--radius-md); text-align: center;" onclick="openDashboardFindingsModal('MEDIUM', null)" title="Click to view Medium risk findings">
+            <div style="font-size: 11px; font-weight: 700; color: #d97706;">MEDIUM</div>
+            <div class="font-mono font-bold" style="font-size: 24px; color: #d97706; margin: 4px 0;">${risk.severity_counts?.MEDIUM || 0}</div>
+            <div style="font-size: 11px; color: #b45309;">Review Required</div>
+          </div>
+          <div class="chart-bar-interactive" style="padding: 12px; border: 1px solid var(--border); background: #ecfdf5; border-radius: var(--radius-md); text-align: center;" onclick="openDashboardFindingsModal('LOW', null)" title="Click to view Low risk findings">
+            <div style="font-size: 11px; font-weight: 700; color: #059669;">LOW</div>
+            <div class="font-mono font-bold" style="font-size: 24px; color: #059669; margin: 4px 0;">${risk.severity_counts?.LOW || 0}</div>
+            <div style="font-size: 11px; color: #047857;">Informational</div>
+          </div>
+        </div>
+
+        <!-- Multi-Engine Detection Distribution Pills -->
+        <div style="display: flex; gap: 10px; background: var(--bg-app); padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border); font-size: 12px; justify-content: space-between;">
+          <div><b>Deterministic Rules:</b> <span class="font-mono font-bold" style="color: #2563eb;">${risk.engine_counts?.DETERMINISTIC || 0}</span></div>
+          <div><b>Statistical & ML Outliers:</b> <span class="font-mono font-bold" style="color: #7c3aed;">${risk.engine_counts?.STATISTICAL_ML || 0}</span></div>
+          <div><b>Local AI Observations:</b> <span class="font-mono font-bold" style="color: #059669;">${risk.engine_counts?.LOCAL_AI || 0}</span></div>
         </div>
       </div>
 
-      <!-- MAIN SECTION 3: RECENT FINDINGS (Live Real Data Table) -->
-      <div class="card" style="margin-bottom: 20px;">
-        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+      <!-- MAIN SECTION 3: RECONCILIATION STATUS -->
+      <div class="dash-chart-card" style="margin-bottom: 20px;">
+        <div class="dash-chart-header">
           <div>
-            <div class="card-title">3. Recent Findings & Priority Observations</div>
-            <div class="card-subtitle">Traceable Finding IDs ([ID: x] F-XXX) mapped directly to database records</div>
+            <div class="dash-chart-title">3. Reconciliation Status (BRS & GST 2B)</div>
+            <div class="dash-chart-subtitle">Automated ledger matching & bank balance audit verification</div>
           </div>
-          <div style="display: flex; gap: 8px;">
-            <div class="btn-group" style="display: flex; gap: 4px;">
-              <button class="btn btn-sm ${activeFindingsFilter === 'ALL' ? 'btn-primary' : 'btn-secondary'}" onclick="filterDashboardFindingsTable('ALL')">All (${recentFindings.length})</button>
-              <button class="btn btn-sm ${activeFindingsFilter === 'CRITICAL' ? 'btn-primary' : 'btn-secondary'}" onclick="filterDashboardFindingsTable('CRITICAL')">Critical</button>
-              <button class="btn btn-sm ${activeFindingsFilter === 'HIGH' ? 'btn-primary' : 'btn-secondary'}" onclick="filterDashboardFindingsTable('HIGH')">High</button>
-            </div>
-            <button class="btn btn-sm btn-secondary" onclick="navigateTo('findings')">Open All Findings Tab →</button>
+          <button class="btn btn-sm btn-secondary" onclick="navigateTo('reconciliation')">Open BRS / 2B Module →</button>
+        </div>
+
+        <!-- Reconciliation Status Chart Breakdown -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
+          <div class="chart-bar-interactive" style="padding: 10px; background: #ecfdf5; border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;" onclick="openDashboardReconciliationModal('MATCHED')">
+            <div style="font-size: 11px; font-weight: 700; color: #059669;">MATCHED</div>
+            <div class="font-mono font-bold" style="font-size: 20px; color: #059669;">${recon.matched_items || 0}</div>
+            <div style="font-size: 10.5px; color: #047857;">Items Reconciled</div>
+          </div>
+          <div class="chart-bar-interactive" style="padding: 10px; background: #fef2f2; border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;" onclick="openDashboardReconciliationModal('UNMATCHED_BANK')">
+            <div style="font-size: 11px; font-weight: 700; color: #dc2626;">BANK UNMATCHED</div>
+            <div class="font-mono font-bold" style="font-size: 20px; color: #dc2626;">${recon.unmatched_bank_items || 0}</div>
+            <div style="font-size: 10.5px; color: #991b1b;">Missing in Books</div>
+          </div>
+          <div class="chart-bar-interactive" style="padding: 10px; background: #fff7ed; border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;" onclick="openDashboardReconciliationModal('UNMATCHED_BOOK')">
+            <div style="font-size: 11px; font-weight: 700; color: #ea580c;">BOOK / 2B UNMATCHED</div>
+            <div class="font-mono font-bold" style="font-size: 20px; color: #ea580c;">${recon.unmatched_book_items || 0}</div>
+            <div style="font-size: 10.5px; color: #c2410c;">Missing in Bank/Portal</div>
+          </div>
+          <div class="chart-bar-interactive" style="padding: 10px; background: #fffbeb; border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;" onclick="openDashboardReconciliationModal('MISMATCH')">
+            <div style="font-size: 11px; font-weight: 700; color: #d97706;">AMT MISMATCH</div>
+            <div class="font-mono font-bold" style="font-size: 20px; color: #d97706;">${recon.amount_mismatches || 0}</div>
+            <div style="font-size: 10.5px; color: #b45309;">Difference Detected</div>
           </div>
         </div>
 
-        ${recentFindings.length === 0 ? `
-          <div style="padding: 40px; text-align: center; color: var(--text-muted);">
-            <p>No audit findings registered for this engagement yet.</p>
-            ${isAuditorOrAdmin ? `<button class="btn btn-primary" style="margin-top: 10px;" onclick="triggerRunHybridEngine()">Execute Audit Engine Now</button>` : ''}
+        <!-- Reconciliations List -->
+        ${(recon.reconciliations || []).length === 0 ? `
+          <div style="padding: 14px; text-align: center; color: var(--text-muted); font-size: 12px; background: var(--bg-app); border-radius: 6px;">
+            No BRS statements executed yet. Click "Open BRS / 2B Module" to start bank ledger reconciliation.
           </div>
         ` : `
-          <div class="table-container">
-            <table class="data-table" id="dash-findings-table">
-              <thead>
-                <tr>
-                  <th style="width: 140px;">Finding ID / Code</th>
-                  <th style="width: 100px;">Severity</th>
-                  <th>Observation Title & Rule</th>
-                  <th style="width: 140px;">Area / Module</th>
-                  <th style="width: 130px;" class="text-right">Discrepancy</th>
-                  <th style="width: 100px;" class="text-center">Status</th>
-                  <th style="width: 90px;" class="text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${recentFindings.map(f => {
-      const hideRow = (activeFindingsFilter !== 'ALL' && (f.severity || '').toUpperCase() !== activeFindingsFilter);
-      return `
-                    <tr style="${hideRow ? 'display: none;' : ''}" data-sev="${(f.severity || '').toUpperCase()}">
-                      <td class="font-mono font-bold" style="color: var(--text-main);">
-                        <span style="background: #e2e8f0; padding: 2px 5px; border-radius: 4px; font-size: 11px;">[ID: ${f.id}]</span>
-                        <span style="margin-left: 4px;">${f.finding_code}</span>
-                      </td>
-                      <td>${getSeverityBadge(f.severity)}</td>
-                      <td>
-                        <div style="font-weight: 700; color: var(--text-main);">${escapeHtml(f.title)}</div>
-                        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">
-                          Rule: <b>${escapeHtml(f.rule_used || 'ICAI Standard Procedure')}</b>
-                        </div>
-                      </td>
-                      <td>
-                        <span class="badge" style="background: var(--bg-sidebar); color: var(--text-secondary); font-size: 11px;">${escapeHtml(f.category || f.module || 'General')}</span>
-                      </td>
-                      <td class="text-right font-mono" style="color: #dc2626; font-weight: 700;">
-                        ${f.difference ? escapeHtml(f.difference) : '—'}
-                      </td>
-                      <td class="text-center">${getStatusBadge(f.status)}</td>
-                      <td class="text-center">
-                        <button class="btn btn-sm btn-secondary" onclick="openEvidenceDrawer(${f.id})">Examine</button>
-                      </td>
-                    </tr>
-                  `;
-    }).join("")}
-              </tbody>
-            </table>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${(recon.reconciliations || []).slice(0, 3).map(r => `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-app); border: 1px solid var(--border); border-radius: 6px; font-size: 12px;">
+                <div>
+                  <div style="font-weight: 700; color: var(--text-main);">${r.title}</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">${r.bank_account_name || 'Bank Ledger'} | Net Diff: <span class="font-mono font-bold" style="color: ${r.net_unreconciled_difference == 0 ? '#059669' : '#dc2626'};">${formatINR(r.net_unreconciled_difference || 0)}</span></div>
+                </div>
+                <span class="badge ${r.status === 'Completed' ? 'badge-low' : 'badge-medium'}">${r.status || 'Completed'}</span>
+              </div>
+            `).join("")}
           </div>
         `}
-      </div>
-
-      <!-- SECTIONS 4 & 5: RECONCILIATION STATUS & ANOMALY SUMMARY -->
-      <div class="dash-section-grid" style="margin-bottom: 20px;">
-        <!-- SECTION 4: RECONCILIATION STATUS (Chart & Details) -->
-        <div class="dash-chart-card">
-          <div class="dash-chart-header">
-            <div>
-              <div class="dash-chart-title">4. Reconciliation Status (BRS & GST 2B)</div>
-              <div class="dash-chart-subtitle">Automated ledger matching & bank balance audit verification</div>
-            </div>
-            <button class="btn btn-sm btn-secondary" onclick="navigateTo('reconciliation')">Open BRS / 2B Module →</button>
-          </div>
-
-          <!-- Reconciliation Status Chart Breakdown -->
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
-            <div class="chart-bar-interactive" style="padding: 10px; background: #ecfdf5; border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;" onclick="openDashboardReconciliationModal('MATCHED')">
-              <div style="font-size: 11px; font-weight: 700; color: #059669;">MATCHED</div>
-              <div class="font-mono font-bold" style="font-size: 20px; color: #059669;">${recon.matched_items || 0}</div>
-              <div style="font-size: 10.5px; color: #047857;">Items Reconciled</div>
-            </div>
-            <div class="chart-bar-interactive" style="padding: 10px; background: #fef2f2; border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;" onclick="openDashboardReconciliationModal('UNMATCHED_BANK')">
-              <div style="font-size: 11px; font-weight: 700; color: #dc2626;">BANK UNMATCHED</div>
-              <div class="font-mono font-bold" style="font-size: 20px; color: #dc2626;">${recon.unmatched_bank_items || 0}</div>
-              <div style="font-size: 10.5px; color: #991b1b;">Missing in Books</div>
-            </div>
-            <div class="chart-bar-interactive" style="padding: 10px; background: #fff7ed; border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;" onclick="openDashboardReconciliationModal('UNMATCHED_BOOK')">
-              <div style="font-size: 11px; font-weight: 700; color: #ea580c;">BOOK / 2B UNMATCHED</div>
-              <div class="font-mono font-bold" style="font-size: 20px; color: #ea580c;">${recon.unmatched_book_items || 0}</div>
-              <div style="font-size: 10.5px; color: #c2410c;">Missing in Bank/Portal</div>
-            </div>
-            <div class="chart-bar-interactive" style="padding: 10px; background: #fffbeb; border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;" onclick="openDashboardReconciliationModal('MISMATCH')">
-              <div style="font-size: 11px; font-weight: 700; color: #d97706;">AMT MISMATCH</div>
-              <div class="font-mono font-bold" style="font-size: 20px; color: #d97706;">${recon.amount_mismatches || 0}</div>
-              <div style="font-size: 10.5px; color: #b45309;">Difference Detected</div>
-            </div>
-          </div>
-
-          <!-- Reconciliations List -->
-          ${(recon.reconciliations || []).length === 0 ? `
-            <div style="padding: 14px; text-align: center; color: var(--text-muted); font-size: 12px; background: var(--bg-app); border-radius: 6px;">
-              No BRS statements executed yet. Click "Open BRS / 2B Module" to start bank ledger reconciliation.
-            </div>
-          ` : `
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              ${(recon.reconciliations || []).slice(0, 3).map(r => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-app); border: 1px solid var(--border); border-radius: 6px; font-size: 12px;">
-                  <div>
-                    <div style="font-weight: 700; color: var(--text-main);">${r.title}</div>
-                    <div style="font-size: 11px; color: var(--text-muted);">${r.bank_account_name || 'Bank Ledger'} | Net Diff: <span class="font-mono font-bold" style="color: ${r.net_unreconciled_difference == 0 ? '#059669' : '#dc2626'};">${formatINR(r.net_unreconciled_difference || 0)}</span></div>
-                  </div>
-                  <span class="badge ${r.status === 'Completed' ? 'badge-low' : 'badge-medium'}">${r.status || 'Completed'}</span>
-                </div>
-              `).join("")}
-            </div>
-          `}
-        </div>
-
-        <!-- SECTION 5: ANOMALY SUMMARY & BENFORD'S LAW (Interactive Digit Chart) -->
-        <div class="dash-chart-card">
-          <div class="dash-chart-header">
-            <div>
-              <div class="dash-chart-title">
-                <span>5. Anomaly Summary & Benford's Law</span>
-                <span class="badge ${anomaly.benford_status === 'Close Conformity' ? 'badge-low' : anomaly.benford_status === 'Acceptable' ? 'badge-medium' : 'badge-critical'}">
-                  ${anomaly.benford_status || 'Close Conformity'} (MAD: ${anomaly.benford_mad || 0.0})
-                </span>
-              </div>
-              <div class="dash-chart-subtitle">Click any digit bar to inspect transactions starting with that digit</div>
-            </div>
-            <button class="btn btn-sm btn-secondary" onclick="navigateTo('findings')">View Findings →</button>
-          </div>
-
-          <!-- Benford's 1st-Digit Comparison Mini-Chart -->
-          <div style="display: flex; align-items: flex-end; gap: 6px; height: 110px; margin-bottom: 12px; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
-            ${(anomaly.benford_digits || []).map(d => {
-      const actHeight = Math.max(8, Math.round(d.actual_pct * 2.5));
-      const expHeight = Math.max(8, Math.round(d.expected_pct * 2.5));
-      return `
-                <div class="chart-bar-interactive" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;" onclick="openDashboardDigitModal(${d.digit})" title="Digit ${d.digit}: Actual ${d.actual_pct}% (Expected ${d.expected_pct}%, Diff: ${d.difference}%) - Click to view transactions">
-                  <div style="display: flex; gap: 2px; width: 100%; justify-content: center; align-items: flex-end;">
-                    <div style="width: 45%; height: ${actHeight}px; background: #2563eb; border-radius: 2px;" title="Actual: ${d.actual_pct}%"></div>
-                    <div style="width: 45%; height: ${expHeight}px; background: #cbd5e1; border-radius: 2px;" title="Expected: ${d.expected_pct}%"></div>
-                  </div>
-                  <div style="font-size: 10.5px; font-weight: 700; color: var(--text-secondary); margin-top: 4px;">D${d.digit}</div>
-                </div>
-              `;
-    }).join("")}
-          </div>
-
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; font-size: 11.5px; text-align: center;">
-            <div style="padding: 6px; background: var(--bg-app); border-radius: 6px; border: 1px solid var(--border);">
-              <div style="color: var(--text-muted);">ML Outliers</div>
-              <div class="font-mono font-bold" style="color: #7c3aed; font-size: 15px;">${anomaly.ml_outliers_count || 0}</div>
-            </div>
-            <div style="padding: 6px; background: var(--bg-app); border-radius: 6px; border: 1px solid var(--border);">
-              <div style="color: var(--text-muted);">Round Sums (₹50k+)</div>
-              <div class="font-mono font-bold" style="color: #d97706; font-size: 15px;">${anomaly.round_sum_count || 0}</div>
-            </div>
-            <div style="padding: 6px; background: var(--bg-app); border-radius: 6px; border: 1px solid var(--border);">
-              <div style="color: var(--text-muted);">Weekend Entries</div>
-              <div class="font-mono font-bold" style="color: #ea580c; font-size: 15px;">${anomaly.weekend_count || 0}</div>
-            </div>
-          </div>
-        </div>
       </div>
     `;
 

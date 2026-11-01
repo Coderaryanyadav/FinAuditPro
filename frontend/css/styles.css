@@ -2457,6 +2457,190 @@ body {
 /* =========================================================================
    First-Run Setup Wizard & Welcome Splash Styles
    ========================================================================= */
+/* =========================================================================
+   Unified Professional Authentication Suite (Sign In / Register / Activate)
+   ========================================================================= */
+.auth-suite-card {
+  width: 540px;
+  max-width: 95vw;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.4), 0 0 1px 1px rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-header {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  padding: 26px 32px 20px;
+  color: #ffffff;
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.auth-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.auth-logo-badge {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 22px;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+}
+
+.auth-brand-text h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #f8fafc !important;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.auth-brand-text p {
+  font-size: 12px;
+  color: #94a3b8 !important;
+  margin: 2px 0 0 0;
+}
+
+.auth-tabs-nav {
+  display: flex;
+  background: #090d16;
+  padding: 6px;
+  gap: 6px;
+  border-bottom: 1px solid #1e293b;
+}
+
+.auth-tab-btn {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.auth-tab-btn:hover {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.auth-tab-btn.active {
+  color: #ffffff;
+  background: #0284c7;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+}
+
+.auth-tab-btn .tab-badge {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.auth-body-container {
+  padding: 26px 32px 30px;
+  background: #ffffff;
+}
+
+.auth-demo-chips {
+  margin-bottom: 20px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.auth-demo-chips-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.auth-chips-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.auth-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.auth-chip-btn:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #0284c7;
+  transform: translateY(-1px);
+}
+
+.auth-chip-btn .chip-role {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.auth-info-banner {
+  display: flex;
+  gap: 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  color: #166534;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.auth-info-banner.warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.auth-info-banner .banner-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
 .wizard-card {
   width: 680px;
   max-width: 95vw;

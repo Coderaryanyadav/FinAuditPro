@@ -1252,9 +1252,41 @@ function showSystemDatabaseError(errorMsg) {
 }
 
 
-// ----------------- STATE C: NORMAL LOGIN SCREEN -----------------
-function showLoginScreen(errorMsg = null) {
+// ----------------- STATE C: UNIFIED MODERN AUTHENTICATION & LOGIN SCREEN -----------------
+let _currentAuthTab = "login"; // "login" | "register" | "activate"
+
+function quickFillDemo(role) {
+  const userField = document.getElementById("login-username");
+  const passField = document.getElementById("login-password");
+  if (!userField || !passField) return;
+
+  if (role === "admin") {
+    userField.value = "admin";
+    passField.value = "admin123";
+  } else if (role === "auditor") {
+    userField.value = "auditor_aryan";
+    passField.value = "audit123";
+  } else if (role === "staff") {
+    userField.value = "staff_aryan";
+    passField.value = "staff123";
+  }
+  userField.focus();
+}
+window.quickFillDemo = quickFillDemo;
+
+function switchAuthTab(tabName) {
+  _currentAuthTab = tabName;
+  showLoginScreen(null, tabName);
+}
+window.switchAuthTab = switchAuthTab;
+
+function showLoginScreen(errorMsg = null, initialTab = null) {
   state.isAuthenticated = false;
+  if (initialTab) {
+    _currentAuthTab = initialTab;
+  }
+  const activeTab = _currentAuthTab;
+
   let overlay = document.getElementById("login-screen-overlay");
   if (!overlay) {
     overlay = document.createElement("div");
@@ -1263,46 +1295,222 @@ function showLoginScreen(errorMsg = null) {
   }
 
   overlay.style.display = "flex";
-  overlay.innerHTML = `
-    <div class="welcome-splash-card" style="width: 440px; padding: 36px 32px; background: #ffffff;">
-      <div class="login-header" style="background: transparent; border: none; padding: 0 0 20px; text-align: center;">
-        <div class="login-logo" style="width: 44px; height: 44px; font-size: 20px; margin: 0 auto 12px auto;">F</div>
-        <div class="login-title" style="color: #0f172a; font-size: 20px; font-weight: 700;">Sign in to FinAuditPro</div>
-        <div class="login-subtitle" style="color: #64748b; margin-top: 4px;">Offline-First AI Audit Workspace</div>
+
+  // Tab Header navigation
+  const tabsNavHTML = `
+    <div class="auth-tabs-nav" role="tablist">
+      <button type="button" class="auth-tab-btn ${activeTab === 'login' ? 'active' : ''}" onclick="switchAuthTab('login')" role="tab" aria-selected="${activeTab === 'login'}">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+        <span>Sign In</span>
+      </button>
+      <button type="button" class="auth-tab-btn ${activeTab === 'register' ? 'active' : ''}" onclick="switchAuthTab('register')" role="tab" aria-selected="${activeTab === 'register'}">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+        <span>Admin Setup</span>
+      </button>
+      <button type="button" class="auth-tab-btn ${activeTab === 'activate' ? 'active' : ''}" onclick="switchAuthTab('activate')" role="tab" aria-selected="${activeTab === 'activate'}">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+        <span>Activate Invite</span>
+      </button>
+    </div>
+  `;
+
+  let tabBodyHTML = "";
+
+  if (activeTab === "login") {
+    // ----------------- TAB 1: SIGN IN -----------------
+    tabBodyHTML = `
+      <div id="login-alert" class="login-alert-box ${errorMsg ? 'error' : ''}" style="${errorMsg ? 'display:block;' : 'display:none;'}">
+        ${errorMsg || ''}
       </div>
 
-      <div class="login-body" style="padding: 0;">
-        <div id="login-alert" class="login-alert-box ${errorMsg ? 'error' : ''}" style="${errorMsg ? 'display:block;' : 'display:none;'}">
-          ${errorMsg || ''}
+      <!-- Quick Demo Credentials Chips for Auditors and Developers -->
+      <div class="auth-demo-chips">
+        <div class="auth-demo-chips-title">
+          <span>Quick Fill Demo Credentials</span>
+          <span style="font-size: 10px; color: #0284c7; font-weight: 500;">Click to fill</span>
+        </div>
+        <div class="auth-chips-group">
+          <button type="button" class="auth-chip-btn" onclick="quickFillDemo('admin')" title="Sign in as Master Admin (admin / admin123)">
+            <span>👑 Admin</span>
+            <span class="chip-role">admin123</span>
+          </button>
+          <button type="button" class="auth-chip-btn" onclick="quickFillDemo('auditor')" title="Sign in as Lead Auditor (auditor_aryan / audit123)">
+            <span>📋 Auditor</span>
+            <span class="chip-role">audit123</span>
+          </button>
+          <button type="button" class="auth-chip-btn" onclick="quickFillDemo('staff')" title="Sign in as Engagement Staff (staff_aryan / staff123)">
+            <span>👥 Staff</span>
+            <span class="chip-role">staff123</span>
+          </button>
+        </div>
+      </div>
+
+      <form id="login-form" onsubmit="handleLoginFormSubmit(event)">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label" style="font-size: 12px; font-weight: 600; color: #334155;">Username or Email</label>
+          <input type="text" id="login-username" class="form-control" placeholder="e.g. admin or auditor_aryan" required autofocus style="padding: 10px 14px; font-size: 14px;">
         </div>
 
-        <form id="login-form" onsubmit="handleLoginFormSubmit(event)">
-          <div class="form-group">
-            <label class="form-label">Username / Email</label>
-            <input type="text" id="login-username" class="form-control" placeholder="Enter username or email" required autofocus>
+        <div class="form-group" style="margin-bottom: 18px;">
+          <label class="form-label" style="font-size: 12px; font-weight: 600; color: #334155;">Password</label>
+          <div class="password-input-wrap">
+            <input type="password" id="login-password" class="form-control" placeholder="Enter password" required style="padding: 10px 14px; font-size: 14px;">
+            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('login-password')">${ICONS.eye}</button>
           </div>
+        </div>
 
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; font-size: 12px; color: #64748b;">
+          <label style="display: flex; align-items: center; gap: 7px; cursor: pointer;">
+            <input type="checkbox" id="remember-me" checked style="border-radius: 4px; accent-color: #0284c7;"> Remember session
+          </label>
+          <button type="button" onclick="switchAuthTab('activate')" style="background:none; border:none; color: #0284c7; cursor:pointer; font-size: 12px; font-weight: 600; padding: 0;">
+            Need activation?
+          </button>
+        </div>
+
+        <button type="submit" id="login-submit-btn" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 700; border-radius: 10px; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
+          Secure Offline Sign In →
+        </button>
+      </form>
+    `;
+  } else if (activeTab === "register") {
+    // ----------------- TAB 2: ADMIN SETUP / REGISTRATION -----------------
+    tabBodyHTML = `
+      <div id="setup-alert" class="login-alert-box ${errorMsg ? 'error' : ''}" style="${errorMsg ? 'display:block;' : 'display:none;'}">
+        ${errorMsg || ''}
+      </div>
+
+      <div class="auth-info-banner">
+        <div class="banner-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <div>
+          <strong>Primary Administrator Provisioning:</strong>
+          <div style="font-size: 12px; color: #334155; margin-top: 2px;">
+            FinAuditPro runs completely offline on your local SQLite database. The Administrator holds Master Engagement Partner governance privileges.
+          </div>
+        </div>
+      </div>
+
+      <form id="wizard-step1-form" onsubmit="handleWizardStep1(event)">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
           <div class="form-group">
-            <label class="form-label">Password</label>
+            <label class="form-label" style="font-size: 12px; font-weight: 600;">Full Name <span style="color: #ef4444;">*</span></label>
+            <input type="text" id="wz-fullname" class="form-control" placeholder="e.g. CA Rajeshwar Sharma" required autofocus>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 12px; font-weight: 600;">Designation</label>
+            <input type="text" id="wz-designation" class="form-control" placeholder="Senior Partner (FCA)" value="Engagement Partner (FCA)">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div class="form-group">
+            <label class="form-label" style="font-size: 12px; font-weight: 600;">Username <span style="color: #ef4444;">*</span></label>
+            <input type="text" id="wz-username" class="form-control" placeholder="e.g. admin" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 12px; font-weight: 600;">Official Email <span style="color: #ef4444;">*</span></label>
+            <input type="email" id="wz-email" class="form-control" placeholder="partner@cafirm.in" required>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" style="font-size: 12px; font-weight: 600;">Phone Number <span style="color: #94a3b8; font-weight: normal;">(Optional)</span></label>
+          <input type="text" id="wz-phone" class="form-control" placeholder="+91 98765 43210">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+          <div class="form-group">
+            <label class="form-label" style="font-size: 12px; font-weight: 600;">Master Password <span style="color: #ef4444;">*</span></label>
             <div class="password-input-wrap">
-              <input type="password" id="login-password" class="form-control" placeholder="Enter password" required>
-              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('login-password')">${ICONS.eye}</button>
+              <input type="password" id="wz-password" class="form-control" placeholder="Min. 10 chars" minlength="10" required>
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('wz-password')">${ICONS.eye}</button>
             </div>
           </div>
-
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-size: 12px; color: var(--text-secondary);">
-            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-              <input type="checkbox" id="remember-me" checked> Remember session
-            </label>
-            <a href="javascript:void(0)" onclick="showActivationModal()" style="color: var(--text-main); text-decoration: underline; font-weight: 500;">
-              Activate Account
-            </a>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 12px; font-weight: 600;">Confirm Password <span style="color: #ef4444;">*</span></label>
+            <div class="password-input-wrap">
+              <input type="password" id="wz-confirm-password" class="form-control" placeholder="Re-enter password" minlength="10" required>
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('wz-confirm-password')">${ICONS.eye}</button>
+            </div>
           </div>
+        </div>
 
-          <button type="submit" id="login-submit-btn" class="btn btn-primary" style="width: 100%; padding: 10px;">
-            Secure Offline Sign In
-          </button>
-        </form>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-bottom: 20px; font-size: 11px; color: #64748b; line-height: 1.4;">
+          🔒 PBKDF2-HMAC-SHA256 (100,000 salt iterations) protects passwords locally. Zero plain-text credentials are ever logged.
+        </div>
+
+        <button type="submit" id="wz-step1-btn" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 700; border-radius: 10px; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
+          Save Administrator & Continue →
+        </button>
+      </form>
+    `;
+  } else if (activeTab === "activate") {
+    // ----------------- TAB 3: ACCOUNT ACTIVATION -----------------
+    tabBodyHTML = `
+      <div id="activation-alert" class="login-alert-box ${errorMsg ? 'error' : ''}" style="${errorMsg ? 'display:block;' : 'display:none;'}">
+        ${errorMsg || ''}
+      </div>
+
+      <div class="auth-info-banner">
+        <div class="banner-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+        </div>
+        <div>
+          <strong>Invited Team Member Activation:</strong>
+          <div style="font-size: 12px; color: #334155; margin-top: 2px;">
+            Paste your 32-character activation token provided by your engagement administrator to set your password.
+          </div>
+        </div>
+      </div>
+
+      <form id="activation-form" onsubmit="handleActivationSubmit(event)">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label" style="font-size: 12px; font-weight: 600;">Activation Token / Code <span style="color: #ef4444;">*</span></label>
+          <input type="text" id="act-token" class="form-control" placeholder="Paste 32-character activation code" required autofocus style="font-family: monospace; font-size: 13px;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
+          <div class="form-group">
+            <label class="form-label" style="font-size: 12px; font-weight: 600;">Set Password <span style="color: #ef4444;">*</span></label>
+            <div class="password-input-wrap">
+              <input type="password" id="act-password" class="form-control" placeholder="Min. 8 chars" minlength="8" required>
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('act-password')">${ICONS.eye}</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 12px; font-weight: 600;">Confirm Password <span style="color: #ef4444;">*</span></label>
+            <div class="password-input-wrap">
+              <input type="password" id="act-confirm-password" class="form-control" placeholder="Re-enter password" minlength="8" required>
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('act-confirm-password')">${ICONS.eye}</button>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" id="act-submit-btn" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 700; border-radius: 10px; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
+          Activate Account & Sign In →
+        </button>
+      </form>
+    `;
+  }
+
+  overlay.innerHTML = `
+    <div class="auth-suite-card">
+      <div class="auth-header">
+        <div class="auth-brand-row">
+          <div class="auth-logo-badge">F</div>
+          <div class="auth-brand-text">
+            <h1>FinAuditPro</h1>
+            <p>Statutory CA Audit & Financial Verification Platform</p>
+          </div>
+        </div>
+      </div>
+
+      ${tabsNavHTML}
+
+      <div class="auth-body-container">
+        ${tabBodyHTML}
       </div>
     </div>
   `;

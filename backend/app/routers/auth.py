@@ -116,6 +116,11 @@ def get_setup_status():
         firm_name = firm_row["value"].replace('"', '') if firm_row and firm_row["value"] else ""
         is_setup_done = bool(setup_done_row and setup_done_row["value"] == "1")
 
+        # Determine admin user existence for convenient UI guidance
+        admin_row = conn.execute("SELECT id, username, email, full_name FROM users WHERE role = 'Admin' ORDER BY id ASC LIMIT 1").fetchone()
+        has_admin = bool(admin_row)
+        admin_info = dict(admin_row) if admin_row else None
+
         if user_count == 0:
             state = "UNINITIALIZED"
         elif not is_setup_done:
@@ -128,6 +133,8 @@ def get_setup_status():
             "is_setup_completed": user_count > 0,
             "wizard_completed": is_setup_done,
             "user_count": user_count,
+            "has_admin": has_admin,
+            "admin_user": admin_info["username"] if admin_info else None,
             "firm_name": firm_name,
             "firm_configured": bool(firm_row),
             "security_configured": bool(sec_row),

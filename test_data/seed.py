@@ -16,6 +16,8 @@ from test_data.transactions import get_transactions_for_company, get_prior_year_
 from test_data.findings import get_test_findings_for_company
 from test_data.working_papers import get_test_working_papers_for_company
 from test_data.checklists import get_test_checklist_items
+from backend.app.parsers.excel_csv import import_and_save_transactions, auto_detect_mapping
+import pandas as pd
 
 # Configurable passwords for test automation suites (TEST ONLY)
 TEST_ADMIN_PASSWORD = os.environ.get("TEST_ADMIN_PASSWORD", "admin123")
@@ -181,7 +183,7 @@ def seed_company_engagement(conn, company: dict) -> dict:
             wp["objective"], wp["status"], wp["prepared_by"], now_str[:10], wp["notes"], now_str, now_str
         ))
 
-    # 9. Register Uploaded Files references with explicit source_type = 'TEST_FIXTURE' and uploaded_by = 'SYSTEM_TEST_SEED'
+    # 9. Register Uploaded Files & Ingest Live File Transactions
     for cat, fname in [
         ("General Ledger", "transactions.csv"),
         ("Sales Register", "sales_register.csv"),
@@ -189,12 +191,56 @@ def seed_company_engagement(conn, company: dict) -> dict:
         ("Bank Statement", "bank_statement.csv"),
         ("GST Data", "gst_portal.csv")
     ]:
+        rel_path = f"test_data/{company['short_code'].lower()}_fintech/{fname}"
+        abs_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), rel_path)
+        actual_row_count = 200
+        if os.path.exists(abs_path):
+            try:
+                df_temp = pd.read_csv(abs_path)
+                actual_row_count = len(df_temp)
+            except Exception:
+                pass
+
         cursor.execute("""
-            INSERT INTO uploaded_files (engagement_id, file_name, file_type, file_path, source_type, data_category, row_count, uploaded_by, uploaded_at)
-            VALUES (?, ?, 'CSV', ?, 'TEST_FIXTURE', ?, 200, 'SYSTEM_TEST_SEED', ?)
+            INSERT INTO uploaded_files (engagement_id, file_name, file_type, file_path, source_type, data_category, row_count, successful_rows, uploaded_by, uploaded_at)
+            VALUES (?, ?, 'CSV', ?, 'TEST_FIXTURE', ?, ?, ?, 'SYSTEM_TEST_SEED', ?)
         """, (
-            cy_eng_id, f"{company['short_code'].lower()}_{fname}", f"test_data/{company['short_code'].lower()}_fintech/{fname}", cat, now_str
+            cy_eng_id, f"{company['short_code'].lower()}_{fname}", rel_path, cat, actual_row_count, actual_row_count, now_str
         ))
+        file_id = cursor.lastrowid
+
+        # Ingest transactions directly through parser so data is 100% linked live
+        if os.path.exists(abs_path):
+            try:
+                df = pd.read_csv(abs_path)
+                mapping = auto_detect_mapping(df.columns.tolist())
+                # For non-GL files (Sales, Purchase, Bank, GST), import transactions linked to file_id
+                # For GL transactions.csv, link the existing 1097 transactions to file_id and add original_row_json
+                if fname == "transactions.csv":
+                    cursor.execute("""
+                        UPDATE transactions SET file_id = ? WHERE engagement_id = ? AND file_id IS NULL
+                    """, (file_id, cy_eng_id))
+                    # Also populate original_row_json for GL transactions
+                    for idx, row in df.iterrows():
+                        row_dict = row.dropna().to_dict()
+                        v_no = str(row_dict.get("voucher_no") or "")
+                        d_val = str(row_dict.get("date") or "")
+                        import json
+                        cursor.execute("""
+                            UPDATE transactions SET original_row_json = ? 
+                            WHERE engagement_id = ? AND file_id = ? AND voucher_no = ? AND date = ?
+                        """, (json.dumps(row_dict, default=str), cy_eng_id, file_id, v_no, d_val))
+                else:
+                    import_and_save_transactions(
+                        engagement_id=cy_eng_id,
+                        file_id=file_id,
+                        file_path=abs_path,
+                        file_type="CSV",
+                        mapping=mapping,
+                        data_category=cat
+                    )
+            except Exception as ex:
+                print(f"[!] Warning: Live ingest failed for {fname}: {ex}")
 
     return {
         "client_id": client_id,

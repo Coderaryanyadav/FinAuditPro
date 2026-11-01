@@ -48,6 +48,12 @@ def main():
 
     if args.reset:
         print("[*] Reinitializing clean database schema...")
+        db_path = get_db_path()
+        if os.path.exists(db_path):
+            os.remove(db_path)
+        for ext in ["-wal", "-shm"]:
+            if os.path.exists(db_path + ext):
+                os.remove(db_path + ext)
         init_db()
 
     print("[*] Seeding all 3 corporate entities from test_data/...")

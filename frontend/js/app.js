@@ -5356,51 +5356,12 @@ async function renderDashboard() {
         </div>
       </div>
 
-      <!-- SECTIONS 6 & 7: YEAR-ON-YEAR CHANGES & CHECKLIST PROGRESS -->
-      <div class="dash-section-grid" style="margin-bottom: 20px;">
-        <!-- SECTION 6: YEAR-ON-YEAR CHANGES (Chart & Variances) -->
+      <!-- SECTION 6: AUDIT CHECKLIST PROGRESS -->
+      <div style="margin-bottom: 20px;">
         <div class="dash-chart-card">
           <div class="dash-chart-header">
             <div>
-              <div class="dash-chart-title">6. Year-on-Year Movement & Variances</div>
-              <div class="dash-chart-subtitle">Current Year vs Prior Year comparative lines | <b>Click row to inspect ledger</b></div>
-            </div>
-            <button class="btn btn-sm btn-secondary" onclick="navigateTo('yoy_comparison')">YoY Module →</button>
-          </div>
-
-          ${yoy.length === 0 ? `
-            <div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 12.5px;">
-              No prior year comparison data active for this engagement. Upload previous year general ledger to unlock automatic YoY analytics.
-            </div>
-          ` : `
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              ${yoy.map(item => {
-      const varPct = Number(item.variance_pct) || 0;
-      const isSig = item.is_significant;
-      return `
-                  <div class="chart-horizontal-bar-row" style="border: 1px solid var(--border); padding: 6px 10px;" onclick="openDashboardYoYModal('${escapeHtml(item.account_name)}')" title="Click to view ledger breakdown for ${escapeHtml(item.account_name)}">
-                    <div style="flex: 1; font-weight: 600; color: var(--text-main); font-size: 12px;">
-                      ${escapeHtml(item.account_name)}
-                      ${isSig ? `<span class="badge badge-critical" style="margin-left: 6px; font-size: 10px;">Variance</span>` : ''}
-                    </div>
-                    <div class="font-mono" style="font-size: 11.5px; color: var(--text-muted); margin-right: 12px;">
-                      CY: ${formatCompactINR(item.cy_amount || 0)} | PY: ${formatCompactINR(item.py_amount || 0)}
-                    </div>
-                    <div class="font-mono font-bold" style="font-size: 12px; min-width: 70px; text-align: right; color: ${varPct > 0 ? '#059669' : varPct < 0 ? '#dc2626' : '#64748b'};">
-                      ${varPct > 0 ? '+' : ''}${varPct.toFixed(1)}%
-                    </div>
-                  </div>
-                `;
-    }).join("")}
-            </div>
-          `}
-        </div>
-
-        <!-- SECTION 7: CHECKLIST PROGRESS -->
-        <div class="dash-chart-card">
-          <div class="dash-chart-header">
-            <div>
-              <div class="dash-chart-title">7. Audit Checklist Progress (ICAI Standards)</div>
+              <div class="dash-chart-title">6. Audit Checklist Progress (ICAI Standards)</div>
               <div class="dash-chart-subtitle">Standard compliance audit procedures completion rate</div>
             </div>
             <button class="btn btn-sm btn-secondary" onclick="navigateTo('checklist')">Open Checklist →</button>

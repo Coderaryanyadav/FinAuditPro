@@ -13237,12 +13237,34 @@ function renderRatiosDashboardHtml(data, cyYear, pyYear) {
   const py = data.ratios?.previous_year || {};
 
   function ratioCard(title, category, cyVal, pyVal, unit, benchmark = null, invert = false) {
-    const diff = roundNum((cyVal || 0) - (pyVal || 0), 2);
-    const isUp = diff > 0;
-    const isGood = invert ? !isUp : isUp;
-    const isNeutral = Math.abs(diff) < 0.001;
-    const diffColor = isNeutral ? "#64748b" : (isGood ? "#059669" : "#dc2626");
-    const diffArrow = isNeutral ? "" : (isUp ? "↑" : "↓");
+    const hasCY = (cyVal !== null && cyVal !== undefined && typeof cyVal === 'number' && !isNaN(cyVal));
+    const hasPY = (pyVal !== null && pyVal !== undefined && typeof pyVal === 'number' && !isNaN(pyVal));
+
+    let diffText = "— vs PY";
+    let diffColor = "#64748b";
+
+    if (hasCY && hasPY) {
+      const diff = roundNum(cyVal - pyVal, 2);
+      const isUp = diff > 0;
+      const isGood = invert ? !isUp : isUp;
+      const isNeutral = Math.abs(diff) < 0.001;
+      diffColor = isNeutral ? "#64748b" : (isGood ? "#059669" : "#dc2626");
+      const diffArrow = isNeutral ? "" : (isUp ? "↑" : "↓");
+      diffText = `${diffArrow} ${Math.abs(diff).toFixed(2)}${unit === '%' ? '%' : ''} vs PY`;
+    } else if (hasCY && !hasPY) {
+      diffText = "No PY Baseline";
+      diffColor = "var(--text-muted)";
+    } else {
+      diffText = "Not Applicable";
+      diffColor = "var(--text-muted)";
+    }
+
+    const formatVal = (v) => {
+      if (v === null || v === undefined || typeof v !== 'number' || isNaN(v)) {
+        return `<span style="color: var(--text-muted); font-size: 16px; font-weight: 500;">N/A</span>`;
+      }
+      return `${v.toFixed(2)}${unit === '%' ? '%' : (unit === 'x' ? 'x' : (unit === 'days' ? ' d' : ''))}`;
+    };
 
     return `
       <div class="card" style="padding: 16px; border: 1px solid var(--border); transition: transform 0.15s, box-shadow 0.15s;">
@@ -13255,17 +13277,17 @@ function renderRatiosDashboardHtml(data, cyYear, pyYear) {
         </div>
 
         <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 10px;">
-          <span style="font-size: 24px; font-weight: 800; color: var(--text-main); font-family: monospace;">
-            ${typeof cyVal === 'number' ? cyVal.toFixed(2) : (cyVal || 0)}${unit === '%' ? '%' : (unit === 'x' ? 'x' : (unit === 'days' ? ' d' : ''))}
+          <span style="font-size: 24px; font-weight: 800; color: ${hasCY ? 'var(--text-main)' : 'var(--text-muted)'}; font-family: monospace;">
+            ${formatVal(cyVal)}
           </span>
           <span style="font-size: 12px; font-weight: 600; color: ${diffColor};">
-            ${diffArrow} ${Math.abs(diff).toFixed(2)}${unit === '%' ? '%' : ''} vs PY
+            ${diffText}
           </span>
         </div>
 
         <div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border); font-size: 11.5px; color: var(--text-muted);">
-          <span>PY (FY ${pyYear}): <b style="color: var(--text-secondary); font-family: monospace;">${typeof pyVal === 'number' ? pyVal.toFixed(2) : (pyVal || 0)}${unit === '%' ? '%' : (unit === 'x' ? 'x' : (unit === 'days' ? ' d' : ''))}</b></span>
-          <span>CY (FY ${cyYear}): <b style="color: var(--text-main); font-family: monospace;">${typeof cyVal === 'number' ? cyVal.toFixed(2) : (cyVal || 0)}${unit === '%' ? '%' : (unit === 'x' ? 'x' : (unit === 'days' ? ' d' : ''))}</b></span>
+          <span>PY (FY ${pyYear}): <b style="color: var(--text-secondary); font-family: monospace;">${formatVal(pyVal)}</b></span>
+          <span>CY (FY ${cyYear}): <b style="color: var(--text-main); font-family: monospace;">${formatVal(cyVal)}</b></span>
         </div>
       </div>
     `;
@@ -13280,7 +13302,7 @@ function renderRatiosDashboardHtml(data, cyYear, pyYear) {
         ${ratioCard("Current Ratio", "Liquidity", cy.current_ratio, py.current_ratio, "x", "≥ 1.33x")}
         ${ratioCard("Quick Ratio (Acid Test)", "Liquidity", cy.quick_ratio, py.quick_ratio, "x", "≥ 1.00x")}
         ${ratioCard("Debt-to-Equity Ratio", "Solvency / Leverage", cy.debt_equity_ratio, py.debt_equity_ratio, "x", "≤ 2.00x", true)}
-        ${ratioCard("Return on Capital Employed (ROCE)", "Capital Efficiency", cy.roce_pct, py.roce_pct, "%", "≥ 15%")}
+        ${ratioCard("Return on Capital Employed (ROCE)", "Capital Efficiency", (cy.roce_pct ?? cy.return_on_capital_employed_pct), (py.roce_pct ?? py.return_on_capital_employed_pct), "%", "≥ 15%")}
       </div>
     </div>
 
@@ -13292,7 +13314,7 @@ function renderRatiosDashboardHtml(data, cyYear, pyYear) {
         ${ratioCard("Gross Profit Margin", "Profitability", cy.gross_profit_margin_pct, py.gross_profit_margin_pct, "%")}
         ${ratioCard("Operating Profit Margin (EBIT)", "Profitability", cy.operating_margin_pct, py.operating_margin_pct, "%")}
         ${ratioCard("Net Profit Margin (PAT)", "Profitability", cy.net_profit_margin_pct, py.net_profit_margin_pct, "%")}
-        ${ratioCard("Return on Equity (ROE)", "Profitability", cy.roe_pct, py.roe_pct, "%")}
+        ${ratioCard("Return on Equity (ROE)", "Profitability", (cy.roe_pct ?? cy.return_on_equity_pct), (py.roe_pct ?? py.return_on_equity_pct), "%")}
       </div>
     </div>
 
@@ -13308,7 +13330,7 @@ function renderRatiosDashboardHtml(data, cyYear, pyYear) {
         ${ratioCard("Creditors / Payable Turnover", "Activity", cy.payable_turnover, py.payable_turnover, "x")}
         ${ratioCard("Days Payables Outstanding (DPO)", "Payment Cycle", cy.dpo_days, py.dpo_days, "days")}
         ${ratioCard("Working Capital Turnover", "Efficiency", cy.working_capital_turnover, py.working_capital_turnover, "x")}
-        ${ratioCard("Cash Conversion Cycle (CCC)", "Working Capital", cy.working_capital_cycle_days, py.working_capital_cycle_days, "days", "≤ 90 days", true)}
+        ${ratioCard("Cash Conversion Cycle (CCC)", "Working Capital", (cy.working_capital_cycle_days ?? cy.cash_conversion_cycle), (py.working_capital_cycle_days ?? py.cash_conversion_cycle), "days", "≤ 90 days", true)}
       </div>
     </div>
   `;

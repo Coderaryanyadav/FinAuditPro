@@ -487,8 +487,11 @@ def run_financial_statement_analysis(engagement_id: int) -> Dict[str, Any]:
             "payable_turnover": round(pay_turnover, 2) if pay_turnover is not None else None,
             "dpo_days": dpo_days,
             "return_on_capital_employed_pct": round(roce, 2) if roce is not None else None,
+            "roce_pct": round(roce, 2) if roce is not None else None,
             "return_on_equity_pct": round(roe, 2) if roe is not None else None,
-            "working_capital_turnover": round(wc_turnover, 2) if wc_turnover is not None else None
+            "roe_pct": round(roe, 2) if roe is not None else None,
+            "working_capital_turnover": round(wc_turnover, 2) if wc_turnover is not None else None,
+            "working_capital_cycle_days": None
         }
 
     # Aggregate CY

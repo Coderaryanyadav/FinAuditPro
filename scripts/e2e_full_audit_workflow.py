@@ -121,19 +121,19 @@ def run_all_steps():
     # Step 4: Create Client
     client_id = None
     try:
-        pan = f"ABCDE{int(datetime.now().timestamp())%9000 + 1000}F"
+        pan = f"AAPCA{int(datetime.now().timestamp())%9000 + 1000}A"
         client_payload = {
-            "name": "Apex Global Logistics Pvt Ltd",
+            "name": "Aryan Fintech Pvt. Ltd.",
             "entity_type": "Private Limited Company",
             "pan": pan,
-            "gstin": f"27{pan}1Z5",
+            "gstin": f"27{pan}1Z1",
             "address": "401 Commerce Tower, BKC, Mumbai, Maharashtra 400051",
-            "contact_person": "Vikramaditya Mehta (MD)",
-            "email": "accounts@apexlogistics.in",
+            "contact_person": "Aryan Sharma (Managing Director)",
+            "email": "contact@aryanfintech.com",
             "phone": "+91 98200 12345",
-            "industry": "Logistics & Supply Chain",
+            "industry": "Financial Technology & Payment Solutions",
             "financial_year": "2025-26",
-            "notes": "Statutory audit client under Companies Act 2013"
+            "notes": "Corporate statutory audit client under Companies Act 2013"
         }
         resp = client.post("/api/clients", json=client_payload, headers=admin_headers)
         assert resp.status_code == 200, f"Create client failed: {resp.text}"
@@ -153,7 +153,7 @@ def run_all_steps():
 
         eng_payload = {
             "client_id": client_id,
-            "title": "Statutory Financial Audit FY 2025-26",
+            "title": "Aryan Fintech Statutory Financial Audit FY 2025-26",
             "financial_year": "2025-26",
             "audit_type": "Statutory Audit",
             "lead_auditor_id": admin_uid,

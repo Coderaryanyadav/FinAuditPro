@@ -43,11 +43,10 @@ This directory houses maintenance utilities, database seeding tools, testing run
 
 | Script | Purpose & Description | Execution Command |
 | :--- | :--- | :--- |
-| [`seed_test_data.py`](seed_test_data.py) | **Multi-Company Test Seeder:** Seeds standard multi-tenant test entities (*Aryan Fintech*, *Hitansh Fintech*, and *Jeet Fintech*) with sample users, engagements, and trial balance lines. | `python scripts/seed_test_data.py` |
-| [`reset_and_seed_aryan_fintech.py`](reset_and_seed_aryan_fintech.py) | **Corporate Gold-Standard Seeder:** Generates 1,097 verified General Ledger records across 26 accounts for Aryan Fintech Pvt. Ltd. (FY 2025-26 & FY 2024-25), with realistic Indian corporate banking, GST, and payroll journals. | `python scripts/reset_and_seed_aryan_fintech.py` |
+| [`seed_test_data.py`](seed_test_data.py) | **Master Multi-Entity Seeder:** Seeds all 3 standard corporate test entities (*Aryan Fintech*, *Hitansh Fintech*, and *Jeet Fintech*) directly from `test_data/` with realistic General Ledgers, prior year comparisons, BRS bank statements, GSTR-2B portal downloads, and working papers. Supports `--reset` for a clean database before seeding. | `python scripts/seed_test_data.py [--reset]` |
 | [`create_admin.py`](create_admin.py) | **CLI Admin Creator:** Interactive and non-interactive command-line utility to bootstrap administrator credentials with PBKDF2/bcrypt hashing directly into the database. | `python scripts/create_admin.py` |
 | [`clean_room_reset.py`](clean_room_reset.py) | **Clean-Room Reset & Invariant Verifier:** Archives the database, wipes temporary artifacts, re-runs schema migrations, and asserts strict zero-data invariants across all tables. | `python scripts/clean_room_reset.py --confirm-reset` |
-| [`drop_all.py`](drop_all.py) | **Schema Drop Utility:** Drops all database tables and triggers for migration lifecycle testing. *(CAUTION: Destructive - test environments only)* | `python scripts/drop_all.py` |
+| [`drop_all.py`](drop_all.py) | **Schema Drop Utility:** Drops all database tables and triggers for migration lifecycle testing. *(CAUTION: Destructive - test environments only)* | `python scripts/drop_all.py [--init]` |
 
 ---
 
@@ -55,7 +54,7 @@ This directory houses maintenance utilities, database seeding tools, testing run
 
 | Script | Purpose & Description | Execution Command |
 | :--- | :--- | :--- |
-| [`generate_reports_and_docs.py`](generate_reports_and_docs.py) | **Enterprise Deliverables Generator:** Synthesizes master PDF deliverables into `backend/reports_generated/master_deliverables/` including the 10-report audit compendium with bookmarks and documentation manual. | `python scripts/generate_reports_and_docs.py` |
+| [`generate_reports_and_docs.py`](generate_reports_and_docs.py) | **Enterprise Deliverables Generator:** Synthesizes master PDF deliverables into `backend/reports_generated/master_deliverables/` including the 10-report audit compendium with bookmarks and complete project documentation manual. Supports `--all-entities` for bulk generation across Aryan, Hitansh, and Jeet. | `python scripts/generate_reports_and_docs.py [--all-entities]` |
 | [`cleanup_generated.sh`](cleanup_generated.sh) | **Safe Cache & Artifact Cleaner:** Discovers and purges Python bytecode (`__pycache__`, `*.pyc`), test caches (`.pytest_cache`), and disposable temporary files. Dry-run by default. | `./scripts/cleanup_generated.sh [--apply]` |
 
 ---

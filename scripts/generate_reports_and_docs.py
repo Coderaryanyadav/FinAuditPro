@@ -304,17 +304,32 @@ def build_project_documentation_pdf(output_path: str):
 def main():
     parser = argparse.ArgumentParser(description="FinAuditPro Enterprise Reports & Documentation Generator")
     parser.add_argument("--engagement-id", type=int, default=2, help="Engagement ID to generate reports for (default: 2)")
+    parser.add_argument("--all-entities", action="store_true", help="Generate full deliverables for all active entities (Aryan, Hitansh, and Jeet Fintech)")
     parser.add_argument("--out-dir", type=str, default=None, help="Directory to save generated deliverables")
     args = parser.parse_args()
 
     out_dir = args.out_dir or os.path.join(PROJECT_ROOT, "backend", "reports_generated", "master_deliverables")
     os.makedirs(out_dir, exist_ok=True)
 
-    compendium_pdf = os.path.join(out_dir, "FinAuditPro_All_Audit_Reports_Compendium.pdf")
     project_doc_pdf = os.path.join(out_dir, "FinAuditPro_Complete_Project_Documentation.pdf")
-
-    build_combined_reports_pdf(args.engagement_id, compendium_pdf)
     build_project_documentation_pdf(project_doc_pdf)
+
+    if args.all_entities:
+        targets = [
+            (2, "Aryan_Fintech_Audit_Compendium.pdf"),
+            (4, "Hitansh_Fintech_Audit_Compendium.pdf"),
+            (6, "Jeet_Fintech_Audit_Compendium.pdf")
+        ]
+        for eng_id, fname in targets:
+            pdf_path = os.path.join(out_dir, fname)
+            try:
+                build_combined_reports_pdf(eng_id, pdf_path)
+            except Exception as e:
+                print(f"[!] Warning generating compendium for engagement #{eng_id}: {e}")
+    else:
+        compendium_pdf = os.path.join(out_dir, "FinAuditPro_All_Audit_Reports_Compendium.pdf")
+        build_combined_reports_pdf(args.engagement_id, compendium_pdf)
+
     print(f"\n[OK] Deliverables successfully generated in: {out_dir}")
 
 

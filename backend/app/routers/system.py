@@ -1,8 +1,5 @@
 import os
-from typing import Optional
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
-from fastapi.responses import FileResponse
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Depends
 
 from backend.app.auth import get_current_user, require_role
 from backend.app.services.integrity_checker import SystemIntegrityChecker

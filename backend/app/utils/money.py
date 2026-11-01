@@ -1,5 +1,5 @@
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
-from typing import Union, Optional, Dict, Any, List
+from typing import Dict, Any, List
 
 PAISE_EXPONENT = Decimal("0.01")
 FOUR_DECIMAL_EXPONENT = Decimal("0.0001")

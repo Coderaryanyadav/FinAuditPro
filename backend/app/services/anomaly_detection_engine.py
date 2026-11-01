@@ -1,4 +1,3 @@
-import re
 import math
 import json
 import io
@@ -657,7 +656,7 @@ def detect_all_anomalies(engagement_id: int) -> Dict[str, Any]:
                                 "party": f["party"],
                                 "date": f["date_str"]
                             },
-                            explanation=f"DBSCAN spatial clustering classified this record as a discrete noise point (Cluster -1), unable to be grouped into any standard operational cluster.",
+                            explanation="DBSCAN spatial clustering classified this record as a discrete noise point (Cluster -1), unable to be grouped into any standard operational cluster.",
                             recommended_review="Perform targeted substantive verification on the transaction's economic substance and commercial justification.",
                             severity_override="MEDIUM"
                         )

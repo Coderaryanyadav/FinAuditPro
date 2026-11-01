@@ -1,9 +1,9 @@
 import io
 import csv
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel
-from typing import Optional, List, Dict, Any
+from typing import Optional
 
 from backend.app.auth import get_current_user, require_role, require_engagement_access
 from backend.app.services.duplicate_missing_detector import (

@@ -1,9 +1,9 @@
-from typing import Optional, List
-from fastapi import APIRouter, HTTPException, Depends, Query
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
 from backend.app.auth import get_current_user, require_engagement_access
-from backend.app.jobs.job_manager import JobManager, JobStatus
+from backend.app.jobs.job_manager import JobManager
 
 router = APIRouter(prefix="/api/jobs", tags=["Background Jobs"])
 

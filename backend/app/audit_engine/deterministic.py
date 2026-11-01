@@ -3,7 +3,7 @@ from decimal import Decimal
 from datetime import datetime
 from typing import List, Dict, Any, Tuple, Optional
 
-from backend.app.utils.money import to_decimal, quantize_money, safe_sum_decimals
+from backend.app.utils.money import quantize_money, safe_sum_decimals
 
 GSTIN_REGEX = r"^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$"
 PAN_REGEX = r"^[A-Z]{5}[0-9]{4}[A-Z]{1}$"
@@ -97,7 +97,7 @@ class DeterministicAuditEngine:
                 "title": "Trial Balance Mismatch: Total Debits != Total Credits",
                 "description": f"The aggregate debits (₹{total_debit:,.2f}) and aggregate credits (₹{total_credit:,.2f}) do not balance, resulting in an unreconciled difference of ₹{diff:,.2f}.",
                 "affected_records": [t.get('id') for t in self.transactions[:10]],
-                "expected_value": f"Debits equal to Credits (Diff: ₹0.00)",
+                "expected_value": "Debits equal to Credits (Diff: ₹0.00)",
                 "actual_value": f"Debits: ₹{total_debit:,.2f}, Credits: ₹{total_credit:,.2f}",
                 "difference": f"₹{diff:,.2f}",
                 "reason": "Double-entry accounting equation violation. Unposted journal entries, missing one-sided entries, or manual ledger tampering.",
@@ -669,7 +669,7 @@ class DeterministicAuditEngine:
                         "severity": "HIGH",
                         "risk_score": 7.8,
                         "title": f"Negative Balance Detected in '{t.get('ledger')}': ₹{cb_val:,.2f}",
-                        "description": f"Cash/Bank account cannot mathematically carry a negative balance without an approved bank overdraft / CC facility.",
+                        "description": "Cash/Bank account cannot mathematically carry a negative balance without an approved bank overdraft / CC facility.",
                         "affected_records": [t.get('id')],
                         "expected_value": "Cash Balance >= ₹0.00",
                         "actual_value": f"Closing Balance: ₹{cb_val:,.2f}",

@@ -2,14 +2,12 @@ import re
 import time
 import json
 import secrets
-from fastapi import APIRouter, HTTPException, Depends, Header
-from datetime import datetime, timedelta, timezone
-from typing import List, Optional, Dict, Any
+from fastapi import APIRouter, HTTPException, Depends
+from datetime import datetime, timedelta
 
 from backend.app.schemas import (
     UserLogin, UserCreate, UserUpdate, UserStatusUpdate,
-    ChangePasswordRequest, AdminResetPasswordRequest, UserResponse,
-    InitialAdminCreate, FirmProfileSetup, SecuritySetup, BackupSetup,
+    ChangePasswordRequest, AdminResetPasswordRequest, InitialAdminCreate, FirmProfileSetup, SecuritySetup, BackupSetup,
     UserInviteCreate, UserActivationSubmit
 )
 from backend.app.auth import (

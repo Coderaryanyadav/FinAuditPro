@@ -1,7 +1,7 @@
 import json
 import logging
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Tuple
 from backend.app.database import get_db_connection
 
 logger = logging.getLogger(__name__)
@@ -169,7 +169,7 @@ class CentralizedFindingsEngine:
             )
         else:
             explanation_lines.append(
-                f"2. Materiality & Exposure: No direct transactional financial difference identified (+0.0)."
+                "2. Materiality & Exposure: No direct transactional financial difference identified (+0.0)."
             )
 
         if effective_freq > 1 or aff_count > 1:

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 from backend.app.schemas import EngagementCreate, EngagementUpdate, DuplicateEngagementRequest
 from backend.app.auth import get_current_user, require_role, require_engagement_access
 from backend.app.database import get_db_connection

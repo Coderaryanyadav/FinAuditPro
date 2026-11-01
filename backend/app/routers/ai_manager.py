@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any, List
+from typing import Optional
 from backend.app.auth import get_current_user, require_role
 from backend.app.services.local_ai_provider import LocalAIModelManager, sanitize_audit_text
 from backend.app.utils.audit_logger import log_audit_event

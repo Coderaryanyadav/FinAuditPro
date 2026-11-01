@@ -1,10 +1,9 @@
 import json
 import os
-import shutil
 import sqlite3
 import time
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse

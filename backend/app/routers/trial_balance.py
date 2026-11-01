@@ -2,7 +2,7 @@ import io
 import csv
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends, Response
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from pydantic import BaseModel
 from backend.app.auth import get_current_user, require_engagement_access
 from backend.app.database import get_db_connection

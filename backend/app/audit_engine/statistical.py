@@ -78,7 +78,7 @@ class StatisticalAuditEngine:
                 "title": f"Benford's Law Non-Conformity (MAD: {mad:.4f}, Peak at Digit {max_dev_digit})",
                 "description": f"The empirical leading digit distribution of {total_count} transactions deviates significantly from Benford's Law (Mean Absolute Deviation = {mad:.4f}). Digit {max_dev_digit} occurs at {actual_dist[max_dev_digit]*100:.1f}% vs theoretical {expected_dist[max_dev_digit]*100:.1f}%.",
                 "affected_records": [t.get('id') for t in self.transactions if str(t.get('amount') or '').startswith(str(max_dev_digit))][:15],
-                "expected_value": f"Theoretical Benford Digit 1-9 curve (MAD < 0.012)",
+                "expected_value": "Theoretical Benford Digit 1-9 curve (MAD < 0.012)",
                 "actual_value": f"Observed MAD: {mad:.4f} ({conformity})",
                 "difference": f"MAD deviation +{(mad - 0.012):.4f}",
                 "reason": "Anomalous concentration of transactions starting with specific digits often points to authorization limit thresholds (e.g. ₹4,999 or ₹9,990 to avoid manager sign-off) or synthetic number generation.",

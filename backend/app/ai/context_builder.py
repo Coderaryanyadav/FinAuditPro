@@ -1,6 +1,4 @@
-import re
-from typing import Dict, Any, List, Optional, Tuple
-from decimal import Decimal
+from typing import Dict, Any, Optional, Tuple
 
 from backend.app.services.local_ai_provider import sanitize_audit_text
 
@@ -48,14 +46,14 @@ class AIContextBoundary:
 
             if "finding" in relevant_data:
                 f = relevant_data["finding"]
-                context_parts.append(f"\nAUDIT FINDING CONTEXT:")
+                context_parts.append("\nAUDIT FINDING CONTEXT:")
                 context_parts.append(f"- Code: {f.get('finding_code')} | Category: {f.get('category')} | Severity: {f.get('severity')}")
                 context_parts.append(f"- Title: {f.get('title')}")
                 context_parts.append(f"- Expected: {f.get('expected_value')} | Actual: {f.get('actual_value')}")
 
             if "reconciliation_summary" in relevant_data:
                 r = relevant_data["reconciliation_summary"]
-                context_parts.append(f"\nRECONCILIATION SUMMARY:")
+                context_parts.append("\nRECONCILIATION SUMMARY:")
                 context_parts.append(f"- Type: {r.get('recon_type')} | Unreconciled Amount: ₹{r.get('unreconciled_amount')}")
 
         raw_context = "\n".join(context_parts)

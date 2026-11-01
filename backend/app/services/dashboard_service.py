@@ -1,6 +1,5 @@
-import math
 from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 from backend.app.database import get_db_connection
 from backend.app.services.checklist_generator import ChecklistGenerator
 from backend.app.services.yoy_comparison_engine import run_yoy_comparison

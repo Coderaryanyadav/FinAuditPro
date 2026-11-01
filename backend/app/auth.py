@@ -4,7 +4,7 @@ import hmac
 import jwt
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
-from fastapi import HTTPException, Security, Depends, Request
+from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from backend.app.database import get_db_connection
 import secrets

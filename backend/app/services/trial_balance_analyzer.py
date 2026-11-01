@@ -1,6 +1,5 @@
 import re
-import math
-from typing import Dict, Any, List, Tuple, Optional
+from typing import Dict, Any, List
 from datetime import datetime
 from backend.app.database import get_db_connection
 

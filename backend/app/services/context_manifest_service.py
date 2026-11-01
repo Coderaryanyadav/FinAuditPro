@@ -10,8 +10,7 @@ and Freshness Fingerprint) prior to local AI model generation.
 
 import hashlib
 import sqlite3
-from typing import Dict, Any, List, Optional
-from datetime import datetime
+from typing import Dict, Any
 
 from backend.app.database import get_db_path
 

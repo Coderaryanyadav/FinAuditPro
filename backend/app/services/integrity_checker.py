@@ -1,6 +1,5 @@
 import os
-import sqlite3
-from typing import Dict, Any, List
+from typing import Dict, Any
 from datetime import datetime
 
 from backend.app.database import get_db_connection, get_db_path

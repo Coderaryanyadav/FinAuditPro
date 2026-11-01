@@ -1,5 +1,4 @@
-import re
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 
 class LocalAIAuditAssistant:
     """Local, offline AI assistant providing natural language explanations,
@@ -112,7 +111,7 @@ Engagement: {self.engagement.get('title', 'Annual Audit')} | FY: {self.engagemen
         elif "largest" in q or "highest" in q or "top" in q or "big" in q:
             sorted_tx = sorted(self.transactions, key=lambda t: float(t.get('amount') or t.get('debit') or t.get('credit') or 0.0), reverse=True)
             top_5 = sorted_tx[:5]
-            response_text = f"Top 5 highest value transactions in the ledger:\n"
+            response_text = "Top 5 highest value transactions in the ledger:\n"
             for idx, t in enumerate(top_5, 1):
                 amt = float(t.get('amount') or t.get('debit') or t.get('credit') or 0.0)
                 response_text += f"{idx}. Date: {t.get('date')} | Ledger: {t.get('ledger')} | Party: {t.get('party_name') or 'N/A'} | Amount: ₹{amt:,.2f} (Voucher: {t.get('voucher_no')})\n"

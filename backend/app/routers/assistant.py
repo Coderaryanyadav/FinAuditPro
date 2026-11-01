@@ -1,13 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
-from typing import List, Optional
 import logging
 
 from backend.app.schemas import (
     AssistantQuery,
     ConversationCreate,
     ConversationResponse,
-    MessageResponse,
     ChatTurnRequest
 )
 from backend.app.database import get_db_connection

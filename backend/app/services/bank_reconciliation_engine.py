@@ -1,7 +1,6 @@
 import re
-import math
 from datetime import datetime
-from typing import Dict, Any, List, Tuple, Optional, Set
+from typing import Dict, Any, List, Optional, Set
 from backend.app.database import get_db_connection
 
 def parse_date(date_str: Optional[str]) -> Optional[datetime]:
@@ -482,7 +481,7 @@ def run_bank_reconciliation(
                 "match_reason": reason,
                 "item_type": item_type,
                 "status": "Unmatched",
-                "notes": f"Requires substantive verification of clearance in subsequent period."
+                "notes": "Requires substantive verification of clearance in subsequent period."
             })
 
     unmatched_bank_items = []
@@ -535,7 +534,7 @@ def run_bank_reconciliation(
                 "match_reason": reason,
                 "item_type": item_type,
                 "status": "Unmatched",
-                "notes": f"Requires adjusting journal entry in Cash Book."
+                "notes": "Requires adjusting journal entry in Cash Book."
             })
 
     # Total counts and balances calculation

@@ -5,7 +5,7 @@ import json
 import uuid
 import shutil
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, Query, UploadFile, File, Form, Response
 from fastapi.responses import FileResponse
 

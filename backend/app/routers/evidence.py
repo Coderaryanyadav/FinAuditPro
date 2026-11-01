@@ -1,14 +1,11 @@
 import os
 import hashlib
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends, Query, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import FileResponse
-from datetime import datetime
 
 from backend.app.auth import get_current_user, require_engagement_access
 from backend.app.database import get_db_connection
 from backend.app.repositories.evidence_repo import EvidenceRepository
-from backend.app.utils.audit_logger import log_audit_event
 
 router = APIRouter(prefix="/api/evidence", tags=["Evidence Management"])
 

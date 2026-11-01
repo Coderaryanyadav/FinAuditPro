@@ -1,6 +1,5 @@
-import re
-from datetime import datetime, timedelta
-from typing import Dict, Any, List, Tuple, Optional
+from datetime import datetime
+from typing import Dict, Any, List, Optional
 from backend.app.database import get_db_connection
 
 def parse_date(date_str: Optional[str]) -> Optional[datetime]:

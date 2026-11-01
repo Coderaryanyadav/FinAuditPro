@@ -1,10 +1,9 @@
 import os
-import json
 import uuid
 import logging
 from datetime import datetime
-from typing import Optional, List, Dict
-from fastapi import APIRouter, HTTPException, Depends, Query, Body
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Depends, Query
 from fastapi.responses import FileResponse
 
 logger = logging.getLogger(__name__)

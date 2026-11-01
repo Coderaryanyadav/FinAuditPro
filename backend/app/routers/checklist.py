@@ -1,15 +1,14 @@
 import io
 import csv
 from datetime import datetime
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends, Query, Response
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Depends, Response
 
 from backend.app.schemas import ChecklistItemUpdate, ChecklistItemCreate, ChecklistGenerateRequest
 from backend.app.auth import get_current_user, require_engagement_access
 from backend.app.database import get_db_connection
 from backend.app.services.checklist_generator import (
     ChecklistGenerator,
-    CHECKLIST_CATEGORIES,
     CHECKLIST_STATUSES
 )
 

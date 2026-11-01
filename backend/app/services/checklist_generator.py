@@ -1,4 +1,3 @@
-import re
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 from backend.app.database import get_db_connection

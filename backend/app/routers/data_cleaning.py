@@ -1,7 +1,6 @@
-import json
 from datetime import datetime
-from typing import Optional, List, Dict, Any
-from fastapi import APIRouter, HTTPException, Depends, Query
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Depends
 from backend.app.schemas import CleaningLogReviewRequest, NormalizationPreviewRequest
 from backend.app.auth import get_current_user, require_role, require_engagement_access
 from backend.app.database import get_db_connection

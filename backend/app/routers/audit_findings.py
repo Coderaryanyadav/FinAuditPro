@@ -2,7 +2,7 @@ import io
 import csv
 import json
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, Query, Response
 from backend.app.schemas import FindingUpdate, FindingCreateCustom
 from backend.app.auth import get_current_user, require_engagement_access
@@ -286,10 +286,10 @@ def get_finding_ai_explanation(finding_id: int, current_user: dict = Depends(get
     rule = finding.get("rule_used") or "Standard Audit Procedure"
 
     explanation_lines = [
-        f"### Audit Risk Assessment & Explainability Analysis",
+        "### Audit Risk Assessment & Explainability Analysis",
         f"**Finding ID**: `{finding.get('finding_code')}` | **Module**: {module} | **Severity**: {sev} | **Deterministic Risk Score**: {score}/10.0",
         "",
-        f"#### Deterministic Factor Breakdown:",
+        "#### Deterministic Factor Breakdown:",
         f"- **Base Severity Weight**: {risk_factors.get('base_weight', 3.0)} ({sev})",
         f"- **Financial Exposure**: ₹{risk_factors.get('amount', 0):,.2f} vs Materiality Benchmark of ₹{risk_factors.get('materiality_threshold', 50000):,.2f} (+{risk_factors.get('amount_impact', 0.0)} impact)",
         f"- **Affected Records / Frequency**: {risk_factors.get('affected_records_count', 1)} record(s), frequency multiplier: {risk_factors.get('frequency', 1)} (+{risk_factors.get('records_impact', 0.0)} / +{risk_factors.get('repetition_impact', 0.0)})",
@@ -297,13 +297,13 @@ def get_finding_ai_explanation(finding_id: int, current_user: dict = Depends(get
         f"- **Data Quality & Historical Flag**: Quality Penalty: +{risk_factors.get('data_quality_impact', 0.0)}, Historical Pattern: +{risk_factors.get('historical_impact', 0.0)}",
         f"- **Formula Calculation**: `{risk_factors.get('equation', f'Calculated Score: {score}/10.0')}`",
         "",
-        f"#### Statutory & Auditing Standard Reference:",
+        "#### Statutory & Auditing Standard Reference:",
         f"This finding operates under **{rule}**. Under Indian Auditing Standards (SA 240 / SA 315 / SA 500 / SA 520), this risk score of {score}/10.0 mandates the auditor to evaluate whether this exception constitutes an isolated posting error or a systemic internal control deficiency.",
         "",
-        f"#### Recommended Substantive Audit Procedures:",
-        f"1. **Document Inspection**: Inspect primary source documentation, signed invoices, payment vouchers, and vendor bank confirmations.",
+        "#### Recommended Substantive Audit Procedures:",
+        "1. **Document Inspection**: Inspect primary source documentation, signed invoices, payment vouchers, and vendor bank confirmations.",
         f"2. **Management Inquiry**: Issue written management inquiry regarding rationale for `{title}`.",
-        f"3. **Financial Statement Impact**: Quantify total potential misstatement and assess if adjustment journal entry is required."
+        "3. **Financial Statement Impact**: Quantify total potential misstatement and assess if adjustment journal entry is required."
     ]
 
     full_ai_explanation = "\n".join(explanation_lines)

@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import Dict, Any
 from backend.app.audit_engine.deterministic import DeterministicAuditEngine
 from backend.app.audit_engine.statistical import StatisticalAuditEngine
 from backend.app.audit_engine.local_ai import LocalAIAuditAssistant

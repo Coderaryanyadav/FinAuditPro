@@ -1,5 +1,4 @@
 import re
-import os
 import json
 import time
 import urllib.request
@@ -330,18 +329,18 @@ class BuiltinDeterministicAIProvider(BaseLocalAIProvider):
         start = time.time()
         
         response_text = (
-            f"**[ENGINE: DETERMINISTIC_RULE_ENGINE — Offline Fallback (Rule-Based Synthesis, Not Generative LLM)]**\n\n"
-            f"### Professional Audit Analysis & Evidence Evaluation (Offline Mode)\n\n"
-            f"**1. Audit Subject Matter Evaluation**:\n"
-            f"Analysis performed under ICAI Standards on Auditing (SA 200 / SA 315 / SA 500). "
-            f"Deterministic evaluation verifies transactional consistency, statutory thresholds, and mathematical reconciliation.\n\n"
-            f"**2. Key Risk Points & Statutory Provisions**:\n"
-            f"- Verification of Section 40A(3) cash payment ceilings (₹10,000 threshold).\n"
-            f"- Section 269ST compliance for high-value receipts (₹2,00,000 threshold).\n"
-            f"- GST ITC reconciliation against GSTR-2B eligible credits under Section 16(2)(aa).\n"
-            f"- Bank statement reconciliation against General Ledger cash/bank books.\n\n"
-            f"**3. Auditor Recommendation & Working Paper Note**:\n"
-            f"Obtain written management representation, verify corroborating source vouchers, and ensure appropriate disclosure in Form 3CD / CARO 2020."
+            "**[ENGINE: DETERMINISTIC_RULE_ENGINE — Offline Fallback (Rule-Based Synthesis, Not Generative LLM)]**\n\n"
+            "### Professional Audit Analysis & Evidence Evaluation (Offline Mode)\n\n"
+            "**1. Audit Subject Matter Evaluation**:\n"
+            "Analysis performed under ICAI Standards on Auditing (SA 200 / SA 315 / SA 500). "
+            "Deterministic evaluation verifies transactional consistency, statutory thresholds, and mathematical reconciliation.\n\n"
+            "**2. Key Risk Points & Statutory Provisions**:\n"
+            "- Verification of Section 40A(3) cash payment ceilings (₹10,000 threshold).\n"
+            "- Section 269ST compliance for high-value receipts (₹2,00,000 threshold).\n"
+            "- GST ITC reconciliation against GSTR-2B eligible credits under Section 16(2)(aa).\n"
+            "- Bank statement reconciliation against General Ledger cash/bank books.\n\n"
+            "**3. Auditor Recommendation & Working Paper Note**:\n"
+            "Obtain written management representation, verify corroborating source vouchers, and ensure appropriate disclosure in Form 3CD / CARO 2020."
         )
 
         lat = round((time.time() - start) * 1000, 1)
@@ -381,12 +380,12 @@ class BuiltinDeterministicAIProvider(BaseLocalAIProvider):
                 response_text += f"**Recommended Substantive Testing Procedure**:\n{guidance.get('audit_procedure')}\n"
         else:
             response_text = (
-                f"**[ENGINE NOTICE: Local AI Daemon Offline]**\n\n"
-                f"FinAuditPro is operating in **100% offline standalone mode** with the deterministic audit core active.\n\n"
-                f"To enable natural conversational Q&A and multi-turn inquiry:\n"
-                f"1. Start **LM Studio** on `http://localhost:1234` or **Ollama** on `http://localhost:11434`.\n"
-                f"2. Load recommended audit model: `qwen2.5:7b` or `llama3.2:3b`.\n"
-                f"3. You can still inspect all deterministic findings and run full reconciliations via the navigation sidebar."
+                "**[ENGINE NOTICE: Local AI Daemon Offline]**\n\n"
+                "FinAuditPro is operating in **100% offline standalone mode** with the deterministic audit core active.\n\n"
+                "To enable natural conversational Q&A and multi-turn inquiry:\n"
+                "1. Start **LM Studio** on `http://localhost:1234` or **Ollama** on `http://localhost:11434`.\n"
+                "2. Load recommended audit model: `qwen2.5:7b` or `llama3.2:3b`.\n"
+                "3. You can still inspect all deterministic findings and run full reconciliations via the navigation sidebar."
             )
 
         lat = round((time.time() - start) * 1000, 1)

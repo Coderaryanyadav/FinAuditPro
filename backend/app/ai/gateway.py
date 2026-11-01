@@ -2,7 +2,6 @@ from typing import Dict, Any, List, Optional
 from backend.app.services.local_ai_provider import (
     BaseLocalAIProvider,
     LocalAIModelManager,
-    LMStudioProvider,
     BuiltinDeterministicAIProvider
 )
 from backend.app.ai.context_builder import AIContextBoundary

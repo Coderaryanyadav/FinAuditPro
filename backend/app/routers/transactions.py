@@ -1,7 +1,7 @@
 import csv
 import io
-from fastapi import APIRouter, HTTPException, Query, Response, Depends
-from typing import List, Optional
+from fastapi import APIRouter, HTTPException, Response, Depends
+from typing import Optional
 from backend.app.auth import get_current_user, require_engagement_access
 from backend.app.database import get_db_connection
 from backend.app.services.general_ledger_analyzer import analyze_general_ledger

@@ -1,9 +1,7 @@
 import io
 import csv
-import json
-from datetime import datetime
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends, Query, Response
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Depends, Response
 from pydantic import BaseModel
 from backend.app.auth import get_current_user, require_engagement_access
 from backend.app.database import get_db_connection

@@ -1,12 +1,11 @@
 import os
-import shutil
 import json
 import uuid
 import logging
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends, Response
-from fastapi.responses import FileResponse, PlainTextResponse
+from fastapi.responses import FileResponse
 from backend.app.schemas import ColumnMappingRequest, ValidateMappingRequest
 from backend.app.auth import get_current_user, require_role, normalize_role
 from backend.app.database import get_db_connection

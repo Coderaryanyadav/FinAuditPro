@@ -3,13 +3,12 @@ import hashlib
 import io
 import json
 import os
-import shutil
 import sqlite3
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
-from fastapi.responses import FileResponse, Response, StreamingResponse
+from fastapi.responses import FileResponse, Response
 
 from backend.app.auth import get_current_user, require_role, require_engagement_access
 from backend.app.database import get_db_connection, get_db_path

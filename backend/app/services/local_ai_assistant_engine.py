@@ -14,12 +14,11 @@ Zero-Hallucination Constraint:
 import re
 import json
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 from backend.app.database import get_db_connection
 from backend.app.services.yoy_comparison_engine import run_yoy_comparison
 from backend.app.services.anomaly_detection_engine import detect_all_anomalies
 from backend.app.services.financial_statement_analysis_engine import run_financial_statement_analysis
-from backend.app.services.trial_balance_analyzer import analyze_trial_balance
 
 MANDATORY_DISCLAIMER = "AI-generated assistance. Verify findings against source records before making audit decisions."
 
@@ -35,9 +34,7 @@ from backend.app.services.assistant_intent import (
     INTENT_EXPLAIN_RECONCILIATION,
     INTENT_CREATE_AUDIT_OBSERVATION,
     INTENT_CASH_STATUTORY_LIMITS,
-    INTENT_LARGEST_TRANSACTIONS,
-    INTENT_GENERAL_AUDIT_QUERY,
-    ALL_INTENTS
+    INTENT_LARGEST_TRANSACTIONS
 )
 
 class LocalAIAssistantEngine:
@@ -281,7 +278,7 @@ The Hybrid AI Anomaly Engine analyzed **{len(self.transactions):,}** transaction
         for pat, count in sorted(patterns_count.items(), key=lambda x: x[1], reverse=True)[:5]:
             narrative += f"- **{pat}:** {count} occurrence(s)\n"
 
-        narrative += f"\n*Click on any transaction in the **Supporting Evidence** table below to inspect complete ledger, party, and voucher details.*"
+        narrative += "\n*Click on any transaction in the **Supporting Evidence** table below to inspect complete ledger, party, and voucher details.*"
 
         evidence = []
         source_txs = []
@@ -463,7 +460,7 @@ The Hybrid AI Anomaly Engine analyzed **{len(self.transactions):,}** transaction
         for r in reasons:
             narrative += f"- {r}\n"
 
-        narrative += f"""
+        narrative += """
 #### 🛠️ Recommended Substantive Procedure:
 1. Examine physical tax invoice, GRN, and authorized payment approval voucher.
 2. Confirm banking mode of payment (Account Payee Cheque / NEFT / RTGS) for Section 40A(3) compliance.
@@ -834,7 +831,7 @@ The audit engine identified **{len(ledger_risk_map)}** ledger account(s) that re
                 "reasons": uniq_reasons
             })
 
-        narrative += f"""
+        narrative += """
 #### 🔬 Audit Strategy:
 - Focus substantive voucher testing on the top flagged accounts.
 - Verify suspense clearing entries before final Trial Balance lock.
@@ -917,7 +914,7 @@ The audit engine identified **{len(ledger_risk_map)}** ledger account(s) that re
             narrative += f"- **Invoice / Ref {inv} ({party}):** Status: `{stat}` | Taxable Diff: ₹{diff:+,.2f} | Tax Diff: ₹{tax_diff:+,.2f}\n"
             evidence.append(item)
 
-        narrative += f"""
+        narrative += """
 #### 🛡️ Compliance Impact:
 - ITC Mismatches in GSTR-2B must be reconciled to prevent demand notices under Section 16(2)(aa) of CGST Act.
 - Invoices missing in Purchase Register require verification against physical goods receipts.

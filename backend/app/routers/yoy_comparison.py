@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, Query, Response
-from typing import Optional, Dict, Any
+from typing import Optional
 from backend.app.auth import get_current_user, require_engagement_access
 from backend.app.schemas import YoYCommentRequest, YoYExplainRequest
 from backend.app.services.yoy_comparison_engine import (

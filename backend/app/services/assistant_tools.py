@@ -13,7 +13,6 @@ import json
 import sqlite3
 from typing import Dict, Any, List, Optional
 from backend.app.database import get_db_path
-from backend.app.services.local_ai_provider import sanitize_audit_text
 
 # =========================================================================
 # Statutory Knowledge Repository (ICAI SAs, Income Tax, GST, CARO 2020)

@@ -1,7 +1,6 @@
 import os
-import json
 from datetime import datetime
-from typing import List, Dict, Any, Optional, Union
+from typing import List, Any
 
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
@@ -618,7 +617,7 @@ def generate_audit_report_pdf(
                 story.append(Paragraph("<i>Prior year comparative records not available for baseline YoY calculation.</i>", st['Body']))
                 story.append(Spacer(1, 10))
         except Exception as e:
-            story.append(Paragraph(f"<i>Comparative analysis note: Baseline figures established from active period.</i>", st['Body']))
+            story.append(Paragraph("<i>Comparative analysis note: Baseline figures established from active period.</i>", st['Body']))
             story.append(Spacer(1, 10))
 
     # =========================================================================

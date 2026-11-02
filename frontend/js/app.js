@@ -5837,7 +5837,7 @@ async function renderTrialBalance() {
                     <td>
                       <div style="display: flex; gap: 4px; flex-wrap: wrap; max-height: 70px; overflow-y: auto;">
                         ${(ex.affected_accounts || []).slice(0, 4).map(acc => `
-                          <span class="demo-chip" style="font-size: 10.5px; padding: 2px 6px; cursor: pointer;" onclick="viewLedgerDrilldown('${escapeHtml(acc).replace(/'/g, "\\'")}')" title="Click to Inspect Ledger">
+                          <span class="demo-chip" style="font-size: 10.5px; padding: 2px 6px; cursor: pointer;" onclick="viewLedgerDrilldown(decodeURIComponent('${encodeURIComponent(acc)}'))" title="Click to Inspect Ledger">
                             ${escapeHtml(acc)}
                           </span>
                         `).join('')}
@@ -5852,11 +5852,11 @@ async function renderTrialBalance() {
                     <td class="text-center">
                       <div style="display: flex; flex-direction: column; gap: 4px;">
                         ${(ex.affected_accounts && ex.affected_accounts.length > 0) ? `
-                          <button class="btn btn-sm btn-secondary" style="font-size: 11px; padding: 3px 6px;" onclick="viewLedgerDrilldown('${escapeHtml(ex.affected_accounts[0]).replace(/'/g, "\\'")}')">
+                          <button class="btn btn-sm btn-secondary" style="font-size: 11px; padding: 3px 6px;" onclick="viewLedgerDrilldown(decodeURIComponent('${encodeURIComponent(ex.affected_accounts[0])}'))">
                             ${ICONS.search} Inspect Ledger
                           </button>
                         ` : ''}
-                        <button class="btn btn-sm btn-secondary" style="font-size: 10.5px; padding: 2px 6px; color: var(--primary);" onclick='openTBExceptionAIExplanation(${JSON.stringify(JSON.stringify(ex))})'>
+                        <button class="btn btn-sm btn-secondary" style="font-size: 10.5px; padding: 2px 6px; color: var(--primary);" onclick="openTBExceptionAIExplanation(decodeURIComponent('${encodeURIComponent(JSON.stringify(ex))}'))">
                           ${ICONS.fileText} Explain Movement
                         </button>
                       </div>
@@ -5917,7 +5917,7 @@ async function renderTrialBalance() {
                     </td>
                     <td><span class="badge badge-medium" style="font-size: 11px;">${escapeHtml(l.account_group)}</span></td>
                     <td class="text-right font-mono" style="font-size: 12px; color: var(--text-secondary);">
-                      ${l.opening_balance !== 0 ? formatINR(l.opening_balance) : '0.00'}
+                      ${formatINR(l.opening_balance || 0)}
                     </td>
                     <td class="text-right font-mono font-bold" style="font-size: 12px; color: var(--primary);">
                       ${formatINR(l.total_debit)}
@@ -5933,7 +5933,7 @@ async function renderTrialBalance() {
                     </td>
                     <td class="text-center font-mono" style="font-size: 12px;">${l.transaction_count}</td>
                     <td class="text-center">
-                      <button class="btn btn-sm btn-secondary" style="font-size: 11.5px; padding: 3px 8px;" onclick="viewLedgerDrilldown('${escapeHtml(l.ledger).replace(/'/g, "\\'")}')">
+                      <button class="btn btn-sm btn-secondary" style="font-size: 11.5px; padding: 3px 8px;" onclick="viewLedgerDrilldown(decodeURIComponent('${encodeURIComponent(l.ledger)}'))">
                         ${ICONS.search} Drilldown
                       </button>
                     </td>
@@ -5947,11 +5947,11 @@ async function renderTrialBalance() {
                 <td class="text-right font-mono" style="color: var(--text-secondary);">${formatINR(tb.grand_opening_debit || 0.0)}</td>
                 <td class="text-right font-mono" style="color: var(--primary); font-size: 14px;">${formatINR(tb.grand_total_debit)}</td>
                 <td class="text-right font-mono" style="color: #059669; font-size: 14px;">${formatINR(tb.grand_total_credit)}</td>
-                <td class="text-right font-mono" colspan="2" style="color: ${isBalanced ? '#059669' : '#dc2626'}; font-size: 14px;">
-                  Diff: ${formatINR(diff)}
-                </td>
-                <td colspan="2" class="text-center">
-                  ${isBalanced ? '<span class="badge badge-resolved">TALLIED</span>' : '<span class="badge badge-critical">MISMATCH</span>'}
+                <td class="text-right font-mono" style="color: #1e293b; font-size: 13px;">${formatINR(accounts.reduce((s, a) => s + (a.closing_debit || 0), 0))}</td>
+                <td class="text-right font-mono" style="color: #1e293b; font-size: 13px;">${formatINR(accounts.reduce((s, a) => s + (a.closing_credit || 0), 0))}</td>
+                <td class="text-center font-mono" style="font-size: 13px;">${accounts.reduce((s, a) => s + (a.transaction_count || 0), 0)}</td>
+                <td class="text-center">
+                  ${isBalanced ? '<span class="badge badge-resolved">TALLIED</span>' : `<span class="badge badge-critical" title="Discrepancy: ${formatINR(diff)}">MISMATCH (${formatINR(diff)})</span>`}
                 </td>
               </tr>
             </tfoot>
@@ -6052,68 +6052,92 @@ async function openTBExceptionAIExplanation(exJsonStr) {
 }
 
 async function viewLedgerDrilldown(ledgerName) {
-  const drill = await FinAuditAPI.getLedgerDrilldown(state.currentEngagementId, ledgerName);
-
   const drawerHeader = document.getElementById("drawer-title");
   const drawerBody = document.getElementById("drawer-content");
+  const overlay = document.getElementById("drawer-overlay");
+  const drawer = document.getElementById("evidence-drawer");
 
-  drawerHeader.innerText = `Ledger Statement: ${ledgerName}`;
-  drawerBody.innerHTML = `
-    <div style="margin-bottom: 14px; background: var(--bg-app); padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
-      <div>
-        <div style="font-size: 11px; color: var(--text-muted);">TOTAL TRANSACTIONS</div>
-        <div style="font-size: 14px; font-weight: 700; color: var(--text-main);">${drill.total_transactions} vouchers</div>
+  if (drawerHeader) drawerHeader.innerText = `Ledger Statement: ${ledgerName}`;
+  if (drawerBody) {
+    drawerBody.innerHTML = `
+      <div style="padding: 40px; text-align: center; color: var(--text-muted);">
+        <div style="display: inline-block; width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px;"></div>
+        <div style="font-size: 13px; font-weight: 600; color: var(--text-main);">Loading ledger vouchers...</div>
+        <div style="font-size: 11.5px; margin-top: 4px;">Fetching complete statement for ${escapeHtml(ledgerName)}</div>
       </div>
-      <div>
-        <div style="font-size: 11px; color: var(--text-muted);">TOTAL DEBIT</div>
-        <div style="font-size: 14px; font-weight: 700; color: var(--primary); font-family: monospace;">${formatINR(drill.total_debit || 0)}</div>
-      </div>
-      <div>
-        <div style="font-size: 11px; color: var(--text-muted);">TOTAL CREDIT</div>
-        <div style="font-size: 14px; font-weight: 700; color: #059669; font-family: monospace;">${formatINR(drill.total_credit || 0)}</div>
-      </div>
-      <div>
-        <div style="font-size: 11px; color: var(--text-muted);">NET BALANCE</div>
-        <div style="font-size: 14px; font-weight: 800; color: var(--text-main); font-family: monospace;">${formatINR(drill.net_balance)}</div>
-      </div>
-    </div>
+    `;
+  }
+  if (overlay) overlay.style.display = "block";
+  if (drawer) drawer.classList.add("open");
 
-    ${drill.transactions.length === 0 ? `
-      <div style="padding: 30px; text-align: center; color: var(--text-muted);">No underlying transactions found for this ledger.</div>
-    ` : `
-      <div class="table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th style="width: 85px;">Date</th>
-              <th style="width: 85px;">Voucher</th>
-              <th>Party / Narration</th>
-              <th class="text-right" style="width: 95px;">Debit</th>
-              <th class="text-right" style="width: 95px;">Credit</th>
-              <th class="text-right" style="width: 105px;">Running Bal</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${drill.transactions.map(t => `
-              <tr>
-                <td class="font-mono" style="font-size: 11px;">${t.date || '—'}</td>
-                <td class="font-mono font-bold" style="font-size: 11px;">${t.voucher_no || '—'}</td>
-                <td style="max-width: 180px; overflow: hidden; text-overflow: ellipsis;">
-                  <b style="font-size: 12px; color: var(--text-main);">${escapeHtml(t.party_name || '')}</b><br/>
-                  <span style="font-size: 11px; color: var(--text-muted);">${escapeHtml(t.description || '')}</span>
-                </td>
-                <td class="text-right font-mono" style="font-size: 11.5px; color: var(--primary);">${t.debit > 0 ? formatINR(t.debit) : '—'}</td>
-                <td class="text-right font-mono" style="font-size: 11.5px; color: #059669;">${t.credit > 0 ? formatINR(t.credit) : '—'}</td>
-                <td class="text-right font-mono font-bold" style="font-size: 11.5px; color: var(--text-main);">${formatINR(t.running_balance)}</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-    `}
-  `;
-  document.getElementById("drawer-overlay").style.display = "block";
+  try {
+    const drill = await FinAuditAPI.getLedgerDrilldown(state.currentEngagementId, ledgerName);
+    if (!drill) throw new Error("No data returned for ledger");
+
+    if (drawerBody) {
+      drawerBody.innerHTML = `
+        <div style="margin-bottom: 14px; background: var(--bg-app); padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 11px; color: var(--text-muted);">TOTAL TRANSACTIONS</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-main);">${drill.total_transactions || 0} vouchers</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: var(--text-muted);">TOTAL DEBIT</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--primary); font-family: monospace;">${formatINR(drill.total_debit || 0)}</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: var(--text-muted);">TOTAL CREDIT</div>
+            <div style="font-size: 14px; font-weight: 700; color: #059669; font-family: monospace;">${formatINR(drill.total_credit || 0)}</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: var(--text-muted);">NET BALANCE</div>
+            <div style="font-size: 14px; font-weight: 800; color: var(--text-main); font-family: monospace;">${formatINR(drill.net_balance || 0)}</div>
+          </div>
+        </div>
+
+        ${(!drill.transactions || drill.transactions.length === 0) ? `
+          <div style="padding: 30px; text-align: center; color: var(--text-muted);">No underlying transactions found for this ledger.</div>
+        ` : `
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 85px;">Date</th>
+                  <th style="width: 85px;">Voucher</th>
+                  <th>Party / Narration</th>
+                  <th class="text-right" style="width: 95px;">Debit</th>
+                  <th class="text-right" style="width: 95px;">Credit</th>
+                  <th class="text-right" style="width: 105px;">Running Bal</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${drill.transactions.map(t => `
+                  <tr>
+                    <td class="font-mono" style="font-size: 11px;">${t.date || '—'}</td>
+                    <td class="font-mono font-bold" style="font-size: 11px;">${t.voucher_no || '—'}</td>
+                    <td style="max-width: 180px; overflow: hidden; text-overflow: ellipsis;">
+                      <b style="font-size: 12px; color: var(--text-main);">${escapeHtml(t.party_name || '')}</b><br/>
+                      <span style="font-size: 11px; color: var(--text-muted);">${escapeHtml(t.description || '')}</span>
+                    </td>
+                    <td class="text-right font-mono" style="font-size: 11.5px; color: var(--primary);">${t.debit > 0 ? formatINR(t.debit) : '—'}</td>
+                    <td class="text-right font-mono" style="font-size: 11.5px; color: #059669;">${t.credit > 0 ? formatINR(t.credit) : '—'}</td>
+                    <td class="text-right font-mono font-bold" style="font-size: 11.5px; color: var(--text-main);">${formatINR(t.running_balance || 0)}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+        `}
+      `;
+    }
+  } catch (err) {
+    if (drawerBody) drawerBody.innerHTML = renderErrorBanner(err, `Unable to Load Statement for ${ledgerName}`);
+  }
 }
+window.viewLedgerDrilldown = viewLedgerDrilldown;
+window.openTBExceptionAIExplanation = openTBExceptionAIExplanation;
+window.applyTBSearch = applyTBSearch;
+window.filterTBGrid = filterTBGrid;
 // ============================================================================
 // GENERAL LEDGER ANALYSIS & SUBSTANTIVE TESTING MODULE
 // ============================================================================
@@ -9663,6 +9687,8 @@ async function renderChecklist() {
   } catch (err) {
     console.error("Failed to render checklist:", err);
     container.innerHTML = `
+      <div class="card" style="paddin
+... [truncated for diff preview]
       <div class="card" style="padding: 30px; text-align: center; color: #dc2626;">
         <h3>Failed to Load Audit Checklist</h3>
         <p style="margin-top: 8px; color: var(--text-muted);">${err.message || 'An error occurred while fetching checklist procedures.'}</p>

@@ -3058,6 +3058,33 @@ function autoFillEngagementDates() {
   }
 }
 
+async function handleCreateEngagementSubmit(event) {
+  event.preventDefault();
+  const client_id = parseInt(document.getElementById("eng-client-id")?.value);
+  const title = (document.getElementById("eng-title")?.value || "").trim();
+  const audit_type = document.getElementById("eng-audit-type")?.value || "Statutory Audit";
+  const financial_year = (document.getElementById("eng-fy")?.value || "").trim();
+  const period_start = document.getElementById("eng-start-date")?.value || document.getElementById("eng-start")?.value || null;
+  const period_end = document.getElementById("eng-end-date")?.value || document.getElementById("eng-end")?.value || null;
+  const lead_auditor_id = parseInt(document.getElementById("eng-lead-auditor")?.value) || null;
+  const staffVal = document.getElementById("eng-assigned-staff")?.value;
+  const assigned_staff_id = staffVal ? parseInt(staffVal) : null;
+  const notes = (document.getElementById("eng-notes")?.value || "").trim();
+
+  try {
+    const res = await FinAuditAPI.createEngagement({
+      client_id, title, audit_type, financial_year, period_start, period_end, lead_auditor_id, assigned_staff_id, notes
+    });
+    notifySuccess(`Engagement '${title}' created successfully!`);
+    closeModal("engagement-modal");
+    closeModal("eng-modal");
+    await loadEngagements();
+    selectEngagementAndGo(res.id);
+  } catch (err) {
+    notifyError("Error creating engagement: " + err.message);
+  }
+}
+
 // Edit Engagement Modal
 async function openEditEngagementModal(engId) {
   try {
@@ -3194,6 +3221,7 @@ async function handleEngagementFormSubmit(event, engId) {
       state.currentEngagementId = res.id;
     }
     closeModal("engagement-modal");
+    closeModal("edit-eng-modal");
     await loadEngagements();
     await updateActiveEngagement();
     renderEngagements();
@@ -3201,6 +3229,7 @@ async function handleEngagementFormSubmit(event, engId) {
     notifyError("Operation failed: " + err.message);
   }
 }
+const handleEditEngagementSubmit = handleEngagementFormSubmit;
 
 // Duplicate / Clone Engagement for New Financial Year Modal
 async function openDuplicateEngagementModal(sourceEngId) {
@@ -5837,7 +5866,7 @@ async function renderTrialBalance() {
                     <td>
                       <div style="display: flex; gap: 4px; flex-wrap: wrap; max-height: 70px; overflow-y: auto;">
                         ${(ex.affected_accounts || []).slice(0, 4).map(acc => `
-                          <span class="demo-chip" style="font-size: 10.5px; padding: 2px 6px; cursor: pointer;" onclick="viewLedgerDrilldown(decodeURIComponent('${encodeURIComponent(acc)}'))" title="Click to Inspect Ledger">
+                          <span class="demo-chip" style="font-size: 10.5px; padding: 2px 6px; cursor: pointer;" onclick="viewLedgerDrilldown(decodeURIComponent('${encodeURIComponent(acc).replace(/'/g, "%27")}'))" title="Click to Inspect Ledger">
                             ${escapeHtml(acc)}
                           </span>
                         `).join('')}
@@ -5852,11 +5881,11 @@ async function renderTrialBalance() {
                     <td class="text-center">
                       <div style="display: flex; flex-direction: column; gap: 4px;">
                         ${(ex.affected_accounts && ex.affected_accounts.length > 0) ? `
-                          <button class="btn btn-sm btn-secondary" style="font-size: 11px; padding: 3px 6px;" onclick="viewLedgerDrilldown(decodeURIComponent('${encodeURIComponent(ex.affected_accounts[0])}'))">
+                          <button class="btn btn-sm btn-secondary" style="font-size: 11px; padding: 3px 6px;" onclick="viewLedgerDrilldown(decodeURIComponent('${encodeURIComponent(ex.affected_accounts[0]).replace(/'/g, "%27")}'))">
                             ${ICONS.search} Inspect Ledger
                           </button>
                         ` : ''}
-                        <button class="btn btn-sm btn-secondary" style="font-size: 10.5px; padding: 2px 6px; color: var(--primary);" onclick="openTBExceptionAIExplanation(decodeURIComponent('${encodeURIComponent(JSON.stringify(ex))}'))">
+                        <button class="btn btn-sm btn-secondary" style="font-size: 10.5px; padding: 2px 6px; color: var(--primary);" onclick="openTBExceptionAIExplanation(decodeURIComponent('${encodeURIComponent(JSON.stringify(ex)).replace(/'/g, "%27")}'))">
                           ${ICONS.fileText} Explain Movement
                         </button>
                       </div>
@@ -5933,7 +5962,7 @@ async function renderTrialBalance() {
                     </td>
                     <td class="text-center font-mono" style="font-size: 12px;">${l.transaction_count}</td>
                     <td class="text-center">
-                      <button class="btn btn-sm btn-secondary" style="font-size: 11.5px; padding: 3px 8px;" onclick="viewLedgerDrilldown(decodeURIComponent('${encodeURIComponent(l.ledger)}'))">
+                      <button class="btn btn-sm btn-secondary" style="font-size: 11.5px; padding: 3px 8px;" onclick="viewLedgerDrilldown(decodeURIComponent('${encodeURIComponent(l.ledger).replace(/'/g, "%27")}'))">
                         ${ICONS.search} Drilldown
                       </button>
                     </td>
@@ -12234,126 +12263,7 @@ async function triggerGeneratePDFReport(reportType = "complete_audit_analysis") 
 // =========================================================
 // 14. CLIENT MANAGEMENT MODULE
 // =========================================================
-async function renderClients() {
-  const container = document.getElementById("content-container");
-  container.innerHTML = `<div style="padding: 20px;">Loading client database...</div>`;
-
-  try {
-    const clients = await FinAuditAPI.getClients();
-    const canCreate = ["Admin", "Auditor"].includes(state.currentUser?.role);
-
-    container.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <div>
-          <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main);">Client Master Database</h2>
-          <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
-            Corporate entities, statutory PAN/GSTIN registration, industry categories, and historical audit records
-          </div>
-        </div>
-        ${canCreate ? `
-          <button class="btn btn-primary" onclick="openCreateClientModal()">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            + Add New Client Master
-          </button>
-        ` : ''}
-      </div>
-
-      <!-- Filter / Search Bar -->
-      <div class="card" style="padding: 14px 18px; margin-bottom: 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 240px;">
-          <input type="text" id="client-search-input" class="form-control" placeholder="Search by Client Name, PAN, GSTIN, Contact Person, Industry..." onkeyup="filterClientsLive()">
-        </div>
-        <div style="width: 200px;">
-          <select id="client-entity-filter" class="form-control" onchange="filterClientsLive()">
-            <option value="All">All Entity Types</option>
-            <option value="Private Limited Company">Private Limited Company</option>
-            <option value="Public Limited Company">Public Limited Company</option>
-            <option value="LLP">LLP</option>
-            <option value="Partnership">Partnership</option>
-            <option value="Proprietorship">Proprietorship</option>
-            <option value="Trust">Trust</option>
-            <option value="Society">Society</option>
-            <option value="NGO">NGO</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Registered Corporate Clients (${clients.length})</div>
-        </div>
-        <div class="table-container">
-          <table class="data-table" id="clients-table">
-            <thead>
-              <tr>
-                <th>Client Name & Entity Type</th>
-                <th>PAN</th>
-                <th>GSTIN</th>
-                <th>Industry</th>
-                <th>Contact Person & Email</th>
-                <th>Financial Years</th>
-                <th class="text-center">Engagements</th>
-                <th class="text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${clients.map(c => `
-                <tr data-name="${(c.name || '').toLowerCase()}" data-pan="${(c.pan || '').toLowerCase()}" data-gstin="${(c.gstin || '').toLowerCase()}" data-entity="${c.entity_type || ''}" data-industry="${c.industry || ''}">
-                  <td>
-                    <div style="font-weight: 700; color: var(--text-main); font-size: 13.5px;">${c.name}</div>
-                    <span class="badge badge-medium" style="margin-top: 2px;">${c.entity_type || 'Private Limited Company'}</span>
-                  </td>
-                  <td class="font-mono font-bold" style="color: var(--primary);">${c.pan || '—'}</td>
-                  <td class="font-mono" style="font-size: 11.5px;">${c.gstin || '—'}</td>
-                  <td><span class="badge badge-open">${c.industry || 'General'}</span></td>
-                  <td>
-                    <b>${c.contact_person || '—'}</b><br/>
-                    <span style="font-size: 11px; color: var(--text-muted);">${c.email || ''} ${c.phone ? `(${c.phone})` : ''}</span>
-                  </td>
-                  <td>
-                    <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                      ${c.financial_years && c.financial_years.length > 0 ? c.financial_years.map(fy => `
-                        <span class="badge badge-role-auditor font-mono" style="font-size: 10px;">${fy}</span>
-                      `).join("") : '<span style="color: var(--text-muted); font-size: 11px;">None</span>'}
-                    </div>
-                  </td>
-                  <td class="text-center font-bold" style="font-size: 13px;">${c.engagements_count || 0}</td>
-                  <td class="text-center">
-                    <div style="display: flex; gap: 6px; justify-content: center;">
-                      <button class="btn btn-sm btn-secondary" onclick="openClientHistoryDrawer(${c.id})">
-                        ${ICONS.calendar} Multi-Year Timeline
-                      </button>
-                      ${canCreate ? `
-                        <button class="btn btn-sm btn-secondary" onclick="openEditClientModal(${c.id})">
-                          Edit
-                        </button>
-                      ` : ''}
-                    </div>
-                  </td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-  } catch (err) {
-    container.innerHTML = renderErrorBanner(err, "Unable to Load Client Directory");
-  }
-}
-
-function filterClientsLive() {
-  const query = document.getElementById("client-search-input").value.toLowerCase().trim();
-  const entity = document.getElementById("client-entity-filter").value;
-  const rows = document.querySelectorAll("#clients-table tbody tr");
-
-  rows.forEach(r => {
-    const textMatch = !query || r.innerText.toLowerCase().includes(query);
-    const entityMatch = entity === "All" || r.dataset.entity === entity;
-    r.style.display = (textMatch && entityMatch) ? "" : "none";
-  });
-}
+// (renderClients is canonically defined in Section 2, line 2534)
 
 function openCreateClientModal() {
   const modalHtml = `
@@ -13793,7 +13703,7 @@ function renderSignificantMovementsHtml(data, cyYear, pyYear) {
                   <td style="text-align: center;">
                     <button class="btn btn-sm ${hasExpl ? 'btn-secondary' : (isSig ? 'btn-primary' : 'btn-secondary')}" 
                             style="font-size: 11px; padding: 4px 8px;"
-                            onclick="openFSExplanationModal('${c.item_key}', '${c.metric_name.replace(/'/g, "\\'")}', ${c.current_year_value}, ${c.previous_year_value}, ${c.absolute_difference}, ${c.percentage_difference}, '${c.unit}')">
+                            onclick="openFSExplanationModal('${c.item_key}', decodeURIComponent('${encodeURIComponent(c.metric_name).replace(/'/g, "%27")}'), ${c.current_year_value}, ${c.previous_year_value}, ${c.absolute_difference}, ${c.percentage_difference}, '${c.unit}')">
                       ${hasExpl ? 'Edit Note' : (isSig ? 'Enter Explanation' : 'Add Note')}
                     </button>
                     ${hasExpl ? `<div style="font-size: 10px; color: #059669; font-weight: 600; margin-top: 2px;">Documented</div>` : ''}
@@ -15250,7 +15160,7 @@ function renderYoYTableRow(row, idx) {
       </td>
       <td style="padding: 10px 14px; text-align: center;">
         <div style="display: flex; gap: 4px; justify-content: center;">
-          <button class="btn btn-sm btn-secondary" style="padding: 3px 6px; font-size: 11px;" title="Document Working Paper Comment" onclick="openYoYCommentModal('${row.item_key}', '${row.category}', '${row.account_name.replace(/'/g, "\\'")}', '${row.status}', '${(row.auditor_comment || '').replace(/'/g, "\\'")}')">${ICONS.edit}</button>
+          <button class="btn btn-sm btn-secondary" style="padding: 3px 6px; font-size: 11px;" title="Document Working Paper Comment" onclick="openYoYCommentModal(decodeURIComponent('${encodeURIComponent(row.item_key).replace(/'/g, "%27")}'), decodeURIComponent('${encodeURIComponent(row.category).replace(/'/g, "%27")}'), decodeURIComponent('${encodeURIComponent(row.account_name).replace(/'/g, "%27")}'), decodeURIComponent('${encodeURIComponent(row.status).replace(/'/g, "%27")}'), decodeURIComponent('${encodeURIComponent(row.auditor_comment || '').replace(/'/g, "%27")}'))">${ICONS.edit}</button>
           <button class="btn btn-sm btn-secondary" style="padding: 3px 6px; font-size: 11px;" title="Analyze Movement Driver" onclick="triggerYoYFactualAI('${row.item_key}')">${ICONS.fileText}</button>
         </div>
       </td>

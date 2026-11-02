@@ -899,7 +899,11 @@ def link_uploaded_file_to_wp(
     source_path = Path(file_row["file_path"])
     if not source_path.is_absolute():
         project_root = Path(__file__).resolve().parent.parent.parent.parent
-        source_path = (project_root / file_row["file_path"]).resolve()
+        candidate_path = (project_root / file_row["file_path"]).resolve()
+        if candidate_path.exists():
+            source_path = candidate_path
+        else:
+            source_path = (project_root / "backend" / file_row["file_path"]).resolve()
 
     if not source_path.exists():
         conn.close()

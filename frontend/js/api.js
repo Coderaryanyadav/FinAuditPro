@@ -718,22 +718,6 @@ class FinAuditAPI {
     });
   }
 
-  static getFindings(engagementId, filters = {}) {
-    const query = new URLSearchParams({ ...filters }).toString();
-    return this.request(`/api/findings/${engagementId}${query ? `?${query}` : ""}`);
-  }
-
-  static getFindingDetail(findingId) {
-    return this.request(`/api/findings/detail/${findingId}`);
-  }
-
-  static updateFinding(findingId, data) {
-    return this.request(`/api/findings/detail/${findingId}`, {
-      method: "PUT",
-      body: JSON.stringify(data)
-    });
-  }
-
   // --- Local AI Assistant ---
   static queryAssistant(arg1, query = null, findingId = null, transactionId = null, voucherNo = null) {
     let payload = {};
@@ -894,15 +878,14 @@ class FinAuditAPI {
 
   // --- Working Papers (SA 230 Audit Documentation) ---
   static getWorkingPapers(engagementId, filters = {}) {
-    let url = `/api/working-papers/${engagementId}?`;
-    const params = [];
-    if (filters.area && filters.area !== "All") params.push(`area=${encodeURIComponent(filters.area)}`);
-    if (filters.status && filters.status !== "All") params.push(`status=${encodeURIComponent(filters.status)}`);
-    if (filters.search) params.push(`search=${encodeURIComponent(filters.search)}`);
-    if (filters.prepared_by) params.push(`prepared_by=${encodeURIComponent(filters.prepared_by)}`);
-    if (filters.reviewed_by) params.push(`reviewed_by=${encodeURIComponent(filters.reviewed_by)}`);
-    url += params.join("&");
-    return this.request(url);
+    const params = new URLSearchParams();
+    if (filters.area && filters.area !== "All") params.append("area", filters.area);
+    if (filters.status && filters.status !== "All") params.append("status", filters.status);
+    if (filters.search) params.append("search", filters.search);
+    if (filters.prepared_by) params.append("prepared_by", filters.prepared_by);
+    if (filters.reviewed_by) params.append("reviewed_by", filters.reviewed_by);
+    const qs = params.toString();
+    return this.request(`/api/working-papers/${engagementId}${qs ? `?${qs}` : ""}`);
   }
 
   static getWorkingPaperDetail(wpId) {
@@ -924,21 +907,10 @@ class FinAuditAPI {
   }
 
   static async uploadWorkingPaperDocument(wpId, formData) {
-    const token = localStorage.getItem("finaudit_token");
-    const headers = {};
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-    const response = await fetch(`/api/working-papers/${wpId}/upload-document`, {
+    return this.request(`/api/working-papers/${wpId}/upload-document`, {
       method: "POST",
-      headers: headers,
       body: formData
     });
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.detail || "Failed to upload supporting document.");
-    }
-    return response.json();
   }
 
   static deleteWorkingPaperDocument(wpId, docId) {
@@ -1092,23 +1064,10 @@ class FinAuditAPI {
     const formData = new FormData();
     formData.append("file", file);
 
-    const token = this.getToken();
-    const headers = {};
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
-    const res = await fetch(`${this.BASE_URL}/api/audit-trail/backup/restore-upload`, {
+    return this.request("/api/audit-trail/backup/restore-upload", {
       method: "POST",
-      headers: headers,
       body: formData
     });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: "Database restore failed" }));
-      throw new Error(err.detail || "Database restore failed");
-    }
-    return res.json();
   }
 
   // --- Settings & Configuration ---
@@ -1188,19 +1147,30 @@ class FinAuditAPI {
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
-    const res = await fetch(endpoint, { headers });
+    const fullUrl = endpoint.startsWith("http") ? endpoint : `${API_BASE}${endpoint}`;
+    const res = await fetch(fullUrl, { headers });
     if (!res.ok) {
-      throw new Error(`Download failed with status ${res.status}`);
+      let msg = `Download failed with status ${res.status}`;
+      try {
+        const err = await res.json();
+        if (err && err.detail) {
+          msg = typeof err.detail === "string" ? err.detail : JSON.stringify(err.detail);
+        }
+      } catch (e) {}
+      throw new Error(msg);
     }
     const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+    if (typeof window !== "undefined" && typeof document !== "undefined") {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }
+    return blob;
   }
 }
 

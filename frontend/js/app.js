@@ -3656,7 +3656,7 @@ async function renderImportData() {
                               Error Log
                             </a>
                           ` : ''}
-                          <button class="btn btn-sm btn-secondary" style="color: #dc2626; font-size: 11px; padding: 4px 8px;" onclick="deleteImportedFile(${f.id}, '${escapeHtml(f.file_name || f.filename)}')" title="Delete Dataset & Transactions">
+                          <button class="btn btn-sm btn-secondary" style="color: #dc2626; font-size: 11px; padding: 4px 8px;" onclick="deleteImportedFile(${f.id}, decodeURIComponent('${encodeURIComponent(f.file_name || f.filename || '').replace(/'/g, "%27")}'))" title="Delete Dataset & Transactions">
                             ${ICONS.trash || '🗑️'}
                           </button>
                         </div>
@@ -7020,7 +7020,7 @@ function renderGLAccountsTab(container) {
                     `}
                   </td>
                   <td class="text-center">
-                    <button class="btn btn-sm btn-secondary" style="font-size: 11px; padding: 3px 8px;" onclick="filterByLedger('${escapeHtml(a.name)}')">
+                    <button class="btn btn-sm btn-secondary" style="font-size: 11px; padding: 3px 8px;" onclick="filterByLedger(decodeURIComponent('${encodeURIComponent(a.name || '').replace(/'/g, "%27")}'))">
                       View Ledger →
                     </button>
                   </td>
@@ -7893,7 +7893,7 @@ async function viewGSTReconciliationDetails(reconId) {
                           <button class="btn btn-sm btn-secondary" style="padding: 2px 6px; font-size: 10.5px; color: #d97706;" onclick="handleGSTItemAction(${reconId}, ${itm.id}, 'Marked for review')" title="Mark for review">
                             Review
                           </button>
-                          <button class="btn btn-sm btn-secondary" style="padding: 2px 6px; font-size: 10.5px;" onclick="openGSTCommentModal(${reconId}, ${itm.id}, '${escapeHtml(itm.status || 'Suggested')}', '${escapeHtml(itm.notes || '')}')" title="Add working-paper comment">
+                          <button class="btn btn-sm btn-secondary" style="padding: 2px 6px; font-size: 10.5px;" onclick="openGSTCommentModal(${reconId}, ${itm.id}, '${escapeHtml(itm.status || 'Suggested')}', decodeURIComponent('${encodeURIComponent(itm.notes || '').replace(/'/g, "%27")}'))" title="Add working-paper comment">
                             ${ICONS.edit}
                           </button>
                         </div>
@@ -8526,7 +8526,7 @@ async function viewSalesPurchaseReconDetails(reconId) {
                           <button class="btn btn-sm btn-secondary" style="padding: 2px 6px; font-size: 10.5px; color: #d97706;" onclick="handleSPItemAction(${reconId}, ${itm.id}, 'Marked for review')" title="Mark for review">
                             Review
                           </button>
-                          <button class="btn btn-sm btn-secondary" style="padding: 2px 6px; font-size: 10.5px;" onclick="openSPCommentModal(${reconId}, ${itm.id}, '${escapeHtml(itm.status || 'Suggested')}', '${escapeHtml(itm.notes || '')}')" title="Add working-paper comment">
+                          <button class="btn btn-sm btn-secondary" style="padding: 2px 6px; font-size: 10.5px;" onclick="openSPCommentModal(${reconId}, ${itm.id}, '${escapeHtml(itm.status || 'Suggested')}', decodeURIComponent('${encodeURIComponent(itm.notes || '').replace(/'/g, "%27")}'))" title="Add working-paper comment">
                             ${ICONS.edit}
                           </button>
                         </div>
@@ -10390,7 +10390,7 @@ async function renderWorkingPapers() {
                     <td>
                       <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
                         ${attachedCount > 0 ? (w.attached_files || []).map(f => `
-                          <button class="wp-file-chip-btn" onclick="event.stopPropagation(); openWpDocumentPreviewModal(${w.id}, '${escapeHtml(f.id || f.file_name)}', '${escapeHtml(f.name)}')" title="Click to inspect '${escapeHtml(f.name)}' data in Tabular Format">
+                          <button class="wp-file-chip-btn" onclick="event.stopPropagation(); openWpDocumentPreviewModal(${w.id}, decodeURIComponent('${encodeURIComponent(f.id || f.file_name).replace(/'/g, "%27")}'), decodeURIComponent('${encodeURIComponent(f.name).replace(/'/g, "%27")}'))" title="Click to inspect '${escapeHtml(f.name)}' data in Tabular Format">
                             <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             <span class="file-chip-name">${escapeHtml(f.name)}</span>
                             <span class="file-chip-size">${escapeHtml(f.size_display || '')}</span>
@@ -10425,11 +10425,11 @@ async function renderWorkingPapers() {
                           Open
                         </button>
                         ${w.status !== 'Reviewed' ? `
-                          <button class="btn btn-success btn-sm" onclick="openReviewWorkingPaperModal(${w.id}, '${escapeHtml(w.wp_reference)}')" title="Mark as Reviewed & Sign Off">
+                          <button class="btn btn-success btn-sm" onclick="openReviewWorkingPaperModal(${w.id}, decodeURIComponent('${encodeURIComponent(w.wp_reference || '').replace(/'/g, "%27")}'))" title="Mark as Reviewed & Sign Off">
                             ${ICONS.check} Review
                           </button>
                         ` : ''}
-                        <button class="btn btn-secondary btn-sm" style="color: #ef4444; border-color: #fecaca;" onclick="promptDeleteWorkingPaper(${w.id}, ${w.status === 'Reviewed'}, '${escapeHtml(w.wp_reference)}')" title="Delete Working Paper">
+                        <button class="btn btn-secondary btn-sm" style="color: #ef4444; border-color: #fecaca;" onclick="promptDeleteWorkingPaper(${w.id}, ${w.status === 'Reviewed'}, decodeURIComponent('${encodeURIComponent(w.wp_reference || '').replace(/'/g, "%27")}'))" title="Delete Working Paper">
                           ${ICONS.trash}
                         </button>
                       </div>
@@ -10743,7 +10743,7 @@ function populateWorkingPaperDrawer() {
     contentArea.innerHTML = renderWpOverviewTab(wp);
     if (footerActions) {
       footerActions.innerHTML = `
-        <button class="btn btn-secondary" style="color: #ef4444;" onclick="promptDeleteWorkingPaper(${wp.id}, ${wp.status === 'Reviewed'}, '${escapeHtml(wp.wp_reference)}')">
+        <button class="btn btn-secondary" style="color: #ef4444;" onclick="promptDeleteWorkingPaper(${wp.id}, ${wp.status === 'Reviewed'}, decodeURIComponent('${encodeURIComponent(wp.wp_reference || '').replace(/'/g, "%27")}'))">
           ${ICONS.trash} Delete WP
         </button>
         <button class="btn btn-primary" onclick="saveWorkingPaperOverview(${wp.id})">
@@ -10801,7 +10801,7 @@ function renderWpOverviewTab(wp) {
         <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Transition to:</span>
         <button class="btn btn-secondary btn-sm ${wp.status === 'Prepared' ? 'font-bold' : ''}" onclick="quickChangeWpStatus(${wp.id}, 'Prepared')">Prepared</button>
         <button class="btn btn-secondary btn-sm ${wp.status === 'Under Review' ? 'font-bold' : ''}" onclick="quickChangeWpStatus(${wp.id}, 'Under Review')">Under Review</button>
-        <button class="btn btn-success btn-sm ${wp.status === 'Reviewed' ? 'font-bold' : ''}" onclick="openReviewWorkingPaperModal(${wp.id}, '${escapeHtml(wp.wp_reference)}')">${ICONS.check} Mark Reviewed</button>
+        <button class="btn btn-success btn-sm ${wp.status === 'Reviewed' ? 'font-bold' : ''}" onclick="openReviewWorkingPaperModal(${wp.id}, decodeURIComponent('${encodeURIComponent(wp.wp_reference || '').replace(/'/g, "%27")}'))">${ICONS.check} Mark Reviewed</button>
         <button class="btn btn-danger btn-sm ${wp.status === 'Needs Correction' ? 'font-bold' : ''}" onclick="quickChangeWpStatus(${wp.id}, 'Needs Correction')">Needs Correction</button>
       </div>
     </div>
@@ -10963,7 +10963,7 @@ function renderWpEvidenceTab(wp) {
           </div>
           <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0; margin-left: 12px;">
             ${isTab ? `
-              <button class="btn btn-primary btn-sm" onclick="openWpDocumentPreviewModal(${wp.id}, '${escapeHtml(file.id || file.file_name)}', '${escapeHtml(file.name)}')" title="Inspect full records in interactive table modal">
+              <button class="btn btn-primary btn-sm" onclick="openWpDocumentPreviewModal(${wp.id}, decodeURIComponent('${encodeURIComponent(file.id || file.file_name).replace(/'/g, "%27")}'), decodeURIComponent('${encodeURIComponent(file.name).replace(/'/g, "%27")}'))" title="Inspect full records in interactive table modal">
                 <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                 View Tabular Data
               </button>
@@ -10972,7 +10972,7 @@ function renderWpEvidenceTab(wp) {
               <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
               Download
             </a>
-            <button class="btn btn-secondary btn-sm" style="color: #ef4444; border-color: #fecaca;" onclick="handleDeleteWpDoc(${wp.id}, '${escapeHtml(file.id || file.file_name)}')" title="Delete attached file">
+            <button class="btn btn-secondary btn-sm" style="color: #ef4444; border-color: #fecaca;" onclick="handleDeleteWpDoc(${wp.id}, decodeURIComponent('${encodeURIComponent(file.id || file.file_name).replace(/'/g, "%27")}'))" title="Delete attached file">
               ${ICONS.close}
             </button>
           </div>
@@ -11083,7 +11083,7 @@ function renderInlineTabularView(data, filterTerm = "") {
 
         <div class="wp-tabular-toolbar">
           <input type="text" class="wp-tabular-search" placeholder="Search in records..." value="${escapeHtml(filterTerm)}" oninput="filterWpInlineTable(this.value)" />
-          <button class="btn btn-secondary btn-sm" onclick="openWpDocumentPreviewModal(${data.wp_id}, '${escapeHtml(data.doc_id)}', '${escapeHtml(data.filename)}')" title="Maximize to full screen table modal">
+          <button class="btn btn-secondary btn-sm" onclick="openWpDocumentPreviewModal(${data.wp_id}, decodeURIComponent('${encodeURIComponent(data.doc_id).replace(/'/g, "%27")}'), decodeURIComponent('${encodeURIComponent(data.filename).replace(/'/g, "%27")}'))" title="Maximize to full screen table modal">
             <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
             Maximize Table
           </button>
@@ -12197,7 +12197,7 @@ async function renderReports() {
                       </div>
                     </td>
                     <td style="text-align: right;">
-                      <button onclick="downloadReport(${rep.id}, '${escapeHtml(rep.report_title).replace(/'/g, "\\'")}')" class="btn btn-sm btn-primary" title="Download PDF Report">
+                      <button onclick="downloadReport(${rep.id}, decodeURIComponent('${encodeURIComponent(rep.report_title || 'Audit Report').replace(/'/g, "%27")}'))" class="btn btn-sm btn-primary" title="Download PDF Report">
                         <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         Download PDF
                       </button>
@@ -12550,157 +12550,7 @@ async function openClientHistoryDrawer(clientId) {
 // =========================================================
 // 15. ENGAGEMENT MANAGEMENT MODULE
 // =========================================================
-async function renderEngagements() {
-  const container = document.getElementById("content-container");
-  container.innerHTML = `<div style="padding: 20px;">Loading engagements directory...</div>`;
-
-  try {
-    const engagements = await FinAuditAPI.getEngagements();
-    const canCreate = ["Admin", "Auditor"].includes(state.currentUser?.role);
-
-    container.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <div>
-          <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main);">Audit Engagements Directory</h2>
-          <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
-            Statutory, Tax Audit (3CD), Internal, and Special Audit engagements with strict data isolation
-          </div>
-        </div>
-        ${canCreate ? `
-          <button class="btn btn-primary" onclick="openCreateEngagementModal()">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            + New Audit Engagement
-          </button>
-        ` : ''}
-      </div>
-
-      <!-- Filter Controls -->
-      <div class="card" style="padding: 14px 18px; margin-bottom: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 200px;">
-          <input type="text" id="eng-search-input" class="form-control" placeholder="Search Engagement Title, Client, FY..." onkeyup="filterEngagementsLive()">
-        </div>
-        <div style="width: 160px;">
-          <select id="eng-type-filter" class="form-control" onchange="filterEngagementsLive()">
-            <option value="All">All Audit Types</option>
-            <option value="Statutory Audit">Statutory Audit</option>
-            <option value="Tax Audit">Tax Audit (3CD)</option>
-            <option value="Internal Audit">Internal Audit</option>
-            <option value="Review">Review</option>
-            <option value="Special Audit">Special Audit</option>
-          </select>
-        </div>
-        <div style="width: 160px;">
-          <select id="eng-status-filter" class="form-control" onchange="filterEngagementsLive()">
-            <option value="All">All Statuses</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Under Review">Under Review</option>
-            <option value="Completed">Completed</option>
-            <option value="Draft">Draft</option>
-            <option value="Archived">Archived</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">All Engagements (${engagements.length})</div>
-        </div>
-        ${engagements.length === 0 ? `
-          <div style="padding: 60px 20px; text-align: center; color: var(--text-muted);">
-            <div style="margin-bottom: 10px; color: var(--text-muted);"><svg width="36" height="36" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg></div>
-            <div style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">No engagements yet</div>
-            <p style="font-size: 13px; max-width: 420px; margin: 0 auto 16px auto; color: var(--text-muted);">
-              Create an audit engagement for your registered client to establish the audit mandate, financial year, and materiality benchmark.
-            </p>
-            ${canCreate ? `<button class="btn btn-primary" onclick="openCreateEngagementModal()">+ Create First Engagement</button>` : ''}
-          </div>
-        ` : `
-          <div class="table-container">
-            <table class="data-table" id="engagements-table">
-            <thead>
-              <tr>
-                <th>Engagement & Client</th>
-                <th>Audit Type</th>
-                <th>Financial Year</th>
-                <th>Lead Auditor & Staff</th>
-                <th>Status</th>
-                <th class="text-right">Turnover</th>
-                <th class="text-center">Findings</th>
-                <th class="text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${engagements.map(e => `
-                <tr style="${e.id === state.currentEngagementId ? 'background-color: var(--primary-light);' : ''}" data-title="${(e.title || '').toLowerCase()}" data-client="${(e.client_name || '').toLowerCase()}" data-fy="${e.financial_year || ''}" data-type="${e.audit_type || ''}" data-status="${e.status || ''}">
-                  <td>
-                    <div style="font-weight: 700; color: var(--text-main); font-size: 13.5px;">
-                      ${e.title}
-                      ${e.id === state.currentEngagementId ? '<span class="badge badge-open" style="margin-left: 6px;">Active Context</span>' : ''}
-                    </div>
-                    <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">
-                      <b>${e.client_name}</b> (PAN: ${e.client_pan || '—'})
-                    </div>
-                  </td>
-                  <td><span class="badge badge-medium">${e.audit_type}</span></td>
-                  <td class="font-mono font-bold" style="color: var(--primary);">${e.financial_year}</td>
-                  <td>
-                    <div><b>Auditor:</b> ${e.lead_auditor_name || 'Partner'}</div>
-                    <div style="font-size: 11px; color: var(--text-muted);"><b>Staff:</b> ${e.assigned_staff_name || 'Unassigned'}</div>
-                  </td>
-                  <td>
-                    <select class="form-control" style="font-size: 11.5px; padding: 3px 6px; width: 115px;" onchange="updateEngagementStatusDirect(${e.id}, this.value)">
-                      <option value="Draft" ${e.status === 'Draft' ? 'selected' : ''}>Draft</option>
-                      <option value="In Progress" ${e.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-                      <option value="Under Review" ${e.status === 'Under Review' ? 'selected' : ''}>Under Review</option>
-                      <option value="Completed" ${e.status === 'Completed' ? 'selected' : ''}>Completed</option>
-                      <option value="Archived" ${e.status === 'Archived' ? 'selected' : ''}>Archived</option>
-                    </select>
-                  </td>
-                  <td class="text-right font-mono font-bold">${formatINR(e.turnover)}</td>
-                  <td class="text-center font-mono font-bold" style="color: ${e.critical_findings_count > 0 ? '#dc2626' : '#0f172a'};">
-                    ${e.findings_count}
-                  </td>
-                  <td class="text-center">
-                    <div style="display: flex; gap: 6px; justify-content: center;">
-                      <button class="btn btn-sm ${e.id === state.currentEngagementId ? 'btn-secondary' : 'btn-primary'}" onclick="selectEngagementAndGo(${e.id})">
-                        ${e.id === state.currentEngagementId ? 'Viewing' : 'Switch Context'}
-                      </button>
-                      <button class="btn btn-sm btn-secondary" onclick="openDuplicateEngagementModal(${e.id})">
-                        ${ICONS.clipboard} Clone FY
-                      </button>
-                      ${canCreate ? `
-                        <button class="btn btn-sm btn-secondary" onclick="openEditEngagementModal(${e.id})">
-                          Edit
-                        </button>
-                      ` : ''}
-                    </div>
-                  </td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
-        `}
-      </div>
-    `;
-  } catch (err) {
-    container.innerHTML = renderErrorBanner(err, "Unable to Load Audit Engagements");
-  }
-}
-
-function filterEngagementsLive() {
-  const query = document.getElementById("eng-search-input").value.toLowerCase().trim();
-  const type = document.getElementById("eng-type-filter").value;
-  const status = document.getElementById("eng-status-filter").value;
-  const rows = document.querySelectorAll("#engagements-table tbody tr");
-
-  rows.forEach(r => {
-    const textMatch = !query || r.innerText.toLowerCase().includes(query);
-    const typeMatch = type === "All" || r.dataset.type === type;
-    const statusMatch = status === "All" || r.dataset.status === status;
-    r.style.display = (textMatch && typeMatch && statusMatch) ? "" : "none";
-  });
-}
+// (renderEngagements is canonically defined in Section 2, line 2722)
 
 async function updateEngagementStatusDirect(engId, newStatus) {
   try {
@@ -12722,301 +12572,9 @@ function selectEngagementAndGo(id) {
   updateActiveEngagement().then(() => navigateTo("dashboard"));
 }
 
-// Create Engagement Modal
-async function openCreateEngagementModal() {
-  const clients = await FinAuditAPI.getClients();
-  const users = await FinAuditAPI.getUsers();
-
-  const modalHtml = `
-    <div class="modal-overlay" id="eng-modal">
-      <div class="modal-card" style="width: 560px;">
-        <div class="modal-header">
-          <div class="modal-title">Create New Audit Engagement</div>
-          <button class="btn btn-sm btn-secondary" style="border: none;" onclick="closeModal('eng-modal')">${ICONS.close}</button>
-        </div>
-        <div class="modal-body">
-          <form onsubmit="handleCreateEngagementSubmit(event)">
-            <div class="form-group">
-              <label class="form-label">Client Selection *</label>
-              <select id="eng-client-id" class="form-control" required>
-                ${clients.map(c => `
-                  <option value="${c.id}">${c.name} (${c.entity_type} - PAN: ${c.pan || 'N/A'})</option>
-                `).join("")}
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Engagement Title *</label>
-              <input type="text" id="eng-title" class="form-control" placeholder="e.g. Statutory & Tax Audit FY 2024-25" required>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div class="form-group">
-                <label class="form-label">Audit Type *</label>
-                <select id="eng-audit-type" class="form-control">
-                  <option value="Statutory Audit">Statutory Audit</option>
-                  <option value="Tax Audit">Tax Audit (Form 3CD)</option>
-                  <option value="Internal Audit">Internal Audit</option>
-                  <option value="Review">Limited Review</option>
-                  <option value="Special Audit">Special / Forensic Audit</option>
-                  <option value="Other">Other Audit</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Financial Year (e.g. 2024-25) *</label>
-                <input type="text" id="eng-fy" class="form-control font-mono font-bold" value="2024-25" required>
-              </div>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div class="form-group">
-                <label class="form-label">Period Start Date</label>
-                <input type="date" id="eng-start" class="form-control" value="2024-04-01">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Period End Date</label>
-                <input type="date" id="eng-end" class="form-control" value="2025-03-31">
-              </div>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div class="form-group">
-                <label class="form-label">Lead Engagement Partner / CA</label>
-                <select id="eng-lead-auditor" class="form-control">
-                  ${users.filter(u => ['Admin', 'Auditor'].includes(u.role)).map(u => `
-                    <option value="${u.id}">${u.full_name} (${u.role})</option>
-                  `).join("")}
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Assigned Audit Staff</label>
-                <select id="eng-assigned-staff" class="form-control">
-                  <option value="">-- None --</option>
-                  ${users.map(u => `
-                    <option value="${u.id}">${u.full_name} (${u.role})</option>
-                  `).join("")}
-                </select>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Engagement Scope & Audit Notes</label>
-              <textarea id="eng-notes" class="form-control" rows="2" placeholder="Specific terms of audit engagement, materiality thresholds..."></textarea>
-            </div>
-            <div class="modal-footer" style="padding: 10px 0 0 0;">
-              <button type="button" class="btn btn-secondary" onclick="closeModal('eng-modal')">Cancel</button>
-              <button type="submit" class="btn btn-primary">Initialize Audit Engagement</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML("beforeend", modalHtml);
-}
-
-async function handleCreateEngagementSubmit(event) {
-  event.preventDefault();
-  const client_id = parseInt(document.getElementById("eng-client-id").value);
-  const title = document.getElementById("eng-title").value.trim();
-  const audit_type = document.getElementById("eng-audit-type").value;
-  const financial_year = document.getElementById("eng-fy").value.trim();
-  const period_start = document.getElementById("eng-start").value;
-  const period_end = document.getElementById("eng-end").value;
-  const lead_auditor_id = parseInt(document.getElementById("eng-lead-auditor").value) || null;
-  const staffVal = document.getElementById("eng-assigned-staff").value;
-  const assigned_staff_id = staffVal ? parseInt(staffVal) : null;
-  const notes = document.getElementById("eng-notes").value.trim();
-
-  try {
-    const res = await FinAuditAPI.createEngagement({
-      client_id, title, audit_type, financial_year, period_start, period_end, lead_auditor_id, assigned_staff_id, notes
-    });
-    notifySuccess(`Engagement '${title}' created successfully!`);
-    closeModal("eng-modal");
-    await loadEngagements();
-    selectEngagementAndGo(res.id);
-  } catch (err) {
-    notifyError("Error creating engagement: " + err.message);
-  }
-}
-
-// Edit Engagement Modal
-async function openEditEngagementModal(engagementId) {
-  const eng = await FinAuditAPI.getEngagementDetails(engagementId);
-  const users = await FinAuditAPI.getUsers();
-
-  const modalHtml = `
-    <div class="modal-overlay" id="edit-eng-modal">
-      <div class="modal-card" style="width: 560px;">
-        <div class="modal-header">
-          <div class="modal-title">Edit Engagement: ${eng.title}</div>
-          <button class="btn btn-sm btn-secondary" style="border: none;" onclick="closeModal('edit-eng-modal')">${ICONS.close}</button>
-        </div>
-        <div class="modal-body">
-          <form onsubmit="handleEditEngagementSubmit(event, ${engagementId})">
-            <div class="form-group">
-              <label class="form-label">Engagement Title *</label>
-              <input type="text" id="edit-eng-title" class="form-control" value="${eng.title}" required>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div class="form-group">
-                <label class="form-label">Audit Type</label>
-                <select id="edit-eng-audit-type" class="form-control">
-                  <option value="Statutory Audit" ${eng.audit_type === 'Statutory Audit' ? 'selected' : ''}>Statutory Audit</option>
-                  <option value="Tax Audit" ${eng.audit_type === 'Tax Audit' ? 'selected' : ''}>Tax Audit (Form 3CD)</option>
-                  <option value="Internal Audit" ${eng.audit_type === 'Internal Audit' ? 'selected' : ''}>Internal Audit</option>
-                  <option value="Review" ${eng.audit_type === 'Review' ? 'selected' : ''}>Limited Review</option>
-                  <option value="Special Audit" ${eng.audit_type === 'Special Audit' ? 'selected' : ''}>Special / Forensic Audit</option>
-                  <option value="Other" ${eng.audit_type === 'Other' ? 'selected' : ''}>Other</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Financial Year</label>
-                <input type="text" id="edit-eng-fy" class="form-control font-mono font-bold" value="${eng.financial_year}" required>
-              </div>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div class="form-group">
-                <label class="form-label">Period Start</label>
-                <input type="date" id="edit-eng-start" class="form-control" value="${eng.period_start || ''}">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Period End</label>
-                <input type="date" id="edit-eng-end" class="form-control" value="${eng.period_end || ''}">
-              </div>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div class="form-group">
-                <label class="form-label">Lead Engagement Partner</label>
-                <select id="edit-eng-lead" class="form-control">
-                  ${users.map(u => `
-                    <option value="${u.id}" ${u.id === eng.lead_auditor_id ? 'selected' : ''}>${u.full_name} (${u.role})</option>
-                  `).join("")}
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Assigned Audit Staff</label>
-                <select id="edit-eng-staff" class="form-control">
-                  <option value="">-- None --</option>
-                  ${users.map(u => `
-                    <option value="${u.id}" ${u.id === eng.assigned_staff_id ? 'selected' : ''}>${u.full_name} (${u.role})</option>
-                  `).join("")}
-                </select>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Notes & Scope</label>
-              <textarea id="edit-eng-notes" class="form-control" rows="2">${eng.notes || ''}</textarea>
-            </div>
-            <div class="modal-footer" style="padding: 10px 0 0 0;">
-              <button type="button" class="btn btn-secondary" onclick="closeModal('edit-eng-modal')">Cancel</button>
-              <button type="submit" class="btn btn-primary">Save Changes</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML("beforeend", modalHtml);
-}
-
-async function handleEditEngagementSubmit(event, engagementId) {
-  event.preventDefault();
-  const title = document.getElementById("edit-eng-title").value.trim();
-  const audit_type = document.getElementById("edit-eng-audit-type").value;
-  const financial_year = document.getElementById("edit-eng-fy").value.trim();
-  const period_start = document.getElementById("edit-eng-start").value;
-  const period_end = document.getElementById("edit-eng-end").value;
-  const lead_auditor_id = parseInt(document.getElementById("edit-eng-lead").value) || null;
-  const staffVal = document.getElementById("edit-eng-staff").value;
-  const assigned_staff_id = staffVal ? parseInt(staffVal) : null;
-  const notes = document.getElementById("edit-eng-notes").value.trim();
-
-  try {
-    await FinAuditAPI.updateEngagement(engagementId, {
-      title, audit_type, financial_year, period_start, period_end, lead_auditor_id, assigned_staff_id, notes
-    });
-    notifySuccess("Engagement updated successfully!");
-    closeModal("edit-eng-modal");
-    await loadEngagements();
-    renderEngagements();
-  } catch (err) {
-    notifyError("Failed to update engagement: " + err.message);
-  }
-}
-
-// Duplicate Engagement Structure for New FY Modal
-async function openDuplicateEngagementModal(sourceEngagementId) {
-  const eng = await FinAuditAPI.getEngagementDetails(sourceEngagementId);
-  const fyParts = (eng.financial_year || "2024-25").split("-");
-  let nextFY = "2025-26";
-  if (fyParts.length === 2 && !isNaN(parseInt(fyParts[0]))) {
-    const y1 = parseInt(fyParts[0]) + 1;
-    const y2 = parseInt(fyParts[1]) + 1;
-    nextFY = `${y1}-${String(y2).padStart(2, '0')}`;
-  }
-
-  const modalHtml = `
-    <div class="modal-overlay" id="duplicate-eng-modal">
-      <div class="modal-card" style="width: 500px;">
-        <div class="modal-header">
-          <div class="modal-title">Duplicate Audit Structure for New FY</div>
-          <button class="btn btn-sm btn-secondary" style="border: none;" onclick="closeModal('duplicate-eng-modal')">${ICONS.close}</button>
-        </div>
-        <div class="modal-body">
-          <div style="padding: 10px; background: #eff6ff; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 12px; margin-bottom: 14px; color: #1e3a8a;">
-            <b>Cloning Source:</b> ${eng.client_name} — ${eng.title} (FY ${eng.financial_year})<br/>
-            This creates an isolated new engagement while carrying over your customized CARO/3CD checklists and working paper index.
-          </div>
-
-          <form onsubmit="handleDuplicateEngagementSubmit(event, ${sourceEngagementId})">
-            <div class="form-group">
-              <label class="form-label">Target Financial Year *</label>
-              <input type="text" id="dup-target-fy" class="form-control font-mono font-bold" value="${nextFY}" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">New Engagement Title *</label>
-              <input type="text" id="dup-title" class="form-control" value="${eng.audit_type} FY ${nextFY}" required>
-            </div>
-            <div class="form-group" style="padding: 10px; background: var(--bg-app); border: 1px solid var(--border); border-radius: var(--radius-md);">
-              <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 12.5px; cursor: pointer;">
-                <input type="checkbox" id="dup-copy-checklists" checked> Copy CARO & Tax Audit Checklist Templates
-              </label>
-              <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 12.5px; cursor: pointer; margin-top: 6px;">
-                <input type="checkbox" id="dup-copy-wps" checked> Copy Working Paper Index & File Structure
-              </label>
-            </div>
-            <div class="modal-footer" style="padding: 10px 0 0 0;">
-              <button type="button" class="btn btn-secondary" onclick="closeModal('duplicate-eng-modal')">Cancel</button>
-              <button type="submit" class="btn btn-primary">Clone Structure & Launch</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML("beforeend", modalHtml);
-}
-
-async function handleDuplicateEngagementSubmit(event, sourceEngagementId) {
-  event.preventDefault();
-  const target_financial_year = document.getElementById("dup-target-fy").value.trim();
-  const title = document.getElementById("dup-title").value.trim();
-  const copy_checklists = document.getElementById("dup-copy-checklists").checked;
-  const copy_working_paper_templates = document.getElementById("dup-copy-wps").checked;
-
-  try {
-    const res = await FinAuditAPI.duplicateEngagement({
-      source_engagement_id: sourceEngagementId,
-      target_financial_year,
-      title,
-      copy_checklists,
-      copy_working_paper_templates
-    });
-    notifySuccess(`Success! Cloned ${res.cloned_checklists} checklists and ${res.cloned_working_papers} working paper structures to FY ${target_financial_year}.`);
-    closeModal("duplicate-eng-modal");
-    await loadEngagements();
-    selectEngagementAndGo(res.new_engagement_id);
-  } catch (err) {
-    notifyError("Duplication failed: " + err.message);
-  }
-}
+// (openCreateEngagementModal, handleCreateEngagementSubmit, openEditEngagementModal,
+//  handleEngagementFormSubmit, openDuplicateEngagementModal, handleDuplicateEngagementSubmit
+//  are canonically defined in Section 2, lines 2930-3320)
 
 // Settings View is canonically defined in Section Settings Center (lines ~16705+)
 
@@ -14154,7 +13712,7 @@ function renderSingleDuplicateGroupCard(g) {
         </div>
 
         <div style="display: flex; gap: 8px;">
-          <button class="btn btn-sm btn-secondary" onclick="openDuplicateCommentModal('${g.group_code}', '${g.status}', '${(g.auditor_comment || '').replace(/'/g, "\\'")}')">
+          <button class="btn btn-sm btn-secondary" onclick="openDuplicateCommentModal('${g.group_code}', '${g.status}', decodeURIComponent('${encodeURIComponent(g.auditor_comment || '').replace(/'/g, "%27")}'))">
             ${g.auditor_comment ? 'Edit Note' : 'Add Note'}
           </button>
           <button class="btn btn-sm btn-secondary" onclick="actionDuplicateGroup('${g.group_code}', 'Ignored')">
@@ -14343,7 +13901,7 @@ function renderSingleSequenceGapCard(gap, idx) {
 
       <!-- Action / Documentation Bar -->
       <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--border); padding-top: 10px;">
-        <button class="btn btn-sm btn-secondary" onclick="openSequenceGapModal('${gap.sequence_type}', '${gap.series_prefix || ''}', '${gap.expected_from}', '${gap.expected_to}', '${gap.status}', '${(gap.auditor_comment || '').replace(/'/g, "\\'")}')">
+        <button class="btn btn-sm btn-secondary" onclick="openSequenceGapModal('${gap.sequence_type}', '${gap.series_prefix || ''}', '${gap.expected_from}', '${gap.expected_to}', '${gap.status}', decodeURIComponent('${encodeURIComponent(gap.auditor_comment || '').replace(/'/g, "%27")}'))">
           ${gap.auditor_comment ? 'Edit Remark' : 'Document Sequence Finding'}
         </button>
       </div>
@@ -14717,7 +14275,7 @@ function renderSingleAnomalyCard(anom, idx) {
           <button class="btn btn-sm btn-secondary" onclick="quickUpdateAnomalyStatus('${anom.anomaly_id}', 'Ignored')" ${anom.status === 'Ignored' ? 'disabled' : ''}>
             Ignore
           </button>
-          <button class="btn btn-sm btn-secondary" onclick="openAnomalyReviewModal('${anom.anomaly_id}', '${anom.status}', '${(anom.auditor_comment || '').replace(/'/g, "\\'")}')">
+          <button class="btn btn-sm btn-secondary" onclick="openAnomalyReviewModal('${anom.anomaly_id}', '${anom.status}', decodeURIComponent('${encodeURIComponent(anom.auditor_comment || '').replace(/'/g, "%27")}'))">
             ${ICONS.edit} ${anom.auditor_comment ? 'Edit Remark' : 'Add Comment'}
           </button>
         </div>
@@ -15207,7 +14765,7 @@ function openYoYCommentModal(itemKey, category, accountName, currentStatus, curr
           <button class="btn btn-sm btn-secondary" style="border: none;" onclick="closeModal('yoy-comment-modal')">${ICONS.close}</button>
         </div>
         <div class="modal-body">
-          <form onsubmit="handleYoYCommentSubmit(event, '${itemKey}', '${category}', '${accountName.replace(/'/g, "\\'")}')">
+          <form onsubmit="handleYoYCommentSubmit(event, '${itemKey}', '${category}', decodeURIComponent('${encodeURIComponent(accountName).replace(/'/g, "%27")}'))">
           <div class="form-group">
             <label class="form-label">Review Conclusion Status</label>
             <select class="form-control" id="yoy-modal-status">
@@ -15415,7 +14973,7 @@ Ask any natural audit question, drill down into evidence, or select a suggested 
           (p.icon === 'document' || p.icon === 'pencil') ? ICONS.fileText :
             ICONS.search;
     return `
-      <button class="assistant-prompt-chip" onclick="fillAssistantPrompt('${p.query.replace(/'/g, "\\'")}')">
+      <button class="assistant-prompt-chip" onclick="fillAssistantPrompt(decodeURIComponent('${encodeURIComponent(p.query).replace(/'/g, "%27")}'))">
         <span>${iconSvg}</span>
         <span>${p.title}</span>
       </button>
@@ -15671,7 +15229,7 @@ function renderAssistantMessageItem(msg, idx) {
           <button 
             class="btn btn-secondary btn-sm" 
             style="font-size: 11px; padding: 2px 8px; border-radius: 12px;"
-            onclick="fillAssistantPrompt('${escapeHtml(act).replace(/'/g, "\\'")}')"
+            onclick="fillAssistantPrompt(decodeURIComponent('${encodeURIComponent(act).replace(/'/g, "%27")}'))"
           >
             💬 ${escapeHtml(act)}
           </button>
@@ -17260,7 +16818,7 @@ async function loadBackupsList() {
               <a href="${FinAuditAPI.getBackupDownloadUrl(b.filename)}" class="btn btn-sm btn-secondary" style="padding: 3px 8px; font-size: 11px;" download>
                 Download (.db)
               </a>
-              <button class="btn btn-sm btn-danger" onclick="handleRestoreBackupClick('${b.filename}')" style="padding: 3px 8px; font-size: 11px;">
+              <button class="btn btn-sm btn-danger" onclick="handleRestoreBackupClick(decodeURIComponent('${encodeURIComponent(b.filename).replace(/'/g, "%27")}'))" style="padding: 3px 8px; font-size: 11px;">
                 Restore DB
               </button>
             </div>

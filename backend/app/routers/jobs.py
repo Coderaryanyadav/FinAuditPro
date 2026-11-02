@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
@@ -14,14 +14,23 @@ class JobCreateRequest(BaseModel):
 
 @router.get("/")
 def list_jobs(
-    engagement_id: Optional[int] = None,
+    engagement_id: Optional[Union[int, str]] = None,
     limit: int = 50,
     current_user: dict = Depends(get_current_user)
 ):
     """Lists background jobs with optional engagement scoping."""
-    if engagement_id:
-        require_engagement_access(engagement_id, current_user)
-    return JobManager.list_jobs(engagement_id=engagement_id, limit=limit)
+    parsed_engagement_id: Optional[int] = None
+    if engagement_id is not None:
+        clean_str = str(engagement_id).strip()
+        if clean_str and clean_str.lower() not in ("all", "none", "null", "undefined"):
+            try:
+                parsed_engagement_id = int(clean_str)
+            except (ValueError, TypeError):
+                parsed_engagement_id = None
+
+    if parsed_engagement_id:
+        require_engagement_access(parsed_engagement_id, current_user)
+    return JobManager.list_jobs(engagement_id=parsed_engagement_id, limit=limit)
 
 @router.get("/{job_id}")
 def get_job_status(

@@ -245,8 +245,14 @@ class FinAuditAPI {
     let query = "";
     if (typeof params === "string") {
       query = params ? `?search=${encodeURIComponent(params)}` : "";
-    } else {
-      const q = new URLSearchParams(params).toString();
+    } else if (params && typeof params === "object") {
+      const cleanParams = {};
+      for (const [k, v] of Object.entries(params)) {
+        if (v !== undefined && v !== null && v !== "" && v !== "All" && v !== "null" && v !== "undefined") {
+          cleanParams[k] = v;
+        }
+      }
+      const q = new URLSearchParams(cleanParams).toString();
       query = q ? `?${q}` : "";
     }
     return this.request(`/api/clients${query}`);
@@ -279,8 +285,23 @@ class FinAuditAPI {
     let query = "";
     if (typeof filters === "number") {
       query = `?client_id=${filters}`;
-    } else {
-      const q = new URLSearchParams(filters).toString();
+    } else if (typeof filters === "string" && /^\d+$/.test(filters.trim())) {
+      query = `?client_id=${filters.trim()}`;
+    } else if (filters && typeof filters === "object") {
+      const cleanParams = {};
+      for (const [k, v] of Object.entries(filters)) {
+        if (v !== undefined && v !== null && v !== "" && v !== "All" && v !== "null" && v !== "undefined") {
+          if (k === "client_id") {
+            const parsed = parseInt(v, 10);
+            if (!isNaN(parsed) && parsed > 0) {
+              cleanParams[k] = parsed;
+            }
+          } else {
+            cleanParams[k] = v;
+          }
+        }
+      }
+      const q = new URLSearchParams(cleanParams).toString();
       query = q ? `?${q}` : "";
     }
     return this.request(`/api/engagements${query}`);
@@ -385,7 +406,15 @@ class FinAuditAPI {
   }
 
   static getCleaningLogs(engagementId, filters = {}) {
-    const query = new URLSearchParams({ ...filters }).toString();
+    const cleanParams = {};
+    if (filters && typeof filters === "object") {
+      for (const [k, v] of Object.entries(filters)) {
+        if (v !== undefined && v !== null && v !== "" && v !== "All" && v !== "null" && v !== "undefined") {
+          cleanParams[k] = v;
+        }
+      }
+    }
+    const query = new URLSearchParams(cleanParams).toString();
     return this.request(`/api/cleaning/logs/${engagementId}${query ? `?${query}` : ""}`);
   }
 

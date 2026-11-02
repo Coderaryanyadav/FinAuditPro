@@ -2729,11 +2729,20 @@ async function renderEngagements(statusFilter = null, clientFilter = null, fyFil
 
   try {
     const clients = await FinAuditAPI.getClients();
-    const engagements = await FinAuditAPI.getEngagements({
-      status: engagementFilterState.status !== "All" ? engagementFilterState.status : "",
-      client_id: engagementFilterState.clientId !== "All" ? engagementFilterState.clientId : "",
-      financial_year: engagementFilterState.financialYear !== "All" ? engagementFilterState.financialYear : ""
-    });
+    const filterPayload = {};
+    if (engagementFilterState.status && engagementFilterState.status !== "All") {
+      filterPayload.status = engagementFilterState.status;
+    }
+    if (engagementFilterState.clientId && engagementFilterState.clientId !== "All") {
+      const parsedId = parseInt(engagementFilterState.clientId, 10);
+      if (!isNaN(parsedId) && parsedId > 0) {
+        filterPayload.client_id = parsedId;
+      }
+    }
+    if (engagementFilterState.financialYear && engagementFilterState.financialYear !== "All") {
+      filterPayload.financial_year = engagementFilterState.financialYear;
+    }
+    const engagements = await FinAuditAPI.getEngagements(filterPayload);
 
     const isAuditorOrAdmin = ["Admin", "Auditor"].includes(state.currentUser?.role);
 

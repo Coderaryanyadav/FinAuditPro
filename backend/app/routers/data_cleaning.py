@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 from fastapi import APIRouter, HTTPException, Depends
 from backend.app.schemas import CleaningLogReviewRequest, NormalizationPreviewRequest
 from backend.app.auth import get_current_user, require_role, require_engagement_access
@@ -60,7 +60,7 @@ def get_cleaning_summary(engagement_id: int, current_user: dict = Depends(get_cu
 def list_cleaning_logs(
     engagement_id: int,
     field_name: Optional[str] = None,
-    is_questionable: Optional[int] = None,
+    is_questionable: Optional[Union[int, str]] = None,
     transformation_rule: Optional[str] = None,
     review_status: Optional[str] = None,
     search: Optional[str] = None,
@@ -86,9 +86,18 @@ def list_cleaning_logs(
         query += " AND l.field_name = ?"
         params.append(field_name)
 
+    parsed_questionable: Optional[int] = None
     if is_questionable is not None:
+        clean_q = str(is_questionable).strip()
+        if clean_q and clean_q.lower() not in ("all", "none", "null", "undefined"):
+            try:
+                parsed_questionable = int(clean_q)
+            except (ValueError, TypeError):
+                parsed_questionable = None
+
+    if parsed_questionable is not None:
         query += " AND l.is_questionable = ?"
-        params.append(is_questionable)
+        params.append(parsed_questionable)
 
     if transformation_rule and transformation_rule != "All":
         query += " AND l.transformation_rule = ?"

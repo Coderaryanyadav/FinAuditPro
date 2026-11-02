@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 from backend.app.schemas import EngagementCreate, EngagementUpdate, DuplicateEngagementRequest
 from backend.app.auth import get_current_user, require_role, require_engagement_access
 from backend.app.database import get_db_connection
@@ -28,12 +28,21 @@ from backend.app.services.dashboard_service import DashboardService
 
 @router.get("/dashboard/summary-stats")
 def get_dashboard_summary_stats(
-    engagement_id: Optional[int] = None,
+    engagement_id: Optional[Union[int, str]] = None,
     current_user: dict = Depends(get_current_user)
 ):
     """Provides high-level dashboard metrics across engagements and for active engagement."""
-    if engagement_id:
-        require_engagement_access(engagement_id, current_user)
+    parsed_engagement_id: Optional[int] = None
+    if engagement_id is not None:
+        clean_str = str(engagement_id).strip()
+        if clean_str and clean_str.lower() not in ("all", "none", "null", "undefined"):
+            try:
+                parsed_engagement_id = int(clean_str)
+            except (ValueError, TypeError):
+                parsed_engagement_id = None
+
+    if parsed_engagement_id:
+        require_engagement_access(parsed_engagement_id, current_user)
 
     from backend.app.auth import normalize_role
     user_id = current_user.get("id") if current_user else None
@@ -42,7 +51,7 @@ def get_dashboard_summary_stats(
 
     conn = get_db_connection()
     try:
-        if is_restricted and not engagement_id:
+        if is_restricted and not parsed_engagement_id:
             # 1. Total Active Clients (Scoped to assigned engagements)
             active_clients_count = conn.execute(
                 "SELECT COUNT(DISTINCT client_id) as c FROM engagements WHERE (assigned_staff_id = ? OR lead_auditor_id = ?)",
@@ -132,20 +141,20 @@ def get_dashboard_summary_stats(
             archived_eng_count = conn.execute("SELECT COUNT(*) as c FROM engagements WHERE status = 'Archived'").fetchone()["c"]
 
             # 6. Open & High-Risk Findings (For active engagement or overall)
-            if engagement_id:
-                open_findings_count = conn.execute("SELECT COUNT(*) as c FROM audit_findings WHERE engagement_id = ? AND status IN ('Open', 'In Review')", (engagement_id,)).fetchone()["c"]
-                high_risk_findings_count = conn.execute("SELECT COUNT(*) as c FROM audit_findings WHERE engagement_id = ? AND severity IN ('CRITICAL', 'HIGH')", (engagement_id,)).fetchone()["c"]
-                crit_findings_count = conn.execute("SELECT COUNT(*) as c FROM audit_findings WHERE engagement_id = ? AND severity = 'CRITICAL'", (engagement_id,)).fetchone()["c"]
-                turnover = conn.execute("SELECT SUM(debit) as s FROM transactions WHERE engagement_id = ?", (engagement_id,)).fetchone()["s"] or 0.0
+            if parsed_engagement_id:
+                open_findings_count = conn.execute("SELECT COUNT(*) as c FROM audit_findings WHERE engagement_id = ? AND status IN ('Open', 'In Review')", (parsed_engagement_id,)).fetchone()["c"]
+                high_risk_findings_count = conn.execute("SELECT COUNT(*) as c FROM audit_findings WHERE engagement_id = ? AND severity IN ('CRITICAL', 'HIGH')", (parsed_engagement_id,)).fetchone()["c"]
+                crit_findings_count = conn.execute("SELECT COUNT(*) as c FROM audit_findings WHERE engagement_id = ? AND severity = 'CRITICAL'", (parsed_engagement_id,)).fetchone()["c"]
+                turnover = conn.execute("SELECT SUM(debit) as s FROM transactions WHERE engagement_id = ?", (parsed_engagement_id,)).fetchone()["s"] or 0.0
                 
                 # Unmatched transactions
                 unmatched_count = conn.execute("""
                     SELECT COUNT(*) as c FROM reconciliation_items ri
                     JOIN reconciliations r ON ri.recon_id = r.id
                     WHERE r.engagement_id = ? AND (ri.status IN ('Unmatched', 'Suggested') OR ri.match_level = 'UNMATCHED')
-                """, (engagement_id,)).fetchone()["c"]
+                """, (parsed_engagement_id,)).fetchone()["c"]
                 if unmatched_count == 0:
-                    recon_summary = conn.execute("SELECT SUM(unmatched_bank_count + unmatched_book_count) as s FROM reconciliations WHERE engagement_id = ?", (engagement_id,)).fetchone()["s"]
+                    recon_summary = conn.execute("SELECT SUM(unmatched_bank_count + unmatched_book_count) as s FROM reconciliations WHERE engagement_id = ?", (parsed_engagement_id,)).fetchone()["s"]
                     unmatched_count = int(recon_summary or 0)
             else:
                 open_findings_count = conn.execute("SELECT COUNT(*) as c FROM audit_findings WHERE status IN ('Open', 'In Review')").fetchone()["c"]
@@ -178,14 +187,23 @@ def get_dashboard_summary_stats(
 
 @router.get("/dashboard/comprehensive")
 def get_comprehensive_dashboard_route(
-    engagement_id: Optional[int] = None,
+    engagement_id: Optional[Union[int, str]] = None,
     current_user: dict = Depends(get_current_user)
 ):
     """Returns complete real database metrics across all dashboard cards, sections, charts, and drill-down datasets."""
-    if engagement_id:
-        require_engagement_access(engagement_id, current_user)
+    parsed_engagement_id: Optional[int] = None
+    if engagement_id is not None:
+        clean_str = str(engagement_id).strip()
+        if clean_str and clean_str.lower() not in ("all", "none", "null", "undefined"):
+            try:
+                parsed_engagement_id = int(clean_str)
+            except (ValueError, TypeError):
+                parsed_engagement_id = None
+
+    if parsed_engagement_id:
+        require_engagement_access(parsed_engagement_id, current_user)
     try:
-        return DashboardService.get_comprehensive_dashboard(engagement_id, current_user=current_user)
+        return DashboardService.get_comprehensive_dashboard(parsed_engagement_id, current_user=current_user)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate dashboard metrics: {str(e)}")
 
@@ -203,7 +221,7 @@ def get_engagement_comprehensive_dashboard_route(
 
 @router.get("")
 def list_engagements(
-    client_id: Optional[int] = None,
+    client_id: Optional[Union[int, str]] = None,
     financial_year: Optional[str] = None,
     audit_type: Optional[str] = None,
     status: Optional[str] = None,
@@ -229,18 +247,27 @@ def list_engagements(
         """
         params = []
 
-        if client_id:
+        parsed_client_id: Optional[int] = None
+        if client_id is not None:
+            clean_str = str(client_id).strip()
+            if clean_str and clean_str.lower() not in ("all", "none", "null", "undefined"):
+                try:
+                    parsed_client_id = int(clean_str)
+                except (ValueError, TypeError):
+                    parsed_client_id = None
+
+        if parsed_client_id:
             query += " AND e.client_id = ?"
-            params.append(client_id)
-        if financial_year:
+            params.append(parsed_client_id)
+        if financial_year and financial_year != "All" and financial_year.strip():
             query += " AND e.financial_year = ?"
-            params.append(financial_year)
-        if audit_type and audit_type != "All":
+            params.append(financial_year.strip())
+        if audit_type and audit_type != "All" and audit_type.strip():
             query += " AND e.audit_type = ?"
-            params.append(audit_type)
-        if status and status != "All":
+            params.append(audit_type.strip())
+        if status and status != "All" and status.strip():
             query += " AND e.status = ?"
-            params.append(status)
+            params.append(status.strip())
         elif not include_archived:
             query += " AND e.status != 'Archived'"
 

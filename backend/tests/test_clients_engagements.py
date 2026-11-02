@@ -258,5 +258,26 @@ class TestClientEngagementManagement(unittest.TestCase):
         self.assertIn("total_engagements", history)
         self.assertTrue(isinstance(history["timeline"], list))
 
+    def test_07_engagements_query_parameter_resilience(self):
+        """Test that list_engagements handles empty string, All, and blank query params without 422 errors."""
+        headers = {"Authorization": f"Bearer {self.auditor_token}"}
+        
+        # Test empty client_id string (caused by UI default filter)
+        res = self.client.get("/api/engagements?status=&client_id=&financial_year=", headers=headers)
+        self.assertEqual(res.status_code, 200)
+        self.assertIsInstance(res.json(), list)
+
+        # Test "All" string query parameters
+        res = self.client.get("/api/engagements?status=All&client_id=All&financial_year=All", headers=headers)
+        self.assertEqual(res.status_code, 200)
+        self.assertIsInstance(res.json(), list)
+
+        # Test dashboard summary stats and comprehensive dashboard with empty engagement_id
+        res_stats = self.client.get("/api/engagements/dashboard/summary-stats?engagement_id=", headers=headers)
+        self.assertEqual(res_stats.status_code, 200)
+
+        res_comp = self.client.get("/api/engagements/dashboard/comprehensive?engagement_id=", headers=headers)
+        self.assertEqual(res_comp.status_code, 200)
+
 if __name__ == "__main__":
     unittest.main()

@@ -5,7 +5,7 @@ import json
 import os
 import sqlite3
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse, Response
@@ -71,7 +71,7 @@ def get_audit_trail(
     module: Optional[str] = None,
     user: Optional[str] = None,
     record_id: Optional[str] = None,
-    engagement_id: Optional[int] = None,
+    engagement_id: Optional[Union[int, str]] = None,
     from_date: Optional[str] = None,
     to_date: Optional[str] = None,
     page: int = Query(1, ge=1),
@@ -83,14 +83,23 @@ def get_audit_trail(
     Supports full-text search, action/module/user/date filtering, and pagination.
     Automatically scopes visibility for non-admin users to assigned engagements.
     """
-    if engagement_id:
-        require_engagement_access(engagement_id, current_user)
+    parsed_engagement_id: Optional[int] = None
+    if engagement_id is not None:
+        clean_str = str(engagement_id).strip()
+        if clean_str and clean_str.lower() not in ("all", "none", "null", "undefined"):
+            try:
+                parsed_engagement_id = int(clean_str)
+            except (ValueError, TypeError):
+                parsed_engagement_id = None
+
+    if parsed_engagement_id:
+        require_engagement_access(parsed_engagement_id, current_user)
 
     conn = get_db_connection()
     conditions = ["1=1"]
     params = []
 
-    if not engagement_id:
+    if not parsed_engagement_id:
         scope_cond, scope_params = _get_user_scoped_engagement_condition(current_user, conn)
         if scope_cond:
             conditions.append(scope_cond)
@@ -120,9 +129,9 @@ def get_audit_trail(
         conditions.append("record_id = ?")
         params.append(record_id.strip())
 
-    if engagement_id:
+    if parsed_engagement_id:
         conditions.append("engagement_id = ?")
-        params.append(engagement_id)
+        params.append(parsed_engagement_id)
 
     if from_date and from_date.strip():
         conditions.append("timestamp >= ?")
